@@ -34,15 +34,15 @@ static inline int _is_fin2_ack(ch_assemble_session_t *ass,struct tcp_hdr *th){
     return (th->tcp_flags&CH_TH_ACK)&&(ack_seq == ass->fin2_seq+1); 
 }
 
-static void assemble_session_flush(ch_assemble_task_t *astask,ch_assemble_session_t *ass){
+static void _assemble_session_flush(ch_assemble_task_t *astask,ch_assemble_session_t *ass){
     
 
 }
 
-static void assemble_session_close(ch_assemble_task_t *astask,ch_assemble_session_t *ass){
+static void _assemble_session_close(ch_assemble_task_t *astask,ch_assemble_session_t *ass){
 
     /*flush session*/
-    assemble_session_flush(astask,ass);
+    _assemble_session_flush(astask,ass);
 
     /*free this assemble session */
 
@@ -50,23 +50,48 @@ static void assemble_session_close(ch_assemble_task_t *astask,ch_assemble_sessio
 
 }
 
-static void _process_fin_packet(ch_assemble_session_t *ass,struct tcp_hdr *th){
+static inline void _process_fin_packet(ch_assemble_task_t *astask,ch_assemble_session_t *ass,struct tcp_hdr *th){
+
+
+    /*fin1*/
+    if(ass->four_way_state == FOUR_WAY_INIT){
+
+        ass->fin1_seq = rte_be_to_cpu_32(th->sent_seq);
+        ass->four_way_state = FOUR_WAY_FIN1;
+
+    }else if(ass->four_way_state == FOUR_WAY_FIN1||ass->four_way_state == FOUR_WAY_FIN1_ACK){
+        /*fin2*/
+        ass->fin2_seq = rte_be_to_cpu_32(th->sent_seq);
+        ass->four_way_state = FOUR_WAY_FIN2;
+    }else{
+        /*nothing do,maybe retrans fin packet!*/
+    }
 
 }
 
-static void _process_rst_packet(ch_assemble_session_t *ass,struct tcp_hdr *th){
+static void _process_rst_packet(ch_assemble_task_t *astask,ch_assemble_session_t *ass,struct tcp_hdr *th){
+
+    /*close session*/
+    _assemble_session_close(astask,ass);
+}
+
+static void _process_data_packet(ch_assemble_task_t *astask,ch_assemble_session_t *ass,ch_assemble_session_endpoint_t *ep,
+        ch_four_tuple_t *tuple,void *pl_data,size_t pl_len,
+        struct tcp_hdr *th){
 
 }
 
-static void _process_data_packet(ch_assemble_session_t *ass,struct tcp_hdr *th){
+static inline void _process_fin1_ack_packet(ch_assemble_task_t *astask,ch_assemble_session_t *ass,struct tcp_hdr *th){
 
+    ass->four_way_state = FOUR_WAY_FIN1_ACK;
 }
 
-static void _process_fin1_ack_packet(ch_assemble_session_t *ass,struct tcp_hdr *th){
+static void _process_fin2_ack_packet(ch_assemble_task_t *astask,ch_assemble_session_t *ass,struct tcp_hdr *th){
 
-}
+    ass->four_way_state = FOUR_WAY_FIN2_ACK;
 
-static void _process_fin2_ack_packet(ch_assemble_session_t *ass,struct tcp_hdr *th){
+    /*close session*/
+    _assemble_session_close(astask,ass);
 
 }
 
@@ -100,30 +125,30 @@ void ch_assemble_do(ch_assemble_task_t *astask,struct rte_mbuf *mbuf){
 
         /*fin packet*/
         if(is_tcp_fin_packet(th)){
-            _process_fin_packet(ass,th);
+            _process_fin_packet(astask,ass,th);
             break;
         }
 
         /*rest packet*/
         if(is_tcp_rst_packet(th)){
-            _process_rst_packet(ass,th);
+            _process_rst_packet(astask,ass,th);
             break;
         }
 
         /*data packet*/
         ch_packet_data_payload_get(mbuf,&pl_data,&pl_len);
         if(pl_len){
-           _process_data_packet(ass,th); 
+           _process_data_packet(astask,ass,ep,&tuple,pl_data,pl_len,th); 
         }
 
         /*fin ack packet!*/
         if(_is_fin1_ack(ass,th)){
-            _process_fin1_ack_packet(ass,th);
+            _process_fin1_ack_packet(astask,ass,th);
             break;
         }
 
         if(_is_fin2_ack(ass,th)){
-            _process_fin2_ack_packet(ass,th);
+            _process_fin2_ack_packet(astask,ass,th);
             break;
         }
 

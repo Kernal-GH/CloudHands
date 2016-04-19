@@ -53,6 +53,7 @@ struct  ch_assemble_session_t {
     ch_assemble_session_endpoint_t endpoint_res;
 
     ch_app_t *app;
+    
     ch_assemble_task_t *astask;
     ch_assemble_session_endpoint_t *cur_ep;
 
