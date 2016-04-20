@@ -67,6 +67,11 @@ struct  ch_assemble_session_t {
     unsigned four_way_state:5;
 };
 
+#define ch_assemble_session_srcport_get(ass) ((ass)->endpoint_req.port)
+#define ch_assemble_session_dstport_get(ass) ((ass)->endpoint_res.port)
+#define ch_assemble_session_srcip_get(ass)   ((ass)->endpoint_req.ip)
+#define ch_assemble_session_dstip_get(ass)   ((ass)->endpoint_res.ip)
+
 #define ch_assemble_session_state_set(ass,st) ((ass)->state = st)
 
 #define session_state_is_fin(ass) ((ass)->state == SESSION_STATE_FIN)

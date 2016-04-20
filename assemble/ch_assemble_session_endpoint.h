@@ -41,6 +41,10 @@ struct ch_assemble_session_endpoint_t {
 
 };
 
+static inline uint32_t ch_assemble_session_endpoint_offset_get(ch_assemble_session_endpoint_t *ep,uint32_t seq){
+
+    return seq-ep->init_seq;
+}
 
 /*init a session endpoint instance 
  * @ip,the ip address of this endpoint

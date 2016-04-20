@@ -246,8 +246,7 @@ static int tcp_rcv(ch_protocol_type_t *protype,ch_packet_info_t *pinfo){
     pinfo->mbuf->l4_len = th_len*4;
 
     if(ch_app_context_recognize_by_port(tcp->context->app_context,
-                rte_be_to_cpu_16(pinfo->src_port),
-                rte_be_to_cpu_16(pinfo->dst_port))==0){
+                pinfo->src_port,pinfo->dst_port)==0){
         /*no application handles this packet!,skip it!*/
         return PROCESSOR_RET_DROP;
     }

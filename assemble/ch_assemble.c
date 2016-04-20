@@ -34,15 +34,10 @@ static inline int _is_fin2_ack(ch_assemble_session_t *ass,struct tcp_hdr *th){
     return (th->tcp_flags&CH_TH_ACK)&&(ack_seq == ass->fin2_seq+1); 
 }
 
-static void _assemble_session_flush(ch_assemble_task_t *astask,ch_assemble_session_t *ass){
-    
-
-}
-
 static void _assemble_session_close(ch_assemble_task_t *astask,ch_assemble_session_t *ass){
 
-    /*flush session*/
-    _assemble_session_flush(astask,ass);
+
+    ch_app_context_content_close(astask->context->app_context,ass);
 
     /*free this assemble session */
 
@@ -79,6 +74,44 @@ static void _process_data_packet(ch_assemble_task_t *astask,ch_assemble_session_
         ch_four_tuple_t *tuple,void *pl_data,size_t pl_len,
         struct tcp_hdr *th){
 
+    int rc;
+    ch_data_fragment_t *df;
+
+    uint32_t seq,offset,end_offset,diff;
+    seq = rte_be_to_cpu_32(th->sent_seq);
+    offset = ch_assemble_session_endpoint_offset_get(ep,seq);
+    end_offset = offset+pl_len;
+
+    if(offset<0||end_offset<=ep->last_offset){
+        /*invalid or retrans packet!*/
+    }else if(offset>ep->last_offset){
+        /*unorder,assemble it!*/
+        if(ch_assemble_session_endpoint_do(ep,pl_data,pl_len,offset)){
+            /*assemble error,maybe no memory,so close this assemble session!*/
+            _assemble_session_close(astask,ass);
+        }
+    }else{
+        /*offset =<last_offset<end_offset*/
+        diff = ep->last_offset - offset;
+        pl_data+=diff;
+        pl_len-=diff;
+        ep->last_offset = end_offset;
+
+        rc = ch_app_context_content_parse(astask->context->app_context,ass,pl_data,pl_len);
+        if(rc == PARSE_RETURN_DISCARD||rc == PARSE_RETURN_CLOSE){
+            _assemble_session_close(astask,ass); 
+        }else{
+            df = ch_assemble_fragment_pop(&ep->as_frag,ep->last_offset);
+            if(df){
+                rc = ch_app_context_content_parse(astask->context->app_context,ass,df->data,df->len);
+                if(rc == PARSE_RETURN_DISCARD||rc == PARSE_RETURN_CLOSE){
+                    _assemble_session_close(astask,ass);
+                }else {
+                    ep->last_offset = df->offset+df->len;
+                }
+            }
+        }
+    }
 }
 
 static inline void _process_fin1_ack_packet(ch_assemble_task_t *astask,ch_assemble_session_t *ass,struct tcp_hdr *th){

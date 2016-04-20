@@ -45,8 +45,8 @@ void ch_packet_tcpinfo_init(ch_packet_info_t *pinfo,struct tcp_hdr *th){
 
     uint32_t pdlen = 0;
 
-    pinfo->src_port = th->src_port;
-    pinfo->dst_port = th->dst_port;
+    pinfo->src_port = rte_be_to_cpu_16(th->src_port);
+    pinfo->dst_port = rte_be_to_cpu_16(th->dst_port);
     pinfo->sent_seq = rte_be_to_cpu_32(th->sent_seq);
     pinfo->recv_ack = rte_be_to_cpu_32(th->recv_ack);
 

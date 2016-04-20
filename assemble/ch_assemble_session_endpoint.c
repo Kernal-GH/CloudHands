@@ -36,6 +36,7 @@ void ch_assemble_session_endpoint_fin(ch_assemble_session_endpoint_t *ep){
 int ch_assemble_session_endpoint_do(ch_assemble_session_endpoint_t *ep,void *data,size_t dlen,size_t offset){
 
 
+    return ch_assemble_fragment_push(&ep->as_frag,data,dlen,offset);
 }
 
 

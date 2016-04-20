@@ -99,16 +99,16 @@ static inline void ch_four_tuple_init(ch_four_tuple_t *tuple,struct rte_mbuf *mb
 
     tuple->src_ip = iph->src_addr; 
     tuple->dst_ip = iph->dst_addr;
-    tuple->src_port = th->src_port;
-    tuple->dst_port = th->dst_port;
+    tuple->src_port = rte_be_to_cpu_16(th->src_port);
+    tuple->dst_port = rte_be_to_cpu_16(th->dst_port);
 }
 
 static inline void ch_four_tuple_init2(ch_four_tuple_t *tuple,struct ipv4_hdr *iph,struct tcp_hdr *th){
 
     tuple->src_ip = iph->src_addr; 
     tuple->dst_ip = iph->dst_addr;
-    tuple->src_port = th->src_port;
-    tuple->dst_port = th->dst_port;
+    tuple->src_port = rte_be_to_cpu_16(th->src_port);
+    tuple->dst_port = rte_be_to_cpu_16(th->dst_port);
 }
 
 extern char  *ch_current_logtime(apr_pool_t *mp);

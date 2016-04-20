@@ -37,7 +37,7 @@ void ch_app_context_register(ch_app_context_t *app_context,ch_app_t *app){
 }
 
 
-ch_app_t * ch_app_context_find_by_common_port(ch_app_context_t *app_context,uint16_t src_port,uint16_t dst_port){
+ch_app_t * _app_context_find_by_common_port(ch_app_context_t *app_context,uint16_t src_port,uint16_t dst_port){
     
     ch_app_t **apps,*app;
     int i;
@@ -73,7 +73,7 @@ int  ch_app_context_recognize_by_port(ch_app_context_t *app_context,uint16_t src
     apps = (ch_app_t **)app_context->apps->elts;
 
     for(i=0;i<app_context->apps->nelts;i++){
-        
+
         app = apps[i];
         common_port = app->common_port;
 
@@ -97,43 +97,51 @@ int  ch_app_context_recognize_by_port(ch_app_context_t *app_context,uint16_t src
 }
 
 
-ch_app_t * ch_app_context_recognize_by_content(ch_app_context_t *app_context,void *data,size_t dlen){
-    
-    ch_app_t **apps,*app;
-    int i;
-    int rc;
+int ch_app_context_content_parse(ch_app_context_t *app_context,ch_assemble_session_t *ass,void *data,size_t dlen){
 
-    apps = (ch_app_t **)app_context->apps->elts;
+    ch_app_t *app = ass->app;
+    ch_app_t **apps;
 
-    for(i=0;i<app_context->apps->nelts;i++){
-        
-        app = apps[i];
+    int rc,i;
 
-        if(app->app_recognize_by_content){
-            
-            rc = app->app_recognize_by_content(app,data,dlen,app->priv_data);
-
-            if(rc){
-                return app;
-            }
-        }
+    if(app == NULL){
+        /*try to find app by common port*/
+        app = _app_context_find_by_common_port(app_context,
+                ch_assemble_session_srcport_get(ass),
+                ch_assemble_session_dstport_get(ass));
     }
 
-    return NULL;
+    if(app){
+        return app->app_content_parse(app,ass,data,dlen,app->priv_data);
+    }
+
+    /*call all apps to parse content*/
+    apps = (ch_app_t **)app_context->apps->elts;
+
+    for(i = 0; i<app_context->apps->nelts; i++){
+
+        app = apps[i];
+
+        rc = app->app_content_parse(app,ass,data,dlen,app->priv_data);
+        
+        if(rc!=PARSE_RETURN_DISCARD){
+
+            ass->app = app;
+            return rc;
+        }
+
+    }
+    
+    return PARSE_RETURN_DISCARD;
 }
 
-int ch_app_context_content_parse(ch_app_context_t *app_context,ch_app_t *app,ch_assemble_session_t *ass,void *data,size_t dlen){
 
-    return 0;
-}
-
-
-void ch_app_context_content_flush(ch_app_context_t *app_context,ch_app_t *app,ch_assemble_session_t *ass){
+void ch_app_context_content_flush(ch_app_context_t *app_context,ch_assemble_session_t *ass){
 
 }
 
 
-void ch_app_context_content_close(ch_app_context_t *app_context,ch_app_t *app,ch_assemble_session_t *ass){
+void ch_app_context_content_close(ch_app_context_t *app_context,ch_assemble_session_t *ass){
 
     
 }
