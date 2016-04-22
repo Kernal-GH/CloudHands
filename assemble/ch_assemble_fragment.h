@@ -37,7 +37,28 @@ struct ch_assemble_fragment_t {
     CH_RING_ENTRY(ch_data_fragment_t) frags_head;
 };
 
-static inline _is_assemble_fragment_empty(ch_assemble_fragment_t *as_frag){
+static inline void ch_assemble_fragment_info_get(ch_assemble_fragment_t *as_frag,size_t *df_count,size_t *dfs_len){
+    
+    *df_count = 0;
+    *dfs_len = 0;
+    ch_data_fragment_t *df;
+
+    CH_RING_FOREACH(df,&as_frag->frags_head,ch_data_fragment_t,link){
+
+        *df_count =*df_count+1;
+        *dfs_len = *dfs_len +df->len;
+    }
+
+}
+
+static inline void ch_assemble_data_fragment_free(ch_data_fragment_t *df){
+    
+    if(df){
+        free(df);
+    }
+}
+
+static inline int _is_assemble_fragment_empty(ch_assemble_fragment_t *as_frag){
 
     return CH_RING_EMPTY(&as_frag->frags_head,ch_data_fragment_t,link);
 }

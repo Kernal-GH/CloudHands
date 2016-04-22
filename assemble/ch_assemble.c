@@ -109,6 +109,8 @@ static void _process_data_packet(ch_assemble_task_t *astask,ch_assemble_session_
                 }else {
                     ep->last_offset = df->offset+df->len;
                 }
+
+                ch_assemble_data_fragment_free(df);
             }
         }
     }

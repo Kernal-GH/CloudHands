@@ -39,7 +39,7 @@ void ch_assemble_fragment_fin(ch_assemble_fragment_t *as_frag){
 
 static inline int _after(ch_data_fragment_t *a,ch_data_fragment_t *b){
 
-    return a->offset+a->len>=b->offset+b->len;
+    return a->offset>=b->offset;
 }
 
 static inline int _before(ch_data_fragment_t *a,ch_data_fragment_t *b){
@@ -76,67 +76,32 @@ static void _data_fragment_neighbors_get(ch_assemble_fragment_t *as_frag,ch_data
 
 }
 
-
-
-static void _data_fragment_before_trim(ch_assemble_fragment_t *as_frag,ch_data_fragment_t *bdf,ch_data_fragment_t *df){
-
-    uint32_t diff;
-    ch_data_fragment_t *dfd,*dfd_tmp;
-
-    if(bdf == NULL){
-        return;
-    }
-
-    /*free all data fragments coveried by this data fragment*/
-    CH_RING_FOREACH_SAFE(dfd,dfd_tmp,&as_frag->frags_head,ch_data_fragment_t,link){
-        
-        if(dfd == bdf){
-            break;
-        }
-
-        if(dfd->offset>=df->offset){
-            /*free it*/
-            CH_RING_REMOVE(dfd,link);
-            free(dfd);
-        }
-    }
-
-    if(bdf->offset+bdf->len<=df->offset){
-      return;  
-    }
-
-    if((df->offset == bdf->offset)&&(bdf->offset+bdf->len == df->offset+df->len)){
-        
-        df->data = NULL;
-        df->offset = 0;
-        df->len = 0;
-        return;
-    }
-
-    diff = bdf->offset+bdf->len-df->offset;
-    df->data = df->data+diff;
-    df->len = df->len-diff;
-    df->offset = df->offset+diff;
-    /*ok!*/
-}
-
 static void _data_fragment_trim(ch_assemble_fragment_t *as_frag,ch_data_fragment_t *df,
         ch_data_fragment_t *before,ch_data_fragment_t *after){
    
     uint32_t diff;
-    
-    _data_fragment_before_trim(as_frag,before,df);
 
-    if(df->data == NULL||after == NULL||df->offset+df->len<=after->offset)
+    if(df->data == NULL)
     {
         /*covered!||end!*/
         return;
     }
 
-    /*trim data coveried*/
-    diff = df->offset+df->len-after->offset;
-    df->len -=diff;
+    if(before){
+        if(before->offset+before->len>df->offset){
+            diff = before->offset+before->len-df->offset;
+            df->data = df->data+diff;
+            df->len = df->len-diff;
+            df->offset = df->offset+diff;
+        }
+    }
 
+    if(after){
+        if(df->offset+df->len>after->offset){
+            diff = df->offset+df->len-after->offset;
+            df->len = df->len-diff;
+        }
+    }
     /*ok!*/
 }
 
@@ -216,14 +181,44 @@ static ch_data_fragment_t *  _data_fragments_merge(ch_assemble_fragment_t *as_fr
     return mdf;
 }
 
+static inline int _data_fragment_covered(ch_data_fragment_t *a,ch_data_fragment_t *b){
+
+    return (a->offset>=b->offset)&&(b->offset+b->len>=a->offset+a->len);
+}
+
+static void _data_fragment_covered_free(ch_assemble_fragment_t *as_frag,ch_data_fragment_t *df,int * is_covered){
+
+    ch_data_fragment_t *cur_df,*cur_tmp_df;
+
+    CH_RING_FOREACH_SAFE(cur_df,cur_tmp_df,&as_frag->frags_head,ch_data_fragment_t,link){
+
+        if(_data_fragment_covered(cur_df,df)){
+
+            CH_RING_REMOVE(cur_df,link);
+            free(cur_df);
+        }else if(_data_fragment_covered(df,cur_df)){
+            *is_covered = 1;
+            break;
+        }
+    }
+}
+
 int ch_assemble_fragment_push(ch_assemble_fragment_t *as_frag,void *data,uint32_t dlen,uint32_t offset){
-    
+   
+    int is_covered = 0;
+
     ch_data_fragment_t tmp_df;
     tmp_df.data = data;
     tmp_df.len = dlen;
     tmp_df.offset = offset;
 
     ch_data_fragment_t *df,*before,*after;
+
+    _data_fragment_covered_free(as_frag,&tmp_df,&is_covered);
+
+    if(is_covered){
+        return 0;
+    }
 
     /*find neighbors*/
     _data_fragment_neighbors_get(as_frag,&tmp_df,&before,&after);
@@ -232,7 +227,7 @@ int ch_assemble_fragment_push(ch_assemble_fragment_t *as_frag,void *data,uint32_
     _data_fragment_trim(as_frag,&tmp_df,before,after);
 
     /*covered completely*/
-    if(tmp_df.data == NULL){
+    if(tmp_df.data == NULL||tmp_df.len == 0){
         /*do nothing*/
         return 0;
     }
