@@ -26,21 +26,21 @@ typedef struct ch_test_command_t ch_test_command_t;
 #include "ch_ring.h"
 
 #define CH_TEST_SUCCESS  (0)
-#define CH_CH_TEST_FAILED  (-1)
+#define CH_TEST_FAILED  (-1)
 
 /* Before including test.h file you can define
- * CH_CH_TEST_TRACE_FAILURE(_file, _line, _func) macro to better trace/debug test
+ * CH_TEST_TRACE_FAILURE(_file, _line, _func) macro to better trace/debug test
  * failures. Mostly useful in test development phase. */
-#ifndef CH_CH_TEST_TRACE_FAILURE
-# define CH_CH_TEST_TRACE_FAILURE(_file, _line, _func)
+#ifndef CH_TEST_TRACE_FAILURE
+# define CH_TEST_TRACE_FAILURE(_file, _line, _func)
 #endif
 
 #define CH_TEST_ASSERT(cond, msg, ...) do {                         \
 		if (!(cond)) {                                           \
 			printf("TestCase %s() line %d failed: "              \
 				msg "\n", __func__, __LINE__, ##__VA_ARGS__);    \
-			CH_CH_TEST_TRACE_FAILURE(__FILE__, __LINE__, __func__);    \
-			return CH_CH_TEST_FAILED;                                  \
+			CH_TEST_TRACE_FAILURE(__FILE__, __LINE__, __func__);    \
+			return CH_TEST_FAILED;                                  \
 		}                                                        \
 } while (0)
 

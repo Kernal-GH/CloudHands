@@ -134,7 +134,7 @@ static ch_data_fragment_t *  _data_fragments_merge(ch_assemble_fragment_t *as_fr
     /*create */
     mdf = (ch_data_fragment_t*)malloc(tsize+sizeof(ch_data_fragment_t));
     if(!mdf){
-        //ch_log(CH_LOG_ERR,"No memory used to create data fragment!");
+        ch_log(CH_LOG_ERR,"No memory used to create data fragment!");
         return NULL;
     }
     

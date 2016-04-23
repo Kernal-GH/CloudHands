@@ -60,15 +60,21 @@ function install_cloudhands(){
      cp -r util build
      cp -r assemble build
      cp -r app build
+     cp -r test build
 
      cp Makefile build
 
      make -C build/
+     cp build/core/MakefileLib build/core/Makefile
+     make -C build/core
+
+     make -C build/test/
 
      if [[ ! -d $dpdk_install_prefix/CloudHands ]];then
          mkdir $dpdk_install_prefix/CloudHands
      fi
      cp -r build/core/build/app/* $dpdk_install_prefix/CloudHands
+     cp -r build/test/build/app/* $dpdk_install_prefix/CloudHands
 }
 
 function prepare_run_env(){
