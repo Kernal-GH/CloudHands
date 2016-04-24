@@ -44,7 +44,7 @@ struct ch_app_t {
 
     void *priv_data;
 
-    int (*app_recognize_by_port)(ch_app_t *app,uint16_t src_port,uint32_t dst_port,void *priv_data);
+    int (*app_recognize_by_port)(ch_app_t *app,uint16_t src_port,uint16_t dst_port,void *priv_data);
 
     int (*app_content_parse)(ch_app_t *app,ch_assemble_session_t *ass,void *data,size_t dlen,void *priv_data);
 

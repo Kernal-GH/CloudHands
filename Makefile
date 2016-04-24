@@ -9,7 +9,7 @@ RTE_TARGET ?= x86_64-native-linuxapp-gcc
 include $(RTE_SDK)/mk/rte.vars.mk
 unexport RTE_SRCDIR RTE_OUTPUT RTE_EXTMK
 
-DIRS-y += util assemble app core
+DIRS-y += util assemble app app/http core
 
 .PHONY: all clean $(DIRS-y)
 
