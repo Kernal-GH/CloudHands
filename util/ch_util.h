@@ -111,6 +111,14 @@ static inline void ch_four_tuple_init2(ch_four_tuple_t *tuple,struct ipv4_hdr *i
     tuple->dst_port = rte_be_to_cpu_16(th->dst_port);
 }
 
+static inline void ch_four_tuple_init3(ch_four_tuple_t *tuple,uint32_t src_ip,uint32_t dst_ip,uint16_t src_port,uint16_t dst_port){
+
+    tuple->src_ip = src_ip; 
+    tuple->dst_ip = dst_ip;
+    tuple->src_port = src_port;
+    tuple->dst_port = dst_port;
+}
+
 extern char  *ch_current_logtime(apr_pool_t *mp);
 
 extern char  *ch_current_logtime_with_buf(char *buf,size_t buf_size);

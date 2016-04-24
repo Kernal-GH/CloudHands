@@ -71,7 +71,7 @@ ch_hash_entry_t * ch_hash_pool_entry_create(ch_hash_pool_t *hpool,ch_four_tuple_
     /* Try to get a free entry from free entries list */
     if(!list_empty(&hpool->free_entries)){
        
-        entry = list_entry(&hpool->free_entries,ch_hash_entry_t,node);
+        entry = list_entry(hpool->free_entries.next,ch_hash_entry_t,node);
         list_del(&entry->node);
 
     }else{

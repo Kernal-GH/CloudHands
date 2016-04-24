@@ -107,7 +107,7 @@ ch_session_request_t* ch_session_request_create(ch_session_request_pool_t *req_p
    
     ch_four_tuple_t tuple;
 
-    ch_four_tuple_init(&tuple,pinfo->mbuf);
+    ch_four_tuple_init3(&tuple,pinfo->src_ip,pinfo->dst_ip,pinfo->src_port,pinfo->dst_port);
 
     ch_session_request_t *req = (ch_session_request_t*)ch_hash_pool_entry_create(req_pool->hash_pool,&tuple);
 
@@ -140,7 +140,7 @@ ch_session_request_t* ch_session_request_find(ch_session_request_pool_t *req_poo
 
     ch_four_tuple_t tuple;
 
-    ch_four_tuple_init(&tuple,pinfo->mbuf);
+    ch_four_tuple_init3(&tuple,pinfo->src_ip,pinfo->dst_ip,pinfo->src_port,pinfo->dst_port);
     
     return (ch_session_request_t*)ch_hash_pool_entry_find(req_pool->hash_pool,&tuple);
 }

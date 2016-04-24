@@ -25,8 +25,16 @@
 #include <termios.h>
 #include <ctype.h>
 #include <sys/queue.h>
+#include <apr_pools.h>
+#include "ch_errno.h"
+#include "ch_log.h"
+#include "ch_context.h"
+#include "ch_constants.h"
+#include "ch_task.h"
 
 static int is_cmd_init = 0; 
+
+ch_context_t *context = NULL;
 
 void ch_add_test_command(ch_test_command_t *t){
 
@@ -100,7 +108,7 @@ static void _run_cmd(ch_test_command_t *cmd){
     fflush(stdout);
 }
 
-static void _run_cmd_by_name(char *name){
+static void _run_cmd_by_name(const char *name){
 
     ch_test_command_t *cmd;
     
@@ -127,23 +135,58 @@ static void _run_all_cmds(void){
     }
 }
 
-int main(int argc, char ** argv){
+int main(int argc, const char * const argv[]){
 
 	int ret;
+    const char *cfname;
+    const char *test_cmd_name = NULL;
 
-	ret = rte_eal_init(argc, argv);
+    apr_pool_t *mp;
+
+	ret = rte_eal_init(argc, (char**)argv);
 	if (ret < 0)
 		return -1;
 
     argc -= ret;
     argv += ret;
 
-    if(argc == 1){
-        
-        _run_all_cmds();
-    }else{
-
-        _run_cmd_by_name(argv[1]);
+    if(argc<=1){
+        fprintf(stderr,"Usage:app [test_cmd_name] <conf path>\n");
+        exit(-1);
     }
 
+    apr_app_initialize(&argc,&argv,NULL);
+    
+    apr_pool_create(&mp,NULL);
+
+    if(mp == NULL){
+        fprintf(stderr,"create a memory pool for testing failed!\n");
+        exit(-1);
+    }
+
+    if(argc == 2){
+        cfname = argv[1];
+    }else{
+        cfname = argv[2];
+        test_cmd_name = argv[1];
+    }
+
+    context = ch_context_create(mp,cfname);
+    if(context == NULL){
+        
+        fprintf(stderr,"create context failed from config file%s\n",cfname);
+        exit(-1);
+    }
+    
+    ch_strerror_init();
+    ch_log_init(mp,context->log_name,context->log_level);
+
+    if(test_cmd_name){
+        
+       _run_cmd_by_name(test_cmd_name);
+    }else{
+        _run_all_cmds();
+    }
+
+    return 0;
 }

@@ -24,6 +24,9 @@ typedef struct ch_test_command_t ch_test_command_t;
 
 #include <sys/queue.h>
 #include "ch_ring.h"
+#include "ch_context.h"
+
+extern ch_context_t *context;
 
 #define CH_TEST_SUCCESS  (0)
 #define CH_TEST_FAILED  (-1)
