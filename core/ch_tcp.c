@@ -277,7 +277,7 @@ ch_protocol_type_t tcp_proto = {
     tcp_rcv
 };
 
-ch_tcp_t * ch_tcp_create(ch_context_t *context,ch_ipv4_t *ipv4){
+ch_tcp_t * ch_tcp_create(ch_context_t *context,ch_session_request_pool_t *req_pool,ch_ipv4_t *ipv4){
 
     ch_tcp_t *tcp = (ch_tcp_t*)apr_palloc(context->mp,sizeof(ch_ipv4_t));
 
@@ -294,21 +294,12 @@ ch_tcp_t * ch_tcp_create(ch_context_t *context,ch_ipv4_t *ipv4){
     /*register tcp protocol into ipv4,*/
     ch_ipv4_proto_register(ipv4,&tcp_proto);
 
-    tcp->req_pool = ch_session_request_pool_create(context);
-    if(tcp->req_pool == NULL){
-        
-        ch_log(CH_LOG_ERR,"Create session request pool instance failed!");
-        return NULL;
-    }
+    tcp->req_pool = req_pool;
+
 
     return tcp;
 }
 
 void ch_tcp_destroy(ch_tcp_t *tcp){
-    
-    if(tcp->req_pool){
-        ch_session_request_pool_destroy(tcp->req_pool);
-        tcp->req_pool = NULL;
-    }
 
 }

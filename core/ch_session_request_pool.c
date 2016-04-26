@@ -76,22 +76,6 @@ ch_session_request_pool_t * ch_session_request_pool_create(ch_context_t *context
     req_pool->mp = mp;
     req_pool->n_requests = 0;
 
-    req_pool->assemble_tasks = apr_array_make(mp,8,sizeof(ch_task_t*));
-
-    /*create all assemble tasks*/
-    for(i = 0; i<context->n_assemble_tasks; i++){
-   
-        astask = ch_assemble_task_create(context,i+1);
-        if(astask == NULL){
-            ch_log(CH_LOG_ERR,"Create assemble task[%d] failed!",i+1);
-            apr_pool_destroy(mp);
-            return NULL;
-        }
-
-        *(ch_task_t**)apr_array_push(req_pool->assemble_tasks) = astask;
-        ch_context_task_push(context,astask);
-    }
-
     return req_pool;
 }
 

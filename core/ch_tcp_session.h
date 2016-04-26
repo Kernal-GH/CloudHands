@@ -1,12 +1,12 @@
 /*
  * =====================================================================================
  *
- *       Filename:  ch_tcp.h
+ *       Filename:  ch_tcp_session.h
  *
  *    Description:  
  *
  *        Version:  1.0
- *        Created:  2016年01月29日 14时32分05秒
+ *        Created:  2016年04月26日 18时15分15秒
  *       Revision:  none
  *       Compiler:  gcc
  *
@@ -15,25 +15,22 @@
  *
  * =====================================================================================
  */
-#ifndef CH_TCP_H
-#define CH_TCP_H
+#ifndef CH_TCP_SESSION_H
+#define CH_TCP_SESSION_H
 
-typedef struct ch_tcp_t ch_tcp_t;
+typedef struct ch_tcp_session_t ch_tcp_session_t;
 
 #include "ch_context.h"
-#include "ch_ipv4.h"
 #include "ch_session_request_pool.h"
 
+struct ch_tcp_session_t {
 
-struct ch_tcp_t {
-    
     ch_context_t *context;
-    ch_session_request_pool_t *req_pool;
+    ch_session_request_pool *req_pool;
 };
 
-extern ch_tcp_t * ch_tcp_create(ch_context_t *context,ch_session_request_pool_t *req_pool,ch_ipv4_t *ipv4);
+extern ch_tcp_session_t * ch_tcp_session_create(ch_context_t *context);
 
-extern void ch_tcp_destroy(ch_tcp_t *tcp);
+extern int ch_tcp_session_packet_process(ch_tcp_session_t *tsession,struct rte_mbuf *mbuf);
 
-#endif /*CH_TCP_H*/
-
+#endif /*CH_TCP_SESSION_H*/

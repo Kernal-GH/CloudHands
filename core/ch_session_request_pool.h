@@ -42,8 +42,6 @@ struct ch_session_request_pool_t {
 
     ch_hash_pool_t *hash_pool;
     ch_context_t *context;
-    apr_array_header_t *assemble_tasks;
-
     apr_pool_t *mp;
 
     size_t n_requests;

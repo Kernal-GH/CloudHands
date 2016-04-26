@@ -25,7 +25,7 @@ typedef struct ch_rxtask_t ch_rxtask_t;
 
 #include <rte_mempool.h>
 #include <apr_tables.h>
-#include "ch_task.h"
+#include "ch_task_pool.h"
 #include "ch_ipv4.h"
 #include "ch_ethertype.h"
 #include "ch_packet.h"
@@ -35,6 +35,9 @@ struct ch_rxtask_t {
 
     ch_task_t task;
     ch_packet_info_t pinfo;
+    
+    ch_context_t *context;
+
     struct rte_mempool *pktmbuf_pool;
     apr_array_header_t *rx_ports;
     apr_array_header_t *pkt_processors;
@@ -46,11 +49,11 @@ struct ch_rxtask_t {
 
 struct ch_rxtask_processor_t {
     const char *name;
-    int (*process)(ch_port_t *port,struct rte_mbuf *mbuf,uint64_t time,void *user_data);
-    void *user_data;
+    int (*process)(ch_port_t *port,struct rte_mbuf *mbuf,uint64_t time,void *priv_data);
+    void *priv_data;
 };
 
-extern ch_task_t * ch_rxtask_create(ch_context_t *context,unsigned int rx_port_mask);
+extern ch_task_t * ch_rxtask_create(ch_context_t *context);
 
 extern void ch_rxtask_pkt_processor_register(ch_rxtask_t *task,ch_rxtask_processor_t *prosessor);
 

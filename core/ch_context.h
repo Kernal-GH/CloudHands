@@ -23,9 +23,9 @@ typedef struct ch_context_t ch_context_t;
 
 #include <apr_pools.h>
 #include <apr_tables.h>
-#include "ch_port.h"
-#include "ch_core.h"
-#include "ch_task.h"
+#include "ch_port_pool.h"
+#include "ch_core_pool.h"
+#include "ch_task_pool.h"
 #include "ch_app_context.h"
 
 #define LOG_NAME_DEFAULT "/tmp/cloudhands.log"
@@ -44,14 +44,11 @@ struct ch_context_t {
 
     ch_app_context_t *app_context;
 
-    /*all available cpu cores*/
-    apr_array_header_t *cores;
+    ch_core_pool_t *cpool;
 
-    /*all available net devices*/
-    apr_array_header_t *ports;
+    ch_port_pool_t *ppool;
 
-    /*all create tasks*/
-    apr_array_header_t *tasks;
+    ch_task_pool_t *tpool;
 
     /*config log name and level*/
     const char *log_name;
@@ -98,14 +95,6 @@ struct ch_context_t {
 };
 
 extern ch_context_t * ch_context_create(apr_pool_t *mp,const char *cfname);
-
-extern ch_core_t * ch_context_core_pop(ch_context_t *context);
-
-extern void ch_context_core_push(ch_context_t *context,ch_core_t *core);
-
-extern void ch_context_port_push(ch_context_t *context,ch_port_t *port);
-
-extern void ch_context_task_push(ch_context_t *context,ch_task_t *task);
 
 extern int ch_context_core_init(ch_context_t *context,uint32_t core_n);
 

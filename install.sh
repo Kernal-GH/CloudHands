@@ -75,6 +75,7 @@ function install_cloudhands(){
      fi
      cp -r build/core/build/app/* $dpdk_install_prefix/CloudHands
      cp -r build/test/build/app/* $dpdk_install_prefix/CloudHands
+     cp -r conf $dpdk_install_prefix/CloudHands
 }
 
 function prepare_run_env(){

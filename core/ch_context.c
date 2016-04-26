@@ -28,9 +28,9 @@ static void do_context_init(ch_context_t *context){
 
 
     context->app_context = NULL;
-    context->cores = apr_array_make(context->mp,16,sizeof(ch_core_t*));
-    context->ports = apr_array_make(context->mp,16,sizeof(ch_port_t*));
-    context->tasks = apr_array_make(context->mp,16,sizeof(ch_task_t*));
+    context->cpool = NULL;
+    context->ppool = NULL;
+    context->tpool = NULL;
 
     context->log_name = LOG_NAME_DEFAULT;
     context->log_level = LOG_LEVEL_DEFAULT;
@@ -403,103 +403,6 @@ ch_context_t * ch_context_create(apr_pool_t *mp,const char *cfname){
 
 
     return context;
-}
-
-ch_core_t * ch_context_core_pop(ch_context_t *context){
-
-    ch_core_t *core = NULL;
-
-    if(context->cores->nelts == 0)
-        return NULL;
-
-    core = (ch_core_t*)apr_array_pop(context->cores);
-
-}
-
-void ch_context_core_push(ch_context_t *context,ch_core_t *core){
-
-    *(ch_core_t **)apr_array_push(context->cores) = core;
-}
-
-void ch_context_port_push(ch_context_t *context,ch_port_t *port){
-
-    *(ch_port_t **)apr_array_push(context->ports) = port;
-}
-
-void ch_context_task_push(ch_context_t *context,ch_task_t *task){
-
-    *(ch_task_t**)apr_array_push(context->tasks) = task;
-}
-
-int ch_context_core_init(ch_context_t *context,uint32_t core_n){
-
-    ch_core_t *core;
-    unsigned int lcore_id;
-
-    for(lcore_id = 0; lcore_id <core_n;lcore_id++){
-
-        if(rte_lcore_is_enabled(lcore_id)==0){
-            continue;
-        }
-
-        printf("create core[%d]\n",lcore_id);
-
-        core = ch_core_create(context->mp,lcore_id);
-
-        if(core == NULL){
-            printf("create core[%d] failed!\n",lcore_id);
-            return -1;
-        }
-
-        ch_context_core_push(context,core);
-    }
-
-    return lcore_id;
-}
-
-int ch_context_port_init(ch_context_t *context,uint32_t port_n){
-
-    ch_port_t *port;
-    unsigned int port_id;
-    
-    for(port_id = 0; port_id < port_n; port_id++){
-
-        /*skip ports that are not enabled*/
-        if((context->port_mask &(1 << port_id)) == 0){
-
-            printf("Skipping disabled port %d\n",port_id);
-            continue;
-        }
-
-        printf("create port[%d]\n",port_id);
-
-        port = ch_port_create(context,port_id);
-
-        if(port == NULL){
-
-            printf("create port[%d] failed!\n",port_id);
-            return -1;
-        }
-
-        ch_context_port_push(context,port);
-   } 
-
-    return port_id;
-}
-
-int ch_context_rxport_init(ch_context_t *context){
-
-    ch_task_t *task = ch_rxtask_create(context,context->port_rx_mask);
-
-    if(task == NULL){
-
-        printf("create rxtask failed!\n");
-        return -1;
-    }
-
-    ch_context_task_push(context,task);
-
-    return 0;
 }
 
 int ch_context_app_init(ch_context_t *context){
