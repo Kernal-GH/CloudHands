@@ -20,6 +20,7 @@
 #include "ch_rxtask.h"
 #include "ch_log.h"
 
+#define PREFETCH_OFFSET 3
 #define CH_RX_TASK_MBUF_SIZE (2048 + sizeof(struct rte_mbuf) + RTE_PKTMBUF_HEADROOM)
 #define CH_RX_TASK_MBUF_CACHE_SIZE 256
 
@@ -43,6 +44,8 @@ static int rx_task_init(ch_task_t *task,void *priv_data){
 static void _pkt_process(ch_rxtask_t *rxtsk,ch_port_t *port,struct rte_mbuf *mbuf,uint64_t time){
 
     unsigned int j,n;
+    int ret;
+
     ch_rxtask_processor_t *processor;
     ch_rxtask_processor_t **processors = (ch_rxtask_processor_t**)rxtsk->pkt_processors->elts;
     n = rxtsk->pkt_processors->nelts;
@@ -159,6 +162,7 @@ ch_task_t * ch_rxtask_create(ch_context_t *context){
     rx_task->task.init = rx_task_init;
     rx_task->task.run = rx_task_run;
     rx_task->task.exit = rx_task_fin;
+    rx_task->task.tsk_id = 0;
 
     rx_task->rx_ports = apr_array_make(context->mp,16,sizeof(ch_port_t *));
 

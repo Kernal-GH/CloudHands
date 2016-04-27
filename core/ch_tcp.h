@@ -22,16 +22,15 @@ typedef struct ch_tcp_t ch_tcp_t;
 
 #include "ch_context.h"
 #include "ch_ipv4.h"
-#include "ch_session_request_pool.h"
+#include "ch_tcp_session.h"
 
 
-struct ch_tcp_t {
-    
+struct ch_tcp_t {    
     ch_context_t *context;
-    ch_session_request_pool_t *req_pool;
+    ch_tcp_session_t *tsession;
 };
 
-extern ch_tcp_t * ch_tcp_create(ch_context_t *context,ch_session_request_pool_t *req_pool,ch_ipv4_t *ipv4);
+extern ch_tcp_t * ch_tcp_create(ch_context_t *context,ch_ipv4_t *ipv4);
 
 extern void ch_tcp_destroy(ch_tcp_t *tcp);
 

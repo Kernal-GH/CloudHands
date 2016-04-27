@@ -27,6 +27,8 @@ ch_app_context_t * ch_app_context_create(ch_context_t *context){
 
     app_context->apps = apr_array_make(context->mp,16,sizeof(ch_app_t*));
 
+
+
     return app_context;
 }
 

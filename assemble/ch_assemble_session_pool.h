@@ -23,23 +23,20 @@ typedef struct ch_assemble_session_pool_t ch_assemble_session_pool_t;
 #include <apr_pools.h>
 #include "ch_hash_pool.h"
 #include "ch_assemble_session.h"
-#include "ch_assemble_task.h"
+#include "ch_assemble.h"
 
 struct ch_assemble_session_pool_t {
 
     apr_pool_t *mp;
-    ch_assemble_task_t *astask;
-
+    ch_assemble_t *as;
+    ch_context_t *context;
     ch_hash_pool_t *hash_pool;
 
     size_t n_sessions;
-
 };
 
 
-extern ch_assemble_session_pool_t * ch_assemble_session_pool_create(ch_assemble_task_t *astask,
-        apr_pool_t *mp,size_t n_sessions_limit);
-
+extern ch_assemble_session_pool_t * ch_assemble_session_pool_create(ch_context_t *context,ch_assemble_t *as);
 
 extern void ch_assemble_session_pool_destroy(ch_assemble_session_pool_t *ass_pool);
 

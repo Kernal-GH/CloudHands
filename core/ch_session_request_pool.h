@@ -26,7 +26,6 @@ typedef struct ch_session_request_t ch_session_request_t;
 #include <apr_pools.h>
 #include "ch_context.h"
 #include "ch_list.h"
-#include "ch_assemble_task.h"
 #include "ch_packet.h"
 #include "ch_hash_pool.h"
 
@@ -74,8 +73,5 @@ extern void ch_session_request_free(ch_session_request_pool_t *req_pool,ch_sessi
 
 
 extern ch_session_request_t* ch_session_request_find(ch_session_request_pool_t *req_pool,ch_packet_info_t *pinfo);
-
-
-extern ch_assemble_task_t * ch_assemble_task_get_from_request_pool(ch_session_request_pool_t *req_pool);
 
 #endif /*CH_SESSION_REQUEST_POOL_H*/

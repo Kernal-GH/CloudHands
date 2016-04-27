@@ -24,7 +24,7 @@ typedef struct ch_packet_info_t ch_packet_info_t;
 #include <rte_ip.h>
 #include <rte_tcp.h>
 
-#include "ch_port.h"
+#include "ch_port_pool.h"
 
 
 struct ch_packet_info_t {

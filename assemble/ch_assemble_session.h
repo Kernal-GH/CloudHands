@@ -27,7 +27,7 @@ typedef struct ch_assemble_session_t ch_assemble_session_t;
 #include "ch_session_request_pool.h"
 #include "ch_util.h"
 #include "ch_app_context.h"
-#include "ch_assemble_task.h"
+#include "ch_assemble.h"
 
 enum {
     SESSION_STATE_INIT=0,
@@ -54,7 +54,7 @@ struct  ch_assemble_session_t {
 
     ch_app_t *app;
     
-    ch_assemble_task_t *astask;
+    ch_assemble_t *as;
     ch_assemble_session_endpoint_t *cur_ep;
 
     uint32_t fin1_seq;
@@ -78,7 +78,7 @@ struct  ch_assemble_session_t {
 
 #define session_state_is_rst(ass) ((ass)->state == SESSION_STATE_RST)
 
-extern int ch_assemble_session_init(ch_assemble_task_t *astask,ch_assemble_session_t *ass,ch_session_request_t *sreq); 
+extern int ch_assemble_session_init(ch_assemble_t *as,ch_assemble_session_t *ass,ch_session_request_t *sreq); 
 
 extern void ch_assemble_session_fin(ch_assemble_session_t *ass);
 

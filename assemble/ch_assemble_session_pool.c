@@ -48,8 +48,21 @@ static int assemble_session_entry_equal(ch_hash_entry_t *entry,ch_four_tuple_t *
     return _is_request(ass,tuple)||_is_response(ass,tuple);
 }
 
-ch_assemble_session_pool_t * ch_assemble_session_pool_create(ch_assemble_task_t *astask,apr_pool_t *mp,size_t n_sessions_limit){
+ch_assemble_session_pool_t * ch_assemble_session_pool_create(ch_context_t *context,ch_assemble_t *as){
 
+    size_t n_sessions_limit = context->n_assemble_sessions_limit;
+    apr_status_t rc;
+    apr_pool_t *mp;
+
+    /*create a memory pool for this assemble task*/
+    rc = apr_pool_create(&mp,NULL);
+
+    if(rc!=APR_SUCCESS||mp == NULL){
+        ch_log(CH_LOG_ERR,"Cannot create a memory pool for this assemble pool!");
+        
+        return NULL;
+    }
+    
     ch_assemble_session_pool_t *ass_pool = (ch_assemble_session_pool_t*)apr_palloc(mp,sizeof(ch_assemble_session_pool_t));
 
     ass_pool->mp = mp;
@@ -65,7 +78,7 @@ ch_assemble_session_pool_t * ch_assemble_session_pool_create(ch_assemble_task_t 
     }
 
     ass_pool->n_sessions = 0;
-    ass_pool->astask = astask;
+    ass_pool->as = as;
 
     return ass_pool;
 }
@@ -73,6 +86,9 @@ ch_assemble_session_pool_t * ch_assemble_session_pool_create(ch_assemble_task_t 
 
 void ch_assemble_session_pool_destroy(ch_assemble_session_pool_t *ass_pool){
 
+    if(ass_pool->mp){
+        apr_pool_destroy(ass_pool->mp);
+    }
 }
 
 ch_assemble_session_t * ch_assemble_session_pool_entry_create(ch_assemble_session_pool_t *ass_pool,ch_session_request_t *sreq,
@@ -85,7 +101,7 @@ ch_assemble_session_t * ch_assemble_session_pool_entry_create(ch_assemble_sessio
         return NULL;
     }
 
-    if(ch_assemble_session_init(ass_pool->astask,ass,sreq)){
+    if(ch_assemble_session_init(ass_pool->as,ass,sreq)){
 
         ch_log(CH_LOG_ERR,"init assemble session failed!");
         ch_assemble_session_pool_entry_free(ass_pool,ass);

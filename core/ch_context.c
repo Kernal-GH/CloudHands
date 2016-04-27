@@ -20,9 +20,6 @@
 #include "ch_constants.h"
 #include "ch_context.h"
 #include "ch_log.h"
-#include "ch_core.h"
-#include "ch_port.h"
-#include "ch_rxtask.h"
 
 static void do_context_init(ch_context_t *context){
 
@@ -405,17 +402,45 @@ ch_context_t * ch_context_create(apr_pool_t *mp,const char *cfname){
     return context;
 }
 
-int ch_context_app_init(ch_context_t *context){
+int ch_context_start(ch_context_t *context){
 
-    ch_app_context_t *app_context = ch_app_context_create(context);
-
-    if(app_context == NULL){
-        
-        printf("Create application context failed!\n");
-        return -1;
+    /*create all cpu cores,*/
+    context->cpool = ch_core_pool_create(context);
+    if(context->cpool == NULL){
+        ch_log(CH_LOG_ERR,"Create cpu cores for context failed!");
+        return CH_ERROR;
     }
 
-    context->app_context = app_context;
+    /*create all ethernet ports*/
+    context->ppool = ch_port_pool_create(context);
+    if(context->ppool == NULL){
+        ch_log(CH_LOG_ERR,"Create ethernet ports for context failed!");
+        return CH_ERROR;
+    }
 
-    return 0;
+    /*create all tasks*/
+    context->tpool = ch_task_pool_create(context);
+    if(context->tpool == NULL){
+        ch_log(CH_LOG_ERR,"Create tasks for context failed!");
+        return CH_ERROR;
+    }
+
+    /*create application context*/
+    context->app_context = ch_app_context_create(context);
+    if(context->app_context == NULL){
+        ch_log(CH_LOG_ERR,"Create application context for context failed!");
+        return CH_ERROR;
+    }
+
+    ch_http_init(context->app_context);
+    
+    /*setup all cores that were been bound to tasks*/
+    ch_core_pool_cores_setup(context->cpool);
+
+    /*ok*/
+    return CH_OK;
+}
+
+void ch_context_stop(ch_context_t *context){
+
 }

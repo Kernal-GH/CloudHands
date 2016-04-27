@@ -27,6 +27,7 @@ typedef struct ch_port_t ch_port_t;
 #include <rte_ring.h>
 #include <rte_mempool.h>
 #include <rte_mbuf.h>
+#include <apr_tables.h>
 #include "ch_context.h"
 
 struct ch_port_pool_t {

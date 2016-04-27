@@ -22,6 +22,8 @@ typedef struct ch_core_pool_t ch_core_pool_t;
 typedef struct ch_core_t ch_core_t;
 
 #include <apr_pools.h>
+#include <apr_tables.h>
+#include "ch_context.h"
 #include "ch_task_pool.h"
 
 struct ch_core_pool_t {
@@ -38,7 +40,7 @@ struct ch_core_t {
     unsigned bound:1;
 };
 
-extern ch_core_pool_t * ch_core_pool_create(ch_context_t *context,size_t core_n);
+extern ch_core_pool_t * ch_core_pool_create(ch_context_t *context);
 
 extern int ch_core_pool_task_bind(ch_core_pool_t *cpool,ch_task_t *tsk);
 

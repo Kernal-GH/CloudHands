@@ -24,7 +24,6 @@
 #include "ch_log.h"
 #include "ch_context.h"
 #include "ch_constants.h"
-#include "ch_task.h"
 
 #define CMDLINE_OPTS "h"
 
@@ -65,37 +64,6 @@ static void handle_signals(int signum)
     cloudhands_exit(1);
 }
 
-static void run_task(ch_context_t *context,unsigned int core_id){
-
-    ch_task_t **tasks;
-    ch_task_t *task;
-    int i;
-
-    tasks = (ch_task_t**)context->tasks->elts;
-
-    for(i=0;i<context->tasks->nelts;i++){
-
-        task = tasks[i];
-        if(task->core->core_id == core_id){
-
-            ch_log(CH_LOG_INFO,"start task in cpu core[%d]",core_id);
-            ch_task_init(task,NULL);
-            ch_task_run(task,NULL);
-        }
-    }
-
-    ch_log(CH_LOG_WARN,"no task in cpu core[%d]",core_id);
-}
-
-static int main_run_task(void *user_data){
-
-    ch_context_t *context = (ch_context_t *)user_data;
-
-    unsigned int core_id = rte_lcore_id();
-
-    run_task(context,core_id);
-}
-
 int main(int argc,const char * const argv[]){
     
 	int ret;
@@ -105,12 +73,6 @@ int main(int argc,const char * const argv[]){
     apr_getopt_t *opt;
     apr_pool_t *mp;
     ch_context_t *context;
-
-    ch_task_t **tasks;
-    ch_task_t *task;
-    uint32_t core_n;
-    uint32_t port_n;
-    uint32_t core_id;
     int i;
 
     if(argc<2){
@@ -197,63 +159,6 @@ int main(int argc,const char * const argv[]){
 	apr_signal(SIGINT, handle_signals);
 	apr_signal(SIGTERM, handle_signals);
 
-    /*init cpu cores*/
-    core_n = rte_lcore_count();
-    if(core_n == 0){
+    return ch_context_start(context);
 
-        ch_log(CH_LOG_ERR,"no cpu core specified for cloudhands!");
-        cloudhands_exit(1);
-    }
-
-    ret = ch_context_core_init(context,core_n);
-
-    if(ret == -1){
-        ch_log(CH_LOG_ERR,"create cpu core failed for cloudhands!");
-        cloudhands_exit(1);
-    }
-    
-    ch_log(CH_LOG_INFO,"create cpu cores[%d] for cloudhands!",ret);
-
-    /*init network ports*/
-    port_n = rte_eth_dev_count();
-    if(port_n == 0){
-
-        ch_log(CH_LOG_ERR,"no network port specified for cloudhands!");
-        cloudhands_exit(1);
-    }
-
-    ret = ch_context_port_init(context,port_n);
-
-    if(ret == -1){
-
-        ch_log(CH_LOG_ERR,"create network ports failed!\n");
-        cloudhands_exit(1);
-    }
-
-    ch_log(CH_LOG_INFO,"create network ports[%d] for cloudhands!",ret);
-
-    /*init receive packat network ports*/
-    ret = ch_context_rxport_init(context);
-    if(ret == -1){
-        ch_log(CH_LOG_ERR,"init receive packete network ports failed!");
-        cloudhands_exit(1);
-    }
-
-    ret = ch_context_app_init(context);
-    if(ret == -1){
-        ch_log(CH_LOG_ERR,"init application context failed!");
-        cloudhands_exit(1);
-    }
-
-   /* launch per-lcore init on every lcore */
-    rte_eal_mp_remote_launch(main_run_task, (void*)context, CALL_MASTER);
-
-    RTE_LCORE_FOREACH_SLAVE(core_id) {
-        if (rte_eal_wait_lcore(core_id) < 0){
-            ch_log(CH_LOG_ERR,"wait all tasks failed!");
-            cloudhands_exit(1);        
-        }
-    } 
-
-    return 0;
 }

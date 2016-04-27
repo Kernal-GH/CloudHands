@@ -20,6 +20,25 @@
 #include "ch_assemble.h"
 #include "ch_assemble_session.h"
 
+ch_assemble_t * ch_assemble_create(ch_context_t *context){
+
+    ch_assemble_t *as = (ch_assemble_t*)apr_palloc(context->mp,sizeof(ch_assemble_t));
+    as->context = context;
+
+    as->ass_pool = ch_assemble_session_pool_create(context,as);
+    if(as->ass_pool == NULL){
+        ch_log(CH_LOG_ERR,"Create assemble session's pool failed for this assemble!");
+        return NULL;
+    }
+
+    return as;
+}
+
+void ch_assemble_destroy(ch_assemble_t *as){
+
+    ch_assemble_session_pool_destroy(as->ass_pool);
+}
+
 static inline int _is_fin1_ack(ch_assemble_session_t *ass,struct tcp_hdr *th){
 
     uint32_t ack_seq = rte_be_to_cpu_32(th->recv_ack);
@@ -34,19 +53,18 @@ static inline int _is_fin2_ack(ch_assemble_session_t *ass,struct tcp_hdr *th){
     return (th->tcp_flags&CH_TH_ACK)&&(ack_seq == ass->fin2_seq+1); 
 }
 
-static void _assemble_session_close(ch_assemble_task_t *astask,ch_assemble_session_t *ass){
+static void _assemble_session_close(ch_assemble_t *as,ch_assemble_session_t *ass){
 
 
-    ch_app_context_content_close(astask->context->app_context,ass);
+    ch_app_context_content_close(as->context->app_context,ass);
 
     /*free this assemble session */
 
-    ch_assemble_session_pool_entry_free(astask->ass_pool,ass);
+    ch_assemble_session_pool_entry_free(as->ass_pool,ass);
 
 }
 
-static inline void _process_fin_packet(ch_assemble_task_t *astask,ch_assemble_session_t *ass,struct tcp_hdr *th){
-
+static inline void _process_fin_packet(ch_assemble_t *as,ch_assemble_session_t *ass,struct tcp_hdr *th){
 
     /*fin1*/
     if(ass->four_way_state == FOUR_WAY_INIT){
@@ -64,13 +82,13 @@ static inline void _process_fin_packet(ch_assemble_task_t *astask,ch_assemble_se
 
 }
 
-static void _process_rst_packet(ch_assemble_task_t *astask,ch_assemble_session_t *ass,struct tcp_hdr *th){
+static void _process_rst_packet(ch_assemble_t *as,ch_assemble_session_t *ass,struct tcp_hdr *th){
 
     /*close session*/
-    _assemble_session_close(astask,ass);
+    _assemble_session_close(as,ass);
 }
 
-static void _process_data_packet(ch_assemble_task_t *astask,ch_assemble_session_t *ass,ch_assemble_session_endpoint_t *ep,
+static void _process_data_packet(ch_assemble_t *as,ch_assemble_session_t *ass,ch_assemble_session_endpoint_t *ep,
         ch_four_tuple_t *tuple,void *pl_data,size_t pl_len,
         struct tcp_hdr *th){
 
@@ -88,7 +106,7 @@ static void _process_data_packet(ch_assemble_task_t *astask,ch_assemble_session_
         /*unorder,assemble it!*/
         if(ch_assemble_session_endpoint_do(ep,pl_data,pl_len,offset)){
             /*assemble error,maybe no memory,so close this assemble session!*/
-            _assemble_session_close(astask,ass);
+            _assemble_session_close(as,ass);
         }
     }else{
         /*offset =<last_offset<end_offset*/
@@ -97,15 +115,15 @@ static void _process_data_packet(ch_assemble_task_t *astask,ch_assemble_session_
         pl_len-=diff;
         ep->last_offset = end_offset;
 
-        rc = ch_app_context_content_parse(astask->context->app_context,ass,pl_data,pl_len);
+        rc = ch_app_context_content_parse(as->context->app_context,ass,pl_data,pl_len);
         if(rc == PARSE_RETURN_DISCARD||rc == PARSE_RETURN_CLOSE){
-            _assemble_session_close(astask,ass); 
+            _assemble_session_close(as,ass); 
         }else{
             df = ch_assemble_fragment_pop(&ep->as_frag,ep->last_offset);
             if(df){
-                rc = ch_app_context_content_parse(astask->context->app_context,ass,df->data,df->len);
+                rc = ch_app_context_content_parse(as->context->app_context,ass,df->data,df->len);
                 if(rc == PARSE_RETURN_DISCARD||rc == PARSE_RETURN_CLOSE){
-                    _assemble_session_close(astask,ass);
+                    _assemble_session_close(as,ass);
                 }else {
                     ep->last_offset = df->offset+df->len;
                 }
@@ -116,21 +134,21 @@ static void _process_data_packet(ch_assemble_task_t *astask,ch_assemble_session_
     }
 }
 
-static inline void _process_fin1_ack_packet(ch_assemble_task_t *astask,ch_assemble_session_t *ass,struct tcp_hdr *th){
+static inline void _process_fin1_ack_packet(ch_assemble_t *as,ch_assemble_session_t *ass,struct tcp_hdr *th){
 
     ass->four_way_state = FOUR_WAY_FIN1_ACK;
 }
 
-static void _process_fin2_ack_packet(ch_assemble_task_t *astask,ch_assemble_session_t *ass,struct tcp_hdr *th){
+static void _process_fin2_ack_packet(ch_assemble_t *as,ch_assemble_session_t *ass,struct tcp_hdr *th){
 
     ass->four_way_state = FOUR_WAY_FIN2_ACK;
 
     /*close session*/
-    _assemble_session_close(astask,ass);
+    _assemble_session_close(as,ass);
 
 }
 
-void ch_assemble_do(ch_assemble_task_t *astask,struct rte_mbuf *mbuf){
+void ch_assemble_do(ch_assemble_t *as,struct rte_mbuf *mbuf){
 
     ch_four_tuple_t tuple;
     ch_assemble_session_t *ass;
@@ -145,7 +163,7 @@ void ch_assemble_do(ch_assemble_task_t *astask,struct rte_mbuf *mbuf){
 
     do{
         /*find the assemble session*/
-        ass = ch_assemble_session_pool_entry_find(astask->ass_pool,&tuple);
+        ass = ch_assemble_session_pool_entry_find(as->ass_pool,&tuple);
         if(ass == NULL){
             ch_log(CH_LOG_ERR,"The assemble session no existed !");
             break;
@@ -160,30 +178,30 @@ void ch_assemble_do(ch_assemble_task_t *astask,struct rte_mbuf *mbuf){
 
         /*fin packet*/
         if(is_tcp_fin_packet(th)){
-            _process_fin_packet(astask,ass,th);
+            _process_fin_packet(as,ass,th);
             break;
         }
 
         /*rest packet*/
         if(is_tcp_rst_packet(th)){
-            _process_rst_packet(astask,ass,th);
+            _process_rst_packet(as,ass,th);
             break;
         }
 
         /*data packet*/
         ch_packet_data_payload_get(mbuf,&pl_data,&pl_len);
         if(pl_len){
-           _process_data_packet(astask,ass,ep,&tuple,pl_data,pl_len,th); 
+           _process_data_packet(as,ass,ep,&tuple,pl_data,pl_len,th); 
         }
 
         /*fin ack packet!*/
         if(_is_fin1_ack(ass,th)){
-            _process_fin1_ack_packet(astask,ass,th);
+            _process_fin1_ack_packet(as,ass,th);
             break;
         }
 
         if(_is_fin2_ack(ass,th)){
-            _process_fin2_ack_packet(astask,ass,th);
+            _process_fin2_ack_packet(as,ass,th);
             break;
         }
 

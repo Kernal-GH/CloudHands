@@ -19,9 +19,22 @@
 #ifndef CH_ASSEMBLE_H
 #define CH_ASSEMBLE_H
 
-#include "ch_assemble_task.h"
-#include "ch_assemble_session.h"
+typedef struct ch_assemble_t ch_assemble_t;
 
-extern void ch_assemble_do(ch_assemble_task_t *astask,struct rte_mbuf *mbuf);
+#include "ch_assemble_session.h"
+#include "ch_assemble_session_pool.h"
+
+struct ch_assemble_t {
+
+    ch_context_t *context;
+    ch_assemble_session_pool_t *ass_pool;
+
+};
+
+extern ch_assemble_t * ch_assemble_create(ch_context_t *context);
+
+extern void ch_assemble_destroy(ch_assemble_t *as);
+
+extern void ch_assemble_do(ch_assemble_t *as,struct rte_mbuf *mbuf);
 
 #endif /*CH_ASSEMBLE_H*/

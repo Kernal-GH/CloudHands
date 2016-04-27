@@ -41,6 +41,7 @@ struct ch_task_t {
 
     ch_core_t *core;
     void *priv_data;
+    unsigned int tsk_id;
 
     int (*init)(ch_task_t *task,void *priv_data);
     int (*run)(ch_task_t *task,void *priv_data);

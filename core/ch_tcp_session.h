@@ -26,11 +26,12 @@ typedef struct ch_tcp_session_t ch_tcp_session_t;
 struct ch_tcp_session_t {
 
     ch_context_t *context;
-    ch_session_request_pool *req_pool;
+    ch_session_request_pool_t *req_pool;
 };
 
 extern ch_tcp_session_t * ch_tcp_session_create(ch_context_t *context);
 
-extern int ch_tcp_session_packet_process(ch_tcp_session_t *tsession,struct rte_mbuf *mbuf);
+extern int ch_tcp_session_packet_process(ch_tcp_session_t *tsession,ch_packet_info_t *pinfo);
 
+extern void ch_tcp_session_destroy(ch_tcp_session_t *tsession);
 #endif /*CH_TCP_SESSION_H*/

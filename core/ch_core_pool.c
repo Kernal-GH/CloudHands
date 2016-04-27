@@ -45,12 +45,12 @@ static inline ch_core_t* _core_get(ch_core_pool_t *cpool){
 
 }
 
-static ch_core_t * _core_create(ch_core_pool_t *cpool,unsigned int lcore_id){
+static ch_core_t * _core_create(ch_core_pool_t *cpool,unsigned int core_id){
 
     ch_core_t *core = (ch_core_t*)apr_palloc(cpool->context->mp,sizeof(ch_core_t));
 
-    core->task = NULL;
-    core->core_id = lcore_id;
+    core->tsk = NULL;
+    core->core_id = core_id;
     core->socket = (unsigned int) rte_lcore_to_socket_id(core_id);
 
     core->bound = 0;
@@ -60,10 +60,11 @@ static ch_core_t * _core_create(ch_core_pool_t *cpool,unsigned int lcore_id){
     return core;
 }
 
-ch_core_pool_t * ch_core_pool_create(ch_context_t *context,size_t core_n){
+ch_core_pool_t * ch_core_pool_create(ch_context_t *context){
 
     ch_core_t *core;
     unsigned int lcore_id;
+    unsigned int core_n = rte_lcore_count();
 
     if(core_n == 0){
         ch_log(CH_LOG_ERR,"The number of cpu cores is zero!");

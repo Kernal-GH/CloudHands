@@ -15,7 +15,9 @@
  *
  * =====================================================================================
  */
-
+#include <rte_cycles.h>
+#include "ch_constants.h"
+#include "ch_log.h"
 #include "ch_port_pool.h"
 
 /* allow max jumbo frame 9.5 KB */

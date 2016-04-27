@@ -22,7 +22,6 @@
 typedef struct ch_context_t ch_context_t;
 
 #include <apr_pools.h>
-#include <apr_tables.h>
 #include "ch_port_pool.h"
 #include "ch_core_pool.h"
 #include "ch_task_pool.h"
@@ -96,13 +95,8 @@ struct ch_context_t {
 
 extern ch_context_t * ch_context_create(apr_pool_t *mp,const char *cfname);
 
-extern int ch_context_core_init(ch_context_t *context,uint32_t core_n);
+extern int ch_context_start(ch_context_t *context);
 
-extern int ch_context_port_init(ch_context_t *context,uint32_t port_n);
-
-extern int ch_context_rxport_init(ch_context_t *context);
-
-extern int ch_context_app_init(ch_context_t *context);
-
+extern void ch_context_stop(ch_context_t *context);
 #endif /*CH_CONTEXT_H*/
 

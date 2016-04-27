@@ -22,7 +22,7 @@
 
 typedef struct ch_assemble_fragment_t ch_assemble_fragment_t;
 typedef struct ch_data_fragment_t ch_data_fragment_t;
-
+#include <stdlib.h>
 #include "ch_ring.h"
 
 struct ch_data_fragment_t {

@@ -30,7 +30,6 @@
 #include "ch_log.h"
 #include "ch_context.h"
 #include "ch_constants.h"
-#include "ch_task.h"
 
 static int is_cmd_init = 0; 
 

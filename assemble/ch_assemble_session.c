@@ -17,7 +17,7 @@
 
 #include "ch_assemble_session.h"
 
-int ch_assemble_session_init(ch_assemble_task_t *astask,ch_assemble_session_t *ass,ch_session_request_t *sreq){
+int ch_assemble_session_init(ch_assemble_t *as,ch_assemble_session_t *ass,ch_session_request_t *sreq){
 
     ch_assemble_session_endpoint_init(&ass->endpoint_req,sreq->req_ip,sreq->req_port,sreq->req_sn_init);
 
@@ -30,7 +30,7 @@ int ch_assemble_session_init(ch_assemble_task_t *astask,ch_assemble_session_t *a
     ass->fin2_seq = 0;
     ass->four_way_state = FOUR_WAY_INIT;
 
-    ass->astask = astask;
+    ass->as = as;
     ass->app = NULL;
     ass->cur_ep = NULL;
 

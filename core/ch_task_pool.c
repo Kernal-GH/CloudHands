@@ -19,6 +19,8 @@
 #include "ch_task_pool.h"
 #include "ch_rxtask.h"
 #include "ch_assemble_task.h"
+#include "ch_log.h"
+#include "ch_constants.h"
 
 static inline void _task_put(apr_array_header_t *arr,ch_task_t *tsk){
 
@@ -48,7 +50,7 @@ static int _as_tasks_create(ch_task_pool_t *tpool){
         tsk = ch_assemble_task_create(tpool->context,i+1);
         if(tsk == NULL){
             ch_log(CH_LOG_ERR,"Create assemble task[%d] failed!",i+1);
-            return NULL;
+            return CH_ERROR;
         }
 
         _task_put(tpool->as_tsks,tsk);

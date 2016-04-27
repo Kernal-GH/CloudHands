@@ -65,12 +65,12 @@ static int parse_ethernet_header(ch_packet_info_t *pinfo,struct rte_mbuf *mbuf,s
     return 0; 
 }
 
-static int ethertype_rx_task_process(ch_port_t *port,struct rte_mbuf *mbuf,uint64_t time,void *user_data){
+static int ethertype_rx_task_process(ch_port_t *port,struct rte_mbuf *mbuf,uint64_t time,void *priv_data){
 
     uint16_t type;
     ch_packet_type_t *ptype;
 
-    ch_ethertype_t *ethertype = (ch_ethertype_t*)user_data;
+    ch_ethertype_t *ethertype = (ch_ethertype_t*)priv_data;
     ch_packet_info_t *pinfo = ethertype->pinfo;
     struct ether_hdr *eth;
 
@@ -128,7 +128,7 @@ ch_ethertype_t * ch_ethertype_create(ch_context_t *context,ch_rxtask_t *rxtask,c
     ethertype->context =  context;
     ethertype->rxtask = rxtask;
     ethertype->pinfo = pinfo;
-    rx_processor.user_data = (void*)ethertype;
+    rx_processor.priv_data = (void*)ethertype;
     ch_rxtask_pkt_processor_register(rxtask,&rx_processor);
 
     return ethertype;

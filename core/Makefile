@@ -14,15 +14,17 @@ APP = cloudhands
 SRCS-y := cloudhands.c \
 	ch_config.c \
 	ch_context.c \
-	ch_port.c    \
-	ch_core.c    \
-	ch_task.c    \
+	ch_port_pool.c    \
+	ch_core_pool.c    \
+	ch_task_pool.c    \
 	ch_rxtask.c  \
 	ch_packet.c  \
 	ch_ethertype.c \
 	ch_ipv4.c      \
 	ch_tcp.c       \
-	ch_session_request_pool.c
+	ch_session_request_pool.c \
+	ch_tcp_session.c
+
 
 CFLAGS += -O3 -g -I$(SRCDIR) -I$(SRCDIR)/../util -I$(SRCDIR)/../assemble -I$(SRCDIR)/../app
 
