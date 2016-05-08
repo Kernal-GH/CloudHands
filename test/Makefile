@@ -18,14 +18,14 @@ SRCS-y := ch_test.c \
 CFLAGS += -O3 -g -I$(SRCDIR) -I$(SRCDIR)/../core -I$(SRCDIR)/../util -I$(SRCDIR)/../assemble -I$(SRCDIR)/../app -I$(SRCDIR)/../app/http
 
 CFLAGS += `/usr/local/apr/bin/apr-1-config --includes`
-CFLAGS += `/usr/local/apu/bin/apu-1-config --includes`
+CFLAGS += `/usr/local/apr/bin/apu-1-config --includes`
 #CFLAGS += $(WERROR_FLAGS)
 #CFLAGS_config.o := -D_GNU_SOURCE
 
 #LDLIBS += `/usr/local/apr/bin/apr-1-config --link-ld --libs` 
-#LDLIBS += `/usr/local/apu/bin/apu-1-config --link-ld --libs` 
+#LDLIBS += `/usr/local/apr/bin/apu-1-config --link-ld --libs` 
 LDLIBS += -L/usr/local/apr/lib -lapr-1 -luuid -lrt -lcrypt  -lpthread -ldl
-LDLIBS +=  -L/usr/local/apu/lib -laprutil-1     -lexpat
+LDLIBS +=  -L/usr/local/apr/lib -laprutil-1     -lexpat
 LDLIBS += -L$(SRCDIR)/../core -L$(SRCDIR)/../util -L$(SRCDIR)/../assemble -L$(SRCDIR)/../app -L$(SRCDIR)/../app/http -lcore -lutil -lassemble -lapp -lhttp
 
 # workaround for a gcc bug with noreturn attribute

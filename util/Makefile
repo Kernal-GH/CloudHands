@@ -16,7 +16,7 @@ LIB = libutil.a
 
 CFLAGS += -O3 -g  -I$(SRCDIR)
 CFLAGS += `/usr/local/apr/bin/apr-1-config --includes`
-CFLAGS += `/usr/local/apu/bin/apu-1-config --includes`
+CFLAGS += `/usr/local/apr/bin/apu-1-config --includes`
 
 # all source are stored in SRCS-y
 SRCS-y := ch_bitmap.c \

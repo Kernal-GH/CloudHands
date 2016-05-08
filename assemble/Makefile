@@ -16,7 +16,7 @@ LIB = libassemble.a
 
 CFLAGS += -O3 -g -I$(SRCDIR)/../core  -I$(SRCDIR)/../util -I$(SRCDIR)/../app -I$(SRCDIR)
 CFLAGS += `/usr/local/apr/bin/apr-1-config --includes`
-CFLAGS += `/usr/local/apu/bin/apu-1-config --includes`
+CFLAGS += `/usr/local/apr/bin/apu-1-config --includes`
 
 # all source are stored in SRCS-y
 SRCS-y := ch_assemble_fragment.c \
