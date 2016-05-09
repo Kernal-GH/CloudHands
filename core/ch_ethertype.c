@@ -55,9 +55,9 @@ static int parse_ethernet_header(ch_packet_info_t *pinfo,struct rte_mbuf *mbuf,s
     
     eth->ether_type = etype;
 
-    if(mbuf->ol_flags&(PKT_RX_IPV4_HDR)){
+    if(RTE_ETH_IS_IPV4_HDR(mbuf->packet_type)){
         eth->ether_type = CH_ETH_P_IP;
-    }else if(mbuf->ol_flags & (PKT_RX_IPV6_HDR | PKT_RX_IPV6_HDR_EXT)){
+    }else if(RTE_ETH_IS_IPV6_HDR(mbuf->packet_type)){
         eth->ether_type = CH_ETH_P_IPV6;
     }
 
