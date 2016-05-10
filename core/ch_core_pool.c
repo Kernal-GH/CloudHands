@@ -106,6 +106,7 @@ int ch_core_pool_task_bind(ch_core_pool_t *cpool,ch_task_t *tsk){
 
     core->tsk = tsk;
     core->bound = 1;
+	tsk->core = core;
 
     ch_log(CH_LOG_INFO,"Cpu core[%u] was bound to task[%u] ok!",core->core_id,tsk->tsk_id);
 
@@ -116,6 +117,7 @@ void ch_core_pool_task_unbind(ch_core_pool_t *cpool,ch_core_t *core){
 
     core->tsk = NULL;
     core->bound = 0;
+	
 }
 
 

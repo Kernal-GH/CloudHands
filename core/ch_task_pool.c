@@ -29,6 +29,9 @@ static inline void _task_put(apr_array_header_t *arr,ch_task_t *tsk){
 
 static int _rx_tasks_create(ch_task_pool_t *tpool){
 
+	if(tpool->context->ppool == NULL)
+		return CH_OK;
+
     ch_task_t *tsk = ch_rxtask_create(tpool->context);
     if(tsk == NULL){
         ch_log(CH_LOG_ERR,"create recieve task failed!");

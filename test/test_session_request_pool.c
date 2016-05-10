@@ -50,7 +50,6 @@ static int test_session_request_pool(void){
 
     ch_packet_info_t pinfo,*pinfo_ptr = &pinfo;
     ch_session_request_t *sreq,*sreq1;
-    context->n_assemble_tasks = 0;
 
     req_pool = ch_session_request_pool_create(context);
     CH_TEST_ASSERT_NOT_NULL(req_pool,"create request pool failed!");

@@ -12,8 +12,10 @@ APP = ch_test
 
 # all source are stored in SRCS-y
 SRCS-y := ch_test.c \
+	      ch_test_util.c \
 	      test_assemble_fragment.c \
-		  test_session_request_pool.c
+		  test_session_request_pool.c \
+		  test_tcp_session.c
 
 CFLAGS += -O3 -g -I$(SRCDIR) -I$(SRCDIR)/../core -I$(SRCDIR)/../util -I$(SRCDIR)/../assemble -I$(SRCDIR)/../app -I$(SRCDIR)/../app/http
 

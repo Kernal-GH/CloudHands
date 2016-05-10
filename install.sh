@@ -48,7 +48,7 @@ function install_apr(){
 
    cur_dir=`pwd`
 
-   if [ ! -f /tmp/${apr_name}.tar.gz ]; then
+   if [ ! -f /usr/local/apr/bin/apr-1-config ]; then
 		wget -P /tmp/ $apr_location
 		cd /tmp
 		tar -zxvf ${apr_name}.tar.gz
@@ -59,7 +59,7 @@ function install_apr(){
 		
 	fi
 
-	if [ ! -f /tmp/${apr_util_name}.tar.gz ]; then
+	if [ ! -f /usr/local/apr/bin/apu-1-config ]; then
 		wget -P /tmp/ $apr_util_location
 		cd /tmp
 		tar -zxvf ${apr_util_name}.tar.gz
