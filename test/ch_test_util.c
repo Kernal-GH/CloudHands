@@ -26,12 +26,14 @@ static inline uint16_t _mbuf_length_get(uint16_t dlen){
 
 static inline void _mbuf_init(struct rte_mbuf *mbuf,uint32_t len,uint16_t dlen){
 
-	mbuf->data_len = len;
-	mbuf->pkt_len = len;
+	mbuf->data_len = len - sizeof(struct rte_mbuf);
+	mbuf->pkt_len = mbuf->data_len;
 	mbuf->l2_len = sizeof(struct ether_hdr);
 	mbuf->l3_len = sizeof(struct ipv4_hdr);
 	mbuf->l4_len = sizeof(struct tcp_hdr);
 
+	mbuf->buf_addr = (void*)(mbuf+1);
+	mbuf->data_off = sizeof(struct rte_mbuf);
 }
 
 static inline void _mbuf_ether_hdr_init(){

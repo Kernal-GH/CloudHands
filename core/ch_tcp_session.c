@@ -173,7 +173,8 @@ static int _assemble_session_create(ch_tcp_session_t *tsession,ch_session_reques
 static int _three_way_handshake_process(ch_tcp_session_t *tsession,ch_session_request_t *sreq,
         ch_packet_info_t *pinfo,struct tcp_hdr *th){
 
-    int rc;
+    int rc = PROCESSOR_RET_DROP;
+	int ret;
 
     uint32_t sent_seq = pinfo->sent_seq;
     uint32_t src_ip = pinfo->src_ip;
@@ -181,6 +182,7 @@ static int _three_way_handshake_process(ch_tcp_session_t *tsession,ch_session_re
     uint16_t src_port = pinfo->src_port;
     uint16_t dst_port = pinfo->dst_port;
 
+	
     if(sreq == NULL){
 
         if(is_tcp_syn_packet(th)){
@@ -189,9 +191,8 @@ static int _three_way_handshake_process(ch_tcp_session_t *tsession,ch_session_re
             sreq = ch_session_request_create(tsession->req_pool,pinfo);
             if(sreq == NULL){
                 ch_log(CH_LOG_ERR,"create session request failed!");
-                return -1;
+                return PROCESSOR_RET_DROP;
             }
-
             /*init session request*/
             sreq->req_sn_init = sent_seq+1;
             sreq->req_ip = src_ip;
@@ -199,23 +200,21 @@ static int _three_way_handshake_process(ch_tcp_session_t *tsession,ch_session_re
             sreq->res_ip = dst_ip;
             sreq->res_port = dst_port;
             sreq->three_way_state = THREE_WAY_SYN;
-        }else{
             /*drop this packet!*/
-            return -1;
         }
     }else{
 
         if(is_tcp_syn_packet(th)){
             /*this syn packet has been retransmited,*/
-            return -1;
         }else if(is_tcp_syn_ack_packet(th)){
             if(sreq->three_way_state == THREE_WAY_SYN){
                 sreq->res_sn_init = sent_seq+1;
                 sreq->three_way_state = THREE_WAY_SYN_ACK;
             }else{
                 /*drop it */
-                return -1;
+                //return -1;
             }
+			
         }else if(_is_tcp_ack_ack_packet(sreq,th)){
 
             if(sreq->three_way_state == THREE_WAY_SYN_ACK){
@@ -223,7 +222,6 @@ static int _three_way_handshake_process(ch_tcp_session_t *tsession,ch_session_re
                 sreq->three_way_state = THREE_WAY_ACK_ACK;
             }else{
                 /*drop this packet,maybe retransmitted*/
-                return -1;
             }
 
         }else if(_is_tcp_data_packet(th,pinfo)){
@@ -235,25 +233,23 @@ static int _three_way_handshake_process(ch_tcp_session_t *tsession,ch_session_re
                  *2: create an assemble session
                  *3: free session request instance back into pool
                  * */
-                rc = _assemble_session_create(tsession,sreq,pinfo,th);
+                ret = _assemble_session_create(tsession,sreq,pinfo,th);
                 ch_session_request_free(tsession->req_pool,sreq);
 
-                if(rc){
-                    return -1;
+                if(ret == 0){
+                    rc = PROCESSOR_RET_OK;
                 }
             }else{
                 /*drop this packet*/
-                return -1;
             }
 
         }else{
             /*other packet(ack,fin),ignore and drop this packet!*/
-            return -1;
         }
     }
 
     /*ok*/
-    return 0;
+    return rc;
 }
 
 ch_tcp_session_t * ch_tcp_session_create(ch_context_t *context){
@@ -297,7 +293,7 @@ int ch_tcp_session_packet_process(ch_tcp_session_t *tsession,ch_packet_info_t *p
         }
     }else{
         /*handle three way handshake!*/
-        if(_three_way_handshake_process(tsession,sreq,pinfo,th)){
+        if(_three_way_handshake_process(tsession,sreq,pinfo,th)==PROCESSOR_RET_DROP){
             /*some error ,drop this packet!*/
             return PROCESSOR_RET_DROP;
         }
