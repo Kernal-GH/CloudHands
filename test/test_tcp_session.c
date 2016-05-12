@@ -352,8 +352,9 @@ static int test_tcp_session(void){
 	if(_test_tcp_session_context_init())
 		return -1;
 
-	return test_tcp_session_packet_process();
+	test_tcp_session_packet_process();
 
+    //ch_core_pool_cores_setup(context->cpool);
 }
 
 static ch_test_command_t tcp_session_cmd = {

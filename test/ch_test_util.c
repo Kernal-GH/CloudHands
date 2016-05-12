@@ -32,7 +32,7 @@ static inline void _mbuf_init(struct rte_mbuf *mbuf,uint32_t len,uint16_t dlen){
 	mbuf->l3_len = sizeof(struct ipv4_hdr);
 	mbuf->l4_len = sizeof(struct tcp_hdr);
 
-	mbuf->buf_addr = (void*)(mbuf+1);
+	mbuf->buf_addr = (void*)mbuf;
 	mbuf->data_off = sizeof(struct rte_mbuf);
 }
 
@@ -91,7 +91,10 @@ struct rte_mbuf * alloc_a_mbuf(uint32_t src_ip,uint32_t dst_ip,uint16_t src_port
 	_mbuf_ether_hdr_init();
 	_mbuf_ipv4_hdr_init(mbuf,src_ip,dst_ip,len);
 	_mbuf_tcp_hdr_init(mbuf,src_port,dst_port,seq,seq_ack,tcp_flags);
-	_mbuf_data_append(mbuf,data,dlen);
+	
+	if(data){
+		_mbuf_data_append(mbuf,data,dlen);
+	}
 
 	return mbuf;
 }

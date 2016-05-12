@@ -38,6 +38,7 @@ static int http_recognize_by_port(ch_app_t *app,
 static int http_content_parse(ch_app_t *app,ch_assemble_session_t *ass,
         void *data,size_t dlen,void *priv_data){
 
+	printf("Rcv data in http:---------->%s\n",(char*)data);
 }
 
 static void http_content_flush(ch_app_t *app,ch_assemble_session_t *ass,void *priv_data){
