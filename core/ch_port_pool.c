@@ -222,7 +222,7 @@ ch_port_pool_t * ch_port_pool_create(ch_context_t *context){
 
     ch_port_pool_t *ppool = (ch_port_pool_t*)apr_palloc(mp,sizeof(ch_port_pool_t));
     ppool->context = context;
-    ppool->ports = apr_array_make(mp,16,sizeof(ch_port_pool_t));
+    ppool->ports = apr_array_make(mp,16,sizeof(ch_port_pool_t*));
 
     if(CH_ERROR == _ports_create(ppool,n_ports)){
 
