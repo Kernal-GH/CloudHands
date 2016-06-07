@@ -69,9 +69,9 @@ static void _pkt_process(ch_rxtask_t *rxtsk,ch_port_t *port,struct rte_mbuf *mbu
 static unsigned int read_pkt_from_port(ch_rxtask_t *rxtsk,ch_port_t *port,uint64_t time){
     
     unsigned int packets = 0;
-    unsigned int nb_rx,i;
+    int i;
     int ret;
-    int j;
+    int j,nb_rx;
 
     struct rte_mbuf **pkts_burst = port->rx_pkts_burst;
     struct rte_mbuf *mbuf;

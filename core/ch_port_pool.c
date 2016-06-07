@@ -203,6 +203,8 @@ static int _ports_create(ch_port_pool_t *ppool,unsigned int n_ports){
             _port_put(ppool,port);
         }
     }
+
+	return CH_OK;
 }
 
 ch_port_pool_t * ch_port_pool_create(ch_context_t *context){
@@ -239,8 +241,8 @@ size_t ch_port_pool_ports_bind(ch_port_pool_t *ppool,apr_array_header_t *arr,uns
     unsigned int i,n_ports;
     ch_port_t *port,**ports;
     
-    n_ports = arr->nelts;
-    ports = (ch_port_t **)arr->elts;
+    n_ports = ppool->ports->nelts;
+    ports = (ch_port_t **)ppool->ports->elts;
 
     for(i = 0 ; i<n_ports; i++){
         
