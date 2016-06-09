@@ -17,6 +17,7 @@ typedef struct ch_mmap_buf_t ch_mmap_buf_t;
 
 struct ch_mmap_t {
 
+	uint64_t page_size;
 	/*The memory pool used to allocate the instance of ch_mmap_t */
 	apr_pool_t *mp;
 
@@ -27,7 +28,7 @@ struct ch_mmap_t {
 	int fd; 
 
 	/*The size of file used to mmap*/
-	size_t fsize;
+	uint64_t fsize;
 
 	/*whether used to write*/
 	unsigned is_write:1;
@@ -39,10 +40,10 @@ struct ch_mmap_t {
 #pragma pack(push,1)
 struct ch_mmap_header_t {
 	uint64_t mmap_entries_start;
-	uint32_t mmap_entries_count;
-	uint32_t mmap_entry_size;
-	uint32_t mmap_write_entry_pos;
-	uint32_t mmap_read_entry_pos;
+	uint64_t mmap_entries_count;
+	uint64_t mmap_entry_size;
+	uint64_t mmap_write_entry_pos;
+	uint64_t mmap_read_entry_pos;
 
 };
 #pragma pack(pop)
@@ -55,7 +56,7 @@ struct ch_mmap_buf_t {
 	void *end;
 };
 
-extern ch_mmap_t * ch_mmap_create(apr_pool_t *mp,const char *fname,size_t fsize,uint32_t  entry_size,int is_write);
+extern ch_mmap_t * ch_mmap_create(apr_pool_t *mp,const char *fname,uint64_t fsize,uint64_t  entry_size,int is_write);
 
 extern void ch_mmap_destroy(ch_mmap_t *fmp);
 

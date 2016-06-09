@@ -4,9 +4,11 @@
  > Mail: csp001314@163.com 
  > Created Time: 2016年06月08日 星期三 16时24分10秒
  ************************************************************************/
-
+#include <sys/mman.h>
+#include "ch_constants.h"
 #include "ch_log.h"
 #include "ch_mmap.h"
+#include "ch_file.h"
 
 static inline ch_mmap_header_t * _mmap_header_attach(ch_mmap_t *mm){
 
@@ -27,16 +29,17 @@ static inline int _is_file_existed(const char *fname){
 
 static inline int  _mmap_file_open_for_read(const char *fname){
 
-	return open(fname,O_RDWR);
+	return ch_file_open(fname,CH_FILE_RDWR,CH_FILE_OPEN,CH_FILE_DEFAULT_ACCESS);
 }
 
 
 
-static inline int _mmap_file_open_for_write(const char *fname,int existed,size_t fsize){
+static inline int _mmap_file_open_for_write(const char *fname,int existed,uint64_t fsize){
 
 	int fd;
 	
-	fd = open(fname,O_RDWR|O_CREAT);
+	fd = ch_file_open(fname,CH_FILE_RDWR,CH_FILE_CREATE_OR_OPEN,CH_FILE_DEFAULT_ACCESS);
+
 	if(fd <0 || existed){
 		return fd;
 	}
@@ -49,16 +52,29 @@ static inline int _mmap_file_open_for_write(const char *fname,int existed,size_t
 	return fd;
 }
 
-static int  _mmap_header_init(ch_mmap_t *mm,uint32_t entry_size){
+static inline uint64_t _mmap_entries_count_get(ch_mmap_t *mm,uint64_t hsize,uint64_t entry_size){
 
+	return ((uint64_t)(mm->fsize)-hsize)/entry_size;
+} 
+
+static void  _mmap_header_init(ch_mmap_t *mm,uint64_t entry_size){
+
+	ch_mmap_header_t *mh = mm->mmap_header;
+	uint64_t hsize = (uint64_t)ch_align_up(sizeof(ch_mmap_header_t),mm->page_size);
+
+	mh->mmap_entries_start = hsize;
+	mh->mmap_entries_count = _mmap_entries_count_get(mm,hsize,entry_size);
+	mh->mmap_entry_size = entry_size;
+	mh->mmap_write_entry_pos = mh->mmap_entries_start;
+	mh->mmap_read_entry_pos = mh->mmap_entries_start;
 }
 
-ch_mmap_t * ch_mmap_create(apr_pool_t *mp,const char *fname,size_t fsize,uint32_t  entry_size,int is_write){
+ch_mmap_t * ch_mmap_create(apr_pool_t *mp,const char *fname,uint64_t fsize,uint64_t  entry_size,int is_write){
 
 	ch_mmap_t *mm = NULL;
-	size_t pg_size = sysconf(_SC_PAGE_SIZE); 
-	size_t r_fsize =  0;
-	uint32_t r_entry_size = 0;
+	uint64_t pg_size = sysconf(_SC_PAGE_SIZE); 
+	uint64_t r_fsize =  0;
+	uint64_t r_entry_size = 0;
 	int fd;
 	int existed = _is_file_existed(fname);
 
@@ -68,8 +84,8 @@ ch_mmap_t * ch_mmap_create(apr_pool_t *mp,const char *fname,size_t fsize,uint32_
 		return NULL;
 	}
 
-	r_fsize = ch_align_up(fsize,pg_size);
-	r_entry_size = (uint32_t)ch_align_up(entry_size,pg_size);
+	r_fsize = (uint64_t)ch_align_up(fsize,pg_size);
+	r_entry_size = (uint64_t)ch_align_up(entry_size,pg_size);
 
 	if(is_write){
 		fd = _mmap_file_open_for_write(fname,existed,r_fsize);
@@ -86,6 +102,7 @@ ch_mmap_t * ch_mmap_create(apr_pool_t *mp,const char *fname,size_t fsize,uint32_
 	}
 
 	mm = (ch_mmap_t *)apr_palloc(mp,sizeof(ch_mmap_t));
+	mm->page_size = pg_size;
 	mm->mp = mp;
 	mm->fname = fname;
 	mm->fd = fd;
@@ -100,12 +117,20 @@ ch_mmap_t * ch_mmap_create(apr_pool_t *mp,const char *fname,size_t fsize,uint32_
 		return NULL;
 	}
 	if(existed == 0){
-		if(_mmap_header_init(mm,r_entry_size)){
-
-			ch_log(CH_LOG_ERR,"Init the mmap header failed!");
-			return NULL;
-		}
+		_mmap_header_init(mm,r_entry_size);
 	}
 	/*ok*/
 	return mm;
+}
+
+void ch_mmap_destroy(ch_mmap_t *mm){
+
+	if(mm->is_write == 0){
+		ch_log(CH_LOG_ERR,"Cao,You cannot do it!");
+		
+	}else{
+
+		close(mm->fd);
+		ch_file_delete(mm->fname);
+	}
 }
