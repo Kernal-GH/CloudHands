@@ -135,6 +135,8 @@ static int test_mmap(void){
     ASSERT_TEST_MMAP(test_mmap_create,mm_r,mm_w);
     ASSERT_TEST_MMAP(test_mmap_buf_get,mm_r,mm_w);
 
+    ch_mmap_destroy(mm_w);
+
 	return CH_TEST_SUCCESS;
 }
 

@@ -16,7 +16,8 @@ SRCS-y := ch_test.c \
 	      test_assemble_fragment.c \
 		  test_session_request_pool.c \
 		  test_tcp_session.c \
-		  test_mmap.c
+		  test_mmap.c \
+		  test_bin_format.c
 
 CFLAGS += -O3 -g -I$(SRCDIR) -I$(SRCDIR)/../core -I$(SRCDIR)/../util -I$(SRCDIR)/../assemble -I$(SRCDIR)/../app -I$(SRCDIR)/../app/http
 
