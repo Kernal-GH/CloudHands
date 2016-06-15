@@ -150,5 +150,6 @@ void __attribute__((constructor, used)) testfn_##t(void)\
 	ch_add_test_command(&t);\
 }
 
+
 #endif /*CH_TEST_H*/
 

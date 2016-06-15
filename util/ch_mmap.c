@@ -5,6 +5,7 @@
  > Created Time: 2016年06月08日 星期三 16时24分10秒
  ************************************************************************/
 #include <sys/mman.h>
+#include <fcntl.h>
 #include "ch_constants.h"
 #include "ch_log.h"
 #include "ch_mmap.h"
@@ -64,9 +65,10 @@ static void  _mmap_header_init(ch_mmap_t *mm,uint64_t entry_size){
 
 	mh->mmap_entries_start = hsize;
 	mh->mmap_entries_count = _mmap_entries_count_get(mm,hsize,entry_size);
-	mh->mmap_entry_size = entry_size;
-	mh->mmap_write_entry_pos = mh->mmap_entries_start;
-	mh->mmap_read_entry_pos = mh->mmap_entries_start;
+	mh->mmap_entries_count_cur = 0;
+    mh->mmap_entry_size = entry_size;
+	mh->mmap_write_entry_pos = 0;
+	mh->mmap_read_entry_pos = 0;
 }
 
 ch_mmap_t * ch_mmap_create(apr_pool_t *mp,const char *fname,uint64_t fsize,uint64_t  entry_size,int is_write){
@@ -125,6 +127,8 @@ ch_mmap_t * ch_mmap_create(apr_pool_t *mp,const char *fname,uint64_t fsize,uint6
 
 void ch_mmap_destroy(ch_mmap_t *mm){
 
+    munmap(mm->mmap_header,sizeof(ch_mmap_header_t));
+
 	if(mm->is_write == 0){
 		ch_log(CH_LOG_ERR,"Cao,You cannot do it!");
 		
@@ -134,3 +138,76 @@ void ch_mmap_destroy(ch_mmap_t *mm){
 		ch_file_delete(mm->fname);
 	}
 }
+
+static int  _mmap_buf_init(ch_mmap_t *mm,ch_mmap_buf_t *mmb,uint64_t index){
+
+    uint64_t offset = 0;
+    void *addr = NULL;
+
+    offset = ch_mmap_entry_pos_offset(mm,index);
+    if(mm->is_write){
+        addr = mmap(NULL,mm->mmap_header->mmap_entry_size,PROT_READ|PROT_WRITE,MAP_SHARED,mm->fd,offset);
+    }else{
+        addr = mmap(NULL,mm->mmap_header->mmap_entry_size,PROT_READ,MAP_PRIVATE,mm->fd,offset);
+    }
+    
+    if(addr == NULL){
+        return -1;
+    }
+
+    mmb->mm = mm;
+    mmb->entry_index = index;
+    mmb->start = addr;
+    mmb->pos = mmb->start;
+    mmb->end = mmb->start+mm->mmap_header->mmap_entry_size;
+
+    return 0;
+}
+
+static inline int _mmap_buf_can_get(ch_mmap_t *mm){
+
+    /*write,full*/
+    if((mm->is_write)&&(ch_mmap_full(mm))){
+        return 0;
+    }
+
+    /*read,empty*/
+    if((mm->is_write == 0)&&(ch_mmap_empty(mm))){
+        return 0;
+    }
+
+    return 1;
+}
+
+static inline uint64_t _mmap_buf_index_get(ch_mmap_t *mm){
+
+    if(mm->is_write){
+
+        return mm->mmap_header->mmap_write_entry_pos;
+    }else{
+        return mm->mmap_header->mmap_read_entry_pos;
+    }
+}
+
+int ch_mmap_buf_get(ch_mmap_t *mm,ch_mmap_buf_t *mmb){
+
+    uint64_t index;
+
+    if(_mmap_buf_can_get(mm) == 0){
+
+        ch_log(CH_LOG_INFO,"No buf get from mmap used to %s",mm->is_write?"write":"read");
+        return -1;
+    }
+
+    index = _mmap_buf_index_get(mm);
+    return _mmap_buf_init(mm,mmb,index);
+}
+
+void ch_mmap_buf_commit(ch_mmap_t *mm,ch_mmap_buf_t *mmb){
+
+    int c = mm->is_write?1:-1;
+    ch_mmap_entry_pos_update(mm,1,c);
+
+    munmap(mmb->start,mm->mmap_header->mmap_entry_size);
+}
+
