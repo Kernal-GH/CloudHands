@@ -209,5 +209,10 @@ void ch_mmap_buf_commit(ch_mmap_t *mm,ch_mmap_buf_t *mmb){
     ch_mmap_entry_pos_update(mm,1,c);
 
     munmap(mmb->start,mm->mmap_header->mmap_entry_size);
+    mmb->mm = NULL;
+    mmb->entry_index = 0;
+    mmb->start = NULL;
+    mmb->pos = NULL;
+    mmb->end = NULL;
 }
 

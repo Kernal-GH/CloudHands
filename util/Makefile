@@ -28,6 +28,7 @@ SRCS-y := ch_bitmap.c \
 		  ch_mpool.c  \
 		  ch_fpool.c \
 		  ch_hash_pool.c \
-		  ch_mmap.c
+		  ch_mmap.c \
+		  ch_mmap_file_format.c
 
 include $(RTE_SDK)/mk/rte.lib.mk

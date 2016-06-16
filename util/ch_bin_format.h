@@ -22,6 +22,11 @@ struct ch_bin_format_t {
 
 };
 
+static inline size_t ch_bf_content_size(ch_bin_format_t *bf){
+
+    return (size_t)(bf->pos - bf->start);
+}
+
 static inline int ch_bf_full(ch_bin_format_t *bf,size_t size){
 
     return bf->pos+size>bf->end;
@@ -316,7 +321,7 @@ static inline ssize_t ch_bf_bytes_write(ch_bin_format_t *bf,unsigned char* bytes
     return (ssize_t)rlen;
 }
 
-ssize_t ch_bf_string_write(ch_bin_format_t *bf,unsigned char* str){
+static inline ssize_t ch_bf_string_write(ch_bin_format_t *bf,unsigned char* str){
 
     size_t len = strlen(str);
     size_t rlen = len+sizeof(size_t);
