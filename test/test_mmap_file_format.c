@@ -8,7 +8,7 @@
 #include "ch_mmap_file_format.h"
 
 #define TFNAME "/tmp/mmap_file_format_data"
-#define TFSIZE 32*1024*1024
+#define TFSIZE (4*1024*1024*1024L)
 #define TENTRY_SIZE 64*1024
 
 static ch_mmap_file_entry_t fentry = {
@@ -48,55 +48,92 @@ static inline int assert_one_file_entry(ch_mmap_file_entry_t *fe){
     return CH_TEST_SUCCESS;
 }
 
-static int test_mmap_file_format_simple(ch_mmap_file_format_t *mmfmt_w,ch_mmap_file_format_t *mmfmt_r){
+static size_t  _write_n_mmap_bufs(ch_mmap_file_format_t *mmfmt,uint64_t n){
 
+    int rc;
     size_t c = 0;
-    uint64_t index;
-    ch_mmap_file_iterator_t *iter;
-    ch_mmap_file_entry_t *fe;
-
-    ch_mmap_file_format_put(mmfmt_w,fentry_ptr);
-    c++;
-
-    index = mmfmt_w->cur_fheader.mmb.entry_index;
 
     for(;;){
 
-        ch_mmap_file_format_put(mmfmt_w,fentry_ptr);
-        if(index!= mmfmt_w->cur_fheader.mmb.entry_index)
+        rc = ch_mmap_file_format_put(mmfmt,fentry_ptr);
+        if(rc == -1|| mmfmt->cur_fheader.mmb.entry_index == n)
             break;
+
         c++;
     }
 
-    one_buf_entries_number = c;
+    return c;
+}
 
-    iter = ch_mmap_file_format_iterator_prefare(mmfmt_r);
-    CH_TEST_ASSERT_NOT_NULL(iter,"One mmap buf should been read!");
-    c = 0;
+static int _read_n_mmap_bufs(ch_mmap_file_format_t *mmfmt,uint64_t n,uint64_t tn){
 
-    while((fe = iter->next(iter))){
+    ch_mmap_file_iterator_t *iter;
+    ch_mmap_file_entry_t *fe;
+    size_t c = 0;
+    uint64_t last_index = 0;
 
-        if(CH_TEST_SUCCESS!=assert_one_file_entry(fe))
-            return CH_TEST_FAILED;
-        c++;
+
+    for(;;){
+        iter = ch_mmap_file_format_iterator_prefare(mmfmt);
+        if(iter == NULL)
+            break;
+        while((fe = iter->next(iter))){
+
+            if(CH_TEST_SUCCESS!=assert_one_file_entry(fe))
+                return CH_TEST_FAILED;
+            c++;
+        }
+        last_index = mmfmt->cur_fheader.mmb.entry_index;
+
+        ch_mmap_file_format_iterator_commit(mmfmt,iter);
     }
 
-    CH_TEST_ASSERT_EQUAL(c,one_buf_entries_number,"The write and read numbers are not equal!");
+    //CH_TEST_ASSERT_EQUAL(last_index,n-1,"The Buf's index is  invalid!");
+    printf("Assert:index-->%lu,w_number:%lu,r_number:%lu\n",n,tn,c);
 
     return CH_TEST_SUCCESS;
 }
 
-#define MMAP_FILE_FORMAT_TEST(fn,w,r) if(CH_TEST_SUCCESS!=fn(w,r)) do{ ch_mmap_file_format_destroy(w);return CH_TEST_FAILED;}while(0)
+#define ASSERT_READ_MMAP_BUFS(mmfmt,mmfmt_w,n,tn) if(_read_n_mmap_bufs(mmfmt,n,tn)!=CH_TEST_SUCCESS) do{ch_mmap_file_format_destroy(mmfmt_w); return CH_TEST_FAILED;}while(0)
 
 static int test_mmap_file_format(void){
+
+    size_t tn = 0;
 
     ch_mmap_file_format_t *mmfmt_w,*mmfmt_r;
 
     mmfmt_w = ch_mmap_file_format_create(context->mp,TFNAME,TFSIZE,TENTRY_SIZE,1);
     mmfmt_r = ch_mmap_file_format_create(context->mp,TFNAME,TFSIZE,TENTRY_SIZE,0);
 
-    MMAP_FILE_FORMAT_TEST(test_mmap_file_format_simple,mmfmt_w,mmfmt_r);
 
+    tn = _write_n_mmap_bufs(mmfmt_w,1);
+    ASSERT_READ_MMAP_BUFS(mmfmt_r,mmfmt_w,1,tn);
+    CH_TEST_ASSERT_NULL(ch_mmap_file_format_iterator_prefare(mmfmt_r),"Should no buf can be read!");
+
+    tn = _write_n_mmap_bufs(mmfmt_w,2);
+    ASSERT_READ_MMAP_BUFS(mmfmt_r,mmfmt_w,2,tn);
+    CH_TEST_ASSERT_NULL(ch_mmap_file_format_iterator_prefare(mmfmt_r),"Should no buf can be read!");
+
+    tn = _write_n_mmap_bufs(mmfmt_w,10);
+    ASSERT_READ_MMAP_BUFS(mmfmt_r,mmfmt_w,10,tn);
+    CH_TEST_ASSERT_NULL(ch_mmap_file_format_iterator_prefare(mmfmt_r),"Should no buf can be read!");
+
+    /*write all*/
+    tn = _write_n_mmap_bufs(mmfmt_w,0);
+    ASSERT_READ_MMAP_BUFS(mmfmt_r,mmfmt_w,mmfmt_w->cur_fheader.mmb.entry_index,tn);
+    CH_TEST_ASSERT_NULL(ch_mmap_file_format_iterator_prefare(mmfmt_r),"Should no buf can be read!");
+    
+    tn = _write_n_mmap_bufs(mmfmt_w,1);
+    ASSERT_READ_MMAP_BUFS(mmfmt_r,mmfmt_w,1,tn);
+    CH_TEST_ASSERT_NULL(ch_mmap_file_format_iterator_prefare(mmfmt_r),"Should no buf can be read!");
+
+    tn = _write_n_mmap_bufs(mmfmt_w,2);
+    ASSERT_READ_MMAP_BUFS(mmfmt_r,mmfmt_w,2,tn);
+    CH_TEST_ASSERT_NULL(ch_mmap_file_format_iterator_prefare(mmfmt_r),"Should no buf can be read!");
+
+    tn = _write_n_mmap_bufs(mmfmt_w,10);
+    ASSERT_READ_MMAP_BUFS(mmfmt_r,mmfmt_w,10,tn);
+    CH_TEST_ASSERT_NULL(ch_mmap_file_format_iterator_prefare(mmfmt_r),"Should no buf can be read!");
     ch_mmap_file_format_destroy(mmfmt_w);
 
     return CH_TEST_SUCCESS;
