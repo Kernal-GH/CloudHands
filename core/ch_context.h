@@ -37,6 +37,10 @@ typedef struct ch_context_t ch_context_t;
 #define N_RX_QUEUE_DEFAULT 1
 #define N_TX_QUEUE_DEFAULT 1
 
+#define MMAP_FILE_DIR_DEFAULT   "/tmp"
+#define MMAP_FILE_SIZE_DEFAULT  (4*1024*1024*1024L)
+#define MMAP_FILE_ENTRY_SIZE_DEFAULT (16*1024*1024L)
+
 struct ch_context_t {
 
     apr_pool_t *mp;
@@ -91,6 +95,12 @@ struct ch_context_t {
 
     /*Configurable max number of assemble task's sessions*/
     unsigned int n_assemble_sessions_limit;
+
+    /*Configurable mmap file format*/
+    const char * mmap_file_dir;
+    uint64_t mmap_file_size;
+    uint64_t mmap_file_entry_size;
+
 };
 
 extern ch_context_t * ch_context_create(apr_pool_t *mp,const char *cfname);

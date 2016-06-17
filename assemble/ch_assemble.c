@@ -20,10 +20,25 @@
 #include "ch_assemble.h"
 #include "ch_assemble_session.h"
 
-ch_assemble_t * ch_assemble_create(ch_context_t *context){
+static inline const char * _get_mmap_file_name(apr_pool_t *mp,const char *dir,unsigned int task_id){
 
+    return apr_psprintf(mp,"%s/assemble_session_data%d",dir,(int)task_id);
+}
+
+ch_assemble_t * ch_assemble_create(ch_context_t *context,unsigned int task_id){
+
+    const char *fname;
     ch_assemble_t *as = (ch_assemble_t*)apr_palloc(context->mp,sizeof(ch_assemble_t));
     as->context = context;
+
+    fname = _get_mmap_file_name(context->mp,context->mmap_file_dir,task_id);
+    as->mmfmt = ch_mmap_file_format_create(context->mp,fname,context->mmap_file_size,
+            context->mmap_file_entry_size,1);
+
+    if(as->mmfmt == NULL){
+        ch_log(CH_LOG_ERR,"Create mmap file format failed for assemble task:%d",task_id);
+        return NULL;
+    }
 
     as->ass_pool = ch_assemble_session_pool_create(context,as);
     if(as->ass_pool == NULL){
@@ -36,6 +51,7 @@ ch_assemble_t * ch_assemble_create(ch_context_t *context){
 
 void ch_assemble_destroy(ch_assemble_t *as){
 
+    ch_mmap_file_format_destroy(as->mmfmt);
     ch_assemble_session_pool_destroy(as->ass_pool);
 }
 

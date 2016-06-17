@@ -74,7 +74,7 @@ ch_task_t * ch_assemble_task_create(ch_context_t *context,unsigned int task_id){
 
     core = astask->task.core;
 
-    astask->as = ch_assemble_create(context);
+    astask->as = ch_assemble_create(context,task_id);
 
     if(astask->as == NULL){
         ch_log(CH_LOG_ERR,"Create assemble instance failed for this assemble task[%u]!",task_id);

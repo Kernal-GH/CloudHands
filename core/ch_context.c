@@ -49,6 +49,11 @@ static void do_context_init(ch_context_t *context){
 
     context->n_session_requests_limit = 0;
     context->n_assemble_sessions_limit = 0;
+
+    context->mmap_file_dir = MMAP_FILE_DIR_DEFAULT;
+    context->mmap_file_size = MMAP_FILE_SIZE_DEFAULT;
+    context->mmap_file_entry_size = MMAP_FILE_SIZE_DEFAULT;
+
 }
 
 static const char *cmd_log(cmd_parms *cmd, void *_dcfg, const char *p1,const char *p2){
@@ -259,6 +264,39 @@ static const char *cmd_core_mask(cmd_parms *cmd, void *_dcfg, const char *p1){
     return NULL;
 }
 
+static const char *cmd_mmap_file_dir(cmd_parms *cmd, void *_dcfg, const char *p1){
+
+    char *endptr;
+
+    ch_context_t *context = (ch_context_t*)_dcfg;
+
+    context->mmap_file_dir = p1;
+
+    return NULL;
+}
+
+static const char *cmd_mmap_file_size(cmd_parms *cmd, void *_dcfg, const char *p1){
+
+    char *endptr;
+
+    ch_context_t *context = (ch_context_t*)_dcfg;
+
+    context->mmap_file_size = (uint64_t)strtoul(p1,&endptr,10);
+    
+    return NULL;
+}
+
+static const char *cmd_mmap_file_entry_size(cmd_parms *cmd, void *_dcfg, const char *p1){
+
+    char *endptr;
+
+    ch_context_t *context = (ch_context_t*)_dcfg;
+
+    context->mmap_file_entry_size = (uint64_t)strtoul(p1,&endptr,10);
+    
+    return NULL;
+}
+
 static const command_rec context_directives[] ={
     
     CH_INIT_TAKE2(
@@ -370,6 +408,30 @@ static const command_rec context_directives[] ={
             NULL,
             0,
             "set number of assemble sessions limit"
+            ),
+    
+    CH_INIT_TAKE1(
+            "CHMMapFileDir",
+            cmd_mmap_file_dir,
+            NULL,
+            0,
+            "set mmap file dir"
+            ),
+
+    CH_INIT_TAKE1(
+            "CHMMapFileSize",
+            cmd_mmap_file_size,
+            NULL,
+            0,
+            "set mmap file size"
+            ),
+
+    CH_INIT_TAKE1(
+            "CHMMapFileEntrySize",
+            cmd_mmap_file_entry_size,
+            NULL,
+            0,
+            "set mmap file entry size"
             ),
 };
 

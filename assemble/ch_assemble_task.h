@@ -38,6 +38,7 @@ struct ch_assemble_task_t {
 
     unsigned int task_id;
     size_t ring_size;
+
 };
 
 #define ch_assemble_task_n_sessions_get(astask) ((astask)->as->ass_pool->n_sessions)

@@ -23,15 +23,17 @@ typedef struct ch_assemble_t ch_assemble_t;
 
 #include "ch_assemble_session.h"
 #include "ch_assemble_session_pool.h"
+#include "ch_mmap_file_format.h"
 
 struct ch_assemble_t {
 
     ch_context_t *context;
     ch_assemble_session_pool_t *ass_pool;
+    ch_mmap_file_format_t *mmfmt;
 
 };
 
-extern ch_assemble_t * ch_assemble_create(ch_context_t *context);
+extern ch_assemble_t * ch_assemble_create(ch_context_t *context,unsigned int task_id);
 
 extern void ch_assemble_destroy(ch_assemble_t *as);
 
