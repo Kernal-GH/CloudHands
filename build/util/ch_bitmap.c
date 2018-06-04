@@ -1,0 +1,620 @@
+/*
+ * =====================================================================================
+ *
+ *       Filename:  ch_bitmap.c
+ *
+ *    Description:  
+ *
+ *        Version:  1.0
+ *        Created:  2016年02月04日 00时03分38秒
+ *       Revision:  none
+ *       Compiler:  gcc
+ *
+ *         Author:  shajf, csp001314@163.com
+ *   Organization:  
+ *
+ * =====================================================================================
+ */
+
+#include "ch_bitmap.h"
+
+/*
+ * bitmaps provide an array of bits, implemented using an an
+ * array of unsigned longs.  The number of valid bits in a
+ * given bitmap does _not_ need to be an exact multiple of
+ * BITS_PER_LONG.
+ *
+ * The possible unused bits in the last, partially used word
+ * of a bitmap are 'don't care'.  The implemecetion makes
+ * no particular effort to keep them zero.  It ensures that
+ * their value will not affect the results of any operation.
+ * The bitmap operations that return Boolean (bitmap_empty,
+ * for example) or scalar (bitmap_weight, for example) results
+ * carefully filter out these unused bits from impacting their
+ * results.
+ *
+ * These operations actually hold to a slightly stronger rule:
+ * if you don't input any bitmaps to these ops that have some
+ * unused bits set, then they won't output any set unused bits
+ * in output bitmaps.
+ *
+ * The byte ordering of bitmaps is more natural on little
+ * endian architectures.  
+ */
+
+int __bitmap_empty(const unsigned long *bitmap, int bits)
+{
+	int k, lim = bits/BITS_PER_LONG;
+	for (k = 0; k < lim; ++k)
+		if (bitmap[k])
+			return 0;
+
+	if (bits % BITS_PER_LONG)
+		if (bitmap[k] & BITMAP_LAST_WORD_MASK(bits))
+			return 0;
+
+	return 1;
+}
+
+int __bitmap_full(const unsigned long *bitmap, int bits)
+{
+	int k, lim = bits/BITS_PER_LONG;
+	for (k = 0; k < lim; ++k)
+		if (~bitmap[k])
+			return 0;
+
+	if (bits % BITS_PER_LONG)
+		if (~bitmap[k] & BITMAP_LAST_WORD_MASK(bits))
+			return 0;
+
+	return 1;
+}
+
+int __bitmap_equal(const unsigned long *bitmap1,
+		const unsigned long *bitmap2, int bits)
+{
+	int k, lim = bits/BITS_PER_LONG;
+	for (k = 0; k < lim; ++k)
+		if (bitmap1[k] != bitmap2[k])
+			return 0;
+
+	if (bits % BITS_PER_LONG)
+		if ((bitmap1[k] ^ bitmap2[k]) & BITMAP_LAST_WORD_MASK(bits))
+			return 0;
+
+	return 1;
+}
+
+void __bitmap_complement(unsigned long *dst, const unsigned long *src, int bits)
+{
+	int k, lim = bits/BITS_PER_LONG;
+	for (k = 0; k < lim; ++k)
+		dst[k] = ~src[k];
+
+	if (bits % BITS_PER_LONG)
+		dst[k] = ~src[k] & BITMAP_LAST_WORD_MASK(bits);
+}
+
+/**
+ * __bitmap_shift_right - logical right shift of the bits in a bitmap
+ *   @dst : destination bitmap
+ *   @src : source bitmap
+ *   @shift : shift by this many bits
+ *   @bits : bitmap size, in bits
+ *
+ * Shifting right (dividing) means moving bits in the MS -> LS bit
+ * direction.  Zeros are fed into the vacated MS positions and the
+ * LS bits shifted off the bottom are lost.
+ */
+void __bitmap_shift_right(unsigned long *dst,
+			const unsigned long *src, int shift, int bits)
+{
+	int k, lim = BITS_TO_LONGS(bits), left = bits % BITS_PER_LONG;
+	int off = shift/BITS_PER_LONG, rem = shift % BITS_PER_LONG;
+	unsigned long mask = (1UL << left) - 1;
+	for (k = 0; off + k < lim; ++k) {
+		unsigned long upper, lower;
+
+		/*
+		 * If shift is not word aligned, take lower rem bits of
+		 * word above and make them the top rem bits of result.
+		 */
+		if (!rem || off + k + 1 >= lim)
+			upper = 0;
+		else {
+			upper = src[off + k + 1];
+			if (off + k + 1 == lim - 1 && left)
+				upper &= mask;
+		}
+		lower = src[off + k];
+		if (left && off + k == lim - 1)
+			lower &= mask;
+		dst[k] = upper << (BITS_PER_LONG - rem) | lower >> rem;
+		if (left && k == lim - 1)
+			dst[k] &= mask;
+	}
+	if (off)
+		memset(&dst[lim - off], 0, off*sizeof(unsigned long));
+}
+
+
+/**
+ * __bitmap_shift_left - logical left shift of the bits in a bitmap
+ *   @dst : destination bitmap
+ *   @src : source bitmap
+ *   @shift : shift by this many bits
+ *   @bits : bitmap size, in bits
+ *
+ * Shifting left (multiplying) means moving bits in the LS -> MS
+ * direction.  Zeros are fed into the vacated LS bit positions
+ * and those MS bits shifted off the top are lost.
+ */
+
+void __bitmap_shift_left(unsigned long *dst,
+			const unsigned long *src, int shift, int bits)
+{
+	int k, lim = BITS_TO_LONGS(bits), left = bits % BITS_PER_LONG;
+	int off = shift/BITS_PER_LONG, rem = shift % BITS_PER_LONG;
+	for (k = lim - off - 1; k >= 0; --k) {
+		unsigned long upper, lower;
+
+		/*
+		 * If shift is not word aligned, take upper rem bits of
+		 * word below and make them the bottom rem bits of result.
+		 */
+		if (rem && k > 0)
+			lower = src[k - 1];
+		else
+			lower = 0;
+		upper = src[k];
+		if (left && k == lim - 1)
+			upper &= (1UL << left) - 1;
+		dst[k + off] = lower  >> (BITS_PER_LONG - rem) | upper << rem;
+		if (left && k + off == lim - 1)
+			dst[k + off] &= (1UL << left) - 1;
+	}
+	if (off)
+		memset(dst, 0, off*sizeof(unsigned long));
+}
+
+int __bitmap_and(unsigned long *dst, const unsigned long *bitmap1,
+				const unsigned long *bitmap2, int bits)
+{
+	int k;
+	int nr = BITS_TO_LONGS(bits);
+	unsigned long result = 0;
+
+	for (k = 0; k < nr; k++)
+		result |= (dst[k] = bitmap1[k] & bitmap2[k]);
+	return result != 0;
+}
+
+void __bitmap_or(unsigned long *dst, const unsigned long *bitmap1,
+				const unsigned long *bitmap2, int bits)
+{
+	int k;
+	int nr = BITS_TO_LONGS(bits);
+
+	for (k = 0; k < nr; k++)
+		dst[k] = bitmap1[k] | bitmap2[k];
+}
+
+void __bitmap_xor(unsigned long *dst, const unsigned long *bitmap1,
+				const unsigned long *bitmap2, int bits)
+{
+	int k;
+	int nr = BITS_TO_LONGS(bits);
+
+	for (k = 0; k < nr; k++)
+		dst[k] = bitmap1[k] ^ bitmap2[k];
+}
+
+int __bitmap_andnot(unsigned long *dst, const unsigned long *bitmap1,
+				const unsigned long *bitmap2, int bits)
+{
+	int k;
+	int nr = BITS_TO_LONGS(bits);
+	unsigned long result = 0;
+
+	for (k = 0; k < nr; k++)
+		result |= (dst[k] = bitmap1[k] & ~bitmap2[k]);
+	return result != 0;
+}
+
+int __bitmap_intersects(const unsigned long *bitmap1,
+				const unsigned long *bitmap2, int bits)
+{
+	int k, lim = bits/BITS_PER_LONG;
+	for (k = 0; k < lim; ++k)
+		if (bitmap1[k] & bitmap2[k])
+			return 1;
+
+	if (bits % BITS_PER_LONG)
+		if ((bitmap1[k] & bitmap2[k]) & BITMAP_LAST_WORD_MASK(bits))
+			return 1;
+	return 0;
+}
+
+int __bitmap_subset(const unsigned long *bitmap1,
+				const unsigned long *bitmap2, int bits)
+{
+	int k, lim = bits/BITS_PER_LONG;
+	for (k = 0; k < lim; ++k)
+		if (bitmap1[k] & ~bitmap2[k])
+			return 0;
+
+	if (bits % BITS_PER_LONG)
+		if ((bitmap1[k] & ~bitmap2[k]) & BITMAP_LAST_WORD_MASK(bits))
+			return 0;
+	return 1;
+}
+
+int __bitmap_weight(const unsigned long *bitmap, int bits)
+{
+	int k, w = 0, lim = bits/BITS_PER_LONG;
+
+	for (k = 0; k < lim; k++)
+		w += hweight_long(bitmap[k]);
+
+	if (bits % BITS_PER_LONG)
+		w += hweight_long(bitmap[k] & BITMAP_LAST_WORD_MASK(bits));
+
+	return w;
+}
+
+void bitmap_set(unsigned long *map, int start, int nr)
+{
+	unsigned long *p = map + BIT_WORD(start);
+	const int size = start + nr;
+	int bits_to_set = BITS_PER_LONG - (start % BITS_PER_LONG);
+	unsigned long mask_to_set = BITMAP_FIRST_WORD_MASK(start);
+
+	while (nr - bits_to_set >= 0) {
+		*p |= mask_to_set;
+		nr -= bits_to_set;
+		bits_to_set = BITS_PER_LONG;
+		mask_to_set = ~0UL;
+		p++;
+	}
+	if (nr) {
+		mask_to_set &= BITMAP_LAST_WORD_MASK(size);
+		*p |= mask_to_set;
+	}
+}
+
+void bitmap_clear(unsigned long *map, int start, int nr)
+{
+	unsigned long *p = map + BIT_WORD(start);
+	const int size = start + nr;
+	int bits_to_clear = BITS_PER_LONG - (start % BITS_PER_LONG);
+	unsigned long mask_to_clear = BITMAP_FIRST_WORD_MASK(start);
+
+	while (nr - bits_to_clear >= 0) {
+		*p &= ~mask_to_clear;
+		nr -= bits_to_clear;
+		bits_to_clear = BITS_PER_LONG;
+		mask_to_clear = ~0UL;
+		p++;
+	}
+	if (nr) {
+		mask_to_clear &= BITMAP_LAST_WORD_MASK(size);
+		*p &= ~mask_to_clear;
+	}
+}
+
+
+/**
+ * bitmap_pos_to_ord - find ordinal of set bit at given position in bitmap
+ *	@buf: pointer to a bitmap
+ *	@pos: a bit position in @buf (0 <= @pos < @bits)
+ *	@bits: number of valid bit positions in @buf
+ *
+ * Map the bit at position @pos in @buf (of length @bits) to the
+ * ordinal of which set bit it is.  If it is not set or if @pos
+ * is not a valid bit position, map to -1.
+ *
+ * If for example, just bits 4 through 7 are set in @buf, then @pos
+ * values 4 through 7 will get mapped to 0 through 3, respectively,
+ * and other @pos values will get mapped to 0.  When @pos value 7
+ * gets mapped to (returns) @ord value 3 in this example, that means
+ * that bit 7 is the 3rd (starting with 0th) set bit in @buf.
+ *
+ * The bit positions 0 through @bits are valid positions in @buf.
+ */
+static int bitmap_pos_to_ord(const unsigned long *buf, int pos, int bits)
+{
+	int i, ord;
+
+	if (pos < 0 || pos >= bits || !test_bit(pos, buf))
+		return -1;
+
+	i = find_first_bit(buf, bits);
+	ord = 0;
+	while (i < pos) {
+		i = find_next_bit(buf, bits, i + 1);
+	     	ord++;
+	}
+
+	return ord;
+}
+
+/**
+ * bitmap_ord_to_pos - find position of n-th set bit in bitmap
+ *	@buf: pointer to bitmap
+ *	@ord: ordinal bit position (n-th set bit, n >= 0)
+ *	@bits: number of valid bit positions in @buf
+ *
+ * Map the ordinal offset of bit @ord in @buf to its position in @buf.
+ * Value of @ord should be in range 0 <= @ord < weight(buf), else
+ * results are undefined.
+ *
+ * If for example, just bits 4 through 7 are set in @buf, then @ord
+ * values 0 through 3 will get mapped to 4 through 7, respectively,
+ * and all other @ord values return undefined values.  When @ord value 3
+ * gets mapped to (returns) @pos value 7 in this example, that means
+ * that the 3rd set bit (starting with 0th) is at position 7 in @buf.
+ *
+ * The bit positions 0 through @bits are valid positions in @buf.
+ */
+int bitmap_ord_to_pos(const unsigned long *buf, int ord, int bits)
+{
+	int pos = 0;
+
+	if (ord >= 0 && ord < bits) {
+		int i;
+
+		for (i = find_first_bit(buf, bits);
+		     i < bits && ord > 0;
+		     i = find_next_bit(buf, bits, i + 1))
+	     		ord--;
+		if (i < bits && ord == 0)
+			pos = i;
+	}
+
+	return pos;
+}
+
+/**
+ * bitmap_remap - Apply map defined by a pair of bitmaps to another bitmap
+ *	@dst: remapped result
+ *	@src: subset to be remapped
+ *	@old: defines domain of map
+ *	@_new: defines range of map
+ *	@bits: number of bits in each of these bitmaps
+ *
+ * Let @old and @_new define a mapping of bit positions, such that
+ * whatever position is held by the n-th set bit in @old is mapped
+ * to the n-th set bit in @_new.  In the more general case, allowing
+ * for the possibility that the weight 'w' of @_new is less than the
+ * weight of @old, map the position of the n-th set bit in @old to
+ * the position of the m-th set bit in @_new, where m == n % w.
+ *
+ * If either of the @old and @_new bitmaps are empty, or if @src and
+ * @dst point to the same location, then this routine copies @src
+ * to @dst.
+ *
+ * The positions of unset bits in @old are mapped to themselves
+ * (the identify map).
+ *
+ * Apply the above specified mapping to @src, placing the result in
+ * @dst, clearing any bits previously set in @dst.
+ *
+ * For example, lets say that @old has bits 4 through 7 set, and
+ * @_new has bits 12 through 15 set.  This defines the mapping of bit
+ * position 4 to 12, 5 to 13, 6 to 14 and 7 to 15, and of all other
+ * bit positions unchanged.  So if say @src comes into this routine
+ * with bits 1, 5 and 7 set, then @dst should leave with bits 1,
+ * 13 and 15 set.
+ */
+void bitmap_remap(unsigned long *dst, const unsigned long *src,
+		const unsigned long *old, const unsigned long *_new,
+		int bits)
+{
+	int oldbit, w;
+
+	if (dst == src)		/* following doesn't handle inplace remaps */
+		return;
+	bitmap_zero(dst, bits);
+
+	w = bitmap_weight(_new, bits);
+	for_each_set_bit(oldbit, src, bits) {
+	     	int n = bitmap_pos_to_ord(old, oldbit, bits);
+
+		if (n < 0 || w == 0)
+			set_bit(oldbit, dst);	/* identity map */
+		else
+			set_bit(bitmap_ord_to_pos(_new, n % w, bits), dst);
+	}
+}
+
+/**
+ * bitmap_bitremap - Apply map defined by a pair of bitmaps to a single bit
+ *	@oldbit: bit position to be mapped
+ *	@old: defines domain of map
+ *	@_new: defines range of map
+ *	@bits: number of bits in each of these bitmaps
+ *
+ * Let @old and @_new define a mapping of bit positions, such that
+ * whatever position is held by the n-th set bit in @old is mapped
+ * to the n-th set bit in @_new.  In the more general case, allowing
+ * for the possibility that the weight 'w' of @_new is less than the
+ * weight of @old, map the position of the n-th set bit in @old to
+ * the position of the m-th set bit in @_new, where m == n % w.
+ *
+ * The positions of unset bits in @old are mapped to themselves
+ * (the identify map).
+ *
+ * Apply the above specified mapping to bit position @oldbit, returning
+ * the _new bit position.
+ *
+ * For example, lets say that @old has bits 4 through 7 set, and
+ * @_new has bits 12 through 15 set.  This defines the mapping of bit
+ * position 4 to 12, 5 to 13, 6 to 14 and 7 to 15, and of all other
+ * bit positions unchanged.  So if say @oldbit is 5, then this routine
+ * returns 13.
+ */
+int bitmap_bitremap(int oldbit, const unsigned long *old,
+				const unsigned long *_new, int bits)
+{
+	int w = bitmap_weight(_new, bits);
+	int n = bitmap_pos_to_ord(old, oldbit, bits);
+	if (n < 0 || w == 0)
+		return oldbit;
+	else
+		return bitmap_ord_to_pos(_new, n % w, bits);
+}
+
+/**
+ * bitmap_onto - translate one bitmap relative to another
+ *	@dst: resulting translated bitmap
+ * 	@orig: original untranslated bitmap
+ * 	@relmap: bitmap relative to which translated
+ *	@bits: number of bits in each of these bitmaps
+ *
+ * Set the n-th bit of @dst iff there exists some m such that the
+ * n-th bit of @relmap is set, the m-th bit of @orig is set, and
+ * the n-th bit of @relmap is also the m-th _set_ bit of @relmap.
+ * (If you understood the previous sentence the first time your
+ * read it, you're overqualified for your current job.)
+ *
+ * In other words, @orig is mapped onto (surjectively) @dst,
+ * using the the map { <n, m> | the n-th bit of @relmap is the
+ * m-th set bit of @relmap }.
+ *
+ * Any set bits in @orig above bit number W, where W is the
+ * weight of (number of set bits in) @relmap are mapped nowhere.
+ * In particular, if for all bits m set in @orig, m >= W, then
+ * @dst will end up empty.  In situations where the possibility
+ * of such an empty result is not desired, one way to avoid it is
+ * to use the bitmap_fold() operator, below, to first fold the
+ * @orig bitmap over itself so that all its set bits x are in the
+ * range 0 <= x < W.  The bitmap_fold() operator does this by
+ * setting the bit (m % W) in @dst, for each bit (m) set in @orig.
+ *
+ * Example [1] for bitmap_onto():
+ *  Let's say @relmap has bits 30-39 set, and @orig has bits
+ *  1, 3, 5, 7, 9 and 11 set.  Then on return from this routine,
+ *  @dst will have bits 31, 33, 35, 37 and 39 set.
+ *
+ *  When bit 0 is set in @orig, it means turn on the bit in
+ *  @dst corresponding to whatever is the first bit (if any)
+ *  that is turned on in @relmap.  Since bit 0 was off in the
+ *  above example, we leave off that bit (bit 30) in @dst.
+ *
+ *  When bit 1 is set in @orig (as in the above example), it
+ *  means turn on the bit in @dst corresponding to whatever
+ *  is the second bit that is turned on in @relmap.  The second
+ *  bit in @relmap that was turned on in the above example was
+ *  bit 31, so we turned on bit 31 in @dst.
+ *
+ *  Similarly, we turned on bits 33, 35, 37 and 39 in @dst,
+ *  because they were the 4th, 6th, 8th and 10th set bits
+ *  set in @relmap, and the 4th, 6th, 8th and 10th bits of
+ *  @orig (i.e. bits 3, 5, 7 and 9) were also set.
+ *
+ *  When bit 11 is set in @orig, it means turn on the bit in
+ *  @dst corresponding to whatever is the twelfth bit that is
+ *  turned on in @relmap.  In the above example, there were
+ *  only ten bits turned on in @relmap (30..39), so that bit
+ *  11 was set in @orig had no affect on @dst.
+ *
+ * Example [2] for bitmap_fold() + bitmap_onto():
+ *  Let's say @relmap has these ten bits set:
+ *		40 41 42 43 45 48 53 61 74 95
+ *  (for the curious, that's 40 plus the first ten terms of the
+ *  Fibonacci sequence.)
+ *
+ *  Further lets say we use the following code, invoking
+ *  bitmap_fold() then bitmap_onto, as suggested above to
+ *  avoid the possitility of an empty @dst result:
+ *
+ *	unsigned long *tmp;	// a temporary bitmap's bits
+ *
+ *	bitmap_fold(tmp, orig, bitmap_weight(relmap, bits), bits);
+ *	bitmap_onto(dst, tmp, relmap, bits);
+ *
+ *  Then this table shows what various values of @dst would be, for
+ *  various @orig's.  I list the zero-based positions of each set bit.
+ *  The tmp column shows the intermediate result, as computed by
+ *  using bitmap_fold() to fold the @orig bitmap modulo ten
+ *  (the weight of @relmap).
+ *
+ *      @orig           tmp            @dst
+ *      0                0             40
+ *      1                1             41
+ *      9                9             95
+ *      10               0             40 (*)
+ *      1 3 5 7          1 3 5 7       41 43 48 61
+ *      0 1 2 3 4        0 1 2 3 4     40 41 42 43 45
+ *      0 9 18 27        0 9 8 7       40 61 74 95
+ *      0 10 20 30       0             40
+ *      0 11 22 33       0 1 2 3       40 41 42 43
+ *      0 12 24 36       0 2 4 6       40 42 45 53
+ *      78 102 211       1 2 8         41 42 74 (*)
+ *
+ * (*) For these marked lines, if we hadn't first done bitmap_fold()
+ *     into tmp, then the @dst result would have been empty.
+ *
+ * If either of @orig or @relmap is empty (no set bits), then @dst
+ * will be returned empty.
+ *
+ * If (as explained above) the only set bits in @orig are in positions
+ * m where m >= W, (where W is the weight of @relmap) then @dst will
+ * once again be returned empty.
+ *
+ * All bits in @dst not set by the above rule are cleared.
+ */
+void bitmap_onto(unsigned long *dst, const unsigned long *orig,
+			const unsigned long *relmap, int bits)
+{
+	int n, m;       	/* same meaning as in above comment */
+
+	if (dst == orig)	/* following doesn't handle inplace mappings */
+		return;
+	bitmap_zero(dst, bits);
+
+	/*
+	 * The following code is a more efficient, but less
+	 * obvious, equivalent to the loop:
+	 *	for (m = 0; m < bitmap_weight(relmap, bits); m++) {
+	 *		n = bitmap_ord_to_pos(orig, m, bits);
+	 *		if (test_bit(m, orig))
+	 *			set_bit(n, dst);
+	 *	}
+	 */
+
+	m = 0;
+	for_each_set_bit(n, relmap, bits) {
+		/* m == bitmap_pos_to_ord(relmap, n, bits) */
+		if (test_bit(m, orig))
+			set_bit(n, dst);
+		m++;
+	}
+}
+
+/**
+ * bitmap_fold - fold larger bitmap into smaller, modulo specified size
+ *	@dst: resulting smaller bitmap
+ *	@orig: original larger bitmap
+ *	@sz: specified size
+ *	@bits: number of bits in each of these bitmaps
+ *
+ * For each bit oldbit in @orig, set bit oldbit mod @sz in @dst.
+ * Clear all other bits in @dst.  See further the comment and
+ * Example [2] for bitmap_onto() for why and how to use this.
+ */
+void bitmap_fold(unsigned long *dst, const unsigned long *orig,
+			int sz, int bits)
+{
+	int oldbit;
+
+	if (dst == orig)	/* following doesn't handle inplace mappings */
+		return;
+	bitmap_zero(dst, bits);
+
+	for_each_set_bit(oldbit, orig, bits)
+		set_bit(oldbit % sz, dst);
+}
+
+
+

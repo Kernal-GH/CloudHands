@@ -1,0 +1,25 @@
+#!/bin/bash
+#
+#      Filename: ./install.sh
+#
+#        Author: gongyanlei@antell.com.cn
+#   Description: ---
+#        Create: 2017-08-16 12:05:37
+# Last Modified: 2017-09-02 19:54:41
+#
+
+dpdk_install_prefix=/opt/antell/dpdk
+
+#if [ -e $dpdk_install_prefix/CloudHands ]; then
+#	rm -fr $dpdk_install_prefix/CloudHands
+#fi
+
+mkdir -p $dpdk_install_prefix
+mkdir -p $dpdk_install_prefix/tools
+mkdir -p $dpdk_install_prefix/CloudHands
+
+\cp -rf app/* $dpdk_install_prefix/CloudHands
+\cp -rf bin/* $dpdk_install_prefix/tools
+\cp -rf conf $dpdk_install_prefix/CloudHands
+\cp -rf tools/preader $dpdk_install_prefix/tools/
+

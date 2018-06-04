@@ -1,0 +1,42 @@
+#!/bin/bash
+#
+#      Filename: build.sh
+#
+#        Author: gongyanlei@antell.com.cn
+#   Description: ---
+#        Create: 2017-08-16 11:18:54
+# Last Modified: 2017-09-02 19:01:58
+#
+
+dpdk_ver=17.02
+
+CURDIR=`pwd`
+
+rm -fr build
+mkdir -p build/app build/bin build/conf build/tools
+
+cd ..
+
+export RTE_SDK=`pwd`/base/dpdk-${dpdk_ver}
+
+cd $CURDIR
+
+make
+
+cd core
+
+make -f MakefileLib
+
+cd ..
+
+make -C tool
+
+cp -rf core/build/app/* build/app/
+cp -rf bin/* build/bin/
+cp -rf conf/* build/conf/
+cp -rf tool/preader build/tools/
+
+cp install.sh build/
+
+chmod a+x build/*.sh
+

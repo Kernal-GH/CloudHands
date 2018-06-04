@@ -1,0 +1,46 @@
+##########################################################
+#Copyright(C) 2012 WAF PROJECT TEAM
+#Author(A) shajianfeng
+##########################################################
+
+include ../make.include
+CFLAGS  = ${BUILD_CFLAGS} -ggdb3 -O0 -rdynamic -D_GNU_SOURCE -pthread
+CFLAGS += `/usr/local/apr/bin/apr-1-config --includes`
+CFLAGS += `/usr/local/apr/bin/apu-1-config --includes`
+CFLAGS += -fPIC
+
+util_SOURCES = ch_bitmap.c \
+	      ch_config.c \
+	      ch_bitops.c \
+		  ch_errno.c  \
+		  ch_string.c \
+		  ch_file.c   \
+		  ch_log.c    \
+		  ch_util.c   \
+		  ch_mpool.c  \
+		  ch_fpool.c \
+		  ch_mmap.c \
+		  ch_mmap_file_format.c \
+		  ch_mmap_packets_format.c \
+		  ch_buf_pool.c \
+		  ch_file_store.c \
+		  ch_fpath.c \
+		  ch_table.c
+
+
+util_OBJECTS = $(patsubst %.c,%.o,$(util_SOURCES))
+util_DEPENDS = $(patsubst %.c,%.d,$(util_SOURCES))
+util_ASMFILE = $(patsubst %.c,%.s,$(util_SOURCES))
+util_package = libutil.a
+
+.PHONY: all clean install
+
+all: $(util_package)
+
+$(util_package): $(util_OBJECTS)
+	$(cmd_archive) $(util_package) 
+
+clean:
+	@rm -fr $(util_OBJECTS) $(util_DEPENDS) $(util_ASMFILE) $(util_package)
+	@rm -fr *.d *.o *.s 
+
