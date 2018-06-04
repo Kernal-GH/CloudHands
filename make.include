@@ -1,0 +1,152 @@
+# Do not:
+# o  use make's built-in rules and variables
+#    (this increases performance and avoids hard-to-debug behaviour);
+# o  print "Entering directory ...";
+MAKEFLAGS += -rR --no-print-directory
+
+# Convenient variables
+comma   := ,
+squote  := '
+empty   :=
+space   := $(empty) $(empty)
+
+CC      := gcc
+CXX     := g++
+AR      := ar
+AS      := as
+LD      := ld
+RANLIB  := ranlib
+MAKE    := make
+
+# try-run
+# Usage: option = $(call try-run, $(CC)...-o "$$TMP",option-ok,otherwise)
+# Exit code chooses option. "$$TMP" is can be used as temporary file and
+# is automatically cleaned up.
+try-run = $(shell set -e;       \
+    TMP="$(TMPOUT).$$$$.tmp";   \
+    if ($(1)) >/dev/null 2>&1;  \
+    then echo "$(2)";           \
+    else echo "$(3)";           \
+    fi;                         \
+    rm -f "$$TMP")
+
+# To put more focus on warnings, be less verbose as default
+# Use 'make V=1' to see the full commands
+ifdef V
+  ifeq ("$(origin V)", "command line")
+    BUILD_VERBOSE = $(V)
+  endif
+endif
+ifndef BUILD_VERBOSE
+  BUILD_VERBOSE = 0
+endif
+
+# Beautify output
+#
+# If BUILD_VERBOSE equals 0 then the above command will be hidden.
+# If BUILD_VERBOSE equals 1 then the above command is displayed.
+ifeq ($(BUILD_VERBOSE),1)
+  quiet =
+  Q =
+else
+  quiet=quiet_
+  Q = @
+endif
+
+# Escape single quote for use in echo statements
+escsq = $(subst $(squote),'\$(squote)',$1)
+
+# echo command.
+# Short version is used, if $(quiet) equals `quiet_', otherwise full one.
+echo-cmd = +$(if $($(quiet)cmd_$(1)),\
+    echo '  $(call escsq,$($(quiet)cmd_$(1)))$(echo-why)';)
+
+# printing commands
+cmd = @$(echo-cmd) $(cmd_$(1))
+
+ quiet_cmd_cc_o_c = CC     $@
+      cmd_cc_o_c = ${CC} ${CFLAGS} -Wp,-MQ,$(patsubst %.c,%.o,$<),-MD,$(patsubst %.c,%.d,$<) -Wa,-ahlms=$(patsubst %.c,%.s,$<) -c -o $@ $<
+
+quiet_cmd_cc_d_c = DEP    $@
+      cmd_cc_d_c = ${CC} ${CFLAGS} -M -o $@ $<
+
+quiet_cmd_cxx_o_c = CXX    $@
+      cmd_cxx_o_c = ${CXX} ${CXXFLAGS} -Wp,-MQ,$(patsubst %.cpp,%.o,$<),-MD,$(patsubst %.cpp,%.d,$<) -Wa,-ahlms=$(patsubst %.cpp,%.s,$<) -c -o $@ $<
+
+# build simple programs, only one source file
+quiet_cmd_progs = LINK   $@
+      cmd_progs = ${CC} ${CFLAGS} -o $@ $@.c $(LDFLAGS)
+
+# build simple programs, but do not optimize, for test program.
+quiet_cmd_test = LINK   $@
+      cmd_test = ${CC} ${CFLAGS} -O0 -o $@ $@.c $(LDFLAGS)
+
+# build archive
+quiet_cmd_archive = AR     $@
+      cmd_archive = ${AR} -cru -o $@ $^ && ranlib $@
+
+# link object files
+quiet_cmd_objects = LD     $@
+      cmd_objects = ${LD} -r -o $@ $^
+
+# make in other directory
+quiet_cmd_make = MAKE   $@
+      cmd_make = ${MAKE} -C $(dir $@)
+
+BUILD_FLAGS    := -g -O2 -pipe -rdynamic \
+                  -Wall -Wextra -Wno-trigraphs -Wmissing-include-dirs \
+                  -Wformat-security -Wfloat-equal \
+                  -Wswitch-enum \
+        		  -Wcast-align\
+                  -Wmissing-field-initializers \
+				  -Wshadow \
+                  -Wstack-protector \
+                  -fno-strict-aliasing -fno-common \
+                  #-Wcast-qual\
+#                 -Wunsafe-loop-optimizations \
+#                 -Wwrite-strings \
+#                 -Wlarger-than-1024 \
+#                 -Wsign-conversion
+#                  -Wpointer-arith   
+
+BUILD_CFLAGS   := ${BUILD_FLAGS} \
+                  -Wstrict-prototypes \
+                  -Wbad-function-cast \
+                  -Werror-implicit-function-declaration 
+
+BUILD_CXXFLAGS := ${BUILD_FLAGS}
+
+# ld-option
+# Usage: ldflags += $(call ld-option, -Wl$(comma)--hash-style=both)
+ld-option = $(call try-run, $(CC) $(1) -nostdlib -xc /dev/null -o "$$TMP",$(1),$(2))
+
+# Use --build-id when available.
+LDFLAGS_BUILD_ID = -Wl$(comma)$(patsubst -Wl$(comma)%,%, $(call ld-option, -Wl$(comma)--build-id,))
+
+BUILD_LDFLAGS   = -export-dynamic -Wl,--warn-common -Wl,--warn-constructors
+BUILD_LDFLAGS  += $(LDFLAGS_BUILD_ID)
+
+.c.o:
+	$(call cmd,cc_o_c)
+
+#.c.d:
+#	$(call cmd,cc_d_c)
+
+.cpp.o:
+	$(call cmd,cxx_o_c)
+
+.po.mo:
+	$(MSGFMT) -o $@ $<
+
+BUILD_PROFILE = 0
+ifdef P
+  ifeq ("$(origin P)", "command line")
+    BUILD_PROFILE = $(P)
+  endif
+endif
+ifeq ($(BUILD_PROFILE),1)
+    BUILD_CFLAGS  += -pg -DDO_PROFILE
+    BUILD_LDFLAGS += -pg
+endif
+
+.SUFFIXES: .c .cc .cxx .cpp .o .d .po .mo
