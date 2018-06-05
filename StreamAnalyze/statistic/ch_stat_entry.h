@@ -15,8 +15,6 @@ typedef struct ch_stat_entry_t ch_stat_entry_t;
 
 #pragma pack(push,1)
 struct ch_stat_entry_t {
-
-	uint64_t st_time;
 	uint64_t st_v;
 };
 #pragma pack(pop)
