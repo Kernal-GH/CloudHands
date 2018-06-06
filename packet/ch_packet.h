@@ -186,6 +186,7 @@ struct ch_packet_parser_t {
  };
 
 #define ch_packet_free(pkt) rte_pktmbuf_free(pkt->mbuf)
+#define ch_packet_size(pkt) ((pkt)->mbuf->data_len)
 
 extern void ch_packet_init(void);
 

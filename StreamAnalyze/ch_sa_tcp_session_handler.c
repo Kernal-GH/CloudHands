@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-03-28 15:02:26
- * Last Modified: 2018-04-21 11:11:47
+ * Last Modified: 2018-06-06 20:05:18
  */
 
 #include "ch_sa_tcp_session_handler.h"
@@ -34,19 +34,29 @@ static void _tcp_session_out(ch_sa_tcp_session_handler_t *shandler,
 	uint16_t timeout_tv,
 	int is_close){
 
-	char *dbname;
-
-	size_t p_dlen = 0,db_path_len = 0;
+	size_t p_dlen = 0;
 
 	ch_sa_session_task_t *sa_session_task = shandler->session_task;
 	ch_buffer_t *p_buffer = &sa_session_task->sa_buffer;
+	
+	ch_sa_data_store_t *req_dstore = sentry->req_dstore;
+	ch_sa_data_store_t *res_dstore = sentry->res_dstore;
 
-	dbname = sentry->rdb_store->rdb_name;
-	db_path_len = strlen(dbname);
+	void *req_data = NULL,*res_data = NULL;
+	size_t req_dsize = 0,res_dsize = 0;
 
-	ch_rdb_store_ref_update(sentry->rdb_store,-1);
+	if(req_dstore){
+		req_dsize = ch_sa_data_store_size(req_dstore);
+		req_data = req_dsize?req_dstore->pos:NULL;
+	}
 
-	size_t meta_data_size = CH_PACKET_RECORD_SESSION_TCP_META_SIZE(db_path_len);
+	if(res_dstore){
+		res_dsize = ch_sa_data_store_size(res_dstore);
+		res_data = res_dsize?res_dstore->pos:NULL;
+	}
+
+
+	size_t meta_data_size = CH_PACKET_RECORD_SESSION_TCP_META_SIZE(req_dsize,res_dsize);
 
 	ch_packet_record_t pkt_rcd;
 	ch_packet_record_session_tcp_t ptmp,*p_tcp_session = &ptmp;
@@ -57,6 +67,7 @@ static void _tcp_session_out(ch_sa_tcp_session_handler_t *shandler,
 		if(ch_buffer_update(p_buffer,meta_data_size)){
 		
 			ch_log(CH_LOG_ERR,"Cannot create buffer failed for tcp session handler!");
+			ch_sa_sentry_dstore_free(sentry);
 			return;
 		}
 	}
@@ -80,16 +91,11 @@ static void _tcp_session_out(ch_sa_tcp_session_handler_t *shandler,
 	p_tcp_session->req_last_time = sentry->req_last_time;
 	p_tcp_session->res_last_time = sentry->res_last_time;
 
-	p_tcp_session->req_data_size = sentry->req_data_size;
-	p_tcp_session->res_data_size = sentry->res_data_size;
-	p_tcp_session->req_data_seq = sentry->req_data_seq;
-	p_tcp_session->res_data_seq = sentry->res_data_seq;
+	p_tcp_session->req_data = req_data;
+	p_tcp_session->req_dsize = req_dsize;
+	p_tcp_session->res_data = res_data;
+	p_tcp_session->res_dsize = res_dsize;
 
-
-	p_tcp_session->db_path_len = db_path_len;
-
-	p_tcp_session->db_path = dbname;
-	
 	p_dlen = ch_packet_record_session_tcp_write(p_tcp_session,p_buffer->bdata,p_buffer->b_current_size,NULL,0);
 
 	pkt_rcd.type = PKT_RECORD_TYPE_SESSION_TCP;
@@ -100,6 +106,8 @@ static void _tcp_session_out(ch_sa_tcp_session_handler_t *shandler,
 		&pkt_rcd,
 		p_buffer->bdata,
 		p_dlen);
+	
+	ch_sa_sentry_dstore_free(sentry);
 
 }
 
@@ -121,7 +129,6 @@ static inline const char * _get_prefix_name(ch_pool_t *mp,uint32_t tsk_id){
 ch_sa_tcp_session_handler_t * 
 ch_sa_tcp_session_handler_create(ch_sa_work_t *sa_work,ch_sa_session_task_t *session_task){
 
-	ch_sa_context_t *sa_context = sa_work->sa_context;
 
 	ch_sa_tcp_session_handler_t *shandler = NULL;
 
@@ -138,18 +145,6 @@ ch_sa_tcp_session_handler_create(ch_sa_work_t *sa_work,ch_sa_session_task_t *ses
 	
 		ch_log(CH_LOG_ERR,"Create tcp session handler failed,cannot create tcp session pool!");
 		return NULL;
-	}
-
-	shandler->rdb_store_pool = ch_rdb_store_pool_create(sa_work->mp,sa_context->rdb_store_dir,
-		_get_prefix_name(sa_work->mp,session_task->task.tsk_id),
-		sa_context->rdb_name_create_type,
-		sa_context->rdb_using_timeout);
-
-	if(shandler->rdb_store_pool == NULL){
-	
-		ch_log(CH_LOG_ERR,"Create rdb pool failed for tcp session handler!");
-		return NULL;
-
 	}
 
 	return shandler;
@@ -216,15 +211,20 @@ static inline int _need_process_payload(ch_sa_tcp_session_handler_t *shandler,
 	if(tcp_session->cur_ep == &tcp_session->endpoint_req){
 
 		/*Request*/
-		if(sa_entry->req_data_size>=max_plen){
+		if(sa_entry->req_error)
+			return 0;
+
+		if(ch_sa_sentry_dstore_size(sa_entry->req_dstore)>=max_plen){
 		
 			return 0;
 		}
 	
 	}else{
 	
-	
-		if(sa_entry->res_data_size>=max_plen){
+		if(sa_entry->res_error)
+			return 0;
+
+		if(ch_sa_sentry_dstore_size(sa_entry->res_dstore)>=max_plen){
 		
 			return 0;
 		}
@@ -237,51 +237,69 @@ static inline int _need_process_payload(ch_sa_tcp_session_handler_t *shandler,
 static void _write_session_payload(ch_sa_tcp_session_handler_t *shandler,
 	ch_tcp_session_t *tcp_session,ch_sa_session_entry_t *sa_entry,void *data,size_t dlen){
 
-	char key[128] = {0};
 	size_t r_dlen = dlen;
 
 	ch_sa_context_t *sa_context = shandler->sa_work->sa_context;
 	uint32_t max_plen = sa_context->payload_data_size;
 	uint32_t data_size = 0;
+	ch_sa_data_store_t *dstore;
+	ch_sa_data_store_pool_t *dstore_pool = shandler->session_task->dstore_pool;
 
 	if(tcp_session->cur_ep == &tcp_session->endpoint_req){
 
+		dstore = sa_entry->req_dstore;
+		if(dstore == NULL){
+		
+			ch_sa_data_store_get(dstore_pool,dstore);
+			if(dstore == NULL){
+				sa_entry->req_error = 1;
+				return;
+			}
+			sa_entry->req_dstore = dstore;
+		}
+
+		data_size = ch_sa_sentry_dstore_size(dstore);
+
 		/*Request*/
-		if(sa_entry->req_data_size>=max_plen){
+		if(data_size>=max_plen){
 		
 			return;
 		}
 
-		if(sa_entry->req_data_size+dlen>max_plen){
+		if(data_size+dlen>max_plen){
 		
-			r_dlen = max_plen - sa_entry->req_data_size;
+			r_dlen = max_plen - data_size;
 		}
-
-		snprintf(key,128,"%luREQ",tcp_session->session_id);
-		sa_entry->req_data_size += r_dlen;
-		sa_entry->req_data_seq += 1;
-
-		data_size = sa_entry->req_data_size;
 
     }else{
+		
+		dstore = sa_entry->res_dstore;
+		if(dstore == NULL){
+		
+			ch_sa_data_store_get(dstore_pool,dstore);
+			if(dstore == NULL){
+				sa_entry->res_error = 1;
+				return;
+			}
+			sa_entry->res_dstore = dstore;
+		}
+
+		data_size = ch_sa_sentry_dstore_size(dstore);
 	
 		/*Response*/
-		if(sa_entry->res_data_size>=max_plen){
+		if(data_size>=max_plen){
 		
 			return;
 		}
 		
-		if(sa_entry->res_data_size+dlen>max_plen){
+		if(data_size+dlen>max_plen){
 		
-			r_dlen = max_plen - sa_entry->res_data_size;
+			r_dlen = max_plen - data_size;
 		}
-		snprintf(key,128,"%luRES",tcp_session->session_id);
-		sa_entry->res_data_size += r_dlen;
-		sa_entry->res_data_seq += 1;
-		data_size = sa_entry->res_data_size;
+
 	}
 
-	ch_rdb_store_put(sa_entry->rdb_store,key,strlen(key),(const char*)data,r_dlen);
+	ch_sa_data_store_write(dstore,data,r_dlen);
 
 	if(data_size>=max_plen){
 	
@@ -339,13 +357,12 @@ static void _process_data_packet(ch_sa_tcp_session_handler_t *shandler,
         tcp_pkt->payload_len-=diff;
         ep->last_offset = end_offset;
 
-		if(sa_entry->rdb_store)
-			_write_session_payload(shandler,tcp_session,sa_entry,tcp_pkt->pdata,tcp_pkt->payload_len);
+		_write_session_payload(shandler,tcp_session,sa_entry,tcp_pkt->pdata,tcp_pkt->payload_len);
 
 		df = ch_assemble_fragment_pop(&ep->as_frag,ep->last_offset);
 		if(df){
-			if(sa_entry->rdb_store)
-				_write_session_payload(shandler,tcp_session,sa_entry,df->data,df->len);
+			
+			_write_session_payload(shandler,tcp_session,sa_entry,df->data,df->len);
 	
 			ep->last_offset = df->offset+df->len;
 
@@ -434,13 +451,9 @@ int ch_sa_tcp_session_packet_handle(ch_sa_tcp_session_handler_t *shandler,
 
 	if(c){
 	
-		//ch_ptable_dump(shandler->tcp_session_pool->tcp_session_tbl,stdout);
-		
-		ch_rdb_store_pool_dump(shandler->rdb_store_pool,stdout);
+		ch_ptable_dump(shandler->tcp_session_pool->tcp_session_tbl,stdout);
 
 	}
-
-	ch_rdb_store_pool_check(shandler->rdb_store_pool);
 
 	/*ok*/
 	return 0;

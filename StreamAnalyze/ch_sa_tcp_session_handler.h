@@ -17,7 +17,6 @@ typedef struct ch_sa_tcp_session_handler_t ch_sa_tcp_session_handler_t;
 #include "ch_sa_session_task.h"
 #include "ch_sa_work.h"
 #include "ch_sa_session_entry.h"
-#include "ch_rdb_store_pool.h"
 
 struct ch_sa_tcp_session_handler_t {
 
@@ -26,8 +25,6 @@ struct ch_sa_tcp_session_handler_t {
 	ch_sa_session_task_t *session_task;
 	
 	ch_tcp_session_pool_t *tcp_session_pool;
-
-	ch_rdb_store_pool_t *rdb_store_pool;
 
 };
 

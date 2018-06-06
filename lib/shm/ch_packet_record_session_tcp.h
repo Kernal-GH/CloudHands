@@ -34,15 +34,8 @@ struct ch_packet_record_session_tcp_t {
     uint16_t src_port;
     uint16_t dst_port;
 	
-	size_t db_path_len;
-	char *db_path;
-
     uint32_t src_ip;
     uint32_t dst_ip;
-	uint32_t req_data_size;
-	uint32_t res_data_size;
-	uint32_t req_data_seq;
-	uint32_t res_data_seq;
 
 	uint64_t session_id;
 	uint64_t req_packets;
@@ -53,15 +46,21 @@ struct ch_packet_record_session_tcp_t {
 	uint64_t req_last_time;
 	uint64_t res_start_time;
 	uint64_t res_last_time;
+	
+	void *req_data;
+	size_t req_dsize;
+
+	void *res_data;
+	size_t res_dsize;
 
 };
 
-#define CH_PACKET_RECORD_SESSION_TCP_META_SIZE(d_plen) (sizeof(uint8_t)+\
+#define CH_PACKET_RECORD_SESSION_TCP_META_SIZE(req_dsize,res_dsize) (sizeof(uint8_t)+\
 	sizeof(uint16_t)*4+\
-	sizeof(uint32_t)*6+\
+	sizeof(uint32_t)*2+\
 	sizeof(uint64_t)*9+\
-	sizeof(size_t)+\
-	d_plen)
+	sizeof(size_t)*2+\
+	req_dsize+res_dsize)
 
 extern void ch_packet_record_session_tcp_read(ch_packet_record_session_tcp_t *pkt_tcp_session,ch_packet_record_t *pkt_rcd);
 

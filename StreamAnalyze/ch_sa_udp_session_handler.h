@@ -16,7 +16,6 @@ typedef struct ch_sa_udp_session_handler_t ch_sa_udp_session_handler_t;
 #include "ch_sa_udp_session_pool.h"
 #include "ch_sa_session_task.h"
 #include "ch_sa_work.h"
-#include "ch_rdb_store_pool.h"
 
 struct ch_sa_udp_session_handler_t {
 
@@ -27,7 +26,6 @@ struct ch_sa_udp_session_handler_t {
 
 	ch_sa_udp_session_pool_t *udp_pool;
 
-	ch_rdb_store_pool_t *rdb_store_pool;
 
 };
 

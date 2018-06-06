@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-03-30 10:41:45
- * Last Modified: 2018-04-21 11:09:00
+ * Last Modified: 2018-06-06 16:13:34
  */
 
 #include "ch_sa_context.h"
@@ -43,6 +43,12 @@ static void do_sa_context_init(ch_sa_context_t *sa_context){
     sa_context->udp_session_cache_limits = 1024;
     sa_context->udp_session_timeout = 3*60;
 	sa_context->rdb_using_timeout = 3*60;
+
+	sa_context->stat_mmap_fname = "/tmp/sa_stat.data";
+	sa_context->stat_time_up = 7*24*3600;
+	sa_context->stat_time_tv = 5*60;
+
+	sa_context->dstore_limits = 100000;
 
 }
 
@@ -290,6 +296,49 @@ static const char *cmd_rdb_using_timeout(cmd_parms *cmd ch_unused, void *_dcfg, 
     return NULL;
 }
 
+static const char *cmd_sa_stat_mmap_fname(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1){
+
+    ch_sa_context_t *context = (ch_sa_context_t*)_dcfg;
+
+	context->stat_mmap_fname = p1;
+
+    return NULL;
+}
+
+static const char *cmd_sa_stat_timeup(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1){
+
+    char *endptr;
+
+    ch_sa_context_t *context = (ch_sa_context_t*)_dcfg;
+
+    context->stat_time_up = (uint64_t)strtoul(p1,&endptr,10);
+    
+    return NULL;
+}
+
+static const char *cmd_sa_stat_timetv(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1){
+
+    char *endptr;
+
+    ch_sa_context_t *context = (ch_sa_context_t*)_dcfg;
+
+    context->stat_time_tv = (uint64_t)strtoul(p1,&endptr,10);
+    
+    return NULL;
+}
+
+static const char *cmd_sa_dstore_limits(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1){
+
+    char *endptr;
+
+    ch_sa_context_t *context = (ch_sa_context_t*)_dcfg;
+
+    context->dstore_limits = (uint32_t)strtoul(p1,&endptr,10);
+    
+    return NULL;
+}
+
+
 static const command_rec sa_context_directives[] = {
     
 	CH_INIT_TAKE2(
@@ -437,6 +486,38 @@ static const command_rec sa_context_directives[] = {
             0,
             "set the store using timeout"
             ),
+	
+	CH_INIT_TAKE1(
+            "CHSAStatMMapFName",
+            cmd_sa_stat_mmap_fname,
+            NULL,
+            0,
+            "set the statistic mmap file name"
+            ),
+	
+	CH_INIT_TAKE1(
+            "CHSAStatTimeUP",
+            cmd_sa_stat_timeup,
+            NULL,
+            0,
+            "set the statistic time up"
+            ),
+
+	CH_INIT_TAKE1(
+            "CHSAStatTimeTV",
+            cmd_sa_stat_timetv,
+            NULL,
+            0,
+            "set the statistic time tv"
+            ),
+	
+	CH_INIT_TAKE1(
+            "CHSADataStoreLimits",
+            cmd_sa_dstore_limits,
+            NULL,
+            0,
+            "set the data store limits can been allocated!"
+            ),
 };
 
 static inline void dump_sa_context(ch_sa_context_t *sa_context){
@@ -461,6 +542,11 @@ static inline void dump_sa_context(ch_sa_context_t *sa_context){
     fprintf(stdout,"udp session timeout:%lu\n",(unsigned long)sa_context->udp_session_timeout);
     fprintf(stdout,"store session payload size:%lu\n",(unsigned long)sa_context->payload_data_size);
     fprintf(stdout,"store session using timeout:%lu\n",(unsigned long)sa_context->rdb_using_timeout);
+    
+	fprintf(stdout,"statistic mmap file name:%s\n",sa_context->stat_mmap_fname);
+    fprintf(stdout,"statistic time up:%lu\n",(unsigned long)sa_context->stat_time_up);
+    fprintf(stdout,"statistic time tv:%lu\n",(unsigned long)sa_context->stat_time_tv);
+    fprintf(stdout,"data store limits:%lu\n",(unsigned long)sa_context->dstore_limits);
 }
 
 ch_sa_context_t * ch_sa_context_create(ch_pool_t *mp,const char *cfname){

@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-03-22 11:45:40
- * Last Modified: 2018-04-18 15:08:41
+ * Last Modified: 2018-06-06 20:05:54
  */
 
 #include "ch_sa_tcp_session_request_handler.h"
@@ -54,7 +54,7 @@ static void _tcp_session_request_out(ch_sa_tcp_session_request_handler_t *req_ha
 	uint8_t is_timeout,
 	uint16_t timeout_tv){
 
-	size_t dlen = CH_PACKET_RECORD_SESSION_TCP_META_SIZE(0);
+	size_t dlen = CH_PACKET_RECORD_SESSION_TCP_META_SIZE(0,0);
 	size_t p_dlen = 0;
 
 	ch_sa_session_task_t *sa_session_task = req_handler->session_task;
@@ -93,15 +93,11 @@ static void _tcp_session_request_out(ch_sa_tcp_session_request_handler_t *req_ha
 	p_tcp_session->res_start_time = req_entry->res_start_time;
 	p_tcp_session->req_last_time = req_entry->req_last_time;
 	p_tcp_session->res_last_time = req_entry->res_last_time;
+	p_tcp_session->req_data = NULL;
+	p_tcp_session->req_dsize = 0;
+	p_tcp_session->res_data = NULL;
+	p_tcp_session->res_dsize = 0;
 
-	p_tcp_session->req_data_size = 0;
-	p_tcp_session->res_data_size = 0;
-	p_tcp_session->req_data_seq = 0;
-	p_tcp_session->res_data_seq = 0;
-
-	p_tcp_session->db_path_len = 0;
-
-	p_tcp_session->db_path = NULL;
 
 	p_dlen = ch_packet_record_session_tcp_write(p_tcp_session,p_buffer->bdata,p_buffer->b_current_size,NULL,0);
 
@@ -210,8 +206,6 @@ _tcp_session_create(ch_sa_tcp_session_request_handler_t *req_handler,
 	sa_entry->req_start_time = req_entry->req_start_time;
 	sa_entry->res_start_time = req_entry->res_start_time;
 	
-	sa_entry->rdb_store = ch_rdb_store_pool_get(req_handler->session_task->tcp_session_handler->rdb_store_pool);
-
     tcp_session->session_id = ch_atomic64_add_return(cur_session_id_ptr,1)%ULONG_MAX;
 
     /*ok,now handle this data packet,*/
@@ -379,13 +373,11 @@ int ch_sa_tcp_session_request_packet_handle(ch_sa_tcp_session_request_handler_t 
 	c = ch_ptable_entries_timeout_free(req_handler->req_pool->tcp_session_request_tbl,
 		NULL);
 
-#if 0
 	if(c){
 	
 		ch_ptable_dump(req_handler->req_pool->tcp_session_request_tbl,stdout);
 
 	}
-#endif
     return res;
 
 }

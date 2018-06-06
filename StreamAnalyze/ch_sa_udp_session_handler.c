@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-04-13 15:50:28
- * Last Modified: 2018-04-21 11:12:16
+ * Last Modified: 2018-06-06 19:51:10
  */
 
 #include "ch_sa_udp_session_handler.h"
@@ -27,19 +27,26 @@ static void _udp_session_out(ch_sa_udp_session_handler_t *udp_handler,
 	uint8_t is_timeout,
 	uint16_t timeout_tv){
 
-	char *dbname;
-
-	size_t p_dlen = 0,db_path_len = 0;
-
+	size_t p_dlen = 0;
 	ch_sa_session_task_t *sa_session_task = udp_handler->session_task;
 	ch_buffer_t *p_buffer = &sa_session_task->sa_buffer;
 
-	dbname = udp_session->rdb_store->rdb_name;
-	db_path_len = strlen(dbname);
+	ch_sa_data_store_t *req_dstore = udp_session->endpoint_req.dstore;
+	ch_sa_data_store_t *res_dstore = udp_session->endpoint_res.dstore;
+	void *req_data = NULL,*res_data = NULL;
+	size_t req_dsize = 0,res_dsize = 0;
 
-	ch_rdb_store_ref_update(udp_session->rdb_store,-1);
+	if(req_dstore){
+		req_dsize = ch_sa_data_store_size(req_dstore);
+		req_data = req_dsize?req_dstore->pos:NULL;
+	}
 
-	size_t meta_data_size = CH_PACKET_RECORD_SESSION_UDP_META_SIZE(db_path_len);
+	if(res_dstore){
+		res_dsize = ch_sa_data_store_size(res_dstore);
+		res_data = res_dsize?res_dstore->pos:NULL;
+	}
+
+	size_t meta_data_size = CH_PACKET_RECORD_SESSION_UDP_META_SIZE(req_dsize,res_dsize);
 
 	ch_packet_record_t pkt_rcd;
 	ch_packet_record_session_udp_t ptmp,*p_udp_session = &ptmp;
@@ -50,6 +57,7 @@ static void _udp_session_out(ch_sa_udp_session_handler_t *udp_handler,
 		if(ch_buffer_update(p_buffer,meta_data_size)){
 		
 			ch_log(CH_LOG_ERR,"Cannot create buffer failed for udp session handler!");
+			ch_sa_udp_session_dstore_free(udp_session);
 			return;
 		}
 	}
@@ -72,16 +80,11 @@ static void _udp_session_out(ch_sa_udp_session_handler_t *udp_handler,
 	p_udp_session->req_last_time = ch_sa_udp_session_req_last_time(udp_session);
 	p_udp_session->res_last_time = ch_sa_udp_session_res_last_time(udp_session);
 
-	p_udp_session->req_data_size = ch_sa_udp_session_req_data_size(udp_session);
-	p_udp_session->res_data_size = ch_sa_udp_session_res_data_size(udp_session);
-	p_udp_session->req_data_seq = ch_sa_udp_session_req_data_seq(udp_session);
-	p_udp_session->res_data_seq = ch_sa_udp_session_res_data_seq(udp_session);
+	p_udp_session->req_data = req_data;
+	p_udp_session->req_dsize = req_dsize;
+	p_udp_session->res_data = res_data;
+	p_udp_session->res_dsize = res_dsize;
 
-
-	p_udp_session->db_path_len = db_path_len;
-
-	p_udp_session->db_path = dbname;
-	
 	p_dlen = ch_packet_record_session_udp_write(p_udp_session,p_buffer->bdata,p_buffer->b_current_size,NULL,0);
 
 	pkt_rcd.type = PKT_RECORD_TYPE_SESSION_UDP;
@@ -92,6 +95,8 @@ static void _udp_session_out(ch_sa_udp_session_handler_t *udp_handler,
 		&pkt_rcd,
 		p_buffer->bdata,
 		p_dlen);
+	
+	ch_sa_udp_session_dstore_free(udp_session);
 
 }
 
@@ -108,8 +113,6 @@ static void _udp_session_timeout_cb(ch_ptable_entry_t *entry,uint64_t tv,void *p
 ch_sa_udp_session_handler_t *
 ch_sa_udp_session_handler_create(ch_sa_work_t *sa_work,ch_sa_session_task_t *session_task){
 
-	ch_sa_context_t *sa_context = sa_work->sa_context;
-
 	ch_sa_udp_session_handler_t *udp_handler = NULL;
 
 	udp_handler = (ch_sa_udp_session_handler_t*)ch_palloc(sa_work->mp,sizeof(*udp_handler));
@@ -125,47 +128,38 @@ ch_sa_udp_session_handler_create(ch_sa_work_t *sa_work,ch_sa_session_task_t *ses
 		return NULL;
 	}
 
-	
-	/*create udp rdb store*/
-	udp_handler->rdb_store_pool = ch_rdb_store_pool_create(sa_work->mp,sa_context->rdb_store_dir,
-		_get_prefix_name(sa_work->mp,session_task->task.tsk_id),
-		sa_context->rdb_name_create_type,
-		sa_context->rdb_using_timeout);
-
-	if(udp_handler->rdb_store_pool == NULL){
-	
-		ch_log(CH_LOG_ERR,"Create rdb pool failed for udp session handler!");
-		return NULL;
-
-	}
-	
 	ch_atomic64_init(cur_session_id_ptr);
 
 	return udp_handler;
 }
 
-static void _udp_data_write(ch_sa_context_t *sa_context,
-	ch_sa_udp_session_t *udp_session,ch_sa_udp_session_endpoint_t *ep,void *data,size_t dlen){
+static void _udp_data_write(ch_sa_context_t *sa_context,ch_sa_udp_session_handler_t *udp_handler,ch_sa_udp_session_endpoint_t *ep,void *data,size_t dlen){
 
-	char key[128] = {0};
+	ch_sa_data_store_pool_t *dstore_pool = udp_handler->session_task->dstore_pool;
+	ch_sa_data_store_t *dstore = ep->dstore;
 	size_t r_dlen = dlen;
-	const char *tstr = ep==&udp_session->endpoint_req?"REQ":"RES";
+	size_t rw_dlen = 0;
+
+	if(dstore == NULL){
 	
-	if(ep->data_size+dlen>sa_context->payload_data_size){
-	
-		r_dlen = sa_context->payload_data_size - ep->data_size;
+		ch_sa_data_store_get(dstore_pool,dstore);
+		if(dstore == NULL){
+			ep->error = 1;
+			return;
+		}
+		ep->dstore = dstore;
 	}
 
-	snprintf(key,128,"%lu%s",udp_session->session_id,tstr);
+	rw_dlen = ch_sa_data_store_size(dstore);
 
-	ep->data_size += r_dlen;
-	ep->data_seq += 1;
+	if(rw_dlen+dlen>sa_context->payload_data_size){
+	
+		r_dlen = sa_context->payload_data_size - rw_dlen;
+	}
 
-
-	ch_rdb_store_put(udp_session->rdb_store,key,strlen(key),(const char*)data,r_dlen);
+	ch_sa_data_store_write(dstore,data,r_dlen);
 
 }
-
 
 int ch_sa_udp_session_packet_handle(ch_sa_udp_session_handler_t *udp_handler,ch_packet_t *pkt){
 
@@ -173,6 +167,7 @@ int ch_sa_udp_session_packet_handle(ch_sa_udp_session_handler_t *udp_handler,ch_
 	uint64_t sid;
 	ch_sa_context_t *sa_context = udp_handler->sa_work->sa_context;
 	uint32_t max_dlen = sa_context->payload_data_size;
+	uint32_t rw_dsize = 0;
 
 	ch_packet_udp_t udp_tmp,*pkt_udp = &udp_tmp;
 	ch_sa_udp_session_t *udp_session = NULL;
@@ -198,13 +193,12 @@ int ch_sa_udp_session_packet_handle(ch_sa_udp_session_handler_t *udp_handler,ch_
 			ch_log(CH_LOG_ERR,"Create a new udp session failed!");
 			return -1;
 		}
-
-		udp_session->rdb_store = ch_rdb_store_pool_get(udp_handler->rdb_store_pool);
-
+		rw_dsize = 0;
 		ep = &udp_session->endpoint_req;
 	}else{
 	
 		ep = ch_sa_udp_session_endpoint_get(udp_session,pkt_udp); 
+		rw_dsize = ep->dstore== NULL?0:ch_sa_data_store_size(ep->dstore);
 	}
 
 	if(ep == NULL){
@@ -215,9 +209,9 @@ int ch_sa_udp_session_packet_handle(ch_sa_udp_session_handler_t *udp_handler,ch_
 
 	ch_sa_udp_session_update(udp_session,ep,pkt_udp);
 
-	if((pkt_udp->payload_len)>0&&(pkt_udp->pdata)&&(ep->data_size<max_dlen)){
+	if((pkt_udp->payload_len)>0&&(pkt_udp->pdata)&&(rw_dsize<max_dlen)&&(ep->error == 0)){
 	
-		_udp_data_write(sa_context,udp_session,ep,pkt_udp->pdata,pkt_udp->payload_len);
+		_udp_data_write(sa_context,udp_handler,ep,pkt_udp->pdata,pkt_udp->payload_len);
 
 	}
 	
@@ -227,13 +221,8 @@ int ch_sa_udp_session_packet_handle(ch_sa_udp_session_handler_t *udp_handler,ch_
 
 	if(c){
 	
-		//ch_ptable_dump(shandler->tcp_session_pool->tcp_session_tbl,stdout);
-		
-		ch_rdb_store_pool_dump(udp_handler->rdb_store_pool,stdout);
-
+		ch_ptable_dump(udp_handler->udp_pool->udp_session_tbl,stdout);
 	}
-
-	ch_rdb_store_pool_check(udp_handler->rdb_store_pool);
 
 	/*ok*/
 	return 0;

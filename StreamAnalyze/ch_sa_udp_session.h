@@ -18,22 +18,22 @@ typedef struct ch_sa_udp_session_endpoint_t ch_sa_udp_session_endpoint_t;
 #include "ch_ptable.h"
 #include "ch_packet_udp.h"
 #include "ch_util.h"
-#include "ch_rdb_store.h"
+#include "ch_sa_data_store_pool.h"
 
 struct ch_sa_udp_session_endpoint_t {
 
+	ch_sa_data_store_t *dstore;
+	
 	uint16_t port;
 	uint32_t ip;
 
-	uint32_t data_size;
-	uint32_t data_seq;
-	
 	uint64_t packets;
 	uint64_t bytes;
 	
 	uint64_t start_time;
 	uint64_t last_time;
 
+	int error;
 };
 
 struct ch_sa_udp_session_t {
@@ -42,8 +42,6 @@ struct ch_sa_udp_session_t {
 
 	ch_sa_udp_session_endpoint_t endpoint_req;
 	ch_sa_udp_session_endpoint_t endpoint_res;
-
-	ch_rdb_store_t *rdb_store;
 
 	uint64_t session_id;
 
@@ -58,17 +56,40 @@ struct ch_sa_udp_session_t {
 #define ch_sa_udp_session_req_bytes(sa_udp_session) ((sa_udp_session)->endpoint_req.bytes)
 #define ch_sa_udp_session_req_start_time(sa_udp_session) ((sa_udp_session)->endpoint_req.start_time)
 #define ch_sa_udp_session_req_last_time(sa_udp_session) ((sa_udp_session)->endpoint_req.last_time)
-#define ch_sa_udp_session_req_data_size(sa_udp_session) ((sa_udp_session)->endpoint_req.data_size)
-#define ch_sa_udp_session_req_data_seq(sa_udp_session) ((sa_udp_session)->endpoint_req.data_seq)
 
 #define ch_sa_udp_session_res_packets(sa_udp_session) ((sa_udp_session)->endpoint_res.packets)
 #define ch_sa_udp_session_res_bytes(sa_udp_session) ((sa_udp_session)->endpoint_res.bytes)
 #define ch_sa_udp_session_res_start_time(sa_udp_session) ((sa_udp_session)->endpoint_res.start_time)
 #define ch_sa_udp_session_res_last_time(sa_udp_session) ((sa_udp_session)->endpoint_res.last_time)
-#define ch_sa_udp_session_res_data_size(sa_udp_session) ((sa_udp_session)->endpoint_res.data_size)
-#define ch_sa_udp_session_res_data_seq(sa_udp_session) ((sa_udp_session)->endpoint_res.data_seq)
 
 #define EP_EQUAL(ep,eip,eport) ((ep->ip == eip)&&(ep->port == eport))
+
+#define ch_sa_udp_session_dstore_free(usession) do {				\
+	ch_sa_data_store_t *rq_dstore = usession->endpoint_req.dstore;	\
+	ch_sa_data_store_t *rs_dstore = usession->endpoint_res.dstore;	\
+	if(rq_dstore)													\
+		ch_sa_data_store_free(rq_dstore);							\
+	if(rs_dstore)													\
+		ch_sa_data_store_free(rs_dstore);							\
+}while(0)
+
+static inline uint32_t ch_sa_udp_session_req_data_size(ch_sa_udp_session_t *udp_session) {
+
+	ch_sa_data_store_t *dstore = udp_session->endpoint_req.dstore;
+	if(dstore == NULL)
+		return 0;
+
+	return ch_sa_data_store_size(dstore);
+}
+
+static inline uint32_t ch_sa_udp_session_res_data_size(ch_sa_udp_session_t *udp_session) {
+
+	ch_sa_data_store_t *dstore = udp_session->endpoint_res.dstore;
+	if(dstore == NULL)
+		return 0;
+
+	return ch_sa_data_store_size(dstore);
+}
 
 static inline void ch_sa_udp_session_init(ch_sa_udp_session_t *udp_session,ch_packet_udp_t *pkt_udp,uint64_t session_id){
 
@@ -82,23 +103,22 @@ static inline void ch_sa_udp_session_init(ch_sa_udp_session_t *udp_session,ch_pa
 	/*init req endpoint*/
 	req->ip = pkt_udp->src_ip;
 	req->port = pkt_udp->src_port;
-	req->data_size = 0;
-	req->data_seq = 0;
 	req->packets = 1;
 	req->bytes = pkt_udp->payload_len;
 	req->start_time = time;
 	req->last_time = time;
+	req->dstore = NULL;
+	req->error = 0;
 
 	/*init res endpoint*/
 	res->ip = pkt_udp->dst_ip;
 	res->port = pkt_udp->dst_port;
-	res->data_size = 0;
-	res->data_seq = 0;
 	res->packets = 0;
 	res->bytes = 0;
 	res->start_time = time;
 	res->last_time = time;
-
+	res->dstore = NULL;
+	res->error = 0;
 }
 
 static inline void 

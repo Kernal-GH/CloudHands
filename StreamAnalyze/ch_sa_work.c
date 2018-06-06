@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-04-09 10:13:20
- * Last Modified: 2018-04-09 15:38:05
+ * Last Modified: 2018-06-06 11:39:09
  */
 
 #include "ch_sa_work.h"
@@ -56,6 +56,15 @@ ch_sa_work_t * ch_sa_work_create(ch_pool_t *mp,const char *cfname){
 	if(sa_work->sat_pool == NULL){
 	
 		ch_log(CH_LOG_ERR,"Cannot create sa session task pool!");
+		return NULL;
+	}
+
+	sa_work->st_pool = ch_stat_pool_create(sa_work->mp,sa_context->stat_mmap_fname,
+		sa_context->stat_time_up,sa_context->stat_time_tv);
+
+	if(sa_work->st_pool == NULL){
+	
+		ch_log(CH_LOG_ERR,"Cannot create statistic pool!");
 		return NULL;
 	}
 

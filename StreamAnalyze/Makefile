@@ -3,7 +3,7 @@ DPDK=/usr/local/dpdk/dpdk_src
 DPDK_FLAGS=$(shell cat ${DPDK}/include/cflags.txt)
 DPDK_LIB_FLAGS = $(shell cat ${DPDK}/lib/ldflags.txt)
 CFLAGS  = ${BUILD_CFLAGS}  -O0 -rdynamic -D_GNU_SOURCE -DUSE_DPDK ${DPDK_FLAGS} -pthread
-CFLAGS += -I../lib/common  -I../lib/shm -I../lib/thread -I../lib/ptables -I../lib/RDB -I../packet -I../MProcess -I../tcp -I../app -I${DPDK}/include -include ${DPDK}/include/rte_config.h
+CFLAGS += -I../lib/common  -I../lib/shm -I../lib/thread -I../lib/ptables -I../packet -I../MProcess -I../tcp -I../app -I./statistic -I${DPDK}/include -include ${DPDK}/include/rte_config.h
 
 LDFLAGS  = ${BUILD_LDFLAGS} ${DPDK_LIB_FLAGS} -lpthread -lrocksdb -lsnappy
 
@@ -11,10 +11,10 @@ LDFLAGS  = ${BUILD_LDFLAGS} ${DPDK_LIB_FLAGS} -lpthread -lrocksdb -lsnappy
 common_package = ../lib/common/*.o
 cpool_package = ../lib/thread/*.o
 shm_package = ../lib/shm/*.o
-rdb_package = ../lib/RDB/*.o
 ptables_package = ../lib/ptables/*.o
 pkt_package = ../packet/*.o
 mprocess_package = ../MProcess/*.o
+stat_package = ./statistic/*.o
 
 tcp_package=../tcp/ch_assemble_fragment.o \
 			../tcp/ch_tcp_context.o \
@@ -37,7 +37,8 @@ sa_SOURCES = StreamAnalyze.c \
 			 ch_sa_udp_session_pool.c \
 			 ch_sa_udp_session_handler.c \
 			 ch_sa_icmp_handler.c \
-			 ch_sa_arp_handler.c
+			 ch_sa_arp_handler.c \
+			 ch_sa_data_store_pool.c
 
 sa_OBJECTS =$(patsubst %.c,%.o,$(sa_SOURCES))
 sa_DEPENDS =$(patsubst %.c,%.d,$(sa_SOURCES))
@@ -46,7 +47,7 @@ sa_ASMFILE =$(patsubst %.c,%.s,$(sa_SOURCES))
 quiet_cmd_dpdk = LINK   $@ 
 	cmd_sa = ${CC} ${CFLAGS} -o $@ $(sa_OBJECTS)  \
 				   $(common_package) $(cpool_package) $(shm_package) $(ptables_package)\
-				   $(pkt_package)  $(mprocess_package) $(tcp_package) $(rdb_package)\
+				   $(pkt_package)  $(mprocess_package) $(tcp_package)  $(stat_package)\
 				   $(LDFLAGS)
 
 .PHONY: all clean
@@ -75,10 +76,10 @@ $(pkt_package):
 $(mprocess_package):
 	$(call,make)
 
-$(mprocess_package):
+$(tcp_package):
 	$(call,make)
 
-$(tcp_package):
+$(stat_package):
 	$(call,make)
 
 clean:

@@ -57,7 +57,12 @@ struct ch_sa_context_t {
 
 	uint64_t rdb_using_timeout;
 
+	/*statistic configs*/
+	const char *stat_mmap_fname;
+	uint64_t stat_time_up;
+	uint64_t stat_time_tv;
 
+	uint32_t dstore_limits;
 };
 
 extern ch_sa_context_t * ch_sa_context_create(ch_pool_t *mp,const char *cfname);

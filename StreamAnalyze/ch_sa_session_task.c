@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-03-30 11:49:48
- * Last Modified: 2018-04-16 11:37:10
+ * Last Modified: 2018-06-06 16:20:20
  */
 
 #include "ch_sa_session_task.h"
@@ -22,6 +22,8 @@ static int _sa_session_task_run(ch_task_t *task,void *priv_data ch_unused){
 
 	ch_sa_session_task_t *sa_task = (ch_sa_session_task_t*)task;
 	ch_packet_t *pkt;
+
+	ch_stat_pool_update(sa_task->sa_work->st_pool);
 
 	pkt = ch_process_queue_pop(sa_task->pqueue);
 
@@ -126,6 +128,14 @@ ch_sa_session_task_t * ch_sa_session_task_create(ch_sa_work_t *sa_work,uint32_t 
 		ch_log(CH_LOG_ERR,"Create buffer failed for sa session!");
 		return NULL;
 	}
+
+	sa_session_task->dstore_pool = ch_sa_data_store_pool_create(sa_context->payload_data_size,sa_context->dstore_limits);
+	if(sa_session_task->dstore_pool == NULL){
+	
+		ch_log(CH_LOG_ERR,"Create data store pool failed!");
+		return NULL;
+	}
+
 
 	return sa_session_task;
 }
