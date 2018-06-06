@@ -16,6 +16,7 @@ typedef struct ch_stat_pool_hdr_t ch_stat_pool_hdr_t;
 
 #include "ch_stat_mpool.h"
 #include "ch_mpool.h"
+#include "ch_stat_obj.h"
 
 /*Stat types*/
 enum {
@@ -35,7 +36,9 @@ struct ch_stat_pool_hdr_t {
 	uint64_t base_time;
 	uint64_t stat_time_up;
 	uint64_t stat_time_tv;
-
+	
+	uint64_t pkt_total;
+	uint64_t pkt_bytes;
 };
 #pragma pack(pop)
 

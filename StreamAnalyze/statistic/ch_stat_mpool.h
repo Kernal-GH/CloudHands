@@ -13,6 +13,7 @@
 
 typedef struct ch_stat_mpool_t ch_stat_mpool_t;
 
+#include <stdlib.h>
 
 struct ch_stat_mpool_t {
 

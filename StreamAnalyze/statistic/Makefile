@@ -6,7 +6,9 @@
 include ../../make.include
 CFLAGS += -I../../lib/common
 
-ch_stat_SOURCES = ch_stat_mpool.c
+ch_stat_SOURCES = ch_stat_mpool.c \
+				  ch_stat_pool.c \
+				  ch_stat_obj.c
 
 ch_stat_OBJECTS = $(patsubst %.c,%.o,$(ch_stat_SOURCES))
 ch_stat_DEPENDS = $(patsubst %.c,%.d,$(ch_stat_SOURCES))

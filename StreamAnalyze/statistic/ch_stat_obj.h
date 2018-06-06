@@ -14,6 +14,9 @@
 typedef struct ch_stat_obj_t ch_stat_obj_t;
 typedef struct ch_stat_obj_hdr_t ch_stat_obj_hdr_t;
 
+#include <stdio.h>
+#include "ch_stat_entry.h"
+
 #pragma pack(push,1)
 struct ch_stat_obj_hdr_t {
 
@@ -36,6 +39,8 @@ extern void ch_stat_obj_init(ch_stat_obj_t *stat_obj,void *addr,uint32_t obj_typ
 extern void ch_stat_obj_load(ch_stat_obj_t *stat_obj,void *addr);
 
 extern void ch_stat_obj_reset(ch_stat_obj_t *stat_obj,void *addr);
+
+extern void ch_stat_obj_handle(ch_stat_obj_t *stat_obj,uint32_t index,uint64_t pkt_size);
 
 #define ch_stat_obj_entry_find(stat_obj,index) ((stat_obj)->obj_hdr->entry_num<=(index)?NULL:(stat_obj)->stat_entris+(index))
 

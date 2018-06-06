@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-06-05 15:06:13
- * Last Modified: 2018-06-05 19:35:57
+ * Last Modified: 2018-06-06 10:35:38
  */
 
 #include "ch_stat_pool.h"
@@ -77,6 +77,8 @@ ch_stat_pool_t * ch_stat_pool_create(ch_pool_t *mp,const char *mmap_fname,
 		st_pool->p_hdr->base_time = ch_get_current_timems()/1000;
 		st_pool->p_hdr->stat_time_up = stat_time_up;
 		st_pool->p_hdr->stat_time_tv = stat_time_tv;
+		st_pool->p_hdr->pkt_total = 0;
+		st_pool->p_hdr->pkt_bytes = 0;
 	}
 
 	for(i = 0;i<STAT_NUM;i++){
@@ -101,7 +103,31 @@ ch_stat_pool_t * ch_stat_pool_create(ch_pool_t *mp,const char *mmap_fname,
 
 void ch_stat_pool_handle(ch_stat_pool_t *st_pool,uint64_t time,uint64_t pkt_size,int pkt_type){
 
+	ch_stat_pool_hdr_t *p_hdr;
+	ch_stat_obj_t *stat_obj;
+	uint32_t index;
 
+	p_hdr = st_pool->p_hdr;
+
+	/*gobal statistic*/
+	p_hdr->pkt_total += 1;
+	p_hdr->pkt_bytes += pkt_size;
+
+	if(time<p_hdr->base_time)
+		return;
+
+	index = (time-p_hdr->base_time)/p_hdr->stat_time_tv;
+
+	/**/
+	stat_obj = &st_pool->stat_objs[0];
+	ch_stat_obj_handle(stat_obj,index,pkt_size);
+
+	if(pkt_type<=0||pkt_type>=STAT_NUM)
+		return;
+
+	stat_obj = &st_pool->stat_objs[pkt_type];
+	ch_stat_obj_handle(stat_obj,index,pkt_size);
+	
 }
 
 
@@ -122,6 +148,9 @@ void ch_stat_pool_update(ch_stat_pool_t *st_pool){
 
 	/*reset*/
 	p_hdr->base_time = time;
+	p_hdr->pkt_total = 0;
+	p_hdr->pkt_bytes = 0;
+
 	npos = (void*)(st_pool->p_hdr+1);
 
 	ch_stat_mpool_pos_set(st_mpool,npos);
