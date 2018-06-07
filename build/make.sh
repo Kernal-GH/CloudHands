@@ -61,6 +61,7 @@ cp -r ../packet $src_path
 cp -r ../MProcess $src_path
 cp -r ../tcp $src_path
 cp -r ../app $src_path
+cp -r ../udp $src_path
 cp -r ../StreamAnalyze $src_path
 cp -f ./*.sh ./build_dir/
 
