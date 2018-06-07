@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-06-05 16:58:22
- * Last Modified: 2018-06-06 10:46:36
+ * Last Modified: 2018-06-07 15:24:57
  */
 
 #include "ch_stat_obj.h"
@@ -43,15 +43,11 @@ void ch_stat_obj_load(ch_stat_obj_t *stat_obj,void *addr) {
 
 }
 
-void ch_stat_obj_reset(ch_stat_obj_t *stat_obj,void *addr){
+void ch_stat_obj_reset(ch_stat_obj_t *stat_obj){
 
 	uint32_t i;
 	ch_stat_entry_t *entry;
-	ch_stat_obj_hdr_t *obj_hdr = (ch_stat_obj_hdr_t*)addr;
-
-	stat_obj->obj_hdr = obj_hdr;
-
-	stat_obj->stat_entris = (ch_stat_entry_t*)(obj_hdr+1);
+	ch_stat_obj_hdr_t *obj_hdr = stat_obj->obj_hdr;
 
 	for(i = 0;i<obj_hdr->entry_num;i++){
 	
@@ -70,5 +66,26 @@ void ch_stat_obj_handle(ch_stat_obj_t *stat_obj,uint32_t index,uint64_t pkt_size
 		return;
 
 	ch_stat_entry_value_update(entry,pkt_size);
+}
+
+void ch_stat_obj_dump(ch_stat_obj_t *stat_obj,uint32_t n,FILE *fp){
+
+	ch_stat_entry_t *entry;
+	uint32_t i;
+	if(n>stat_obj->obj_hdr->entry_num)
+		n = stat_obj->obj_hdr->entry_num;
+
+
+	fprintf(fp,"%s:[",ch_stat_obj_type_name(stat_obj));
+	for(i = 0;i<n;i++){
+
+		entry = stat_obj->stat_entris+i;
+		fprintf(fp,"(%lu,%lu)",(unsigned long)entry->st_n,(unsigned long)entry->st_v);
+		if(i!=n-1)
+			fprintf(fp,",");
+
+	}
+
+	fprintf(fp,"]\n\n");
 }
 

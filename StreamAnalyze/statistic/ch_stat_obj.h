@@ -34,14 +34,54 @@ struct ch_stat_obj_t {
 
 };
 
+#define ch_stat_obj_entry_find(stat_obj,index) ((stat_obj)->obj_hdr->entry_num<=(index)?NULL:(stat_obj)->stat_entris+(index))
+
 extern void ch_stat_obj_init(ch_stat_obj_t *stat_obj,void *addr,uint32_t obj_type,uint32_t entry_num);
 
 extern void ch_stat_obj_load(ch_stat_obj_t *stat_obj,void *addr);
 
-extern void ch_stat_obj_reset(ch_stat_obj_t *stat_obj,void *addr);
+extern void ch_stat_obj_reset(ch_stat_obj_t *stat_obj);
 
 extern void ch_stat_obj_handle(ch_stat_obj_t *stat_obj,uint32_t index,uint64_t pkt_size);
 
-#define ch_stat_obj_entry_find(stat_obj,index) ((stat_obj)->obj_hdr->entry_num<=(index)?NULL:(stat_obj)->stat_entris+(index))
+extern void ch_stat_obj_dump(ch_stat_obj_t *stat_obj,uint32_t n,FILE *fp);
+
+#include "ch_stat_pool.h"
+static inline const char * ch_stat_obj_type_name(ch_stat_obj_t *stat_obj){
+
+	const char *name = "";
+
+	switch(stat_obj->obj_hdr->obj_type){
+	
+	case STAT_ALL:
+		name = "total";
+		break;
+
+	case STAT_TCP:
+		name = "tcp";
+		break;
+	
+	case STAT_UDP:
+		name = "udp";
+		break;
+
+	case STAT_ICMP:
+		name = "icmp";
+		break;
+
+	case STAT_ARP:
+		name = "arp";
+		break;
+
+	case STAT_OTHER:
+		name = "other";
+		break;
+	default:
+		name = "unknown";
+		break;
+	}
+
+	return name;
+}
 
 #endif /*CH_STAT_OBJ_H*/

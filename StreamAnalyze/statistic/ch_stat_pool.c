@@ -5,13 +5,26 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-06-05 15:06:13
- * Last Modified: 2018-06-06 10:35:38
+ * Last Modified: 2018-06-07 16:05:56
  */
 
 #include "ch_stat_pool.h"
 #include "ch_log.h"
+#include "ch_util.h"
 
-#define STAT_ENTRY_COUNT(time_up,time_tv) ((time_up)/(time_tv))
+#define STAT_ENTRY_COUNT(time_up,time_tv) (uint32_t)(time_tv == 0?0:(time_up)/(time_tv))
+
+static size_t _get_fsize(const char *fname){
+	
+	struct stat st;
+	stat(fname, &st);
+	return st.st_size;
+}
+
+static inline int _is_file_existed(const char *fname){
+
+   return access(fname,F_OK) == 0;
+}
 
 static size_t _stat_msize_cal(uint64_t stat_time_up,uint64_t stat_time_tv){
 
@@ -51,6 +64,8 @@ static void * _stat_obj_addr(ch_stat_pool_t *st_pool){
 ch_stat_pool_t * ch_stat_pool_create(ch_pool_t *mp,const char *mmap_fname,
 	uint64_t stat_time_up,uint64_t stat_time_tv){
 
+	size_t msize = 0;
+	int existed = 0;
 	void *addr;
 	int i;
 
@@ -64,15 +79,18 @@ ch_stat_pool_t * ch_stat_pool_create(ch_pool_t *mp,const char *mmap_fname,
 
 	st_mpool = &st_pool->st_mpool;
 
+	existed = _is_file_existed(mmap_fname);
+	msize = existed?_get_fsize(mmap_fname):_stat_msize_cal(stat_time_up,stat_time_tv);
+
 	/*load mmap memory pool*/
-	if(ch_stat_mpool_init(st_mpool,mmap_fname,_stat_msize_cal(stat_time_up,stat_time_tv))){
+	if(ch_stat_mpool_init(st_mpool,mmap_fname,msize,existed)){
 		ch_log(CH_LOG_ERR,"Cannot load mmap memory pool!");
 		return NULL;
 	}
 
 	st_pool->p_hdr = (ch_stat_pool_hdr_t*)ch_stat_mpool_alloc(st_mpool,sizeof(ch_stat_pool_hdr_t));
 
-	if(st_mpool->is_new_created){
+	if(existed == 0){
 	
 		st_pool->p_hdr->base_time = ch_get_current_timems()/1000;
 		st_pool->p_hdr->stat_time_up = stat_time_up;
@@ -92,7 +110,7 @@ ch_stat_pool_t * ch_stat_pool_create(ch_pool_t *mp,const char *mmap_fname,
 			return NULL;
 		}
 
-		if(st_mpool->is_new_created)
+		if(existed == 0)
 			ch_stat_obj_init(stat_obj,addr,i,STAT_ENTRY_COUNT(stat_time_up,stat_time_tv));
 		else
 			ch_stat_obj_load(stat_obj,addr);
@@ -133,7 +151,6 @@ void ch_stat_pool_handle(ch_stat_pool_t *st_pool,uint64_t time,uint64_t pkt_size
 
 void ch_stat_pool_update(ch_stat_pool_t *st_pool){
 
-	void *addr;
 	void *npos;
 	int i;
 	ch_stat_obj_t *stat_obj;
@@ -159,11 +176,43 @@ void ch_stat_pool_update(ch_stat_pool_t *st_pool){
 	
 		stat_obj = &st_pool->stat_objs[i];
 
-		addr = _stat_obj_addr(st_pool);
-		
-		ch_stat_obj_reset(stat_obj,addr);
+		ch_stat_obj_reset(stat_obj);
 	}
 
+}
+
+static inline uint32_t _index_up(ch_stat_pool_t *st_pool){
+
+	uint64_t time = ch_get_current_timems()/1000;
+	uint32_t index = (time-st_pool->p_hdr->base_time)/st_pool->p_hdr->stat_time_tv;
+
+	return index+1;
+}
+
+void ch_stat_pool_dump(ch_stat_pool_t *st_pool,FILE *fp) {
+
+	int i;
+	uint32_t n;
+	ch_stat_pool_hdr_t *p_hdr = st_pool->p_hdr;
+	ch_stat_obj_t *stat_obj;
+
+	n = _index_up(st_pool);
+
+	fprintf(fp,"Dump The Stat Pool information:\n");
+
+	fprintf(fp,"base_time:%lu\n",(unsigned long)p_hdr->base_time);
+	fprintf(fp,"stat_time_up:%lu\n",(unsigned long)p_hdr->stat_time_up);
+	fprintf(fp,"stat_time_tv:%lu\n",(unsigned long)p_hdr->stat_time_tv);
+	fprintf(fp,"pkt_total:%lu\n",(unsigned long)p_hdr->pkt_total);
+	fprintf(fp,"pkt_bytes:%lu\n",(unsigned long)p_hdr->pkt_bytes);
+
+
+	for(i = 0;i<STAT_NUM;i++){
+	
+		stat_obj = &st_pool->stat_objs[i];
+
+		ch_stat_obj_dump(stat_obj,n,fp);
+	}
 }
 
 

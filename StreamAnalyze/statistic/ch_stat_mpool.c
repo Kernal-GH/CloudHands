@@ -5,18 +5,13 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-06-05 11:20:21
- * Last Modified: 2018-06-05 13:37:16
+ * Last Modified: 2018-06-07 16:03:19
  */
 
 #include <sys/mman.h>
 #include <fcntl.h>
 #include "ch_stat_mpool.h"
 #include "ch_log.h"
-
-static inline int _is_file_existed(const char *fname){
-
-   return access(fname,F_OK) == 0;
-}
 
 static int _mmap_file_open(const char *fname,uint64_t fsize,int existed){
    int fd;
@@ -50,13 +45,11 @@ static int _mmap_file_attach(ch_stat_mpool_t *st_mpool,uint64_t r_msize){
 	return 0;
 }
 
-int ch_stat_mpool_init(ch_stat_mpool_t *st_mpool,const char *mmap_fname,size_t msize){
+int ch_stat_mpool_init(ch_stat_mpool_t *st_mpool,const char *mmap_fname,size_t msize,int existed){
 
 	int fd;
 	uint64_t r_msize;
 	uint64_t pg_size = sysconf(_SC_PAGE_SIZE); 
-
-	int existed = _is_file_existed(mmap_fname);
 
 	r_msize = (uint64_t)ch_align_up(msize,pg_size);
 
@@ -69,7 +62,6 @@ int ch_stat_mpool_init(ch_stat_mpool_t *st_mpool,const char *mmap_fname,size_t m
 	}
 
 	st_mpool->fd = fd;
-	st_mpool->is_new_created = existed;
 
 	if(_mmap_file_attach(st_mpool,r_msize)){
 	

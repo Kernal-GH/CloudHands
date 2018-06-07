@@ -14,10 +14,6 @@
 typedef struct ch_stat_pool_t ch_stat_pool_t;
 typedef struct ch_stat_pool_hdr_t ch_stat_pool_hdr_t;
 
-#include "ch_stat_mpool.h"
-#include "ch_mpool.h"
-#include "ch_stat_obj.h"
-
 /*Stat types*/
 enum {
 
@@ -29,6 +25,10 @@ enum {
 	STAT_OTHER,
 	STAT_NUM,
 };
+
+#include "ch_stat_mpool.h"
+#include "ch_mpool.h"
+#include "ch_stat_obj.h"
 
 #pragma pack(push,1)
 struct ch_stat_pool_hdr_t {
@@ -60,5 +60,8 @@ extern ch_stat_pool_t * ch_stat_pool_create(ch_pool_t *mp,const char *mmap_fname
 extern void ch_stat_pool_handle(ch_stat_pool_t *st_pool,uint64_t time,uint64_t pkt_size,int pkt_type);
 
 extern void ch_stat_pool_update(ch_stat_pool_t *st_pool);
+
+extern void ch_stat_pool_dump(ch_stat_pool_t *st_pool,FILE *fp);
+
 
 #endif /*CH_STAT_POOL_H*/

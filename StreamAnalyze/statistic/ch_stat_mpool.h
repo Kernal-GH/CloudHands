@@ -18,7 +18,6 @@ typedef struct ch_stat_mpool_t ch_stat_mpool_t;
 struct ch_stat_mpool_t {
 
 	int fd;
-	int is_new_created;
 	void *start;
 	void *pos;
 	void *end;
@@ -39,7 +38,7 @@ struct ch_stat_mpool_t {
 #define ch_stat_mpool_full(st_mp,sz) ((st_mp)->pos+(sz)>(st_mp)->end)
 
 
-extern int ch_stat_mpool_init(ch_stat_mpool_t *st_mpool,const char *mmap_fname,size_t msize);
+extern int ch_stat_mpool_init(ch_stat_mpool_t *st_mpool,const char *mmap_fname,size_t msize,int existed);
 
 extern void ch_stat_mpool_fin(ch_stat_mpool_t *st_mpool);
 
