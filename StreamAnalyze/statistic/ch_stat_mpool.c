@@ -5,13 +5,15 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-06-05 11:20:21
- * Last Modified: 2018-06-07 16:03:19
+ * Last Modified: 2018-06-08 12:08:59
  */
 
 #include <sys/mman.h>
 #include <fcntl.h>
+#include <unistd.h>
+#include <stdio.h>
+#include "ch_constants.h"
 #include "ch_stat_mpool.h"
-#include "ch_log.h"
 
 static int _mmap_file_open(const char *fname,uint64_t fsize,int existed){
    int fd;
@@ -57,7 +59,7 @@ int ch_stat_mpool_init(ch_stat_mpool_t *st_mpool,const char *mmap_fname,size_t m
 
 	if(fd <0){
 	
-		ch_log(CH_LOG_ERR,"Cannot open file:%s ",mmap_fname);
+		fprintf(stderr,"Cannot open file:%s ",mmap_fname);
 		return -1;
 	}
 
@@ -65,7 +67,7 @@ int ch_stat_mpool_init(ch_stat_mpool_t *st_mpool,const char *mmap_fname,size_t m
 
 	if(_mmap_file_attach(st_mpool,r_msize)){
 	
-		ch_log(CH_LOG_ERR,"Cannot mmap file:%s",mmap_fname);
+		fprintf(stderr,"Cannot mmap file:%s",mmap_fname);
 		return -1;
 	}
 

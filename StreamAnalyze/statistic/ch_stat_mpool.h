@@ -14,6 +14,7 @@
 typedef struct ch_stat_mpool_t ch_stat_mpool_t;
 
 #include <stdlib.h>
+#include <stdint.h>
 
 struct ch_stat_mpool_t {
 

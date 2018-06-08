@@ -16,7 +16,7 @@ typedef struct ch_stat_obj_hdr_t ch_stat_obj_hdr_t;
 
 #include <stdio.h>
 #include "ch_stat_entry.h"
-
+#include "ch_data_output.h"
 #pragma pack(push,1)
 struct ch_stat_obj_hdr_t {
 
@@ -83,5 +83,7 @@ static inline const char * ch_stat_obj_type_name(ch_stat_obj_t *stat_obj){
 
 	return name;
 }
+
+extern ssize_t ch_stat_obj_out(ch_stat_obj_t *stat_obj,ch_data_output_t *dout,uint32_t n);
 
 #endif /*CH_STAT_OBJ_H*/

@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-06-05 16:58:22
- * Last Modified: 2018-06-07 15:24:57
+ * Last Modified: 2018-06-08 10:31:37
  */
 
 #include "ch_stat_obj.h"
@@ -89,3 +89,25 @@ void ch_stat_obj_dump(ch_stat_obj_t *stat_obj,uint32_t n,FILE *fp){
 	fprintf(fp,"]\n\n");
 }
 
+ssize_t ch_stat_obj_out(ch_stat_obj_t *stat_obj,ch_data_output_t *dout,uint32_t n){
+
+	ssize_t rc,len = 0;
+
+	ch_stat_entry_t *entry;
+	uint32_t i;
+
+	if(n>stat_obj->obj_hdr->entry_num)
+		n = stat_obj->obj_hdr->entry_num;
+
+	CH_DOUT_UINT32_WRITE(dout,n,len,rc);
+
+	for(i = 0;i<n;i++){
+
+		entry = stat_obj->stat_entris+i;
+
+		CH_DOUT_UINT64_WRITE(dout,entry->st_n,len,rc);
+		CH_DOUT_UINT64_WRITE(dout,entry->st_v,len,rc);
+	}
+
+	return len;
+}

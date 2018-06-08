@@ -5,11 +5,10 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-06-05 15:06:13
- * Last Modified: 2018-06-07 16:05:56
+ * Last Modified: 2018-06-08 12:15:24
  */
 
 #include "ch_stat_pool.h"
-#include "ch_log.h"
 #include "ch_util.h"
 
 #define STAT_ENTRY_COUNT(time_up,time_tv) (uint32_t)(time_tv == 0?0:(time_up)/(time_tv))
@@ -84,7 +83,7 @@ ch_stat_pool_t * ch_stat_pool_create(ch_pool_t *mp,const char *mmap_fname,
 
 	/*load mmap memory pool*/
 	if(ch_stat_mpool_init(st_mpool,mmap_fname,msize,existed)){
-		ch_log(CH_LOG_ERR,"Cannot load mmap memory pool!");
+		fprintf(stderr,"Cannot load mmap memory pool!");
 		return NULL;
 	}
 
@@ -106,7 +105,7 @@ ch_stat_pool_t * ch_stat_pool_create(ch_pool_t *mp,const char *mmap_fname,
 		addr = _stat_obj_addr(st_pool);
 		if(addr == NULL){
 		
-			ch_log(CH_LOG_ERR,"No enough memory used to alloc stat object!");
+			fprintf(stderr,"No enough memory used to alloc stat object!");
 			return NULL;
 		}
 
@@ -181,22 +180,30 @@ void ch_stat_pool_update(ch_stat_pool_t *st_pool){
 
 }
 
-static inline uint32_t _index_up(ch_stat_pool_t *st_pool){
+static inline uint32_t _index_up(ch_stat_pool_t *st_pool,uint64_t time,uint64_t *rtime){
 
-	uint64_t time = ch_get_current_timems()/1000;
-	uint32_t index = (time-st_pool->p_hdr->base_time)/st_pool->p_hdr->stat_time_tv;
+	uint64_t base_time = st_pool->p_hdr->base_time;
+	uint64_t tv = st_pool->p_hdr->stat_time_tv;
+
+	if(time<base_time)
+		time = ch_get_current_timems()/1000;
+
+	uint32_t index = (time-base_time)/tv;
+
+	*rtime = time;
 
 	return index+1;
 }
 
 void ch_stat_pool_dump(ch_stat_pool_t *st_pool,FILE *fp) {
 
+	uint64_t rtime;
 	int i;
 	uint32_t n;
 	ch_stat_pool_hdr_t *p_hdr = st_pool->p_hdr;
 	ch_stat_obj_t *stat_obj;
 
-	n = _index_up(st_pool);
+	n = _index_up(st_pool,0,&rtime);
 
 	fprintf(fp,"Dump The Stat Pool information:\n");
 
@@ -215,4 +222,65 @@ void ch_stat_pool_dump(ch_stat_pool_t *st_pool,FILE *fp) {
 	}
 }
 
+#define _g_stat_out(phdr,time,dout,rc,len) do {				\
+	CH_DOUT_UINT64_WRITE(dout,time,len,rc);					\
+	CH_DOUT_UINT64_WRITE(dout,phdr->base_time,len,rc);		\
+	CH_DOUT_UINT64_WRITE(dout,phdr->stat_time_up,len,rc);   \
+	CH_DOUT_UINT64_WRITE(dout,phdr->stat_time_tv,len,rc);   \
+	CH_DOUT_UINT64_WRITE(dout,phdr->pkt_total,len,rc);      \
+	CH_DOUT_UINT64_WRITE(dout,phdr->pkt_bytes,len,rc);      \
+}while(0)
 
+ssize_t ch_stat_pool_out(ch_stat_pool_t *st_pool,ch_data_output_t *dout,uint64_t time,int stat_type){
+
+	ssize_t len = 0,rc;
+	uint32_t n;
+	uint64_t rtime;
+	ch_stat_obj_t *stat_obj;
+	ch_stat_pool_hdr_t *phdr = st_pool->p_hdr;
+
+	if(stat_type<0||stat_type>=STAT_NUM)
+		return -1;
+
+	n = _index_up(st_pool,time,&rtime);
+
+	_g_stat_out(phdr,rtime,dout,rc,len);
+
+	stat_obj =  &st_pool->stat_objs[stat_type];
+
+	if(-1 == (rc= ch_stat_obj_out(stat_obj,dout,n)))
+		return -1;
+
+	return len+rc;
+}
+
+ssize_t ch_stat_pool_out_all(ch_stat_pool_t *st_pool,ch_data_output_t *dout,uint64_t time){
+	int i;
+	ssize_t len = 0,rc;
+	uint32_t n;
+	uint64_t rtime;
+	ch_stat_obj_t *stat_obj;
+	ch_stat_pool_hdr_t *phdr = st_pool->p_hdr;
+
+	n = _index_up(st_pool,time,&rtime);
+
+	_g_stat_out(phdr,rtime,dout,rc,len);
+
+	for(i = 0;i<STAT_NUM;i++){
+	
+		stat_obj = &st_pool->stat_objs[i];
+		
+		if(-1 == (rc= ch_stat_obj_out(stat_obj,dout,n)))
+			return -1;
+
+		len += rc;
+	}
+
+	return len;
+
+}
+
+void ch_stat_pool_destroy(ch_stat_pool_t *st_pool) {
+
+	ch_stat_mpool_fin(&st_pool->st_mpool);
+}
