@@ -84,6 +84,6 @@ static inline const char * ch_stat_obj_type_name(ch_stat_obj_t *stat_obj){
 	return name;
 }
 
-extern ssize_t ch_stat_obj_out(ch_stat_obj_t *stat_obj,ch_data_output_t *dout,uint32_t n);
+extern ssize_t ch_stat_obj_out(ch_stat_obj_t *stat_obj,ch_data_output_t *dout,int type,uint32_t n);
 
 #endif /*CH_STAT_OBJ_H*/

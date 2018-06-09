@@ -30,7 +30,7 @@ public class StatDataReader {
 
     public native int open(String fname);
 
-    public StatDataInput read(long time,int type){
+    public StatDataInput read(long time, int type){
 
         int ret = read(statDataInput,time,type);
 
@@ -52,7 +52,8 @@ public class StatDataReader {
 
     private native int read(StatDataInput statDataInput, long time);
 
-    public native int read(StatDataInput statDataInput,long time,int type);
+    public native int read(StatDataInput statDataInput, long time, int type);
 
     public native void close();
+
 }

@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-06-05 15:06:13
- * Last Modified: 2018-06-08 12:15:24
+ * Last Modified: 2018-06-08 15:48:05
  */
 
 #include "ch_stat_pool.h"
@@ -248,7 +248,9 @@ ssize_t ch_stat_pool_out(ch_stat_pool_t *st_pool,ch_data_output_t *dout,uint64_t
 
 	stat_obj =  &st_pool->stat_objs[stat_type];
 
-	if(-1 == (rc= ch_stat_obj_out(stat_obj,dout,n)))
+	CH_DOUT_UINT16_WRITE(dout,1,len,rc);
+
+	if(-1 == (rc= ch_stat_obj_out(stat_obj,dout,stat_type,n)))
 		return -1;
 
 	return len+rc;
@@ -266,11 +268,13 @@ ssize_t ch_stat_pool_out_all(ch_stat_pool_t *st_pool,ch_data_output_t *dout,uint
 
 	_g_stat_out(phdr,rtime,dout,rc,len);
 
+	CH_DOUT_UINT16_WRITE(dout,STAT_NUM,len,rc);
+
 	for(i = 0;i<STAT_NUM;i++){
 	
 		stat_obj = &st_pool->stat_objs[i];
 		
-		if(-1 == (rc= ch_stat_obj_out(stat_obj,dout,n)))
+		if(-1 == (rc= ch_stat_obj_out(stat_obj,dout,i,n)))
 			return -1;
 
 		len += rc;

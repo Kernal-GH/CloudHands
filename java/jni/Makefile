@@ -11,6 +11,7 @@ jni_SOURCES = ../../lib/common/ch_file_open.c \
 		  ../../lib/common/ch_string.c \
 		  ../../lib/common/ch_mpool.c \
 		  ../../lib/common/ch_log.c    \
+		  ../../lib/common/ch_util.c \
 		  ../../lib/shm/ch_shm_mmap.c \
 		  ../../lib/shm/ch_shm_memory.c \
 		  ../../lib/shm/ch_shm_interface.c \
