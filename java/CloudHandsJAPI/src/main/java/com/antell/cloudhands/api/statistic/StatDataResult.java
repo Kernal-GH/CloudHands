@@ -1,6 +1,5 @@
 package com.antell.cloudhands.api.statistic;
 
-import com.antell.cloudhands.api.DataResultBuilder;
 import com.antell.cloudhands.api.utils.TextUtils;
 
 import java.io.DataInput;
