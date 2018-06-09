@@ -20,7 +20,8 @@ jni_SOURCES = ../../lib/common/ch_file_open.c \
 		  ../../StreamAnalyze/statistic/ch_stat_pool.c \
 		  ../../StreamAnalyze/statistic/ch_stat_mpool.c \
 		  ../../StreamAnalyze/statistic/ch_stat_obj.c \
-		  ch_stat_pool_reader.c
+		  ch_stat_pool_reader.c \
+		  ch_packet_record_reader.c
 
 jni_package = libCloudHandsJNI.so
 

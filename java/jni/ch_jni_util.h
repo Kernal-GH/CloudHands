@@ -12,6 +12,7 @@
 #define CH_JNI_UTIL_H
 
 #include <jni.h>
+#include <string.h>
 
 static inline void ch_set_int_field(JNIEnv *jenv,jobject jobj,const char *f,int v){
 

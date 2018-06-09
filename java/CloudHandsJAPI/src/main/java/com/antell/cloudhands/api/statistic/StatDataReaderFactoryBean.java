@@ -4,8 +4,6 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 
-import java.util.Properties;
-
 /**
  * Created by dell on 2018/6/8.
  */
