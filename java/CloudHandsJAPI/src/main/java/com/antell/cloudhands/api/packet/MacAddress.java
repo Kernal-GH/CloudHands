@@ -1,5 +1,7 @@
 package com.antell.cloudhands.api.packet;
 
+import org.msgpack.core.MessageUnpacker;
+
 import java.io.DataInput;
 import java.io.IOException;
 
@@ -47,5 +49,10 @@ public class MacAddress implements DataReadable{
         addr[3] = (byte) in.readUnsignedByte();
         addr[4] = (byte) in.readUnsignedByte();
         addr[5] = (byte) in.readUnsignedByte();
+    }
+
+    @Override
+    public void parse(MessageUnpacker unpacker) {
+
     }
 }

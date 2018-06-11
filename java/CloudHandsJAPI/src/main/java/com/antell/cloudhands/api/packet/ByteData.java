@@ -1,5 +1,7 @@
 package com.antell.cloudhands.api.packet;
 
+import org.msgpack.core.MessageUnpacker;
+
 import java.io.DataInput;
 import java.io.IOException;
 
@@ -25,6 +27,11 @@ public class ByteData implements DataReadable{
         this.data = new byte[(int)dataSize];
 
         in.readFully(data,0,(int)dataSize);
+
+    }
+
+    @Override
+    public void parse(MessageUnpacker unpacker) {
 
     }
 

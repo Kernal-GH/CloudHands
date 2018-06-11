@@ -2,6 +2,8 @@ package com.antell.cloudhands.api.packet;
 
 import com.antell.cloudhands.api.utils.TextUtils;
 import com.google.common.io.ByteStreams;
+import org.msgpack.core.MessagePack;
+import org.msgpack.core.MessageUnpacker;
 
 import java.io.DataInput;
 import java.nio.ByteBuffer;
@@ -47,6 +49,14 @@ public class PacketRecord {
 
         return ByteStreams.newDataInput(data);
 
+    }
+
+    public MessageUnpacker getMessageUnpacker(){
+
+        byte[] data = new byte[dataSize];
+
+        dataBuffer.get(data);
+        return MessagePack.newDefaultUnpacker(data);
     }
 
     public void reset(){

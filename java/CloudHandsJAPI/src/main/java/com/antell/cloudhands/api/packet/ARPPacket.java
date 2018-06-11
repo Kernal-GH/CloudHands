@@ -2,6 +2,7 @@ package com.antell.cloudhands.api.packet;
 
 import com.antell.cloudhands.api.utils.IPUtils;
 import com.antell.cloudhands.api.utils.TextUtils;
+import org.msgpack.core.MessageUnpacker;
 
 import java.io.DataInput;
 import java.io.IOException;
@@ -49,6 +50,11 @@ public class ARPPacket implements DataReadable {
         tha.read(input);
         srcMac.read(input);
         dstMac.read(input);
+    }
+
+    @Override
+    public void parse(MessageUnpacker unpacker) {
+
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.antell.cloudhands.api.packet;
 
 import com.antell.cloudhands.api.utils.TextUtils;
+import org.msgpack.core.MessageUnpacker;
 
 import java.io.DataInput;
 import java.io.IOException;
@@ -8,7 +9,7 @@ import java.io.IOException;
 /**
  * Created by dell on 2018/4/16.
  */
-public class TCPSession extends PacketSessionEntry{
+public class TCPSession extends SessionEntry {
 
     private int phaseState;
 
@@ -49,6 +50,11 @@ public class TCPSession extends PacketSessionEntry{
 
         setReqContent(reqContent);
         setResContent(resContent);
+
+    }
+
+    @Override
+    public void parse(MessageUnpacker unpacker) {
 
     }
 
