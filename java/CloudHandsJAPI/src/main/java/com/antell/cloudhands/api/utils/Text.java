@@ -376,22 +376,80 @@ public class Text {
   /** Read a UTF8 encoded string from in
    */
   public static String readString(DataInput in) throws IOException {
-    return readString(in, Integer.MAX_VALUE);
+    return readString(in, Integer.MAX_VALUE,8);
   }
-  
+
+  public static String readString(DataInput in,int bytes) throws IOException {
+
+    return readString(in,Integer.MAX_VALUE,bytes);
+
+  }
+
   /** Read a UTF8 encoded string with a maximum size
    */
-  public static String readString(DataInput in, int maxLength)
+  public static String readString(DataInput in, int maxLength,int bytes)
       throws IOException {
 
-    int len = (int)in.readLong();
+    int len = 0;
+    switch (bytes){
+
+      case 1:
+        len = in.readUnsignedByte();
+        break;
+      case 2:
+        len = in.readUnsignedShort();
+        break;
+      case 4:
+        len = in.readInt();
+        break;
+      case 8:
+        len = (int)in.readLong();
+        break;
+        default:
+          return null;
+    }
+
     int length = len>maxLength?maxLength:len;
 
-    byte [] bytes = new byte[length];
-    in.readFully(bytes, 0, length);
-    return decode(bytes);
+    byte [] data = new byte[length];
+    in.readFully(data, 0, length);
+    return decode(data);
+
   }
-  
+
+  /** Read a UTF8 encoded string with a maximum size
+   */
+  public static byte[] readBytes(DataInput in,int bytes)
+          throws IOException {
+
+    int maxLength = Integer.MAX_VALUE;
+
+    int len = 0;
+    switch (bytes){
+
+      case 1:
+        len = in.readUnsignedByte();
+        break;
+      case 2:
+        len = in.readUnsignedShort();
+        break;
+      case 4:
+        len = in.readInt();
+        break;
+      case 8:
+        len = (int)in.readLong();
+        break;
+      default:
+        return null;
+    }
+
+    int length = len>maxLength?maxLength:len;
+
+    byte [] data = new byte[length];
+    in.readFully(data, 0, length);
+
+    return data;
+  }
 
 
   ////// states for validateUTF8

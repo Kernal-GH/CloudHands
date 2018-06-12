@@ -151,4 +151,30 @@ static inline unsigned char * ch_dns_data_input_bytes_read(ch_dns_data_input_t *
 	return data;
 }
 
+static inline unsigned char * ch_dns_data_input_rbytes_read(ch_dns_data_input_t *din,ch_pool_t *mp){
+
+	const char *data;
+	size_t dlen;
+
+	data = (const char *)din->pos;
+	dlen = ch_dns_data_input_rdlen(din);
+	
+	din->pos = din->last;
+
+	return (unsigned char*)ch_pstrndup(mp,data,dlen);
+
+}
+
+static inline unsigned char * ch_dns_data_input_counted_bytes_read(ch_dns_data_input_t *din,ch_pool_t *mp,size_t dlen){
+
+	const char *data;
+
+	data = (const char *)din->pos;
+	
+	ch_dns_data_input_pos_update(din,dlen); 
+
+	return (unsigned char*)ch_pstrndup(mp,data,dlen);
+
+}
+
 #endif /*CH_DNS_DATA_INPUT_H*/

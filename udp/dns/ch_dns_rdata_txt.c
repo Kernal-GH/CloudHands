@@ -5,17 +5,12 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-05-03 19:46:10
- * Last Modified: 2018-05-09 18:28:29
+ * Last Modified: 2018-06-12 16:46:22
  */
 
 #include "ch_dns_rdata_txt.h"
 #include "ch_log.h"
 
-#define STR_WRITE(dout,str,rc,len) do { \
-	if(-1 == (rc = ch_dout_string16_write(dout,str?(unsigned char*)str:(unsigned char*)"",str?strlen(str):0))) \
-		return -1; \
-	len+=rc; \
-}while(0)
 
 static void _rdata_txt_dump(ch_dns_rdata_t *rdata,FILE *fp,void *priv_data ch_unused){
 
@@ -47,7 +42,7 @@ static ssize_t  _rdata_txt_write(ch_dns_rdata_t *rdata,ch_data_output_t *dout,vo
 	for(i = 0;i<txt->txts->nelts;i++){
 	
 		str = texts[i];
-		STR_WRITE(dout,str,rc,len);
+		CH_DOUT_STRING16_WRITE2(dout,str,len,rc);
 	}
 
 	return len;

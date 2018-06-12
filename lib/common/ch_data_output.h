@@ -347,4 +347,11 @@ static inline ssize_t ch_dout_string16_write(ch_data_output_t *dout,unsigned cha
 	len+=rc;												\
 }while(0) 
 
+
+#define CH_DOUT_STRING16_WRITE2(dout,str,len,rc) do { \
+	if(-1 == (rc = ch_dout_string16_write(dout,str?(unsigned char*)str:(unsigned char*)"",str?strlen((const char*)str):0))) \
+		return -1; \
+	len+=rc; \
+}while(0)
+
 #endif /*CH_DATA_OUTPUT_H*/

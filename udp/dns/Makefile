@@ -34,7 +34,12 @@ ch_dns_SOURCES = ch_dns_app.c \
 				 ch_dns_rdata_ptr.c \
 				 ch_dns_rdata_soa.c \
 				 ch_dns_rdata_txt.c \
-				 ch_dns_rdata_wks.c
+				 ch_dns_rdata_wks.c \
+				 ch_dns_rdata_caa.c \
+				 ch_dns_rdata_cert.c \
+				 ch_dns_rdata_dhcid.c \
+				 ch_dns_rdata_dlv.c \
+				 ch_dns_rdata_apl.c
 
 ch_dns_OBJECTS = $(patsubst %.c,%.o,$(ch_dns_SOURCES))
 ch_dns_DEPENDS = $(patsubst %.c,%.d,$(ch_dns_SOURCES))
