@@ -112,7 +112,7 @@ static inline void ch_dns_data_input_bstring_read(ch_dns_data_input_t *din,unsig
     ch_dns_data_input_pos_update(din,*len);
 }
 
-static inline char* ch_dns_data_input_bstring_read_dup(ch_dns_data_input_t *din,ch_pool_t *mp){
+static inline unsigned char* ch_dns_data_input_bstring_read_dup(ch_dns_data_input_t *din,ch_pool_t *mp){
 
 	const char *data;
 	uint8_t dlen;
@@ -126,7 +126,7 @@ static inline char* ch_dns_data_input_bstring_read_dup(ch_dns_data_input_t *din,
 
     ch_dns_data_input_pos_update(din,dlen);
 
-	return ch_pstrndup(mp,data,(size_t)dlen);
+	return (unsigned char*)ch_pstrndup(mp,data,(size_t)dlen);
 
 }
 
@@ -159,6 +159,9 @@ static inline unsigned char * ch_dns_data_input_rbytes_read(ch_dns_data_input_t 
 	data = (const char *)din->pos;
 	dlen = ch_dns_data_input_rdlen(din);
 	
+	if(dlen == 0)
+		return NULL;
+
 	din->pos = din->last;
 
 	return (unsigned char*)ch_pstrndup(mp,data,dlen);
@@ -168,6 +171,9 @@ static inline unsigned char * ch_dns_data_input_rbytes_read(ch_dns_data_input_t 
 static inline unsigned char * ch_dns_data_input_counted_bytes_read(ch_dns_data_input_t *din,ch_pool_t *mp,size_t dlen){
 
 	const char *data;
+
+	if(dlen == 0)
+		return NULL;
 
 	data = (const char *)din->pos;
 	

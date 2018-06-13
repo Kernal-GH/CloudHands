@@ -26,7 +26,7 @@ struct ch_dns_rdata_txt_t {
 
 };
 
-#define ch_dns_rdata_txt_add(rdata_txt,text) *(char**)ch_array_push(rdata_txt->txts)=text
+#define ch_dns_rdata_txt_add(rdata_txt,text) *(unsigned char**)ch_array_push(rdata_txt->txts)=text
 
 extern void ch_dns_rdata_txt_init(ch_dns_rdata_pool_t *rdata_pool);
 

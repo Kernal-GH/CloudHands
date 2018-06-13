@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-05-03 19:46:10
- * Last Modified: 2018-06-12 16:46:22
+ * Last Modified: 2018-06-13 12:10:32
  */
 
 #include "ch_dns_rdata_txt.h"
@@ -15,12 +15,12 @@
 static void _rdata_txt_dump(ch_dns_rdata_t *rdata,FILE *fp,void *priv_data ch_unused){
 
 	ch_dns_rdata_txt_t *txt = (ch_dns_rdata_txt_t*)rdata;
-	char ** texts,*str;
+	unsigned char ** texts,*str;
 	int i;
 
 	fprintf(fp,"Dump The rdata.txt:\n");
 
-	texts = (char**)txt->txts->elts;
+	texts = (unsigned char**)txt->txts->elts;
 
 	for(i = 0;i<txt->txts->nelts;i++){
 	
@@ -34,10 +34,10 @@ static ssize_t  _rdata_txt_write(ch_dns_rdata_t *rdata,ch_data_output_t *dout,vo
 
 	ch_dns_rdata_txt_t *txt = (ch_dns_rdata_txt_t*)rdata;
 	ssize_t rc,len = 0;
-	char ** texts,*str;
+	unsigned char ** texts,*str;
 	int i;
 
-	texts = (char**)txt->txts->elts;
+	texts = (unsigned char**)txt->txts->elts;
 	
 	for(i = 0;i<txt->txts->nelts;i++){
 	
@@ -53,7 +53,7 @@ static ch_dns_rdata_t * _rdata_txt_create(ch_pool_t *mp,void *priv_data ch_unuse
 
 	ch_dns_rdata_txt_t *rdata = (ch_dns_rdata_txt_t*)ch_pcalloc(mp,sizeof(ch_dns_rdata_txt_t));
 
-	rdata->txts = ch_array_make(mp,8,sizeof(char*));
+	rdata->txts = ch_array_make(mp,8,sizeof(unsigned char*));
 
 	rdata->rdata.rdata_dump = _rdata_txt_dump;
 	rdata->rdata.rdata_write = _rdata_txt_write;
@@ -64,7 +64,7 @@ static ch_dns_rdata_t * _rdata_txt_create(ch_pool_t *mp,void *priv_data ch_unuse
 
 static int _rdata_txt_parse(ch_pool_t *mp,ch_dns_rdata_t *rdata,void *priv_data ch_unused){
 
-	char *txt;
+	unsigned char *txt;
 
 	ch_dns_data_input_t tmp,*din=&tmp;
 

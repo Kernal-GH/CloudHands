@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-05-04 18:29:37
- * Last Modified: 2018-06-12 19:32:12
+ * Last Modified: 2018-06-13 12:02:15
  */
 
 #include "ch_log.h"
@@ -33,6 +33,10 @@
 #include "ch_dns_rdata_dhcid.h"
 #include "ch_dns_rdata_dlv.h"
 #include "ch_dns_rdata_apl.h"
+#include "ch_dns_rdata_dname.h"
+#include "ch_dns_rdata_dnskey.h"
+#include "ch_dns_rdata_ds.h"
+#include "ch_dns_rdata_gpos.h"
 
 ch_dns_rdata_pool_t *ch_dns_rdata_pool_create(ch_pool_t *mp){
 
@@ -65,6 +69,10 @@ ch_dns_rdata_pool_t *ch_dns_rdata_pool_create(ch_pool_t *mp){
 	ch_dns_rdata_dhcid_init(rdata_pool);
 	ch_dns_rdata_dlv_init(rdata_pool);
 	ch_dns_rdata_apl_init(rdata_pool);
+	ch_dns_rdata_dname_init(rdata_pool);
+	ch_dns_rdata_dnskey_init(rdata_pool);
+	ch_dns_rdata_ds_init(rdata_pool);
+	ch_dns_rdata_gpos_init(rdata_pool);
 
 	return rdata_pool;
 }

@@ -14,6 +14,9 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <sys/socket.h>     
+#include <netinet/in.h>     
+#include <arpa/inet.h> 
 
 static inline void ch_mac_addr_format(char *buffer,size_t bsize,uint8_t *addr_bytes){
 
@@ -44,5 +47,6 @@ static inline void ch_ipv6_to_str(char *buffer,size_t bsize,unsigned char *addr)
                                                ipv6[3], ipv6[4], ipv6[5],
                                                ipv6[6], ipv6[7]);
 }
+
 
 #endif /*CH_NET_UTIL_H*/

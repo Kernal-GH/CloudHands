@@ -1,6 +1,6 @@
 /*
  *
- *      Filename: ch_dns_rdata_cname.h
+ *      Filename: ch_dns_rdata_dname.h
  *
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
@@ -8,17 +8,17 @@
  * Last Modified: 2018-05-02 17:04:40
  */
 
-#ifndef CH_DNS_RDATA_CNAME_H
-#define CH_DNS_RDATA_CNAME_H
+#ifndef CH_DNS_RDATA_DNAME_H
+#define CH_DNS_RDATA_DNAME_H
 
 #include "ch_dns_rdata.h"
 #include "ch_dns_rdata_pool.h"
 #include "ch_dns_name.h"
 
-typedef struct ch_dns_rdata_cname_t ch_dns_rdata_cname_t;
+typedef struct ch_dns_rdata_dname_t ch_dns_rdata_dname_t;
 
 
-struct ch_dns_rdata_cname_t {
+struct ch_dns_rdata_dname_t {
 
 	ch_dns_rdata_t rdata;
 
@@ -26,6 +26,6 @@ struct ch_dns_rdata_cname_t {
 
 };
 
-extern void ch_dns_rdata_cname_init(ch_dns_rdata_pool_t *rdata_pool);
+extern void ch_dns_rdata_dname_init(ch_dns_rdata_pool_t *rdata_pool);
 
-#endif /*CH_DNS_RDATA_CNAME_H*/
+#endif /*CH_DNS_RDATA_DNAME_H*/

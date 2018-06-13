@@ -18,6 +18,7 @@ typedef struct ch_dns_rdata_t ch_dns_rdata_t;
 #include "ch_dns_class.h"
 #include "ch_dns_types.h"
 #include "ch_list.h"
+#include "ch_util.h"
 
 struct ch_dns_rdata_t {
 
@@ -101,5 +102,29 @@ static inline ssize_t ch_dns_rdata_write(ch_dns_rdata_t *rdata,ch_data_output_t 
 		return -1;                                  \
 	len+=rc;                                        \
 }while(0)
+
+
+static inline void ch_base64_string_dump(const char *prefix,unsigned char *data,size_t dlen,FILE *fp){
+
+	char *decode = NULL;
+	
+	if(dlen){
+	
+		decode = malloc(dlen+1);
+		if(decode){
+		
+			ch_decode_base64_ext(decode,(const unsigned char*)data,dlen);
+		}
+
+	}
+
+	fprintf(fp,"%s:%s\n",prefix,decode?decode:"");
+	if(decode){
+	
+		free(decode);
+	}
+
+
+}
 
 #endif /*CH_DNS_RDATA_H*/

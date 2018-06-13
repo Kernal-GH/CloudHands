@@ -21,9 +21,9 @@ struct ch_dns_rdata_hinfo_t {
 
 	ch_dns_rdata_t rdata;
 
-	 char *cpu;
+	 unsigned char *cpu;
 	 
-	 char *os;
+	 unsigned char *os;
 
 };
 
