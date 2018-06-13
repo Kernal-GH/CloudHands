@@ -1,5 +1,7 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
+import org.elasticsearch.common.xcontent.XContentBuilder;
+
 import java.io.DataInput;
 import java.io.IOException;
 
@@ -39,5 +41,12 @@ public abstract class U16NameBase extends Record {
         return nameField;
     }
 
+    @Override
+    public XContentBuilder rdataToJson(XContentBuilder cb) throws IOException {
+
+        cb.field("u16Field",u16Field);
+        cb.field("nameField",nameField.toString());
+        return cb;
+    }
 
 }

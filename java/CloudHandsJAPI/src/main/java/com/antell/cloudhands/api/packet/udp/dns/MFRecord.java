@@ -7,7 +7,6 @@ package com.antell.cloudhands.api.packet.udp.dns;
 
 public class MFRecord extends SingleNameBase {
 
-    private static final long serialVersionUID = -6670449036843028169L;
 
     public MFRecord() {
     }
@@ -17,14 +16,6 @@ public class MFRecord extends SingleNameBase {
         return new MFRecord();
     }
 
-    /**
-     * Creates a new MF Record with the given data
-     *
-     * @param mailAgent The mail agent that forwards mail for the domain.
-     */
-    public MFRecord(Name name, int dclass, long ttl, Name mailAgent) {
-        super(name, Type.MF, dclass, ttl, mailAgent, "mail agent");
-    }
 
     /**
      * Gets the mail agent for the domain

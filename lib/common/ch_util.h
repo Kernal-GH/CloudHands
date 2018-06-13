@@ -50,6 +50,8 @@ extern int  ch_hex2bytes_inplace(unsigned char *data, int len);
 
 extern char  *ch_bytes2hex(ch_pool_t *pool, unsigned char *data, int len);
 
+extern char  *ch_bytes2hex_malloc(unsigned char *data, int len);
+
 extern int  ch_is_token_char(unsigned char c);
 
 extern int  ch_remove_lf_crlf_inplace(char *text);
@@ -87,6 +89,10 @@ extern char  *ch_log_escape_raw(ch_pool_t *mp, const unsigned char *text, unsign
 extern char  *ch_log_escape_nul(ch_pool_t *mp, const unsigned char *text, unsigned long int text_length);
 
 extern int  ch_decode_base64_ext(char *plain_text, const unsigned char *input, int input_len);
+
+extern unsigned char* ch_encode_base64(ch_pool_t *mp,const unsigned char *input,int input_len);
+
+extern unsigned char* ch_encode_base64_malloc(const unsigned char *input,int input_len);
 
 extern int  ch_convert_to_int(const char c);
 

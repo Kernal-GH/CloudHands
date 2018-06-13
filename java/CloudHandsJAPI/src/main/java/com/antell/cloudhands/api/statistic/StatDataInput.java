@@ -27,6 +27,7 @@ public class StatDataInput {
 
         dataBuffer.get(data);
 
+
         return ByteStreams.newDataInput(data);
 
     }

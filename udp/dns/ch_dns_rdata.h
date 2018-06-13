@@ -106,24 +106,37 @@ static inline ssize_t ch_dns_rdata_write(ch_dns_rdata_t *rdata,ch_data_output_t 
 
 static inline void ch_base64_string_dump(const char *prefix,unsigned char *data,size_t dlen,FILE *fp){
 
-	char *decode = NULL;
+	unsigned char *encode = NULL;
 	
 	if(dlen){
 	
-		decode = malloc(dlen+1);
-		if(decode){
-		
-			ch_decode_base64_ext(decode,(const unsigned char*)data,dlen);
-		}
-
+		encode = ch_encode_base64_malloc((const unsigned char*)data,dlen);
 	}
 
-	fprintf(fp,"%s:%s\n",prefix,decode?decode:"");
-	if(decode){
+	fprintf(fp,"%s:%s\n",prefix,encode?encode:(unsigned char*)"");
+
+	if(encode){
 	
-		free(decode);
+		free(encode);
 	}
 
+}
+
+static inline void ch_hex_string_dump(const char *prefix,unsigned char *data,size_t dlen,FILE *fp){
+
+	unsigned char *encode = NULL;
+	
+	if(dlen){
+	
+		encode = (unsigned char*)ch_bytes2hex_malloc(data,dlen);
+	}
+
+	fprintf(fp,"%s:%s\n",prefix,encode?encode:(unsigned char*)"");
+
+	if(encode){
+	
+		free(encode);
+	}
 
 }
 

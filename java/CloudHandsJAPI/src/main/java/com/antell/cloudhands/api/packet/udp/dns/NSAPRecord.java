@@ -1,9 +1,11 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
-import com.antell.security.utils.Base16;
+import com.antell.cloudhands.api.utils.Base16;
+import com.antell.cloudhands.api.utils.Text;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 
 import java.io.ByteArrayOutputStream;
+import java.io.DataInput;
 import java.io.IOException;
 
 /**
@@ -12,8 +14,6 @@ import java.io.IOException;
  */
 
 public class NSAPRecord extends Record {
-
-    private static final long serialVersionUID = -1037209403185658593L;
 
     private byte[] address;
 
@@ -57,45 +57,21 @@ public class NSAPRecord extends Record {
         return bytes.toByteArray();
     }
 
-    /**
-     * Creates an NSAP Record from the given data
-     *
-     * @param address The NSAP address.
-     * @throws IllegalArgumentException The address is not a valid NSAP address.
-     */
-    public NSAPRecord(Name name, int dclass, long ttl, String address) {
-        super(name, Type.NSAP, dclass, ttl);
-        this.address = checkAndConvertAddress(address);
-        if (this.address == null) {
-            throw new IllegalArgumentException("invalid NSAP address " +
-                    address);
-        }
-    }
 
     @Override
-    public void rrFromWire(DNSInput in) throws IOException {
-        address = in.readByteArray();
-    }
-
-    @Override
-    public void rdataFromString(Tokenizer st, Name origin) throws IOException {
-        String addr = st.getString();
-        this.address = checkAndConvertAddress(addr);
-        if (this.address == null)
-            throw st.exception("invalid NSAP address " + addr);
+    public void read(DataInput in) throws IOException {
+        address = Text.readBytes(in,2);
     }
 
     /**
      * Returns the NSAP address.
      */
-    public String getAddress() {
-        return byteArrayToString(address, false);
+    public byte[] getAddress() {
+
+
+        return address;
     }
 
-    @Override
-    public void rrToWire(DNSOutput out, Compression c, boolean canonical) {
-        out.writeByteArray(address);
-    }
 
     public String rrToString() {
         return "0x" + Base16.toString(address);

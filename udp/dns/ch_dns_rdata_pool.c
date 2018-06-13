@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-05-04 18:29:37
- * Last Modified: 2018-06-13 12:02:15
+ * Last Modified: 2018-06-13 19:40:37
  */
 
 #include "ch_log.h"
@@ -37,6 +37,14 @@
 #include "ch_dns_rdata_dnskey.h"
 #include "ch_dns_rdata_ds.h"
 #include "ch_dns_rdata_gpos.h"
+#include "ch_dns_rdata_ipseckey.h"
+#include "ch_dns_rdata_isdn.h"
+#include "ch_dns_rdata_key.h"
+#include "ch_dns_rdata_kx.h"
+#include "ch_dns_rdata_loc.h"
+#include "ch_dns_rdata_naptr.h"
+#include "ch_dns_rdata_nsap_ptr.h"
+#include "ch_dns_rdata_nsap.h"
 
 ch_dns_rdata_pool_t *ch_dns_rdata_pool_create(ch_pool_t *mp){
 
@@ -73,6 +81,14 @@ ch_dns_rdata_pool_t *ch_dns_rdata_pool_create(ch_pool_t *mp){
 	ch_dns_rdata_dnskey_init(rdata_pool);
 	ch_dns_rdata_ds_init(rdata_pool);
 	ch_dns_rdata_gpos_init(rdata_pool);
+	ch_dns_rdata_ipseckey_init(rdata_pool);
+	ch_dns_rdata_isdn_init(rdata_pool);
+	ch_dns_rdata_key_init(rdata_pool);
+	ch_dns_rdata_kx_init(rdata_pool);
+	ch_dns_rdata_loc_init(rdata_pool);
+	ch_dns_rdata_naptr_init(rdata_pool);
+	ch_dns_rdata_nsap_ptr_init(rdata_pool);
+	ch_dns_rdata_nsap_init(rdata_pool);
 
 	return rdata_pool;
 }

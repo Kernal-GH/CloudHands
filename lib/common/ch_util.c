@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@163.com
  *   Description: ---
  *        Create: 2017-01-18 10:45:13
- * Last Modified: 2018-05-15 16:58:32
+ * Last Modified: 2018-06-13 19:26:54
  */
 
 #include "ch_util.h"
@@ -666,6 +666,29 @@ char *ch_bytes2hex(ch_pool_t *pool, unsigned char *data, int len) {
         hex[j++] = b2hex[data[i] >> 4];
         hex[j++] = b2hex[data[i] & 0x0f];
     }
+    hex[j] = 0;
+
+    return hex;
+}
+
+/**
+ * Converts a series of bytes into its hexadecimal
+ * representation.
+ */
+char *ch_bytes2hex_malloc(unsigned char *data, int len) {
+    static const unsigned char b2hex[] = "0123456789abcdef";
+    char *hex = NULL;
+    int i, j;
+
+    hex = malloc((len * 2) + 1);
+    if (hex == NULL) return NULL;
+
+    j = 0;
+    for(i = 0; i < len; i++) {
+        hex[j++] = b2hex[data[i] >> 4];
+        hex[j++] = b2hex[data[i] & 0x0f];
+    }
+
     hex[j] = 0;
 
     return hex;
@@ -1979,5 +2002,78 @@ int ch_dir_make_r(const char *orig_path)
 	} /* while (1) */
 
 	return -1;
+}
+
+static int
+_encode_base64_internal(unsigned char *dst, const unsigned char *s,int len,
+    unsigned int padding)
+{
+    
+	static char   basis[] =
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+	unsigned char *d = dst;
+
+    while (len > 2) {
+        *d++ = basis[(s[0] >> 2) & 0x3f];
+        *d++ = basis[((s[0] & 3) << 4) | (s[1] >> 4)];
+        *d++ = basis[((s[1] & 0x0f) << 2) | (s[2] >> 6)];
+        *d++ = basis[s[2] & 0x3f];
+
+        s += 3;
+        len -= 3;
+    }
+
+    if (len) {
+        *d++ = basis[(s[0] >> 2) & 0x3f];
+
+        if (len == 1) {
+            *d++ = basis[(s[0] & 3) << 4];
+            if (padding) {
+                *d++ = '=';
+            }
+
+        } else {
+            *d++ = basis[((s[0] & 3) << 4) | (s[1] >> 4)];
+            *d++ = basis[(s[1] & 0x0f) << 2];
+        }
+
+        if (padding) {
+            *d++ = '=';
+        }
+    }
+
+    return d - dst;
+}
+
+
+#define BASE64_LEN(len) (((len)/3+1)*4+1)
+
+unsigned char* ch_encode_base64(ch_pool_t *mp,const unsigned char *input,int input_len){
+
+	size_t dst_len = BASE64_LEN(input_len);
+
+	unsigned char *dst = (unsigned char*)ch_pcalloc(mp,dst_len);
+
+	if(dst == NULL)
+		return NULL;
+
+	_encode_base64_internal(dst,input,input_len,1);
+
+	return dst;
+}
+
+unsigned char* ch_encode_base64_malloc(const unsigned char *input,int input_len){
+
+	size_t dst_len = BASE64_LEN(input_len);
+
+	unsigned char *dst = (unsigned char*)malloc(dst_len);
+
+	if(dst == NULL)
+		return NULL;
+
+	_encode_base64_internal(dst,input,input_len,1);
+
+	return dst;
 }
 

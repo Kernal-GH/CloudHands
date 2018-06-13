@@ -331,7 +331,10 @@ static inline ssize_t ch_dout_string_write(ch_data_output_t *dout,unsigned char*
 }while(0) 
 
 static inline ssize_t ch_dout_string16_write(ch_data_output_t *dout,unsigned char *str,uint16_t len){
-    
+
+	if(str == NULL)
+		str = (unsigned char*)"";
+
 	uint16_t rlen = len+sizeof(uint16_t);
     DOUT_CHECK(dout,rlen);
     ch_dout_uint16_write(dout,len);

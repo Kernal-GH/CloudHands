@@ -2,6 +2,7 @@ package com.antell.cloudhands.api.packet.udp.dns;
 
 import org.elasticsearch.common.xcontent.XContentBuilder;
 
+import java.io.DataInput;
 import java.io.IOException;
 
 /**
@@ -11,8 +12,6 @@ import java.io.IOException;
  */
 
 public class MINFORecord extends Record {
-
-    private static final long serialVersionUID = -3962147172340353796L;
 
     private Name responsibleAddress;
     private Name errorAddress;
@@ -26,33 +25,10 @@ public class MINFORecord extends Record {
         return new MINFORecord();
     }
 
-    /**
-     * Creates an MINFO Record from the given data
-     *
-     * @param responsibleAddress The address responsible for the
-     *                           mailing list/mailbox.
-     * @param errorAddress       The address to receive error messages relating to the
-     *                           mailing list/mailbox.
-     */
-    public MINFORecord(Name name, int dclass, long ttl,
-                       Name responsibleAddress, Name errorAddress) {
-        super(name, Type.MINFO, dclass, ttl);
-
-        this.responsibleAddress = checkName("responsibleAddress",
-                responsibleAddress);
-        this.errorAddress = checkName("errorAddress", errorAddress);
-    }
-
     @Override
-    public void rrFromWire(DNSInput in) throws IOException {
+    public void read(DataInput in) throws IOException {
         responsibleAddress = new Name(in);
         errorAddress = new Name(in);
-    }
-
-    @Override
-    public void rdataFromString(Tokenizer st, Name origin) throws IOException {
-        responsibleAddress = st.getName(origin);
-        errorAddress = st.getName(origin);
     }
 
     /**
@@ -91,10 +67,5 @@ public class MINFORecord extends Record {
         return errorAddress;
     }
 
-    @Override
-    public void rrToWire(DNSOutput out, Compression c, boolean canonical) {
-        responsibleAddress.toWire(out, null, canonical);
-        errorAddress.toWire(out, null, canonical);
-    }
 
 }

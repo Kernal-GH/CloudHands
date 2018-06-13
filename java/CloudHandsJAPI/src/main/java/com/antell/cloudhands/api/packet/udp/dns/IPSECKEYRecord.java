@@ -1,8 +1,10 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
-import com.antell.security.utils.Base64;
+import com.antell.cloudhands.api.utils.Base64;
+import com.antell.cloudhands.api.utils.Text;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 
+import java.io.DataInput;
 import java.io.IOException;
 import java.net.Inet6Address;
 import java.net.InetAddress;
@@ -12,8 +14,6 @@ import java.net.InetAddress;
  */
 
 public class IPSECKEYRecord extends Record {
-
-    private static final long serialVersionUID = 3050449702765909687L;
 
     public static class Algorithm {
         private Algorithm() {
@@ -32,7 +32,6 @@ public class IPSECKEYRecord extends Record {
         public static final int IPv6 = 2;
         public static final int Name = 3;
     }
-
     private int precedence;
     private int gatewayType;
     private int algorithmType;
@@ -47,105 +46,35 @@ public class IPSECKEYRecord extends Record {
         return new IPSECKEYRecord();
     }
 
-    /**
-     * Creates an IPSECKEY Record from the given data.
-     *
-     * @param precedence    The record's precedence.
-     * @param gatewayType   The record's gateway type.
-     * @param algorithmType The record's algorithm type.
-     * @param gateway       The record's gateway.
-     * @param key           The record's public key.
-     */
-    public IPSECKEYRecord(Name name, int dclass, long ttl, int precedence,
-                          int gatewayType, int algorithmType, Object gateway,
-                          byte[] key) {
-        super(name, Type.IPSECKEY, dclass, ttl);
-        this.precedence = checkU8("precedence", precedence);
-        this.gatewayType = checkU8("gatewayType", gatewayType);
-        this.algorithmType = checkU8("algorithmType", algorithmType);
-        switch (gatewayType) {
-            case Gateway.None:
-                this.gateway = null;
-                break;
-            case Gateway.IPv4:
-                if (!(gateway instanceof InetAddress))
-                    throw new IllegalArgumentException("\"gateway\" " +
-                            "must be an IPv4 " +
-                            "address");
-                this.gateway = gateway;
-                break;
-            case Gateway.IPv6:
-                if (!(gateway instanceof Inet6Address))
-                    throw new IllegalArgumentException("\"gateway\" " +
-                            "must be an IPv6 " +
-                            "address");
-                this.gateway = gateway;
-                break;
-            case Gateway.Name:
-                if (!(gateway instanceof Name))
-                    throw new IllegalArgumentException("\"gateway\" " +
-                            "must be a DNS " +
-                            "name");
-                this.gateway = checkName("gateway", (Name) gateway);
-                break;
-            default:
-                throw new IllegalArgumentException("\"gatewayType\" " +
-                        "must be between 0 and 3");
-        }
-
-        this.key = key;
-    }
-
     @Override
-    public void rrFromWire(DNSInput in) throws IOException {
-        precedence = in.readU8();
-        gatewayType = in.readU8();
-        algorithmType = in.readU8();
+    public void read(DataInput in) throws IOException {
+        precedence = in.readUnsignedByte();
+        gatewayType = in.readUnsignedByte();
+        algorithmType = in.readUnsignedByte();
+
         switch (gatewayType) {
             case Gateway.None:
                 gateway = null;
                 break;
             case Gateway.IPv4:
-                gateway = InetAddress.getByAddress(in.readByteArray(4));
+                byte[] data = new byte[4];
+                in.readFully(data,0,4);
+                gateway = InetAddress.getByAddress(data);
                 break;
             case Gateway.IPv6:
-                gateway = InetAddress.getByAddress(in.readByteArray(16));
+                gateway = InetAddress.getByAddress(Text.readBytes(in,2));
+
                 break;
             case Gateway.Name:
                 gateway = new Name(in);
                 break;
-            default:
-                throw new ParseException("invalid gateway type");
-        }
-        if (in.remaining() > 0)
-            key = in.readByteArray();
-    }
 
-    @Override
-    public void rdataFromString(Tokenizer st, Name origin) throws IOException {
-        precedence = st.getUInt8();
-        gatewayType = st.getUInt8();
-        algorithmType = st.getUInt8();
-        switch (gatewayType) {
-            case Gateway.None:
-                String s = st.getString();
-                if (!s.equals("."))
-                    throw new TextParseException("invalid gateway format");
-                gateway = null;
-                break;
-            case Gateway.IPv4:
-                gateway = st.getAddress(Address.IPv4);
-                break;
-            case Gateway.IPv6:
-                gateway = st.getAddress(Address.IPv6);
-                break;
-            case Gateway.Name:
-                gateway = st.getName(origin);
-                break;
             default:
                 throw new ParseException("invalid gateway type");
         }
-        key = st.getBase64(false);
+
+        key = Text.readBytes(in,2);
+
     }
 
     @Override
@@ -246,26 +175,5 @@ public class IPSECKEYRecord extends Record {
         return key;
     }
 
-    @Override
-    public void rrToWire(DNSOutput out, Compression c, boolean canonical) {
-        out.writeU8(precedence);
-        out.writeU8(gatewayType);
-        out.writeU8(algorithmType);
-        switch (gatewayType) {
-            case Gateway.None:
-                break;
-            case Gateway.IPv4:
-            case Gateway.IPv6:
-                InetAddress gatewayAddr = (InetAddress) gateway;
-                out.writeByteArray(gatewayAddr.getAddress());
-                break;
-            case Gateway.Name:
-                Name gatewayName = (Name) gateway;
-                gatewayName.toWire(out, null, canonical);
-                break;
-        }
-        if (key != null)
-            out.writeByteArray(key);
-    }
 
 }

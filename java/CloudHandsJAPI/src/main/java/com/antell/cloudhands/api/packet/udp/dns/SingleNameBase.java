@@ -1,5 +1,7 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
+import org.elasticsearch.common.xcontent.XContentBuilder;
+
 import java.io.DataInput;
 import java.io.IOException;
 
@@ -17,16 +19,6 @@ abstract class SingleNameBase extends Record {
     protected SingleNameBase() {
     }
 
-    protected SingleNameBase(Name name, int type, int dclass, long ttl) {
-        super(name, type, dclass, ttl);
-    }
-
-    protected SingleNameBase(Name name, int type, int dclass, long ttl, Name singleName,
-                             String description) {
-        super(name, type, dclass, ttl);
-        this.singleName = singleName;
-    }
-
     @Override
     public void read(DataInput in) throws IOException {
         singleName = new Name(in);
@@ -42,5 +34,10 @@ abstract class SingleNameBase extends Record {
         return singleName;
     }
 
+    @Override
+    public XContentBuilder rdataToJson(XContentBuilder cb) throws IOException {
 
+        cb.field("name",singleName.toString());
+        return cb;
+    }
 }

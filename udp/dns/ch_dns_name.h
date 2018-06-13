@@ -32,7 +32,7 @@ struct ch_dns_name_t {
 
 };
 
-#define CH_DNS_NAME_INIT(name) do {name->ndata = NULL;name->length = 0;name->labels = 0;}while(0)
+#define CH_DNS_NAME_INIT(name) do {(name)->ndata = NULL;(name)->length = 0;(name)->labels = 0;}while(0)
 
 extern int ch_dns_name_parse(ch_pool_t *mp,ch_dns_data_input_t *din,ch_dns_name_t *dname);
 

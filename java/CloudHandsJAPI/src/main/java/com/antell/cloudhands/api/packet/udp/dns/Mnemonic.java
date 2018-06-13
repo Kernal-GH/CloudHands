@@ -8,7 +8,7 @@ import java.util.HashMap;
  *
  */
 
-class Mnemonic {
+public class Mnemonic {
 
     private static Integer cachedInts[] = new Integer[64];
 
@@ -19,13 +19,13 @@ class Mnemonic {
     }
 
     /* Strings are case-sensitive. */
-    static final int CASE_SENSITIVE = 1;
+    public static final int CASE_SENSITIVE = 1;
 
     /* Strings will be stored/searched for in uppercase. */
-    static final int CASE_UPPER = 2;
+    public static final int CASE_UPPER = 2;
 
     /* Strings will be stored/searched for in lowercase. */
-    static final int CASE_LOWER = 3;
+    public static final int CASE_LOWER = 3;
 
     private HashMap strings;
     private HashMap values;

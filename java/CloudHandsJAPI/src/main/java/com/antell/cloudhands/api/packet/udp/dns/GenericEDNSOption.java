@@ -1,7 +1,10 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
-import com.antell.security.utils.Base16;
 
+import com.antell.cloudhands.api.utils.Base16;
+import com.antell.cloudhands.api.utils.Text;
+
+import java.io.DataInput;
 import java.io.IOException;
 
 /**
@@ -27,14 +30,10 @@ public class GenericEDNSOption extends EDNSOption {
     }
 
     @Override
-    public void optionFromWire(DNSInput in) throws IOException {
-        data = in.readByteArray();
+    public void read(DataInput in) throws IOException {
+        data = Text.readBytes(in,2);
     }
 
-    @Override
-    public void optionToWire(DNSOutput out) {
-        out.writeByteArray(data);
-    }
 
     @Override
     public String optionToString() {

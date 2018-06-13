@@ -1,15 +1,15 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
-import com.antell.security.utils.Base16;
-import org.elasticsearch.common.xcontent.XContentBuilder;
+import com.antell.cloudhands.api.utils.Base16;
+import com.antell.cloudhands.api.utils.Text;
 
+import java.io.DataInput;
 import java.io.IOException;
 
 /**
  * DS - contains a Delegation Signer record, which acts as a
  * placeholder for KEY records in the parent zone.
  *
- * @see DNSSEC
  */
 
 public class DSRecord extends Record {
@@ -44,8 +44,6 @@ public class DSRecord extends Record {
     public static final int GOST3411_DIGEST_ID = Digest.GOST3411;
     public static final int SHA384_DIGEST_ID = Digest.SHA384;
 
-    private static final long serialVersionUID = -9001819329700081493L;
-
     private int footprint;
     private int alg;
     private int digestid;
@@ -59,48 +57,14 @@ public class DSRecord extends Record {
         return new DSRecord();
     }
 
-    /**
-     * Creates a DS Record from the given data
-     *
-     * @param footprint The original KEY record's footprint (keyid).
-     * @param alg       The original key algorithm.
-     * @param digestid  The digest id code.
-     * @param digest    A hash of the original key.
-     */
-    public DSRecord(Name name, int dclass, long ttl, int footprint, int alg,
-                    int digestid, byte[] digest) {
-        super(name, Type.DS, dclass, ttl);
-        this.footprint = checkU16("footprint", footprint);
-        this.alg = checkU8("alg", alg);
-        this.digestid = checkU8("digestid", digestid);
-        this.digest = digest;
-    }
-
-    /**
-     * Creates a DS Record from the given data
-     *
-     * @param digestid The digest id code.
-     * @param key      The key to digest
-     */
-    public DSRecord(Name name, int dclass, long ttl, int digestid, DNSKEYRecord key) {
-        this(name, dclass, ttl, key.getFootprint(), key.getAlgorithm(),
-                digestid, DNSSEC.generateDSDigest(key, digestid));
-    }
-
     @Override
-    public void rrFromWire(DNSInput in) throws IOException {
-        footprint = in.readU16();
-        alg = in.readU8();
-        digestid = in.readU8();
-        digest = in.readByteArray();
-    }
+    public void read(DataInput in) throws IOException {
 
-    @Override
-    public void rdataFromString(Tokenizer st, Name origin) throws IOException {
-        footprint = st.getUInt16();
-        alg = st.getUInt8();
-        digestid = st.getUInt8();
-        digest = st.getHex();
+        footprint = in.readUnsignedShort();
+        alg = in.readUnsignedByte();
+        digestid = in.readUnsignedByte();
+        digest = Text.readBytes(in,2);
+
     }
 
     /**
@@ -120,17 +84,6 @@ public class DSRecord extends Record {
         }
 
         return sb.toString();
-    }
-
-    @Override
-    public XContentBuilder rdataToJson(XContentBuilder cb) throws IOException {
-
-        cb.field("footprint",footprint);
-        cb.field("alg",alg);
-        cb.field("digestid",digestid);
-        cb.field("digest",digest == null?"":Base16.toString(digest));
-
-        return cb;
     }
 
     /**
@@ -165,13 +118,5 @@ public class DSRecord extends Record {
         return footprint;
     }
 
-    @Override
-    public void rrToWire(DNSOutput out, Compression c, boolean canonical) {
-        out.writeU16(footprint);
-        out.writeU8(alg);
-        out.writeU8(digestid);
-        if (digest != null)
-            out.writeByteArray(digest);
-    }
 
 }

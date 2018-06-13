@@ -21,10 +21,10 @@ typedef struct ch_dns_rdata_mx_t ch_dns_rdata_mx_t;
 struct ch_dns_rdata_mx_t {
 
 	ch_dns_rdata_t rdata;
+	
+	uint16_t preference;
 
 	ch_dns_name_t mail_exchange;
-
-	uint16_t preference;
 
 };
 

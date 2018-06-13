@@ -2,6 +2,7 @@ package com.antell.cloudhands.api.packet.udp.dns;
 
 import org.elasticsearch.common.xcontent.XContentBuilder;
 
+import java.io.DataInput;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -11,8 +12,6 @@ import java.text.NumberFormat;
  */
 
 public class LOCRecord extends Record {
-
-    private static final long serialVersionUID = 9058224788126750409L;
 
     private static NumberFormat w2, w3;
 
@@ -35,41 +34,20 @@ public class LOCRecord extends Record {
         return new LOCRecord();
     }
 
-    /**
-     * Creates an LOC Record from the given data
-     *
-     * @param latitude   The latitude of the center of the sphere
-     * @param longitude  The longitude of the center of the sphere
-     * @param altitude   The altitude of the center of the sphere, in m
-     * @param size       The diameter of a sphere enclosing the described entity, in m.
-     * @param hPrecision The horizontal precision of the data, in m.
-     * @param vPrecision The vertical precision of the data, in m.
-     */
-    public LOCRecord(Name name, int dclass, long ttl, double latitude, double longitude,
-                     double altitude, double size, double hPrecision, double vPrecision) {
-        super(name, Type.LOC, dclass, ttl);
-        this.latitude = (long) (latitude * 3600 * 1000 + (1L << 31));
-        this.longitude = (long) (longitude * 3600 * 1000 + (1L << 31));
-        this.altitude = (long) ((altitude + 100000) * 100);
-        this.size = (long) (size * 100);
-        this.hPrecision = (long) (hPrecision * 100);
-        this.vPrecision = (long) (vPrecision * 100);
-    }
-
     @Override
-    public void rrFromWire(DNSInput in) throws IOException {
+    public void read(DataInput in) throws IOException {
         int version;
 
-        version = in.readU8();
+        version = in.readUnsignedByte();
         if (version != 0)
             throw new ParseException("Invalid LOC version");
 
-        size = parseLOCformat(in.readU8());
-        hPrecision = parseLOCformat(in.readU8());
-        vPrecision = parseLOCformat(in.readU8());
-        latitude = in.readU32();
-        longitude = in.readU32();
-        altitude = in.readU32();
+        size = parseLOCformat(in.readUnsignedByte());
+        hPrecision = parseLOCformat(in.readUnsignedByte());
+        vPrecision = parseLOCformat(in.readUnsignedByte());
+        latitude = in.readInt();
+        longitude = in.readInt();
+        altitude = in.readInt();
     }
 
     private double
@@ -151,19 +129,6 @@ public class LOCRecord extends Record {
         } catch (NumberFormatException e) {
             throw st.exception("Invalid LOC " + type);
         }
-    }
-
-    @Override
-    public void rdataFromString(Tokenizer st, Name origin) throws IOException {
-        latitude = parsePosition(st, "latitude");
-        longitude = parsePosition(st, "longitude");
-        altitude = parseDouble(st, "altitude", true,
-                -10000000, 4284967295L, 0) + 10000000;
-        size = parseDouble(st, "size", false, 0, 9000000000L, 100);
-        hPrecision = parseDouble(st, "horizontal precision", false,
-                0, 9000000000L, 1000000);
-        vPrecision = parseDouble(st, "vertical precision", false,
-                0, 9000000000L, 1000);
     }
 
     private void
@@ -309,16 +274,6 @@ public class LOCRecord extends Record {
         return ((double) vPrecision) / 100;
     }
 
-    @Override
-    public void rrToWire(DNSOutput out, Compression c, boolean canonical) {
-        out.writeU8(0); /* version */
-        out.writeU8(toLOCformat(size));
-        out.writeU8(toLOCformat(hPrecision));
-        out.writeU8(toLOCformat(vPrecision));
-        out.writeU32(latitude);
-        out.writeU32(longitude);
-        out.writeU32(altitude);
-    }
 
     private static long
     parseLOCformat(int b) throws ParseException {

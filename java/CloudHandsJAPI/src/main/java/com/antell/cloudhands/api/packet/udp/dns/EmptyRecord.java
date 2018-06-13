@@ -1,8 +1,7 @@
 
 package com.antell.cloudhands.api.packet.udp.dns;
 
-import org.elasticsearch.common.xcontent.XContentBuilder;
-
+import java.io.DataInput;
 import java.io.IOException;
 
 /**
@@ -12,7 +11,6 @@ import java.io.IOException;
 
 class EmptyRecord extends Record {
 
-    private static final long serialVersionUID = 3601852050646429582L;
 
     public EmptyRecord() {
     }
@@ -23,25 +21,13 @@ class EmptyRecord extends Record {
     }
 
     @Override
-    public void rrFromWire(DNSInput in) throws IOException {
+    public void read(DataInput in) throws IOException {
     }
 
-    @Override
-    public void rdataFromString(Tokenizer st, Name origin) throws IOException {
-    }
 
     @Override
     public String rrToString() {
         return "";
-    }
-
-    @Override
-    public XContentBuilder rdataToJson(XContentBuilder cb) throws IOException {
-        return cb;
-    }
-
-    @Override
-    public void rrToWire(DNSOutput out, Compression c, boolean canonical) {
     }
 
 }

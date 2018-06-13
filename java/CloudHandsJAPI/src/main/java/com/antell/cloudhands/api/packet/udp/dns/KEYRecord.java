@@ -1,19 +1,14 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
-import java.io.IOException;
-import java.security.PublicKey;
 import java.util.StringTokenizer;
 
 /**
  * Key - contains a cryptographic public key.  The data can be converted
  * to objects implementing java.security.interfaces.PublicKey
  *
- * @see DNSSEC
  */
 
 public class KEYRecord extends KEYBase {
-
-    private static final long serialVersionUID = 6385613447571488906L;
 
     public static class Protocol {
         /**
@@ -396,57 +391,6 @@ public class KEYRecord extends KEYBase {
     @Override
     public Record getObject() {
         return new KEYRecord();
-    }
-
-    /**
-     * Creates a KEY Record from the given data
-     *
-     * @param flags Flags describing the key's properties
-     * @param proto The protocol that the key was created for
-     * @param alg   The key's algorithm
-     * @param key   Binary data representing the key
-     */
-    public KEYRecord(Name name, int dclass, long ttl, int flags, int proto, int alg,
-                     byte[] key) {
-        super(name, Type.KEY, dclass, ttl, flags, proto, alg, key);
-    }
-
-    /**
-     * Creates a KEY Record from the given data
-     *
-     * @param flags Flags describing the key's properties
-     * @param proto The protocol that the key was created for
-     * @param alg   The key's algorithm
-     * @param key   The key as a PublicKey
-     * @throws DNSSEC.DNSSECException The PublicKey could not be converted into DNS
-     *                                format.
-     */
-    public KEYRecord(Name name, int dclass, long ttl, int flags, int proto, int alg,
-                     PublicKey key) throws DNSSEC.DNSSECException {
-        super(name, Type.KEY, dclass, ttl, flags, proto, alg,
-                DNSSEC.fromPublicKey(key, alg));
-        publicKey = key;
-    }
-
-    @Override
-    public void rdataFromString(Tokenizer st, Name origin) throws IOException {
-        String flagString = st.getIdentifier();
-        flags = Flags.value(flagString);
-        if (flags < 0)
-            throw st.exception("Invalid flags: " + flagString);
-        String protoString = st.getIdentifier();
-        proto = Protocol.value(protoString);
-        if (proto < 0)
-            throw st.exception("Invalid protocol: " + protoString);
-        String algString = st.getIdentifier();
-        alg = DNSSEC.Algorithm.value(algString);
-        if (alg < 0)
-            throw st.exception("Invalid algorithm: " + algString);
-    /* If this is a null KEY, there's no key data */
-        if ((flags & Flags.USE_MASK) == Flags.NOKEY)
-            key = null;
-        else
-            key = st.getBase64();
     }
 
 }

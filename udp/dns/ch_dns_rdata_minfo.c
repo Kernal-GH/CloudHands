@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-05-03 16:08:34
- * Last Modified: 2018-05-09 16:53:45
+ * Last Modified: 2018-06-13 17:49:59
  */
 
 #include "ch_dns_rdata_minfo.h"
@@ -26,55 +26,52 @@ static ssize_t  _rdata_minfo_write(ch_dns_rdata_t *rdata,ch_data_output_t *dout,
 
 	ssize_t len = 0,rc;
 	ch_dns_rdata_minfo_t *minfo = (ch_dns_rdata_minfo_t*)rdata;
+	ch_dns_name_t *responsibleAddress = &minfo->responsibleAddress;
+	ch_dns_name_t *errorAddress = &minfo->errorAddress;
 
-	if(-1 == (rc = ch_dns_name_write(dout,&minfo->responsibleAddress)))
-		return -1;
-
-	len += rc;
-
-	if(-1 == (rc = ch_dns_name_write(dout,&minfo->errorAddress)))
-		return -1;
-
-	len+= rc;
-
+	CH_DNS_NAME_WRITE(dout,responsibleAddress,len,rc);
+	CH_DNS_NAME_WRITE(dout,errorAddress,len,rc);
+	
 	return len;
 }
 
 static ch_dns_rdata_t * _rdata_minfo_create(ch_pool_t *mp,void *priv_data ch_unused){
 
 
-	ch_dns_rdata_minfo_t *rdata = (ch_dns_rdata_minfo_t*)ch_pcalloc(mp,sizeof(ch_dns_rdata_minfo_t));
+	ch_dns_rdata_minfo_t *minfo = (ch_dns_rdata_minfo_t*)ch_pcalloc(mp,sizeof(ch_dns_rdata_minfo_t));
 
-	ch_dns_name_t *ra_name = &rdata->responsibleAddress;
-	ch_dns_name_t *err_name = &rdata->errorAddress;
+	ch_dns_name_t *ra_name = &minfo->responsibleAddress;
+	ch_dns_name_t *err_name = &minfo->errorAddress;
 
+
+	minfo->rdata.rdata_dump = _rdata_minfo_dump;
+	minfo->rdata.rdata_write = _rdata_minfo_write;
+	
 	CH_DNS_NAME_INIT(ra_name);
 	CH_DNS_NAME_INIT(err_name);
 
-	rdata->rdata.rdata_dump = _rdata_minfo_dump;
-	rdata->rdata.rdata_write = _rdata_minfo_write;
 
-	return (ch_dns_rdata_t*)rdata;
+	return (ch_dns_rdata_t*)minfo;
 
 }
 
 static int _rdata_minfo_parse(ch_pool_t *mp,ch_dns_rdata_t *rdata,void *priv_data ch_unused){
 
-	ch_dns_rdata_minfo_t *rdata_minfo = (ch_dns_rdata_minfo_t*)rdata;
+	ch_dns_rdata_minfo_t *minfo = (ch_dns_rdata_minfo_t*)rdata;
 
 	if(rdata->dlen ==0 || rdata->data == NULL)
 		return -1;
 
-	ch_dns_data_input_t din;
-	ch_dns_rdata_input_init(&din,rdata);
+	ch_dns_data_input_t tmp,*din = &tmp;
+	ch_dns_rdata_input_init(din,rdata);
 
-	if(ch_dns_name_parse(mp,&din,&rdata_minfo->responsibleAddress)){
+	if(ch_dns_name_parse(mp,din,&minfo->responsibleAddress)){
 	
 		ch_log(CH_LOG_ERR,"Parse minfo responsibleAddress failed!");
 		return -1;
 	}
 	
-	if(ch_dns_name_parse(mp,&din,&rdata_minfo->errorAddress)){
+	if(ch_dns_name_parse(mp,din,&minfo->errorAddress)){
 	
 		ch_log(CH_LOG_ERR,"Parse minfo errorAddress failed!");
 		return -1;

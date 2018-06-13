@@ -13,8 +13,12 @@
 
 typedef struct ch_dns_rdata_ipseckey_t ch_dns_rdata_ipseckey_t;
 
+#include <sys/socket.h>     
+#include <netinet/in.h>     
+#include <arpa/inet.h> 
 #include "ch_dns_rdata.h"
 #include "ch_dns_rdata_pool.h"
+#include "ch_dns_name.h"
 
 struct ch_dns_rdata_ipseckey_t {
 

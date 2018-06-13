@@ -1,7 +1,8 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
-import org.elasticsearch.common.xcontent.XContentBuilder;
+import com.antell.cloudhands.api.utils.Text;
 
+import java.io.DataInput;
 import java.io.IOException;
 
 /**
@@ -10,11 +11,12 @@ import java.io.IOException;
 
 public class GPOSRecord extends Record {
 
-    private static final long serialVersionUID = -6349714958085750705L;
-
-    private byte[] latitude, longitude, altitude;
+    private String latitude;
+    private String longitude;
+    private String altitude;
 
     public GPOSRecord() {
+
     }
 
     @Override
@@ -33,101 +35,38 @@ public class GPOSRecord extends Record {
         }
     }
 
-    /**
-     * Creates an GPOS Record from the given data
-     *
-     * @param longitude The longitude component of the location.
-     * @param latitude  The latitude component of the location.
-     * @param altitude  The altitude component of the location (in meters above sea
-     *                  level).
-     */
-    public GPOSRecord(Name name, int dclass, long ttl, double longitude, double latitude,
-                      double altitude) {
-        super(name, Type.GPOS, dclass, ttl);
-        validate(longitude, latitude);
-        this.longitude = Double.toString(longitude).getBytes();
-        this.latitude = Double.toString(latitude).getBytes();
-        this.altitude = Double.toString(altitude).getBytes();
-    }
-
-    /**
-     * Creates an GPOS Record from the given data
-     *
-     * @param longitude The longitude component of the location.
-     * @param latitude  The latitude component of the location.
-     * @param altitude  The altitude component of the location (in meters above sea
-     *                  level).
-     */
-    public GPOSRecord(Name name, int dclass, long ttl, String longitude, String latitude,
-                      String altitude) {
-        super(name, Type.GPOS, dclass, ttl);
-        try {
-            this.longitude = byteArrayFromString(longitude);
-            this.latitude = byteArrayFromString(latitude);
-            validate(getLongitude(), getLatitude());
-            this.altitude = byteArrayFromString(altitude);
-        } catch (TextParseException e) {
-            throw new IllegalArgumentException(e.getMessage());
-        }
-    }
-
     @Override
-    public void rrFromWire(DNSInput in) throws IOException {
-        longitude = in.readCountedString();
-        latitude = in.readCountedString();
-        altitude = in.readCountedString();
+    public void read(DataInput in) throws IOException {
+        longitude = Text.readString(in,2);
+        latitude = Text.readString(in,2);
+        altitude = Text.readString(in,2);
+
         try {
             validate(getLongitude(), getLatitude());
         } catch (IllegalArgumentException e) {
             throw new ParseException(e.getMessage());
         }
     }
-
-    @Override
-    public void rdataFromString(Tokenizer st, Name origin) throws IOException {
-        try {
-            longitude = byteArrayFromString(st.getString());
-            latitude = byteArrayFromString(st.getString());
-            altitude = byteArrayFromString(st.getString());
-        } catch (TextParseException e) {
-            throw st.exception(e.getMessage());
-        }
-        try {
-            validate(getLongitude(), getLatitude());
-        } catch (IllegalArgumentException e) {
-            throw new ParseException(e.getMessage());
-        }
-    }
-
     /**
      * Convert to a String
      */
     @Override
     public String rrToString() {
         StringBuffer sb = new StringBuffer();
-        sb.append(byteArrayToString(longitude, true));
+        sb.append(longitude);
         sb.append(" ");
-        sb.append(byteArrayToString(latitude, true));
+        sb.append(latitude);
         sb.append(" ");
-        sb.append(byteArrayToString(altitude, true));
+        sb.append(altitude);
         return sb.toString();
-    }
-
-    @Override
-    public XContentBuilder rdataToJson(XContentBuilder cb) throws IOException {
-
-        cb.field("longitude",byteArrayToString(longitude,true));
-        cb.field("latitude",byteArrayToString(latitude,true));
-        cb.field("altitude",byteArrayToString(altitude,true));
-        return cb;
     }
 
     /**
      * Returns the longitude as a string
      */
-    public String
-    getLongitudeString() {
-        return byteArrayToString(longitude, false);
+    public String getLongitudeString() {
+
+        return longitude;
     }
 
     /**
@@ -146,7 +85,7 @@ public class GPOSRecord extends Record {
      */
     public String
     getLatitudeString() {
-        return byteArrayToString(latitude, false);
+        return latitude;
     }
 
     /**
@@ -165,7 +104,7 @@ public class GPOSRecord extends Record {
      */
     public String
     getAltitudeString() {
-        return byteArrayToString(altitude, false);
+        return altitude;
     }
 
     /**
@@ -179,11 +118,5 @@ public class GPOSRecord extends Record {
         return Double.parseDouble(getAltitudeString());
     }
 
-    @Override
-    public void rrToWire(DNSOutput out, Compression c, boolean canonical) {
-        out.writeCountedString(longitude);
-        out.writeCountedString(latitude);
-        out.writeCountedString(altitude);
-    }
 
 }

@@ -1,7 +1,9 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
+import com.antell.cloudhands.api.utils.Text;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 
+import java.io.DataInput;
 import java.io.IOException;
 
 /**
@@ -11,10 +13,13 @@ import java.io.IOException;
 
 public class NAPTRRecord extends Record {
 
-    private static final long serialVersionUID = 5191232392044947002L;
+    private int order;
+    private int preference;
 
-    private int order, preference;
-    private byte[] flags, service, regexp;
+    private String flags;
+    private String service;
+    private String regexp;
+
     private Name replacement;
 
     public NAPTRRecord() {
@@ -25,57 +30,15 @@ public class NAPTRRecord extends Record {
         return new NAPTRRecord();
     }
 
-    /**
-     * Creates an NAPTR Record from the given data
-     *
-     * @param order       The order of this NAPTR.  Records with lower order are
-     *                    preferred.
-     * @param preference  The preference, used to select between records at the
-     *                    same order.
-     * @param flags       The control aspects of the NAPTRRecord.
-     * @param service     The service or protocol available down the rewrite path.
-     * @param regexp      The regular/substitution expression.
-     * @param replacement The domain-name to query for the next DNS resource
-     *                    record, depending on the value of the flags field.
-     * @throws IllegalArgumentException One of the strings has invalid escapes
-     */
-    public NAPTRRecord(Name name, int dclass, long ttl, int order, int preference,
-                       String flags, String service, String regexp, Name replacement) {
-        super(name, Type.NAPTR, dclass, ttl);
-        this.order = checkU16("order", order);
-        this.preference = checkU16("preference", preference);
-        try {
-            this.flags = byteArrayFromString(flags);
-            this.service = byteArrayFromString(service);
-            this.regexp = byteArrayFromString(regexp);
-        } catch (TextParseException e) {
-            throw new IllegalArgumentException(e.getMessage());
-        }
-        this.replacement = checkName("replacement", replacement);
-    }
-
     @Override
-    public void rrFromWire(DNSInput in) throws IOException {
-        order = in.readU16();
-        preference = in.readU16();
-        flags = in.readCountedString();
-        service = in.readCountedString();
-        regexp = in.readCountedString();
+    public void read(DataInput in) throws IOException {
+
+        order = in.readUnsignedShort();
+        preference = in.readUnsignedShort();
+        flags = Text.readString(in,2);
+        service = Text.readString(in,2);
+        regexp = Text.readString(in,2);
         replacement = new Name(in);
-    }
-
-    @Override
-    public void rdataFromString(Tokenizer st, Name origin) throws IOException {
-        order = st.getUInt16();
-        preference = st.getUInt16();
-        try {
-            flags = byteArrayFromString(st.getString());
-            service = byteArrayFromString(st.getString());
-            regexp = byteArrayFromString(st.getString());
-        } catch (TextParseException e) {
-            throw st.exception(e.getMessage());
-        }
-        replacement = st.getName(origin);
     }
 
     /**
@@ -88,13 +51,14 @@ public class NAPTRRecord extends Record {
         sb.append(" ");
         sb.append(preference);
         sb.append(" ");
-        sb.append(byteArrayToString(flags, true));
+        sb.append(flags);
         sb.append(" ");
-        sb.append(byteArrayToString(service, true));
+        sb.append(service);
         sb.append(" ");
-        sb.append(byteArrayToString(regexp, true));
+        sb.append(regexp);
         sb.append(" ");
         sb.append(replacement);
+
         return sb.toString();
     }
 
@@ -103,9 +67,9 @@ public class NAPTRRecord extends Record {
 
         cb.field("order",order);
         cb.field("preference",preference);
-        cb.field("flags",byteArrayToString(flags,true));
-        cb.field("service",byteArrayToString(service,true));
-        cb.field("regexp",byteArrayToString(regexp,true));
+        cb.field("flags",flags);
+        cb.field("service",service);
+        cb.field("regexp",regexp);
         cb.field("replacement",replacement);
 
         return cb;
@@ -129,21 +93,21 @@ public class NAPTRRecord extends Record {
      * Returns flags
      */
     public String getFlags() {
-        return byteArrayToString(flags, false);
+        return flags;
     }
 
     /**
      * Returns service
      */
     public String getService() {
-        return byteArrayToString(service, false);
+        return service;
     }
 
     /**
      * Returns regexp
      */
     public String getRegexp() {
-        return byteArrayToString(regexp, false);
+        return regexp;
     }
 
     /**
@@ -153,15 +117,6 @@ public class NAPTRRecord extends Record {
         return replacement;
     }
 
-    @Override
-    public void rrToWire(DNSOutput out, Compression c, boolean canonical) {
-        out.writeU16(order);
-        out.writeU16(preference);
-        out.writeCountedString(flags);
-        out.writeCountedString(service);
-        out.writeCountedString(regexp);
-        replacement.toWire(out, null, canonical);
-    }
 
     @Override
     public Name getAdditionalName() {

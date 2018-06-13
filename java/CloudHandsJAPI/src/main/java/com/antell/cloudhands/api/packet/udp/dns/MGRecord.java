@@ -7,7 +7,6 @@ package com.antell.cloudhands.api.packet.udp.dns;
 
 public class MGRecord extends SingleNameBase {
 
-    private static final long serialVersionUID = -3980055550863644582L;
 
     public MGRecord() {
     }
@@ -15,16 +14,6 @@ public class MGRecord extends SingleNameBase {
     @Override
     public Record getObject() {
         return new MGRecord();
-    }
-
-    /**
-     * Creates a new MG Record with the given data
-     *
-     * @param mailbox The mailbox that is a member of the group specified by the
-     *                domain.
-     */
-    public MGRecord(Name name, int dclass, long ttl, Name mailbox) {
-        super(name, Type.MG, dclass, ttl, mailbox, "mailbox");
     }
 
     /**

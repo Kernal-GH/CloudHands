@@ -1,81 +1,33 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
-import com.antell.security.proto.udp.dns.impl.BasicDNSInput;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 
+import java.io.DataInput;
 import java.io.IOException;
-import java.util.Random;
 
 /**
  * A DNS  header
  */
 
-public class Header implements Cloneable {
+public class Header {
 
     private int id;
     private int flags;
     private int[] counts;
 
-    private static Random random = new Random();
-
-    /**
-     * The length of a DNS Header in wire format.
-     */
-    public static final int LENGTH = 12;
-
-    private void init() {
-        counts = new int[4];
-        flags = 0;
-        id = -1;
-    }
-
-    /**
-     * Create a new empty header.
-     *
-     * @param id The message id
-     */
-    public Header(int id) {
-        init();
-        setID(id);
-    }
-
-    /**
-     * Create a new empty header with a random message id
-     */
-    public Header() {
-        init();
-    }
-
     /**
      * Parses a Header from a stream containing DNS wire format.
      */
-    public Header(DNSInput in) throws IOException {
-        this(in.readU16());
-        flags = in.readU16();
+    public Header(DataInput in) throws IOException {
+
+        id = in.readUnsignedShort();
+        flags = in.readUnsignedShort();
+        counts = new int[4];
+
         for (int i = 0; i < counts.length; i++)
-            counts[i] = in.readU16();
-    }
+            counts[i] = in.readUnsignedShort();
 
-    /**
-     * Creates a new Header from its DNS wire format representation
-     *
-     * @param b A byte array containing the DNS Header.
-     */
-    public Header(byte[] b) throws IOException {
-        this(new BasicDNSInput(b));
-    }
 
-    public void toWire(DNSOutput out) {
-        out.writeU16(getID());
-        out.writeU16(flags);
-        for (int i = 0; i < counts.length; i++)
-            out.writeU16(counts[i]);
-    }
-
-    public byte[] toWire() {
-        DNSOutput out = new DNSOutput();
-        toWire(out);
-        return out.toByteArray();
     }
 
     static private boolean validFlag(int bit) {
@@ -86,39 +38,6 @@ public class Header implements Cloneable {
     checkFlag(int bit) {
         if (!validFlag(bit))
             throw new IllegalArgumentException("invalid flag bit " + bit);
-    }
-
-    public static int
-    setFlag(int flags, int bit, boolean value) {
-        checkFlag(bit);
-
-        // bits are indexed from left to right
-        if (value)
-            return flags |= (1 << (15 - bit));
-        else
-            return flags &= ~(1 << (15 - bit));
-    }
-
-    /**
-     * Sets a flag to the supplied value
-     *
-     * @see Flags
-     */
-    public void
-    setFlag(int bit) {
-        checkFlag(bit);
-        flags = setFlag(flags, bit, true);
-    }
-
-    /**
-     * Sets a flag to the supplied value
-     *
-     * @see Flags
-     */
-    public void
-    unsetFlag(int bit) {
-        checkFlag(bit);
-        flags = setFlag(flags, bit, false);
     }
 
     /**
@@ -147,38 +66,7 @@ public class Header implements Cloneable {
      */
     public int
     getID() {
-        if (id >= 0)
-            return id;
-        synchronized (this) {
-            if (id < 0)
-                id = random.nextInt(0xffff);
-            return id;
-        }
-    }
-
-    /**
-     * Sets the message ID
-     */
-    public void
-    setID(int id) {
-        if (id < 0 || id > 0xffff)
-            throw new IllegalArgumentException("DNS message ID " + id +
-                    " is out of range");
-        this.id = id;
-    }
-
-    /**
-     * Sets the message's rcode
-     *
-     * @see Rcode
-     */
-    public void
-    setRcode(int value) {
-        if (value < 0 || value > 0xF)
-            throw new IllegalArgumentException("DNS Rcode " + value +
-                    " is out of range");
-        flags &= ~0xF;
-        flags |= value;
+        return id;
     }
 
     /**
@@ -192,20 +80,6 @@ public class Header implements Cloneable {
     }
 
     /**
-     * Sets the message's opcode
-     *
-     * @see Opcode
-     */
-    public void
-    setOpcode(int value) {
-        if (value < 0 || value > 0xF)
-            throw new IllegalArgumentException("DNS Opcode " + value +
-                    "is out of range");
-        flags &= 0x87FF;
-        flags |= (value << 11);
-    }
-
-    /**
      * Retrieves the mesasge's opcode
      *
      * @see Opcode
@@ -213,27 +87,6 @@ public class Header implements Cloneable {
     public int
     getOpcode() {
         return (flags >> 11) & 0xF;
-    }
-
-    public void setCount(int field, int value) {
-        if (value < 0 || value > 0xFFFF)
-            throw new IllegalArgumentException("DNS section count " +
-                    value + " is out of range");
-        counts[field] = value;
-    }
-
-    public void incCount(int field) {
-        if (counts[field] == 0xFFFF)
-            throw new IllegalStateException("DNS section count cannot " +
-                    "be incremented");
-        counts[field]++;
-    }
-
-    public void decCount(int field) {
-        if (counts[field] == 0)
-            throw new IllegalStateException("DNS section count cannot " +
-                    "be decremented");
-        counts[field]--;
     }
 
     /**
@@ -282,6 +135,15 @@ public class Header implements Cloneable {
         return sb.toString();
     }
 
+    /**
+     * Converts the header into a String
+     */
+    public String
+    toString() {
+        return toStringWithRcode(getRcode());
+    }
+
+
     public XContentBuilder toJson(XContentBuilder cb) throws IOException {
 
         cb.field("opcode", Opcode.string(getOpcode()));
@@ -295,22 +157,4 @@ public class Header implements Cloneable {
 
         return cb;
     }
-    /**
-     * Converts the header into a String
-     */
-    public String
-    toString() {
-        return toStringWithRcode(getRcode());
-    }
-
-    /* Creates a new Header identical to the current one */
-    public Object
-    clone() {
-        Header h = new Header();
-        h.id = id;
-        h.flags = flags;
-        System.arraycopy(counts, 0, h.counts, 0, counts.length);
-        return h;
-    }
-
 }

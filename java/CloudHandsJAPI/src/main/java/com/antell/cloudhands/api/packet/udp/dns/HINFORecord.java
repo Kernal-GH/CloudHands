@@ -1,7 +1,9 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
+import com.antell.cloudhands.api.utils.Text;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 
+import java.io.DataInput;
 import java.io.IOException;
 
 /**
@@ -10,9 +12,8 @@ import java.io.IOException;
 
 public class HINFORecord extends Record {
 
-    private static final long serialVersionUID = -4732870630947452112L;
-
-    private byte[] cpu, os;
+    private String cpu;
+    private String os;
 
     public HINFORecord() {
     }
@@ -22,57 +23,28 @@ public class HINFORecord extends Record {
         return new HINFORecord();
     }
 
-    /**
-     * Creates an HINFO Record from the given data
-     *
-     * @param cpu A string describing the host's CPU
-     * @param os  A string describing the host's OS
-     * @throws IllegalArgumentException One of the strings has invalid escapes
-     */
-    public HINFORecord(Name name, int dclass, long ttl, String cpu, String os) {
-        super(name, Type.HINFO, dclass, ttl);
-        try {
-            this.cpu = byteArrayFromString(cpu);
-            this.os = byteArrayFromString(os);
-        } catch (TextParseException e) {
-            throw new IllegalArgumentException(e.getMessage());
-        }
-    }
 
     @Override
-    public void rrFromWire(DNSInput in) throws IOException {
-        cpu = in.readCountedString();
-        os = in.readCountedString();
-    }
+    public void read(DataInput in) throws IOException {
+        cpu = Text.readString(in,2);
+        os = Text.readString(in,2);
 
-    @Override
-    public void rdataFromString(Tokenizer st, Name origin) throws IOException {
-        try {
-            cpu = byteArrayFromString(st.getString());
-            os = byteArrayFromString(st.getString());
-        } catch (TextParseException e) {
-            throw st.exception(e.getMessage());
-        }
     }
 
     /**
      * Returns the host's CPU
      */
     public String getCPU() {
-        return byteArrayToString(cpu, false);
+
+        return cpu;
     }
 
     /**
      * Returns the host's OS
      */
     public String getOS() {
-        return byteArrayToString(os, false);
-    }
 
-    @Override
-    public void rrToWire(DNSOutput out, Compression c, boolean canonical) {
-        out.writeCountedString(cpu);
-        out.writeCountedString(os);
+        return os;
     }
 
     /**
@@ -81,17 +53,17 @@ public class HINFORecord extends Record {
     @Override
     public String rrToString() {
         StringBuffer sb = new StringBuffer();
-        sb.append(byteArrayToString(cpu, true));
+        sb.append(cpu);
         sb.append(" ");
-        sb.append(byteArrayToString(os, true));
+        sb.append(os);
         return sb.toString();
     }
 
     @Override
     public XContentBuilder rdataToJson(XContentBuilder cb) throws IOException {
 
-        cb.field("cpu",byteArrayToString(cpu,true));
-        cb.field("os",byteArrayToString(os,true));
+        cb.field("cpu",cpu);
+        cb.field("os",os);
 
         return cb;
     }

@@ -1,9 +1,12 @@
 
 package com.antell.cloudhands.api.packet.udp.dns;
 
-import com.antell.security.utils.Base64;
+import com.antell.cloudhands.api.utils.Base64;
+import com.antell.cloudhands.api.utils.DNSSEC;
+import com.antell.cloudhands.api.utils.Text;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 
+import java.io.DataInput;
 import java.io.IOException;
 import java.security.PublicKey;
 
@@ -13,32 +16,20 @@ import java.security.PublicKey;
 
 public abstract class KEYBase extends Record {
 
-    private static final long serialVersionUID = 3469321722693285454L;
-
     protected int flags, proto, alg;
     protected byte[] key;
-    protected int footprint = -1;
     protected PublicKey publicKey = null;
 
     protected KEYBase() {
     }
 
-    public KEYBase(Name name, int type, int dclass, long ttl, int flags, int proto,
-                   int alg, byte[] key) {
-        super(name, type, dclass, ttl);
-        this.flags = checkU16("flags", flags);
-        this.proto = checkU8("proto", proto);
-        this.alg = checkU8("alg", alg);
-        this.key = key;
-    }
-
     @Override
-    public void rrFromWire(DNSInput in) throws IOException {
-        flags = in.readU16();
-        proto = in.readU8();
-        alg = in.readU8();
-        if (in.remaining() > 0)
-            key = in.readByteArray();
+    public void read(DataInput in) throws IOException {
+        flags = in.readUnsignedShort();
+        proto = in.readUnsignedByte();
+        alg = in.readUnsignedByte();
+
+        key = Text.readBytes(in,2);
     }
 
     /**
@@ -66,9 +57,9 @@ public abstract class KEYBase extends Record {
         cb.field("proto",proto);
         cb.field("alg",alg);
         cb.field("key",key == null?"":Base64.toString(key));
-
         return cb;
     }
+
     /**
      * Returns the flags describing the key's properties
      */
@@ -101,40 +92,6 @@ public abstract class KEYBase extends Record {
         return key;
     }
 
-    /**
-     * Returns the key's footprint (after computing it)
-     */
-    public int
-    getFootprint() {
-        if (footprint >= 0)
-            return footprint;
-
-        int foot = 0;
-
-        DNSOutput out = new DNSOutput();
-        rrToWire(out, null, false);
-        byte[] rdata = out.toByteArray();
-
-        if (alg == DNSSEC.Algorithm.RSAMD5) {
-            int d1 = rdata[rdata.length - 3] & 0xFF;
-            int d2 = rdata[rdata.length - 2] & 0xFF;
-            foot = (d1 << 8) + d2;
-        } else {
-            int i;
-            for (i = 0; i < rdata.length - 1; i += 2) {
-                int d1 = rdata[i] & 0xFF;
-                int d2 = rdata[i + 1] & 0xFF;
-                foot += ((d1 << 8) + d2);
-            }
-            if (i < rdata.length) {
-                int d1 = rdata[i] & 0xFF;
-                foot += (d1 << 8);
-            }
-            foot += ((foot >> 16) & 0xFFFF);
-        }
-        footprint = (foot & 0xFFFF);
-        return footprint;
-    }
 
     /**
      * Returns a PublicKey corresponding to the data in this key.
@@ -148,15 +105,6 @@ public abstract class KEYBase extends Record {
 
         publicKey = DNSSEC.toPublicKey(this);
         return publicKey;
-    }
-
-    @Override
-    public void rrToWire(DNSOutput out, Compression c, boolean canonical) {
-        out.writeU16(flags);
-        out.writeU8(proto);
-        out.writeU8(alg);
-        if (key != null)
-            out.writeByteArray(key);
     }
 
 }

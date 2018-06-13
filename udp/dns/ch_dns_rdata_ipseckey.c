@@ -1,102 +1,193 @@
 /*
  *
- *      Filename: ch_dns_rdata_cert.c
+ *      Filename: ch_dns_rdata_ipseckey.c
  *
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-06-12 16:31:13
- * Last Modified: 2018-06-13 10:40:37
+ * Last Modified: 2018-06-13 16:14:20
  */
 
 
-#include "ch_dns_rdata_cert.h"
+#include "ch_dns_rdata_ipseckey.h"
 #include "ch_log.h"
 #include "ch_util.h"
 
-static void _rdata_cert_dump(ch_dns_rdata_t *rdata,FILE *fp,void *priv_data ch_unused){
+static void _rdata_ipseckey_dump(ch_dns_rdata_t *rdata,FILE *fp,void *priv_data ch_unused){
 
-	ch_dns_rdata_cert_t *cert = (ch_dns_rdata_cert_t*)rdata;
+	ch_dns_rdata_ipseckey_t *ipseckey = (ch_dns_rdata_ipseckey_t*)rdata;
 
-	fprintf(fp,"Dump The rdata.cert:\n");
-	fprintf(fp,"rdata.cert.type:%u\n",cert->cert_type);
-	fprintf(fp,"rdata.cert.keytag:%u\n",cert->key_tag);
-	fprintf(fp,"rdata.cert.alg:%u\n",cert->alg);
+	char buffer[INET6_ADDRSTRLEN];  
 
-	ch_base64_string_dump("rdata.cert.cert",cert->cert,cert->cert_len,fp);
+	fprintf(fp,"Dump The rdata.ipseckey:\n");
+	fprintf(fp,"rdata.ipseckey.precedence:%u\n",ipseckey->precedence);
+	fprintf(fp,"rdata.ipseckey.gateway_type:%u\n",ipseckey->gateway_type);
+	fprintf(fp,"rdata.ipseckey.alg:%u\n",ipseckey->alg);
+
+	const char *gw ="";
+
+	switch(ipseckey->gateway_type){
+	
+	case 0:
+		gw ="none";
+		break;
+
+	case 1:
+		gw = inet_ntoa(ipseckey->in_addr);
+		break;
+
+	case 2:
+		if(inet_ntop(AF_INET6,(void*)(&ipseckey->in6_addr),buffer, INET6_ADDRSTRLEN) == NULL){    
+        
+			gw = "invalid ipv6 address!";   
+		}else{
+
+			gw = (const char*)buffer;
+		} 	 
+		
+		break;
+
+	case 3:
+		gw = (const char*)ipseckey->gateway.ndata;	
+		break;
+
+	default:
+		break;
+	}
+	fprintf(fp,"rdata.ipseckey.gateway:%s\n",gw);
 
 }
 
-static ssize_t  _rdata_cert_write(ch_dns_rdata_t *rdata,ch_data_output_t *dout,void *priv_data ch_unused){
+static ssize_t  _rdata_ipseckey_write(ch_dns_rdata_t *rdata,ch_data_output_t *dout,void *priv_data ch_unused){
 
-	ch_dns_rdata_cert_t *cert = (ch_dns_rdata_cert_t*)rdata;
+	ch_dns_rdata_ipseckey_t *ipseckey = (ch_dns_rdata_ipseckey_t*)rdata;
 	ssize_t rc,len = 0;
 
-	unsigned char *cert_v = cert->cert;
-	uint16_t cert_len = cert->cert_len;
+	unsigned char *data = NULL;
+	uint16_t dlen = 0;
+	uint32_t v;
 
-	CH_DOUT_UINT16_WRITE(dout,cert->cert_type,len,rc);
-	CH_DOUT_UINT16_WRITE(dout,cert->key_tag,len,rc);
-	CH_DOUT_UINT8_WRITE(dout,cert->alg,len,rc);
+	CH_DOUT_UINT8_WRITE(dout,ipseckey->precedence,len,rc);
+	CH_DOUT_UINT8_WRITE(dout,ipseckey->gateway_type,len,rc);
+	CH_DOUT_UINT8_WRITE(dout,ipseckey->alg,len,rc);
 
-	CH_DOUT_STRING16_WRITE(dout,cert_v,cert_len,len,rc);
+	switch(ipseckey->gateway_type){
+	
+	case 0:
+
+		break;
+
+	case 1:
+		v =  ntohl(ipseckey->in_addr.s_addr);
+		CH_DOUT_UINT32_WRITE(dout,v,len,rc);
+
+		break;
+
+	case 2:
+		
+		data = (unsigned char*)ipseckey->in6_addr.s6_addr;
+		dlen = 16;
+		CH_DOUT_STRING16_WRITE(dout,data,dlen,len,rc);
+
+		break;
+
+	case 3:
+		ch_dns_name_write(dout,&ipseckey->gateway);
+
+		break;
+
+	default:
+		break;
+	}
+
+	data = ipseckey->key;
+	dlen = ipseckey->key_len;
+
+	CH_DOUT_STRING16_WRITE(dout,data,dlen,len,rc);
 
 	return len;
 }
 
-static ch_dns_rdata_t * _rdata_cert_create(ch_pool_t *mp,void *priv_data ch_unused){
+static ch_dns_rdata_t * _rdata_ipseckey_create(ch_pool_t *mp,void *priv_data ch_unused){
 
 
-	ch_dns_rdata_cert_t *cert = (ch_dns_rdata_cert_t*)ch_pcalloc(mp,sizeof(ch_dns_rdata_cert_t));
+	ch_dns_rdata_ipseckey_t *ipseckey = (ch_dns_rdata_ipseckey_t*)ch_pcalloc(mp,sizeof(ch_dns_rdata_ipseckey_t));
 
-	cert->rdata.rdata_dump = _rdata_cert_dump;
-	cert->rdata.rdata_write = _rdata_cert_write;
+	ipseckey->rdata.rdata_dump = _rdata_ipseckey_dump;
+	ipseckey->rdata.rdata_write = _rdata_ipseckey_write;
 
-	cert->cert_type = 0;
-	cert->key_tag = 0;
-	cert->alg = 0;
-	cert->cert_len = 0;
-	cert->cert = NULL;
+	ipseckey->precedence = 0;
+	ipseckey->gateway_type = 0;
+	ipseckey->alg = 0;
+	CH_DNS_NAME_INIT(&ipseckey->gateway);
 
-	return (ch_dns_rdata_t*)cert;
+	ipseckey->key_len = 0;
+	ipseckey->key = NULL;
+	ipseckey->in_addr.s_addr = 0;
+
+	return (ch_dns_rdata_t*)ipseckey;
 
 }
 
-static int _rdata_cert_parse(ch_pool_t *mp,ch_dns_rdata_t *rdata,void *priv_data ch_unused){
+static int _rdata_ipseckey_parse(ch_pool_t *mp,ch_dns_rdata_t *rdata,void *priv_data ch_unused){
 
 	ch_dns_data_input_t tmp,*din=&tmp;
 
-	ch_dns_rdata_cert_t *cert = (ch_dns_rdata_cert_t*)rdata;
+	ch_dns_rdata_ipseckey_t *ipseckey = (ch_dns_rdata_ipseckey_t*)rdata;
 	
-	if(rdata->dlen <5 || rdata->data == NULL)
+	if(rdata->dlen <3 || rdata->data == NULL)
 		return -1;
 
 	ch_dns_rdata_input_init(din,rdata);
 
-	cert->cert_type = ch_dns_data_input_uint16_read(din);
-	cert->key_tag = ch_dns_data_input_uint16_read(din);
-	cert->alg = ch_dns_data_input_uint8_read(din);
+	ipseckey->precedence = ch_dns_data_input_uint8_read(din);
+	ipseckey->gateway_type = ch_dns_data_input_uint8_read(din);
+	ipseckey->alg = ch_dns_data_input_uint8_read(din);
 
-	cert->cert_len = ch_dns_data_input_rdlen(din);
+	switch(ipseckey->gateway_type){
+	
+	case 0:
 
-	cert->cert = ch_dns_data_input_rbytes_read(din,mp);
+		break;
+
+	case 1:
+		ipseckey->in_addr.s_addr = htonl(ch_dns_data_input_uint32_read(din));
+		break;
+
+	case 2:
+		memcpy(ipseckey->in6_addr.s6_addr,din->pos,16);
+		ch_dns_data_input_pos_update(din,16);
+		break;
+
+	case 3:
+		ch_dns_name_parse(mp,din,&ipseckey->gateway);
+		break;
+
+	default:
+		break;
+	}
+
+	ipseckey->key_len = ch_dns_data_input_rdlen(din);
+
+	ipseckey->key = ch_dns_data_input_rbytes_read(din,mp);
 
 	return 0;
 }
 
 
-static ch_dns_rdata_parser_t cert_parser = {
+static ch_dns_rdata_parser_t ipseckey_parser = {
 
 	{NULL,NULL},
 	dns_rdataclass_in,
-	dns_rdatatype_cert,
-	_rdata_cert_create,
-	_rdata_cert_parse
+	dns_rdatatype_ipseckey,
+	_rdata_ipseckey_create,
+	_rdata_ipseckey_parse
 };
 
 
-void ch_dns_rdata_cert_init(ch_dns_rdata_pool_t *rdata_pool){
+void ch_dns_rdata_ipseckey_init(ch_dns_rdata_pool_t *rdata_pool){
 
-	ch_dns_rdata_parser_register(rdata_pool,&cert_parser);
+	ch_dns_rdata_parser_register(rdata_pool,&ipseckey_parser);
 }
 
 

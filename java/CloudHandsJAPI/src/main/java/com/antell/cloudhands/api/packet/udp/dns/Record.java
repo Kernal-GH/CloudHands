@@ -1,5 +1,7 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
+import org.elasticsearch.common.xcontent.XContentBuilder;
+
 import java.io.DataInput;
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -140,6 +142,26 @@ public abstract class Record {
      */
     abstract String rrToString();
 
+    abstract XContentBuilder rdataToJson(XContentBuilder cb) throws IOException;
+
+    /**
+     * Converts a Record into a Json format
+     * */
+    public XContentBuilder toJson(XContentBuilder cb) throws IOException {
+
+        cb.field("name",name.toString());
+        cb.field("ttl",ttl);
+        cb.field("dclassStr",DClass.string(dclass));
+        cb.field("dclass",dclass);
+        cb.field("typeStr",Type.string(type));
+        cb.field("type",type);
+        XContentBuilder cbb = cb.startObject("rdata");
+        rdataToJson(cbb);
+        cbb.endObject();
+
+        return cb;
+    }
+
     /**
      * Converts the rdata portion of a Record into a String representation
      */
@@ -217,7 +239,17 @@ public abstract class Record {
     public long getTTL() {
         return ttl;
     }
-
+    /**
+     * Returns the name for which additional data processing should be done
+     * for this record.  This can be used both for building responses and
+     * parsing responses.
+     *
+     * @return The name to used for additional data processing, or null if this
+     * record type does not require additional data processing.
+     */
+    public Name getAdditionalName() {
+        return null;
+    }
     /**
      * Determines if two Records could be part of the same RRset.
      * This compares the name, type, and class of the Records; the ttl and
@@ -234,5 +266,47 @@ public abstract class Record {
         this.ttl = ttl;
     }
 
+    /* Checks that an int contains an unsigned 8 bit value */
+    public static int checkU8(String field, int val) {
+        if (val < 0 || val > 0xFF)
+            throw new IllegalArgumentException("\"" + field + "\" " + val +
+                    " must be an unsigned 8 " +
+                    "bit value");
+        return val;
+    }
 
+    /* Checks that an int contains an unsigned 16 bit value */
+    public static int checkU16(String field, int val) {
+        if (val < 0 || val > 0xFFFF)
+            throw new IllegalArgumentException("\"" + field + "\" " + val +
+                    " must be an unsigned 16 " +
+                    "bit value");
+        return val;
+    }
+
+    /* Checks that a long contains an unsigned 32 bit value */
+    public static long checkU32(String field, long val) {
+        if (val < 0 || val > 0xFFFFFFFFL)
+            throw new IllegalArgumentException("\"" + field + "\" " + val +
+                    " must be an unsigned 32 " +
+                    "bit value");
+        return val;
+    }
+
+    /* Checks that a name is absolute */
+    public static Name checkName(String field, Name name) {
+        if (!name.isAbsolute())
+            throw new RelativeNameException(name);
+        return name;
+    }
+
+    public static byte[] checkByteArrayLength(String field, byte[] array, int maxLength) {
+        if (array.length > 0xFFFF)
+            throw new IllegalArgumentException("\"" + field + "\" array " +
+                    "must have no more than " +
+                    maxLength + " elements");
+        byte[] out = new byte[array.length];
+        System.arraycopy(array, 0, out, 0, array.length);
+        return out;
+    }
 }

@@ -6,7 +6,6 @@ package com.antell.cloudhands.api.packet.udp.dns;
 
 public class MBRecord extends SingleNameBase {
 
-    private static final long serialVersionUID = 532349543479150419L;
 
     public MBRecord() {
     }
@@ -14,15 +13,6 @@ public class MBRecord extends SingleNameBase {
     @Override
     public Record getObject() {
         return new MBRecord();
-    }
-
-    /**
-     * Creates a new MB Record with the given data
-     *
-     * @param mailbox The host containing the mailbox for the domain.
-     */
-    public MBRecord(Name name, int dclass, long ttl, Name mailbox) {
-        super(name, Type.MB, dclass, ttl, mailbox, "mailbox");
     }
 
     /**
