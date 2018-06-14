@@ -112,21 +112,35 @@ static inline void ch_dns_data_input_bstring_read(ch_dns_data_input_t *din,unsig
     ch_dns_data_input_pos_update(din,*len);
 }
 
+static inline unsigned char * ch_dns_data_copy(ch_pool_t *mp,unsigned char* data,size_t dlen){
+
+
+	unsigned char *result = ch_pcalloc(mp,dlen+1);
+	if(result){
+	
+		memcpy((void*)result,(const void*)data,dlen);
+
+	}
+
+	return result;
+
+}
+
 static inline unsigned char* ch_dns_data_input_bstring_read_dup(ch_dns_data_input_t *din,ch_pool_t *mp){
 
-	const char *data;
-	uint8_t dlen;
+	unsigned char *data;
+	size_t dlen;
 
     if(ch_dns_data_input_read_over(din,sizeof(uint8_t)))
         return NULL;
 
     dlen = ch_dns_data_input_uint8_read(din);
 
-    data = (const char*)din->pos;
+    data = (unsigned char*)din->pos;
 
     ch_dns_data_input_pos_update(din,dlen);
 
-	return (unsigned char*)ch_pstrndup(mp,data,(size_t)dlen);
+	return ch_dns_data_copy(mp,data,dlen);
 
 }
 
@@ -143,20 +157,18 @@ static inline unsigned char * ch_dns_data_input_bytes_read(ch_dns_data_input_t *
     if(r_bytes == 0)
         return NULL;
 
-    unsigned char *data = (unsigned char*)ch_pcalloc(mp,r_bytes);
-	memcpy(data,din->pos,r_bytes);
-
     ch_dns_data_input_pos_update(din,r_bytes);
+	
+	return ch_dns_data_copy(mp,(unsigned char*)din->pos,r_bytes);
 
-	return data;
 }
 
 static inline unsigned char * ch_dns_data_input_rbytes_read(ch_dns_data_input_t *din,ch_pool_t *mp){
 
-	const char *data;
+	unsigned char *data;
 	size_t dlen;
 
-	data = (const char *)din->pos;
+	data = (unsigned char *)din->pos;
 	dlen = ch_dns_data_input_rdlen(din);
 	
 	if(dlen == 0)
@@ -164,22 +176,7 @@ static inline unsigned char * ch_dns_data_input_rbytes_read(ch_dns_data_input_t 
 
 	din->pos = din->last;
 
-	return (unsigned char*)ch_pstrndup(mp,data,dlen);
-
-}
-
-static inline unsigned char * ch_dns_data_input_counted_bytes_read(ch_dns_data_input_t *din,ch_pool_t *mp,size_t dlen){
-
-	const char *data;
-
-	if(dlen == 0)
-		return NULL;
-
-	data = (const char *)din->pos;
-	
-	ch_dns_data_input_pos_update(din,dlen); 
-
-	return (unsigned char*)ch_pstrndup(mp,data,dlen);
+	return ch_dns_data_copy(mp,data,dlen);
 
 }
 

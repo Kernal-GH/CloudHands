@@ -2,6 +2,7 @@ package com.antell.cloudhands.api.packet.udp.dns;
 
 import org.elasticsearch.common.xcontent.XContentBuilder;
 
+import java.io.DataInput;
 import java.io.IOException;
 
 /**
@@ -9,8 +10,6 @@ import java.io.IOException;
  */
 
 public class PXRecord extends Record {
-
-    private static final long serialVersionUID = 1811540008806660667L;
 
     private int preference;
     private Name map822;
@@ -24,34 +23,11 @@ public class PXRecord extends Record {
         return new PXRecord();
     }
 
-    /**
-     * Creates an PX Record from the given data
-     *
-     * @param preference The preference of this mail address.
-     * @param map822     The RFC 822 component of the mail address.
-     * @param mapX400    The X.400 component of the mail address.
-     */
-    public PXRecord(Name name, int dclass, long ttl, int preference,
-                    Name map822, Name mapX400) {
-        super(name, Type.PX, dclass, ttl);
-
-        this.preference = checkU16("preference", preference);
-        this.map822 = checkName("map822", map822);
-        this.mapX400 = checkName("mapX400", mapX400);
-    }
-
     @Override
-    public void rrFromWire(DNSInput in) throws IOException {
-        preference = in.readU16();
+    public void read(DataInput in) throws IOException {
+        preference = in.readUnsignedShort();
         map822 = new Name(in);
         mapX400 = new Name(in);
-    }
-
-    @Override
-    public void rdataFromString(Tokenizer st, Name origin) throws IOException {
-        preference = st.getUInt16();
-        map822 = st.getName(origin);
-        mapX400 = st.getName(origin);
     }
 
     /**
@@ -77,12 +53,6 @@ public class PXRecord extends Record {
         return cb;
     }
 
-    @Override
-    public void rrToWire(DNSOutput out, Compression c, boolean canonical) {
-        out.writeU16(preference);
-        map822.toWire(out, null, canonical);
-        mapX400.toWire(out, null, canonical);
-    }
 
     /**
      * Gets the preference of the route.

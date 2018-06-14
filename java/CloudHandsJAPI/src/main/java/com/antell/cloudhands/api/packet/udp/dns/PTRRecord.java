@@ -8,7 +8,6 @@ package com.antell.cloudhands.api.packet.udp.dns;
 
 public class PTRRecord extends SingleCompressedNameBase {
 
-    private static final long serialVersionUID = -8321636610425434192L;
 
     public PTRRecord() {
     }
@@ -16,15 +15,6 @@ public class PTRRecord extends SingleCompressedNameBase {
     @Override
     public Record getObject() {
         return new PTRRecord();
-    }
-
-    /**
-     * Creates a new PTR Record with the given data
-     *
-     * @param target The name of the machine with this address
-     */
-    public PTRRecord(Name name, int dclass, long ttl, Name target) {
-        super(name, Type.PTR, dclass, ttl, target, "target");
     }
 
     /**

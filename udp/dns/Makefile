@@ -42,6 +42,7 @@ ch_dns_SOURCES = ch_dns_app.c \
 				 ch_dns_rdata_apl.c \
 				 ch_dns_rdata_dname.c \
 				 ch_dns_sec_key.c \
+				 ch_dns_sec_sig.c \
 				 ch_dns_rdata_dnskey.c \
 				 ch_dns_rdata_ds.c \
 				 ch_dns_rdata_gpos.c \
@@ -52,7 +53,19 @@ ch_dns_SOURCES = ch_dns_app.c \
 				 ch_dns_rdata_loc.c \
 				 ch_dns_rdata_naptr.c \
 				 ch_dns_rdata_nsap_ptr.c \
-				 ch_dns_rdata_nsap.c
+				 ch_dns_rdata_nsap.c \
+				 ch_dns_rdata_nsec3param.c \
+				 ch_dns_rdata_nsec3.c \
+				 ch_dns_rdata_nsec.c \
+				 ch_dns_rdata_nxt.c \
+				 ch_dns_rdata_openpgpkey.c \
+				 ch_dns_rdata_opt.c \
+				 ch_dns_rdata_px.c \
+				 ch_dns_rdata_rp.c \
+				 ch_dns_rdata_rrsig.c \
+				 ch_dns_rdata_rt.c \
+				 ch_dns_rdata_sig.c \
+				 ch_dns_rdata_smimea.c 
 
 ch_dns_OBJECTS = $(patsubst %.c,%.o,$(ch_dns_SOURCES))
 ch_dns_DEPENDS = $(patsubst %.c,%.d,$(ch_dns_SOURCES))

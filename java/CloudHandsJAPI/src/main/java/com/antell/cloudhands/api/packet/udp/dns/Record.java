@@ -1,5 +1,6 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
+import com.antell.cloudhands.api.utils.Base16;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 
 import java.io.DataInput;
@@ -308,5 +309,28 @@ public abstract class Record {
         byte[] out = new byte[array.length];
         System.arraycopy(array, 0, out, 0, array.length);
         return out;
+    }
+
+    /**
+     * Converts a byte array into the unknown RR format.
+     */
+    protected static String unknownToString(byte[] data) {
+        StringBuffer sb = new StringBuffer();
+        sb.append("\\# ");
+        sb.append(data.length);
+        sb.append(" ");
+        sb.append(Base16.toString(data));
+
+        return sb.toString();
+    }
+
+   protected Record
+    cloneRecord() {
+        try {
+            return (Record) clone();
+        }
+        catch (CloneNotSupportedException e) {
+            throw new IllegalStateException();
+        }
     }
 }

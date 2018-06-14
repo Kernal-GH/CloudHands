@@ -3,12 +3,10 @@ package com.antell.cloudhands.api.packet.udp.dns;
 /**
  * Routines for deal with the lists of types found in NSEC/NSEC3 records.
  */
-
-import com.google.common.io.ByteArrayDataInput;
+import com.antell.cloudhands.api.utils.Text;
 
 import java.io.DataInput;
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.Iterator;
 import java.util.TreeSet;
 
@@ -27,22 +25,26 @@ public final class TypeBitmap  {
         }
     }
 
-    public TypeBitmap(DataInput in) throws ParseException {
+    public TypeBitmap(DataInput in) throws IOException {
         this();
 
+        byte[] data = Text.readBytes(in,2);
+
+        DNSDataInput din = new BasicDNSDataInput(data);
+
         int lastbase = -1;
-        while (in.remaining() > 0) {
-            if (in.remaining() < 2)
-                throw new WireParseException
+        while (din.remaining() > 0) {
+            if (din.remaining() < 2)
+                throw new ParseException
                         ("invalid bitmap descriptor");
-            int mapbase = in.readU8();
+            int mapbase = din.readU8();
             if (mapbase < lastbase)
-                throw new WireParseException("invalid ordering");
-            int maplength = in.readU8();
-            if (maplength > in.remaining())
-                throw new WireParseException("invalid bitmap");
+                throw new ParseException("invalid ordering");
+            int maplength = din.readU8();
+            if (maplength > din.remaining())
+                throw new ParseException("invalid bitmap");
             for (int i = 0; i < maplength; i++) {
-                int current = in.readU8();
+                int current = din.readU8();
                 if (current == 0)
                     continue;
                 for (int j = 0; j < 8; j++) {
@@ -53,21 +55,6 @@ public final class TypeBitmap  {
                 }
             }
         }
-    }
-
-    public TypeBitmap(Tokenizer st) throws IOException {
-        this();
-        while (true) {
-            Tokenizer.Token t = st.get();
-            if (!t.isString())
-                break;
-            int typecode = Type.value(t.value);
-            if (typecode < 0) {
-                throw st.exception("Invalid type: " + t.value);
-            }
-            types.add(Mnemonic.toInteger(typecode));
-        }
-        st.unget();
     }
 
     public int[] toArray() {
@@ -90,41 +77,7 @@ public final class TypeBitmap  {
         return sb.toString();
     }
 
-    private static void mapToWire(DNSOutput out, TreeSet map, int mapbase) {
-        int arraymax = (((Integer) map.last()).intValue()) & 0xFF;
-        int arraylength = (arraymax / 8) + 1;
-        int[] array = new int[arraylength];
-        out.writeU8(mapbase);
-        out.writeU8(arraylength);
-        for (Iterator it = map.iterator(); it.hasNext(); ) {
-            int typecode = ((Integer) it.next()).intValue();
-            array[(typecode & 0xFF) / 8] |= (1 << (7 - typecode % 8));
-        }
-        for (int j = 0; j < arraylength; j++)
-            out.writeU8(array[j]);
-    }
 
-    public void toWire(DNSOutput out) {
-        if (types.size() == 0)
-            return;
-
-        int mapbase = -1;
-        TreeSet map = new TreeSet();
-
-        for (Iterator it = types.iterator(); it.hasNext(); ) {
-            int t = ((Integer) it.next()).intValue();
-            int base = t >> 8;
-            if (base != mapbase) {
-                if (map.size() > 0) {
-                    mapToWire(out, map, mapbase);
-                    map.clear();
-                }
-                mapbase = base;
-            }
-            map.add(new Integer(t));
-        }
-        mapToWire(out, map, mapbase);
-    }
 
     public boolean empty() {
         return types.isEmpty();

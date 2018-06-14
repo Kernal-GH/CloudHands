@@ -1,8 +1,10 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
-import com.antell.security.utils.Base64;
+import com.antell.cloudhands.api.utils.Base64;
+import com.antell.cloudhands.api.utils.Text;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 
+import java.io.DataInput;
 import java.io.IOException;
 
 /**
@@ -10,8 +12,6 @@ import java.io.IOException;
  * RFC 7929.
  */
 public class OPENPGPKEYRecord extends Record {
-
-    private static final long serialVersionUID = -1277262990243423062L;
 
     private byte[] cert;
 
@@ -23,25 +23,12 @@ public class OPENPGPKEYRecord extends Record {
         return new OPENPGPKEYRecord();
     }
 
-    /**
-     * Creates an OPENPGPKEY Record from the given data
-     *
-     * @param cert Binary data representing the certificate
-     */
-    public OPENPGPKEYRecord(Name name, int dclass, long ttl, byte[] cert) {
-        super(name, Type.OPENPGPKEY, dclass, ttl);
-        this.cert = cert;
-    }
 
     @Override
-    public void rrFromWire(DNSInput in) throws IOException {
-        cert = in.readByteArray();
+    public void read(DataInput in) throws IOException {
+        cert = Text.readBytes(in,2);
     }
 
-    @Override
-    public void rdataFromString(Tokenizer st, Name origin) throws IOException {
-        cert = st.getBase64();
-    }
 
     /**
      * Converts rdata to a String
@@ -71,9 +58,5 @@ public class OPENPGPKEYRecord extends Record {
         return cert;
     }
 
-    @Override
-    public void rrToWire(DNSOutput out, Compression c, boolean canonical) {
-        out.writeByteArray(cert);
-    }
 
 }

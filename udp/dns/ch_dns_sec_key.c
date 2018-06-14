@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-06-13 10:15:48
- * Last Modified: 2018-06-13 10:43:08
+ * Last Modified: 2018-06-14 19:06:46
  */
 
 #include "ch_dns_sec_key.h"
@@ -33,7 +33,7 @@ int ch_dns_sec_key_parse(ch_pool_t *mp,ch_dns_sec_key_t *skey,ch_dns_data_input_
 	skey->alg = ch_dns_data_input_uint8_read(din);
 
 	skey->public_key_len = ch_dns_data_input_rdlen(din);
-	skey->public_key = ch_dns_data_input_counted_bytes_read(din,mp,skey->public_key_len);
+	skey->public_key = ch_dns_data_input_bytes_read(din,mp,skey->public_key_len);
 
 	return 0;
 }

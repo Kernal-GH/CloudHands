@@ -6,8 +6,6 @@ package com.antell.cloudhands.api.packet.udp.dns;
 
 public class RTRecord extends U16NameBase {
 
-    private static final long serialVersionUID = -3206215651648278098L;
-
     public RTRecord() {
     }
 
@@ -16,18 +14,6 @@ public class RTRecord extends U16NameBase {
         return new RTRecord();
     }
 
-    /**
-     * Creates an RT Record from the given data
-     *
-     * @param preference       The preference of the route.  Smaller numbers indicate
-     *                         more preferred routes.
-     * @param intermediateHost The domain name of the host to use as a router.
-     */
-    public RTRecord(Name name, int dclass, long ttl, int preference,
-                    Name intermediateHost) {
-        super(name, Type.RT, dclass, ttl, preference, "preference",
-                intermediateHost, "intermediateHost");
-    }
 
     /**
      * Gets the preference of the route.

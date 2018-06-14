@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-05-03 10:23:52
- * Last Modified: 2018-05-09 16:31:40
+ * Last Modified: 2018-06-14 14:36:14
  */
 
 #include "ch_dns_rdata_mb.h"
@@ -32,28 +32,28 @@ static ssize_t  _rdata_mb_write(ch_dns_rdata_t *rdata,ch_data_output_t *dout,voi
 static ch_dns_rdata_t * _rdata_mb_create(ch_pool_t *mp,void *priv_data ch_unused){
 
 
-	ch_dns_rdata_mb_t *rdata = (ch_dns_rdata_mb_t*)ch_pcalloc(mp,sizeof(ch_dns_rdata_mb_t));
+	ch_dns_rdata_mb_t *mb = (ch_dns_rdata_mb_t*)ch_pcalloc(mp,sizeof(ch_dns_rdata_mb_t));
 
-	ch_dns_name_t *name = &rdata->name;
+	ch_dns_name_t *name = &mb->name;
 
-	rdata->rdata.rdata_dump = _rdata_mb_dump;
-	rdata->rdata.rdata_write = _rdata_mb_write;
+	mb->rdata.rdata_dump = _rdata_mb_dump;
+	mb->rdata.rdata_write = _rdata_mb_write;
 
 	CH_DNS_NAME_INIT(name);
 
 
-	return (ch_dns_rdata_t*)rdata;
+	return (ch_dns_rdata_t*)mb;
 
 }
 
 static int _rdata_mb_parse(ch_pool_t *mp,ch_dns_rdata_t *rdata,void *priv_data ch_unused){
 
-	ch_dns_rdata_mb_t *rdata_mb = (ch_dns_rdata_mb_t*)rdata;
+	ch_dns_rdata_mb_t *mb = (ch_dns_rdata_mb_t*)rdata;
 	
 	if(rdata->dlen ==0 || rdata->data == NULL)
 		return -1;
 
-	if(ch_dns_rdata_name_parse(mp,rdata,&rdata_mb->name)){
+	if(ch_dns_rdata_name_parse(mp,rdata,&mb->name)){
 	
 		ch_log(CH_LOG_ERR,"Parse MailBox failed!");
 		return -1;

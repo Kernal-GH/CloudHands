@@ -2,6 +2,7 @@ package com.antell.cloudhands.api.packet.udp.dns;
 
 import org.elasticsearch.common.xcontent.XContentBuilder;
 
+import java.io.DataInput;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,11 +22,10 @@ import java.util.List;
 
 public class OPTRecord extends Record {
 
-    private static final long serialVersionUID = -6254521894809367938L;
-
     private List options;
 
-    OPTRecord() {
+    public OPTRecord() {
+
     }
 
     @Override
@@ -33,69 +33,16 @@ public class OPTRecord extends Record {
         return new OPTRecord();
     }
 
-    /**
-     * Creates an OPT Record.  This is normally called by SimpleResolver, but can
-     * also be called by a server.
-     *
-     * @param payloadSize The size of a packet that can be reassembled on the
-     *                    sending host.
-     * @param xrcode      The value of the extended rcode field.  This is the upper
-     *                    16 bits of the full rcode.
-     * @param flags       Additional message flags.
-     * @param version     The EDNS version that this DNS implementation supports.
-     *                    This should be 0 for dnsjava.
-     * @param options     The list of options that comprise the data field.  There
-     *                    are currently no defined options.
-     */
-    public OPTRecord(int payloadSize, int xrcode, int version, int flags, List options) {
-        super(Name.root, Type.OPT, payloadSize, 0);
-        checkU16("payloadSize", payloadSize);
-        checkU8("xrcode", xrcode);
-        checkU8("version", version);
-        checkU16("flags", flags);
-        ttl = ((long) xrcode << 24) + ((long) version << 16) + flags;
-        if (options != null) {
-            this.options = new ArrayList(options);
-        }
-    }
-
-    /**
-     * Creates an OPT Record with no data.  This is normally called by
-     * SimpleResolver, but can also be called by a server.
-     *
-     * @param payloadSize The size of a packet that can be reassembled on the
-     *                    sending host.
-     * @param xrcode      The value of the extended rcode field.  This is the upper
-     *                    16 bits of the full rcode.
-     * @param flags       Additional message flags.
-     * @param version     The EDNS version that this DNS implementation supports.
-     *                    This should be 0 for dnsjava.
-     */
-    public OPTRecord(int payloadSize, int xrcode, int version, int flags) {
-        this(payloadSize, xrcode, version, flags, null);
-    }
-
-    /**
-     * Creates an OPT Record with no data.  This is normally called by
-     * SimpleResolver, but can also be called by a server.
-     */
-    public OPTRecord(int payloadSize, int xrcode, int version) {
-        this(payloadSize, xrcode, version, 0, null);
-    }
-
     @Override
-    public void rrFromWire(DNSInput in) throws IOException {
-        if (in.remaining() > 0)
-            options = new ArrayList();
-        while (in.remaining() > 0) {
-            EDNSOption option = EDNSOption.fromWire(in);
+    public void read(DataInput in) throws IOException {
+
+        int n = in.readUnsignedShort();
+        options = new ArrayList();
+
+        for(int i = 0;i<n;i++){
+            EDNSOption option = EDNSOption.build(in);
             options.add(option);
         }
-    }
-
-    @Override
-    public void rdataFromString(Tokenizer st, Name origin) throws IOException {
-        throw st.exception("no text format defined for OPT");
     }
 
     /**
@@ -161,16 +108,6 @@ public class OPTRecord extends Record {
         return (int) (ttl & 0xFFFF);
     }
 
-    @Override
-    public void rrToWire(DNSOutput out, Compression c, boolean canonical) {
-        if (options == null)
-            return;
-        Iterator it = options.iterator();
-        while (it.hasNext()) {
-            EDNSOption option = (EDNSOption) it.next();
-            option.toWire(out);
-        }
-    }
 
     /**
      * Gets all options in the OPTRecord.  This returns a list of EDNSOptions.

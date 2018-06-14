@@ -2,6 +2,7 @@ package com.antell.cloudhands.api.packet.udp.dns;
 
 import org.elasticsearch.common.xcontent.XContentBuilder;
 
+import java.io.DataInput;
 import java.io.IOException;
 import java.util.BitSet;
 
@@ -14,8 +15,6 @@ import java.util.BitSet;
 
 public class NXTRecord extends Record {
 
-    private static final long serialVersionUID = -8851454400765507520L;
-
     private Name next;
     private BitSet bitmap;
 
@@ -27,46 +26,21 @@ public class NXTRecord extends Record {
         return new NXTRecord();
     }
 
-    /**
-     * Creates an NXT Record from the given data
-     *
-     * @param next   The following name in an ordered list of the zone
-     * @param bitmap The set of type for which records exist at this name
-     */
-    public NXTRecord(Name name, int dclass, long ttl, Name next, BitSet bitmap) {
-        super(name, Type.NXT, dclass, ttl);
-        this.next = checkName("next", next);
-        this.bitmap = bitmap;
-    }
 
     @Override
-    public void rrFromWire(DNSInput in) throws IOException {
+    public void read(DataInput in) throws IOException {
         next = new Name(in);
         bitmap = new BitSet();
-        int bitmapLength = in.remaining();
+
+        int bitmapLength = in.readUnsignedShort();
         for (int i = 0; i < bitmapLength; i++) {
-            int t = in.readU8();
+            int t = in.readUnsignedByte();
             for (int j = 0; j < 8; j++)
                 if ((t & (1 << (7 - j))) != 0)
                     bitmap.set(i * 8 + j);
         }
     }
 
-    @Override
-    public void rdataFromString(Tokenizer st, Name origin) throws IOException {
-        next = st.getName(origin);
-        bitmap = new BitSet();
-        while (true) {
-            Tokenizer.Token t = st.get();
-            if (!t.isString())
-                break;
-            int typecode = Type.value(t.value, true);
-            if (typecode <= 0 || typecode > 128)
-                throw st.exception("Invalid type: " + t.value);
-            bitmap.set(typecode);
-        }
-        st.unget();
-    }
 
     /**
      * Converts rdata to a String
@@ -87,8 +61,18 @@ public class NXTRecord extends Record {
     @Override
     public XContentBuilder rdataToJson(XContentBuilder cb) throws IOException {
 
+        StringBuffer sb = new StringBuffer();
+
         cb.field("next",next);
-        cb.field("bitmap",bitmap.toString());
+
+        int length = bitmap.length();
+        for (short i = 0; i < length; i++)
+            if (bitmap.get(i)) {
+                sb.append(" ");
+                sb.append(Type.string(i));
+            }
+
+        cb.field("bitmap",sb.toString());
         return cb;
     }
 
@@ -105,18 +89,4 @@ public class NXTRecord extends Record {
     public BitSet getBitmap() {
         return bitmap;
     }
-
-    @Override
-    public void rrToWire(DNSOutput out, Compression c, boolean canonical) {
-        next.toWire(out, null, canonical);
-        int length = bitmap.length();
-        for (int i = 0, t = 0; i < length; i++) {
-            t |= (bitmap.get(i) ? (1 << (7 - i % 8)) : 0);
-            if (i % 8 == 7 || i == length - 1) {
-                out.writeU8(t);
-                t = 0;
-            }
-        }
-    }
-
 }

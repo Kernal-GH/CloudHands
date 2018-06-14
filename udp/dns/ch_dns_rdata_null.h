@@ -21,6 +21,9 @@ struct ch_dns_rdata_null_t {
 
 	ch_dns_rdata_t rdata;
 
+	uint16_t dlen;
+
+	unsigned char *data;
 };
 
 extern void ch_dns_rdata_null_init(ch_dns_rdata_pool_t *rdata_pool);

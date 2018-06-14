@@ -1,6 +1,5 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -14,9 +13,7 @@ import java.util.List;
  * @see RRSIGRecord
  */
 
-public class RRset implements Serializable {
-
-    private static final long serialVersionUID = -3270249290171239695L;
+public class RRset  {
 
     /*
      * rrs contains both normal and RRSIG records, with the RRSIG records

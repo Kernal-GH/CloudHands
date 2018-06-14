@@ -1,12 +1,12 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
-import com.antell.security.utils.Base16;
-import com.antell.security.utils.Base32;
+import com.antell.cloudhands.api.utils.Base16;
+import com.antell.cloudhands.api.utils.Base32;
+import com.antell.cloudhands.api.utils.Text;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 
+import java.io.DataInput;
 import java.io.IOException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 
 /**
  * Next SECure name 3 - this record contains the next hashed name in an
@@ -66,96 +66,17 @@ public class NSEC3Record extends Record {
         return new NSEC3Record();
     }
 
-    /**
-     * Creates an NSEC3 record from the given data.
-     *
-     * @param name       The ownername of the NSEC3 record (base32'd hash plus zonename).
-     * @param dclass     The class.
-     * @param ttl        The TTL.
-     * @param hashAlg    The hash algorithm.
-     * @param flags      The value of the flags field.
-     * @param iterations The number of hash iterations.
-     * @param salt       The salt to use (may be null).
-     * @param next       The next hash (may not be null).
-     * @param types      The types present at the original ownername.
-     */
-    public NSEC3Record(Name name, int dclass, long ttl, int hashAlg,
-                       int flags, int iterations, byte[] salt, byte[] next,
-                       int[] types) {
-        super(name, Type.NSEC3, dclass, ttl);
-        this.hashAlg = checkU8("hashAlg", hashAlg);
-        this.flags = checkU8("flags", flags);
-        this.iterations = checkU16("iterations", iterations);
-
-        if (salt != null) {
-            if (salt.length > 255)
-                throw new IllegalArgumentException("Invalid salt");
-            if (salt.length > 0) {
-                this.salt = new byte[salt.length];
-                System.arraycopy(salt, 0, this.salt, 0, salt.length);
-            }
-        }
-
-        if (next.length > 255) {
-            throw new IllegalArgumentException("Invalid next hash");
-        }
-        this.next = new byte[next.length];
-        System.arraycopy(next, 0, this.next, 0, next.length);
-        this.types = new TypeBitmap(types);
-    }
-
     @Override
-    public void rrFromWire(DNSInput in) throws IOException {
-        hashAlg = in.readU8();
-        flags = in.readU8();
-        iterations = in.readU16();
+    public void read(DataInput in) throws IOException {
 
-        int salt_length = in.readU8();
-        if (salt_length > 0)
-            salt = in.readByteArray(salt_length);
-        else
-            salt = null;
+        hashAlg = in.readUnsignedByte();
+        flags = in.readUnsignedByte();
+        iterations = in.readUnsignedShort();
 
-        int next_length = in.readU8();
-        next = in.readByteArray(next_length);
+        salt = Text.readBytes(in,2);
+        next = Text.readBytes(in,2);
+
         types = new TypeBitmap(in);
-    }
-
-    @Override
-    public void rrToWire(DNSOutput out, Compression c, boolean canonical) {
-        out.writeU8(hashAlg);
-        out.writeU8(flags);
-        out.writeU16(iterations);
-
-        if (salt != null) {
-            out.writeU8(salt.length);
-            out.writeByteArray(salt);
-        } else
-            out.writeU8(0);
-
-        out.writeU8(next.length);
-        out.writeByteArray(next);
-        types.toWire(out);
-    }
-
-    @Override
-    public void rdataFromString(Tokenizer st, Name origin) throws IOException {
-        hashAlg = st.getUInt8();
-        flags = st.getUInt8();
-        iterations = st.getUInt16();
-
-        String s = st.getString();
-        if (s.equals("-"))
-            salt = null;
-        else {
-            st.unget();
-            salt = st.getHexString();
-            if (salt.length > 255)
-                throw st.exception("salt value too long");
-        }
-
-        next = st.getBase32String(b32);
-        types = new TypeBitmap(st);
     }
 
     /**
@@ -247,41 +168,5 @@ public class NSEC3Record extends Record {
         return types.contains(type);
     }
 
-    public static byte[] hashName(Name name, int hashAlg, int iterations, byte[] salt)
-            throws NoSuchAlgorithmException {
-        MessageDigest digest;
-        switch (hashAlg) {
-            case Digest.SHA1:
-                digest = MessageDigest.getInstance("sha-1");
-                break;
-            default:
-                throw new NoSuchAlgorithmException("Unknown NSEC3 algorithm" +
-                        "identifier: " +
-                        hashAlg);
-        }
-        byte[] hash = null;
-        for (int i = 0; i <= iterations; i++) {
-            digest.reset();
-            if (i == 0)
-                digest.update(name.toWireCanonical());
-            else
-                digest.update(hash);
-            if (salt != null)
-                digest.update(salt);
-            hash = digest.digest();
-        }
-        return hash;
-    }
-
-    /**
-     * Hashes a name with the parameters of this NSEC3 record.
-     *
-     * @param name The name to hash
-     * @return The hashed version of the name
-     * @throws NoSuchAlgorithmException The hash algorithm is unknown.
-     */
-    public byte[] hashName(Name name) throws NoSuchAlgorithmException {
-        return hashName(name, hashAlg, iterations, salt);
-    }
 
 }

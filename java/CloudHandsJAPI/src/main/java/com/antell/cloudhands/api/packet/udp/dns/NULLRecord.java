@@ -1,7 +1,9 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
+import com.antell.cloudhands.api.utils.Text;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 
+import java.io.DataInput;
 import java.io.IOException;
 
 /**
@@ -24,29 +26,14 @@ public class NULLRecord extends Record {
         return new NULLRecord();
     }
 
-    /**
-     * Creates a NULL record from the given data.
-     *
-     * @param data The contents of the record.
-     */
-    public NULLRecord(Name name, int dclass, long ttl, byte[] data) {
-        super(name, Type.NULL, dclass, ttl);
-
-        if (data.length > 0xFFFF) {
-            throw new IllegalArgumentException("data must be <65536 bytes");
-        }
-        this.data = data;
-    }
 
     @Override
-    public void rrFromWire(DNSInput in) throws IOException {
-        data = in.readByteArray();
+    public void read(DataInput in) throws IOException {
+
+        data = Text.readBytes(in,2);
+
     }
 
-    @Override
-    public void rdataFromString(Tokenizer st, Name origin) throws IOException {
-        throw st.exception("no defined text format for NULL records");
-    }
 
     @Override
     public String rrToString() {
@@ -55,6 +42,8 @@ public class NULLRecord extends Record {
 
     @Override
     public XContentBuilder rdataToJson(XContentBuilder cb) throws IOException {
+
+        cb.field("nullData",unknownToString(data));
         return cb;
     }
 
@@ -65,9 +54,5 @@ public class NULLRecord extends Record {
         return data;
     }
 
-    @Override
-    public void rrToWire(DNSOutput out, Compression c, boolean canonical) {
-        out.writeByteArray(data);
-    }
 
 }

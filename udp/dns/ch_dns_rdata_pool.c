@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-05-04 18:29:37
- * Last Modified: 2018-06-13 19:40:37
+ * Last Modified: 2018-06-14 19:55:13
  */
 
 #include "ch_log.h"
@@ -45,6 +45,18 @@
 #include "ch_dns_rdata_naptr.h"
 #include "ch_dns_rdata_nsap_ptr.h"
 #include "ch_dns_rdata_nsap.h"
+#include "ch_dns_rdata_nsec3param.h"
+#include "ch_dns_rdata_nsec3.h"
+#include "ch_dns_rdata_nsec.h"
+#include "ch_dns_rdata_nxt.h"
+#include "ch_dns_rdata_openpgpkey.h"
+#include "ch_dns_rdata_opt.h"
+#include "ch_dns_rdata_px.h"
+#include "ch_dns_rdata_rp.h"
+#include "ch_dns_rdata_rrsig.h"
+#include "ch_dns_rdata_rt.h"
+#include "ch_dns_rdata_sig.h"
+#include "ch_dns_rdata_smimea.h"
 
 ch_dns_rdata_pool_t *ch_dns_rdata_pool_create(ch_pool_t *mp){
 
@@ -89,6 +101,18 @@ ch_dns_rdata_pool_t *ch_dns_rdata_pool_create(ch_pool_t *mp){
 	ch_dns_rdata_naptr_init(rdata_pool);
 	ch_dns_rdata_nsap_ptr_init(rdata_pool);
 	ch_dns_rdata_nsap_init(rdata_pool);
+	ch_dns_rdata_nsec3param_init(rdata_pool);
+	ch_dns_rdata_nsec3_init(rdata_pool);
+	ch_dns_rdata_nsec_init(rdata_pool);
+	ch_dns_rdata_nxt_init(rdata_pool);
+	ch_dns_rdata_openpgpkey_init(rdata_pool);
+	ch_dns_rdata_opt_init(rdata_pool);
+	ch_dns_rdata_px_init(rdata_pool);
+	ch_dns_rdata_rp_init(rdata_pool);
+	ch_dns_rdata_rrsig_init(rdata_pool);
+	ch_dns_rdata_rt_init(rdata_pool);
+	ch_dns_rdata_sig_init(rdata_pool);
+	ch_dns_rdata_smimea_init(rdata_pool);
 
 	return rdata_pool;
 }

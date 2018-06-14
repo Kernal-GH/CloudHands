@@ -2,6 +2,7 @@ package com.antell.cloudhands.api.packet.udp.dns;
 
 import org.elasticsearch.common.xcontent.XContentBuilder;
 
+import java.io.DataInput;
 import java.io.IOException;
 
 /**
@@ -16,8 +17,6 @@ import java.io.IOException;
 
 public class NSECRecord extends Record {
 
-    private static final long serialVersionUID = -5165065768816265385L;
-
     private Name next;
     private TypeBitmap types;
 
@@ -29,38 +28,10 @@ public class NSECRecord extends Record {
         return new NSECRecord();
     }
 
-    /**
-     * Creates an NSEC Record from the given data.
-     *
-     * @param next  The following name in an ordered list of the zone
-     * @param types An array containing the types present.
-     */
-    public NSECRecord(Name name, int dclass, long ttl, Name next, int[] types) {
-        super(name, Type.NSEC, dclass, ttl);
-        this.next = checkName("next", next);
-        for (int i = 0; i < types.length; i++) {
-            Type.check(types[i]);
-        }
-        this.types = new TypeBitmap(types);
-    }
-
     @Override
-    public void rrFromWire(DNSInput in) throws IOException {
+    public void read(DataInput in) throws IOException {
         next = new Name(in);
         types = new TypeBitmap(in);
-    }
-
-    @Override
-    public void rrToWire(DNSOutput out, Compression c, boolean canonical) {
-        // Note: The next name is not lowercased.
-        next.toWire(out, null, false);
-        types.toWire(out);
-    }
-
-    @Override
-    public void rdataFromString(Tokenizer st, Name origin) throws IOException {
-        next = st.getName(origin);
-        types = new TypeBitmap(st);
     }
 
     /**
