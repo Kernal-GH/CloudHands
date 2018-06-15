@@ -1,6 +1,5 @@
 package com.antell.cloudhands.api.packet;
 
-import com.antell.cloudhands.api.Dump;
 import com.antell.cloudhands.api.utils.MessagePackUtil;
 import com.antell.cloudhands.api.utils.TextUtils;
 import com.google.common.base.Preconditions;
