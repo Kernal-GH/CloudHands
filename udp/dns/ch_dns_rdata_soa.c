@@ -5,23 +5,11 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-05-03 19:28:04
- * Last Modified: 2018-05-09 18:27:35
+ * Last Modified: 2018-06-15 09:42:47
  */
 
 #include "ch_dns_rdata_soa.h"
 #include "ch_log.h"
-
-#define WRITE_INT(dout,v,len) do {			\
-	if( -1 == ch_dout_uint32_write(dout,v))	\
-		return -1;							\
-	len+=4;									\
-}while(0)
-
-#define WRITE_NAME(dout,n,len,rc) do {			\
-	if(-1 == (rc = ch_dns_name_write(dout,n)))	\
-		return -1;								\
-	len+=rc;									\
-}while(0)
 
 static void _rdata_soa_dump(ch_dns_rdata_t *rdata,FILE *fp,void *priv_data ch_unused){
 
@@ -34,7 +22,10 @@ static void _rdata_soa_dump(ch_dns_rdata_t *rdata,FILE *fp,void *priv_data ch_un
 	fprintf(fp,"rdata.soa.expire:%lu\n",(unsigned long)soa->expire);
 	fprintf(fp,"rdata.soa.minimum:%lu\n",(unsigned long)soa->minimum);
 
+	fprintf(fp,"rdata.soa.host:\n");
 	ch_dns_name_dump(&soa->host,fp);
+
+	fprintf(fp,"rdata.soa.admin:\n");
 	ch_dns_name_dump(&soa->admin,fp);
 
 }
@@ -46,14 +37,17 @@ static ssize_t  _rdata_soa_write(ch_dns_rdata_t *rdata,ch_data_output_t *dout,vo
 	ch_dns_rdata_soa_t *soa = (ch_dns_rdata_soa_t*)rdata;
 	ch_dns_name_t *host = &soa->host;
 	ch_dns_name_t *admin = &soa->admin;
+	
+	CH_DNS_NAME_WRITE(dout,host,len,rc);
+	CH_DNS_NAME_WRITE(dout,admin,len,rc);
 
-	WRITE_INT(dout,soa->serial,len);
-	WRITE_INT(dout,soa->refresh,len);
-	WRITE_INT(dout,soa->retry,len);
-	WRITE_INT(dout,soa->expire,len);
-	WRITE_INT(dout,soa->minimum,len);
-	WRITE_NAME(dout,host,len,rc);
-	WRITE_NAME(dout,admin,len,rc);
+	CH_DOUT_UINT32_WRITE(dout,soa->serial,len,rc);
+	CH_DOUT_UINT32_WRITE(dout,soa->refresh,len,rc);
+	CH_DOUT_UINT32_WRITE(dout,soa->retry,len,rc);
+	CH_DOUT_UINT32_WRITE(dout,soa->expire,len,rc);
+	CH_DOUT_UINT32_WRITE(dout,soa->minimum,len,rc);
+
+
 
 	return len;
 
@@ -62,54 +56,57 @@ static ssize_t  _rdata_soa_write(ch_dns_rdata_t *rdata,ch_data_output_t *dout,vo
 static ch_dns_rdata_t * _rdata_soa_create(ch_pool_t *mp,void *priv_data ch_unused){
 
 
-	ch_dns_rdata_soa_t *rdata = (ch_dns_rdata_soa_t*)ch_pcalloc(mp,sizeof(ch_dns_rdata_soa_t));
 
-	ch_dns_name_t *host = &rdata->host;
-	ch_dns_name_t *admin = &rdata->admin;
+	ch_dns_rdata_soa_t *soa = (ch_dns_rdata_soa_t*)ch_pcalloc(mp,sizeof(ch_dns_rdata_soa_t));
+
+	soa->rdata.rdata_dump = _rdata_soa_dump;
+	soa->rdata.rdata_write = _rdata_soa_write;
+	
+	ch_dns_name_t *host = &soa->host;
+	ch_dns_name_t *admin = &soa->admin;
 
 	CH_DNS_NAME_INIT(host);
 	CH_DNS_NAME_INIT(admin);
 
-	rdata->serial = 0;
-	rdata->refresh = 0;
-	rdata->retry = 0;
-	rdata->expire = 0;
-	rdata->minimum = 0;
+	soa->serial = 0;
+	soa->refresh = 0;
+	soa->retry = 0;
+	soa->expire = 0;
+	soa->minimum = 0;
 
-	rdata->rdata.rdata_dump = _rdata_soa_dump;
-	rdata->rdata.rdata_write = _rdata_soa_write;
 
-	return (ch_dns_rdata_t*)rdata;
+
+	return (ch_dns_rdata_t*)soa;
 
 }
 
 static int _rdata_soa_parse(ch_pool_t *mp,ch_dns_rdata_t *rdata,void *priv_data ch_unused){
 
-	ch_dns_data_input_t din;
-	ch_dns_rdata_soa_t *rdata_soa = (ch_dns_rdata_soa_t*)rdata;
+	ch_dns_data_input_t tmp,*din = &tmp;
+	ch_dns_rdata_soa_t *soa = (ch_dns_rdata_soa_t*)rdata;
 	
-	if(rdata->dlen ==4*5 || rdata->data == NULL)
+	if(rdata->dlen <20 || rdata->data == NULL)
 		return -1;
 
-	ch_dns_rdata_input_init(&din,rdata);
+	ch_dns_rdata_input_init(din,rdata);
 
-	if(ch_dns_name_parse(mp,&din,&rdata_soa->host)){
+	if(ch_dns_name_parse(mp,din,&soa->host)){
 	
 		ch_log(CH_LOG_ERR,"Parse rdata.soa.host failed!");
 		return -1;
 	}
 	
-	if(ch_dns_name_parse(mp,&din,&rdata_soa->admin)){
+	if(ch_dns_name_parse(mp,din,&soa->admin)){
 	
 		ch_log(CH_LOG_ERR,"Parse rdata.soa.admin failed!");
 		return -1;
 	}
 
-	rdata_soa->serial = ch_dns_data_input_uint32_read(&din);
-	rdata_soa->refresh = ch_dns_data_input_uint32_read(&din);
-	rdata_soa->retry = ch_dns_data_input_uint32_read(&din);
-	rdata_soa->expire = ch_dns_data_input_uint32_read(&din);
-	rdata_soa->minimum = ch_dns_data_input_uint32_read(&din);
+	soa->serial = ch_dns_data_input_uint32_read(din);
+	soa->refresh = ch_dns_data_input_uint32_read(din);
+	soa->retry = ch_dns_data_input_uint32_read(din);
+	soa->expire = ch_dns_data_input_uint32_read(din);
+	soa->minimum = ch_dns_data_input_uint32_read(din);
 
 	return 0;
 }

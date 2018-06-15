@@ -10,6 +10,7 @@
 
     <properties>
         <spring.version>4.3.7.RELEASE</spring.version>
+        <elasticsearch.version>5.2.2</elasticsearch.version>
     </properties>
 
     <dependencies>
@@ -34,6 +35,13 @@
             <artifactId>spring-beans</artifactId>
             <version>4.3.7.RELEASE</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.elasticsearch/elasticsearch -->
+        <dependency>
+            <groupId>org.elasticsearch.client</groupId>
+            <artifactId>transport</artifactId>
+            <version>${elasticsearch.version}</version>
+        </dependency>
+
     </dependencies>
 
     <build>

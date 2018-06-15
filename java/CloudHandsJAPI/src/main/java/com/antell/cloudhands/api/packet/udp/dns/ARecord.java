@@ -1,5 +1,7 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
+import org.elasticsearch.common.xcontent.XContentBuilder;
+
 import java.io.DataInput;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -45,6 +47,13 @@ public class ARecord extends Record {
     @Override
     public String rrToString() {
         return (Address.toDottedQuad(toArray(addr)));
+    }
+
+    @Override
+    XContentBuilder rdataToJson(XContentBuilder cb) throws IOException {
+
+        cb.field("address",rrToString());
+        return cb;
     }
 
     /**

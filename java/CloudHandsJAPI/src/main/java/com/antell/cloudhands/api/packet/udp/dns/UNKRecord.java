@@ -1,7 +1,9 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
+import com.antell.cloudhands.api.utils.Text;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 
+import java.io.DataInput;
 import java.io.IOException;
 
 /**
@@ -10,8 +12,6 @@ import java.io.IOException;
  */
 
 public class UNKRecord extends Record {
-
-    private static final long serialVersionUID = -4193583311594626915L;
 
     private byte[] data;
 
@@ -24,13 +24,8 @@ public class UNKRecord extends Record {
     }
 
     @Override
-    public void rrFromWire(DNSInput in) throws IOException {
-        data = in.readByteArray();
-    }
-
-    @Override
-    public void rdataFromString(Tokenizer st, Name origin) throws IOException {
-        throw st.exception("invalid unknown RR encoding");
+    public void read(DataInput in) throws IOException {
+        data = Text.readBytes(in,2);
     }
 
     /**
@@ -54,11 +49,6 @@ public class UNKRecord extends Record {
     public byte[]
     getData() {
         return data;
-    }
-
-    @Override
-    public void rrToWire(DNSOutput out, Compression c, boolean canonical) {
-        out.writeByteArray(data);
     }
 
 }

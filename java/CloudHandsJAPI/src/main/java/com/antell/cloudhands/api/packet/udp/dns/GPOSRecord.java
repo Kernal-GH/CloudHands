@@ -1,6 +1,7 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
 import com.antell.cloudhands.api.utils.Text;
+import org.elasticsearch.common.xcontent.XContentBuilder;
 
 import java.io.DataInput;
 import java.io.IOException;
@@ -59,6 +60,16 @@ public class GPOSRecord extends Record {
         sb.append(" ");
         sb.append(altitude);
         return sb.toString();
+    }
+
+    @Override
+    XContentBuilder rdataToJson(XContentBuilder cb) throws IOException {
+
+        cb.field("longitude",longitude);
+        cb.field("latitude",latitude);
+        cb.field("altitude",altitude);
+        return cb;
+
     }
 
     /**

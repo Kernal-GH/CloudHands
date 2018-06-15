@@ -2,6 +2,7 @@ package com.antell.cloudhands.api.packet.udp.dns;
 
 import com.antell.cloudhands.api.utils.Base64;
 import com.antell.cloudhands.api.utils.Text;
+import org.elasticsearch.common.xcontent.XContentBuilder;
 
 import java.io.DataInput;
 import java.io.IOException;
@@ -173,6 +174,17 @@ public class CERTRecord extends Record {
             sb.append(Base64.toString(cert));
         }
         return sb.toString();
+    }
+
+    @Override
+    XContentBuilder rdataToJson(XContentBuilder cb) throws IOException {
+
+        cb.field("certType",certType);
+        cb.field("keyTag",keyTag);
+        cb.field("alg",alg);
+        cb.field("cert",cert== null?"":Base64.toString(cert));
+
+        return cb;
     }
 
     /**

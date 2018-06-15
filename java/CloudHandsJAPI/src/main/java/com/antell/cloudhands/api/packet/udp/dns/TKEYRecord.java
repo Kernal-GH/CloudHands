@@ -1,8 +1,10 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
-import com.antell.security.utils.Base64;
+import com.antell.cloudhands.api.utils.Base64;
+import com.antell.cloudhands.api.utils.Text;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 
+import java.io.DataInput;
 import java.io.IOException;
 import java.util.Date;
 
@@ -10,12 +12,9 @@ import java.util.Date;
  * Transaction Key - used to compute and/or securely transport a shared
  * secret to be used with TSIG.
  *
- * @see TSIG
  */
 
 public class TKEYRecord extends Record {
-
-    private static final long serialVersionUID = 8828458121926391756L;
 
     private Name alg;
     private Date timeInception;
@@ -57,57 +56,17 @@ public class TKEYRecord extends Record {
         return new TKEYRecord();
     }
 
-    /**
-     * Creates a TKEY Record from the given data.
-     *
-     * @param alg           The shared key's algorithm
-     * @param timeInception The beginning of the validity period of the shared
-     *                      secret or keying material
-     * @param timeExpire    The end of the validity period of the shared
-     *                      secret or keying material
-     * @param mode          The mode of key agreement
-     * @param error         The extended error field.  Should be 0 in queries
-     * @param key           The shared secret
-     * @param other         The other data field.  Currently unused
-     *                      responses.
-     */
-    public TKEYRecord(Name name, int dclass, long ttl, Name alg,
-                      Date timeInception, Date timeExpire, int mode, int error,
-                      byte[] key, byte other[]) {
-        super(name, Type.TKEY, dclass, ttl);
-        this.alg = checkName("alg", alg);
-        this.timeInception = timeInception;
-        this.timeExpire = timeExpire;
-        this.mode = checkU16("mode", mode);
-        this.error = checkU16("error", error);
-        this.key = key;
-        this.other = other;
-    }
-
     @Override
-    public void rrFromWire(DNSInput in) throws IOException {
+    public void read(DataInput in) throws IOException {
         alg = new Name(in);
-        timeInception = new Date(1000 * in.readU32());
-        timeExpire = new Date(1000 * in.readU32());
-        mode = in.readU16();
-        error = in.readU16();
+        timeInception = new Date(1000 * in.readInt());
+        timeExpire = new Date(1000 * in.readInt());
+        mode = in.readUnsignedShort();
+        error = in.readUnsignedShort();
 
-        int keylen = in.readU16();
-        if (keylen > 0)
-            key = in.readByteArray(keylen);
-        else
-            key = null;
+        key = Text.readBytes(in,2);
+        other = Text.readBytes(in,2);
 
-        int otherlen = in.readU16();
-        if (otherlen > 0)
-            other = in.readByteArray(otherlen);
-        else
-            other = null;
-    }
-
-    @Override
-    public void rdataFromString(Tokenizer st, Name origin) throws IOException {
-        throw st.exception("no text format defined for TKEY");
     }
 
     protected String modeString() {
@@ -224,27 +183,5 @@ public class TKEYRecord extends Record {
         return other;
     }
 
-    @Override
-    public void rrToWire(DNSOutput out, Compression c, boolean canonical) {
-        alg.toWire(out, null, canonical);
-
-        out.writeU32(timeInception.getTime() / 1000);
-        out.writeU32(timeExpire.getTime() / 1000);
-
-        out.writeU16(mode);
-        out.writeU16(error);
-
-        if (key != null) {
-            out.writeU16(key.length);
-            out.writeByteArray(key);
-        } else
-            out.writeU16(0);
-
-        if (other != null) {
-            out.writeU16(other.length);
-            out.writeByteArray(other);
-        } else
-            out.writeU16(0);
-    }
 
 }

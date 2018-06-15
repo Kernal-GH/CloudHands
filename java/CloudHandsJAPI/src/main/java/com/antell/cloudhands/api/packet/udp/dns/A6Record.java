@@ -1,5 +1,7 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
+import org.elasticsearch.common.xcontent.XContentBuilder;
+
 import java.io.DataInput;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -54,6 +56,16 @@ public class A6Record extends Record {
             sb.append(prefix);
         }
         return sb.toString();
+    }
+
+    @Override
+    XContentBuilder rdataToJson(XContentBuilder cb) throws IOException {
+
+        cb.field("prefixBits",prefixBits);
+        cb.field("suffix",suffix==null?"":suffix.getHostAddress());
+        cb.field("prefix",prefix==null?"":prefix.toString());
+
+        return cb;
     }
 
     /**

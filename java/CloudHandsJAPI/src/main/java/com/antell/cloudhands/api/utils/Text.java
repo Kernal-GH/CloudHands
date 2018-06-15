@@ -412,6 +412,9 @@ public class Text {
     int length = len>maxLength?maxLength:len;
 
     byte [] data = new byte[length];
+    if(length == 0)
+      return "";
+
     in.readFully(data, 0, length);
     return decode(data);
 
@@ -446,6 +449,9 @@ public class Text {
     int length = len>maxLength?maxLength:len;
 
     byte [] data = new byte[length];
+    if(length == 0)
+      return data;
+
     in.readFully(data, 0, length);
 
     return data;

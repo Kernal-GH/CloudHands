@@ -1,6 +1,7 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
 import com.antell.cloudhands.api.utils.Text;
+import org.elasticsearch.common.xcontent.XContentBuilder;
 
 import java.io.DataInput;
 import java.io.IOException;
@@ -53,6 +54,14 @@ public class AAAARecord extends Record {
             return sb.toString();
         }
         return addr.getHostAddress();
+    }
+
+    @Override
+    XContentBuilder rdataToJson(XContentBuilder cb) throws IOException {
+
+        String addr = rrToString();
+        cb.field("address",addr == null?"":addr);
+        return cb;
     }
 
     /**

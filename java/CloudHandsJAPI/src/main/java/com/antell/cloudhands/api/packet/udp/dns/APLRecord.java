@@ -2,6 +2,7 @@ package com.antell.cloudhands.api.packet.udp.dns;
 
 import com.antell.cloudhands.api.utils.Base16;
 import com.antell.cloudhands.api.utils.Text;
+import org.elasticsearch.common.xcontent.XContentBuilder;
 
 import java.io.DataInput;
 import java.io.IOException;
@@ -12,11 +13,6 @@ import java.util.List;
 
 /**
  * APL - Address Prefix List.  See RFC 3123.
- */
-
-/*
- * Note: this currently uses the same constants as the Address class;
- * this could change if more constants are defined for APL records.
  */
 
 public class APLRecord extends Record {
@@ -154,6 +150,14 @@ public class APLRecord extends Record {
                 sb.append(" ");
         }
         return sb.toString();
+    }
+
+    @Override
+    XContentBuilder rdataToJson(XContentBuilder cb) throws IOException {
+
+        cb.field("APLRecords",elements);
+        return cb;
+
     }
 
     /**

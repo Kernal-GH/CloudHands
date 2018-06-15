@@ -1,6 +1,6 @@
 /*
  *
- *      Filename: ch_dns_rdata_txt.h
+ *      Filename: ch_dns_rdata_spf.h
  *
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
@@ -8,17 +8,17 @@
  * Last Modified: 2018-05-03 19:38:45
  */
 
-#ifndef CH_DNS_RDATA_TXT_H
-#define CH_DNS_RDATA_TXT_H
+#ifndef CH_DNS_RDATA_SPF_H
+#define CH_DNS_RDATA_SPF_H
 
 #include "ch_dns_rdata.h"
 #include "ch_dns_rdata_pool.h"
 #include "ch_dns_txt_base.h"
 
-typedef struct ch_dns_rdata_txt_t ch_dns_rdata_txt_t;
+typedef struct ch_dns_rdata_spf_t ch_dns_rdata_spf_t;
 
 
-struct ch_dns_rdata_txt_t {
+struct ch_dns_rdata_spf_t {
 
 	ch_dns_rdata_t rdata;
 
@@ -27,6 +27,6 @@ struct ch_dns_rdata_txt_t {
 };
 
 
-extern void ch_dns_rdata_txt_init(ch_dns_rdata_pool_t *rdata_pool);
+extern void ch_dns_rdata_spf_init(ch_dns_rdata_pool_t *rdata_pool);
 
-#endif /*CH_DNS_RDATA_TXT_H*/
+#endif /*CH_DNS_RDATA_SPF_H*/

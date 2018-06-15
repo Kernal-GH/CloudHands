@@ -99,15 +99,5 @@ public class NSEC3PARAMRecord extends Record {
         return salt;
     }
 
-    /**
-     * Hashes a name with the parameters of this NSEC3PARAM record.
-     *
-     * @param name The name to hash
-     * @return The hashed version of the name
-     * @throws NoSuchAlgorithmException The hash algorithm is unknown.
-     */
-    public byte[] hashName(Name name) throws NoSuchAlgorithmException {
-        return NSEC3Record.hashName(name, hashAlg, iterations, salt);
-    }
 
 }

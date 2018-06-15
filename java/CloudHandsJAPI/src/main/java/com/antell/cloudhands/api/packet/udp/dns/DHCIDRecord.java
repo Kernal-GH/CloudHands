@@ -2,6 +2,7 @@ package com.antell.cloudhands.api.packet.udp.dns;
 
 import com.antell.cloudhands.api.utils.Base64;
 import com.antell.cloudhands.api.utils.Text;
+import org.elasticsearch.common.xcontent.XContentBuilder;
 
 import java.io.DataInput;
 import java.io.IOException;
@@ -33,6 +34,15 @@ public class DHCIDRecord extends Record {
     @Override
     public String rrToString() {
         return Base64.toString(data);
+    }
+
+    @Override
+    XContentBuilder rdataToJson(XContentBuilder cb) throws IOException {
+
+
+        cb.field("data",Base64.toString(data));
+        return cb;
+
     }
 
 

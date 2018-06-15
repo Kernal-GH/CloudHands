@@ -1,8 +1,10 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
-import com.antell.security.utils.Base16;
+import com.antell.cloudhands.api.utils.Base16;
+import com.antell.cloudhands.api.utils.Text;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 
+import java.io.DataInput;
 import java.io.IOException;
 
 /**
@@ -10,8 +12,6 @@ import java.io.IOException;
  */
 
 public class TLSARecord extends Record {
-
-    private static final long serialVersionUID = 356494267028580169L;
 
     public static class CertificateUsage {
         private CertificateUsage() {
@@ -73,44 +73,12 @@ public class TLSARecord extends Record {
         return new TLSARecord();
     }
 
-    /**
-     * Creates an TLSA Record from the given data
-     *
-     * @param certificateUsage           The provided association that will be used to
-     *                                   match the certificate presented in the TLS handshake.
-     * @param selector                   The part of the TLS certificate presented by the server
-     *                                   that will be matched against the association data.
-     * @param matchingType               How the certificate association is presented.
-     * @param certificateAssociationData The "certificate association data" to be
-     *                                   matched.
-     */
-    public TLSARecord(Name name, int dclass, long ttl,
-                      int certificateUsage, int selector, int matchingType,
-                      byte[] certificateAssociationData) {
-        super(name, Type.TLSA, dclass, ttl);
-        this.certificateUsage = checkU8("certificateUsage", certificateUsage);
-        this.selector = checkU8("selector", selector);
-        this.matchingType = checkU8("matchingType", matchingType);
-        this.certificateAssociationData = checkByteArrayLength(
-                "certificateAssociationData",
-                certificateAssociationData,
-                0xFFFF);
-    }
-
     @Override
-    public void rrFromWire(DNSInput in) throws IOException {
-        certificateUsage = in.readU8();
-        selector = in.readU8();
-        matchingType = in.readU8();
-        certificateAssociationData = in.readByteArray();
-    }
-
-    @Override
-    public void rdataFromString(Tokenizer st, Name origin) throws IOException {
-        certificateUsage = st.getUInt8();
-        selector = st.getUInt8();
-        matchingType = st.getUInt8();
-        certificateAssociationData = st.getHex();
+    public void read(DataInput in) throws IOException {
+        certificateUsage = in.readUnsignedByte();
+        selector = in.readUnsignedByte();
+        matchingType = in.readUnsignedByte();
+        certificateAssociationData = Text.readBytes(in,2);
     }
 
     /**
@@ -138,14 +106,6 @@ public class TLSARecord extends Record {
         cb.field("matchingType",matchingType);
         cb.field("certificateAssociationData",Base16.toString(certificateAssociationData));
         return cb;
-    }
-
-    @Override
-    public void rrToWire(DNSOutput out, Compression c, boolean canonical) {
-        out.writeU8(certificateUsage);
-        out.writeU8(selector);
-        out.writeU8(matchingType);
-        out.writeByteArray(certificateAssociationData);
     }
 
     /**

@@ -1,7 +1,9 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
+import com.antell.cloudhands.api.utils.Text;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 
+import java.io.DataInput;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -13,8 +15,6 @@ import java.util.List;
  */
 
 public class WKSRecord extends Record {
-
-    private static final long serialVersionUID = -9104259763909119805L;
 
     public static class Protocol {
         /**
@@ -829,12 +829,14 @@ public class WKSRecord extends Record {
         return new WKSRecord();
     }
 
-
     @Override
-    public void rrFromWire(DNSInput in) throws IOException {
-        address = in.readByteArray(4);
-        protocol = in.readU8();
-        byte[] array = in.readByteArray();
+    public void read(DataInput in) throws IOException {
+        address = new byte[4];
+        in.readFully(address,0,4);
+
+        protocol = in.readUnsignedByte();
+        byte[] array = Text.readBytes(in,2);
+
         List list = new ArrayList();
         for (int i = 0; i < array.length; i++) {
             for (int j = 0; j < 8; j++) {
@@ -844,38 +846,6 @@ public class WKSRecord extends Record {
                 }
             }
         }
-        services = new int[list.size()];
-        for (int i = 0; i < list.size(); i++) {
-            services[i] = ((Integer) list.get(i)).intValue();
-        }
-    }
-
-    @Override
-    public void rdataFromString(Tokenizer st, Name origin) throws IOException {
-        String s = st.getString();
-        address = Address.toByteArray(s, Address.IPv4);
-        if (address == null)
-            throw st.exception("invalid address");
-
-        s = st.getString();
-        protocol = Protocol.value(s);
-        if (protocol < 0) {
-            throw st.exception("Invalid IP protocol: " + s);
-        }
-
-        List list = new ArrayList();
-        while (true) {
-            Tokenizer.Token t = st.get();
-            if (!t.isString())
-                break;
-            int service = Service.value(t.value);
-            if (service < 0) {
-                throw st.exception("Invalid TCP/UDP service: " +
-                        t.value);
-            }
-            list.add(new Integer(service));
-        }
-        st.unget();
         services = new int[list.size()];
         for (int i = 0; i < list.size(); i++) {
             services[i] = ((Integer) list.get(i)).intValue();
@@ -930,19 +900,6 @@ public class WKSRecord extends Record {
      */
     public int[] getServices() {
         return services;
-    }
-
-    @Override
-    public void rrToWire(DNSOutput out, Compression c, boolean canonical) {
-        out.writeByteArray(address);
-        out.writeU8(protocol);
-        int highestPort = services[services.length - 1];
-        byte[] array = new byte[highestPort / 8 + 1];
-        for (int i = 0; i < services.length; i++) {
-            int port = services[i];
-            array[port / 8] |= (1 << (7 - port % 8));
-        }
-        out.writeByteArray(array);
     }
 
 }

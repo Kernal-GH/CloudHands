@@ -5,13 +5,14 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-05-04 18:29:37
- * Last Modified: 2018-06-14 19:55:13
+ * Last Modified: 2018-06-15 15:15:39
  */
 
 #include "ch_log.h"
 #include "ch_dns_rdata_pool.h"
 #include "ch_dns_rdata_pool.h"
 #include "ch_dns_rdata_cname.h"
+#include "ch_dns_rdata_afsdb.h"
 #include "ch_dns_rdata_hinfo.h"
 #include "ch_dns_rdata_ipv4.h"
 #include "ch_dns_rdata_ipv6.h"
@@ -57,6 +58,14 @@
 #include "ch_dns_rdata_rt.h"
 #include "ch_dns_rdata_sig.h"
 #include "ch_dns_rdata_smimea.h"
+#include "ch_dns_rdata_spf.h"
+#include "ch_dns_rdata_srv.h"
+#include "ch_dns_rdata_sshfp.h"
+#include "ch_dns_rdata_tkey.h"
+#include "ch_dns_rdata_tlsa.h"
+#include "ch_dns_rdata_tsig.h"
+#include "ch_dns_rdata_x25.h"
+#include "ch_dns_rdata_uri.h"
 
 ch_dns_rdata_pool_t *ch_dns_rdata_pool_create(ch_pool_t *mp){
 
@@ -70,6 +79,7 @@ ch_dns_rdata_pool_t *ch_dns_rdata_pool_create(ch_pool_t *mp){
 	ch_dns_rdata_ipv4_init(rdata_pool);
 	ch_dns_rdata_ipv6_init(rdata_pool);
 	ch_dns_rdata_cname_init(rdata_pool);
+	ch_dns_rdata_afsdb_init(rdata_pool);
 	ch_dns_rdata_txt_init(rdata_pool);
 	ch_dns_rdata_hinfo_init(rdata_pool);
 	ch_dns_rdata_minfo_init(rdata_pool);
@@ -113,6 +123,14 @@ ch_dns_rdata_pool_t *ch_dns_rdata_pool_create(ch_pool_t *mp){
 	ch_dns_rdata_rt_init(rdata_pool);
 	ch_dns_rdata_sig_init(rdata_pool);
 	ch_dns_rdata_smimea_init(rdata_pool);
+	ch_dns_rdata_spf_init(rdata_pool);
+	ch_dns_rdata_srv_init(rdata_pool);
+	ch_dns_rdata_sshfp_init(rdata_pool);
+	ch_dns_rdata_tkey_init(rdata_pool);
+	ch_dns_rdata_tlsa_init(rdata_pool);
+	ch_dns_rdata_tsig_init(rdata_pool);
+	ch_dns_rdata_x25_init(rdata_pool);
+	ch_dns_rdata_uri_init(rdata_pool);
 
 	return rdata_pool;
 }

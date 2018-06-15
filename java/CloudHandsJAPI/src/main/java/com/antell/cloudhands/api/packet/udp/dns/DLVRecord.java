@@ -4,6 +4,7 @@ package com.antell.cloudhands.api.packet.udp.dns;
 
 import com.antell.cloudhands.api.utils.Base16;
 import com.antell.cloudhands.api.utils.Text;
+import org.elasticsearch.common.xcontent.XContentBuilder;
 
 import java.io.DataInput;
 import java.io.IOException;
@@ -60,6 +61,15 @@ public class DLVRecord extends Record {
         }
 
         return sb.toString();
+    }
+
+    @Override
+    XContentBuilder rdataToJson(XContentBuilder cb) throws IOException {
+        cb.field("footprint",footprint);
+        cb.field("alg",alg);
+        cb.field("digestid",digestid);
+        cb.field("digest",digest==null?"":Base16.toString(digest));
+        return cb;
     }
 
     /**

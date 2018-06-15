@@ -2,6 +2,7 @@ package com.antell.cloudhands.api.packet.udp.dns;
 
 import org.elasticsearch.common.xcontent.XContentBuilder;
 
+import java.io.DataInput;
 import java.io.IOException;
 
 /**
@@ -11,10 +12,13 @@ import java.io.IOException;
 
 public class SOARecord extends Record {
 
-    private static final long serialVersionUID = 1049740098229303931L;
-
-    private Name host, admin;
-    private long serial, refresh, retry, expire, minimum;
+    private Name host;
+    private Name admin;
+    private long serial;
+    private long refresh;
+    private long retry;
+    private long expire;
+    private long minimum;
 
     public SOARecord() {
     }
@@ -24,51 +28,15 @@ public class SOARecord extends Record {
         return new SOARecord();
     }
 
-    /**
-     * Creates an SOA Record from the given data
-     *
-     * @param host    The primary name server for the zone
-     * @param admin   The zone administrator's address
-     * @param serial  The zone's serial number
-     * @param refresh The amount of time until a secondary checks for a new serial
-     *                number
-     * @param retry   The amount of time between a secondary's checks for a new
-     *                serial number
-     * @param expire  The amount of time until a secondary expires a zone
-     * @param minimum The minimum TTL for records in the zone
-     */
-    public SOARecord(Name name, int dclass, long ttl, Name host, Name admin,
-                     long serial, long refresh, long retry, long expire, long minimum) {
-        super(name, Type.SOA, dclass, ttl);
-        this.host = checkName("host", host);
-        this.admin = checkName("admin", admin);
-        this.serial = checkU32("serial", serial);
-        this.refresh = checkU32("refresh", refresh);
-        this.retry = checkU32("retry", retry);
-        this.expire = checkU32("expire", expire);
-        this.minimum = checkU32("minimum", minimum);
-    }
-
     @Override
-    public void rrFromWire(DNSInput in) throws IOException {
+    public void read(DataInput in) throws IOException {
         host = new Name(in);
         admin = new Name(in);
-        serial = in.readU32();
-        refresh = in.readU32();
-        retry = in.readU32();
-        expire = in.readU32();
-        minimum = in.readU32();
-    }
-
-    @Override
-    public void rdataFromString(Tokenizer st, Name origin) throws IOException {
-        host = st.getName(origin);
-        admin = st.getName(origin);
-        serial = st.getUInt32();
-        refresh = st.getTTLLike();
-        retry = st.getTTLLike();
-        expire = st.getTTLLike();
-        minimum = st.getTTLLike();
+        serial = in.readInt();
+        refresh = in.readInt();
+        retry = in.readInt();
+        expire = in.readInt();
+        minimum = in.readInt();
     }
 
     /**
@@ -161,17 +129,6 @@ public class SOARecord extends Record {
     public long
     getMinimum() {
         return minimum;
-    }
-
-    @Override
-    public void rrToWire(DNSOutput out, Compression c, boolean canonical) {
-        host.toWire(out, c, canonical);
-        admin.toWire(out, c, canonical);
-        out.writeU32(serial);
-        out.writeU32(refresh);
-        out.writeU32(retry);
-        out.writeU32(expire);
-        out.writeU32(minimum);
     }
 
 }

@@ -1,8 +1,10 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
-import com.antell.security.utils.Base16;
+import com.antell.cloudhands.api.utils.Base16;
+import com.antell.cloudhands.api.utils.Text;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 
+import java.io.DataInput;
 import java.io.IOException;
 
 /**
@@ -10,8 +12,6 @@ import java.io.IOException;
  */
 
 public class SSHFPRecord extends Record {
-
-    private static final long serialVersionUID = -8104701402654687025L;
 
     public static class Algorithm {
         private Algorithm() {
@@ -40,34 +40,14 @@ public class SSHFPRecord extends Record {
         return new SSHFPRecord();
     }
 
-    /**
-     * Creates an SSHFP Record from the given data.
-     *
-     * @param alg         The public key's algorithm.
-     * @param digestType  The public key's digest type.
-     * @param fingerprint The public key's fingerprint.
-     */
-    public SSHFPRecord(Name name, int dclass, long ttl, int alg, int digestType,
-                       byte[] fingerprint) {
-        super(name, Type.SSHFP, dclass, ttl);
-        this.alg = checkU8("alg", alg);
-        this.digestType = checkU8("digestType", digestType);
-        this.fingerprint = fingerprint;
-    }
 
     @Override
-    public void rrFromWire(DNSInput in) throws IOException {
-        alg = in.readU8();
-        digestType = in.readU8();
-        fingerprint = in.readByteArray();
+    public void read(DataInput in) throws IOException {
+        alg = in.readUnsignedByte();
+        digestType = in.readUnsignedByte();
+        fingerprint = Text.readBytes(in,2);
     }
 
-    @Override
-    public void rdataFromString(Tokenizer st, Name origin) throws IOException {
-        alg = st.getUInt8();
-        digestType = st.getUInt8();
-        fingerprint = st.getHex(true);
-    }
 
     @Override
     public String rrToString() {
@@ -114,11 +94,5 @@ public class SSHFPRecord extends Record {
         return fingerprint;
     }
 
-    @Override
-    public void rrToWire(DNSOutput out, Compression c, boolean canonical) {
-        out.writeU8(alg);
-        out.writeU8(digestType);
-        out.writeByteArray(fingerprint);
-    }
 
 }

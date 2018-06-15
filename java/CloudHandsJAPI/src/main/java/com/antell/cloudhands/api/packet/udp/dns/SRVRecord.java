@@ -2,6 +2,7 @@ package com.antell.cloudhands.api.packet.udp.dns;
 
 import org.elasticsearch.common.xcontent.XContentBuilder;
 
+import java.io.DataInput;
 import java.io.IOException;
 
 /**
@@ -13,12 +14,13 @@ import java.io.IOException;
 
 public class SRVRecord extends Record {
 
-    private static final long serialVersionUID = -3886460132387522052L;
 
-    private int priority, weight, port;
+    private int priority;
+    private int weight;
+    private int port;
     private Name target;
 
-    SRVRecord() {
+    public SRVRecord() {
     }
 
     @Override
@@ -26,40 +28,14 @@ public class SRVRecord extends Record {
         return new SRVRecord();
     }
 
-    /**
-     * Creates an SRV Record from the given data
-     *
-     * @param priority The priority of this SRV.  Records with lower priority
-     *                 are preferred.
-     * @param weight   The weight, used to select between records at the same
-     *                 priority.
-     * @param port     The TCP/UDP port that the service uses
-     * @param target   The host running the service
-     */
-    public SRVRecord(Name name, int dclass, long ttl, int priority,
-                     int weight, int port, Name target) {
-        super(name, Type.SRV, dclass, ttl);
-        this.priority = checkU16("priority", priority);
-        this.weight = checkU16("weight", weight);
-        this.port = checkU16("port", port);
-        this.target = checkName("target", target);
-    }
-
     @Override
-    public void rrFromWire(DNSInput in) throws IOException {
-        priority = in.readU16();
-        weight = in.readU16();
-        port = in.readU16();
+    public void read(DataInput in) throws IOException {
+        priority = in.readUnsignedShort();
+        weight = in.readUnsignedShort();
+        port = in.readUnsignedShort();
         target = new Name(in);
     }
 
-    @Override
-    public void rdataFromString(Tokenizer st, Name origin) throws IOException {
-        priority = st.getUInt16();
-        weight = st.getUInt16();
-        port = st.getUInt16();
-        target = st.getName(origin);
-    }
 
     /**
      * Converts rdata to a String
@@ -116,13 +92,6 @@ public class SRVRecord extends Record {
         return target;
     }
 
-    @Override
-    public void rrToWire(DNSOutput out, Compression c, boolean canonical) {
-        out.writeU16(priority);
-        out.writeU16(weight);
-        out.writeU16(port);
-        target.toWire(out, null, canonical);
-    }
 
     @Override
     public Name getAdditionalName() {

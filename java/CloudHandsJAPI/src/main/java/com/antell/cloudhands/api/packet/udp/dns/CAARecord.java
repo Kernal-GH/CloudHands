@@ -1,6 +1,7 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
 import com.antell.cloudhands.api.utils.Text;
+import org.elasticsearch.common.xcontent.XContentBuilder;
 
 import java.io.DataInput;
 import java.io.IOException;
@@ -47,6 +48,16 @@ public class CAARecord extends Record {
         sb.append(value);
 
         return sb.toString();
+    }
+
+    @Override
+    XContentBuilder rdataToJson(XContentBuilder cb) throws IOException {
+
+        cb.field("flags",flags);
+        cb.field("tag",tag);
+        cb.field("value",value);
+
+        return cb;
     }
 
     /**

@@ -36,6 +36,11 @@ struct ch_dns_name_t {
 
 extern int ch_dns_name_parse(ch_pool_t *mp,ch_dns_data_input_t *din,ch_dns_name_t *dname);
 
+#define CH_DNS_NAME_PARSE(mp,din,name) do {  \
+	if(-1 == ch_dns_name_parse(mp,din,name)) \
+		return -1;							 \
+}while(0)
+
 static inline void ch_dns_name_clone(ch_pool_t *mp,ch_dns_name_t *dst,ch_dns_name_t *src){
 
 
