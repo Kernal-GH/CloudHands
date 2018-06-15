@@ -10,7 +10,7 @@ import java.io.IOException;
 /**
  * Created by dell on 2018/4/17.
  */
-public abstract class SessionEntry implements DataReadable,Dump {
+public abstract class SessionEntry {
 
     private boolean isTimeout;
     private int timeoutTV;
@@ -37,7 +37,6 @@ public abstract class SessionEntry implements DataReadable,Dump {
         res.dump(sb);
     }
 
-    @Override
     public void parse(MessageUnpacker unpacker) throws IOException {
 
         int n = MessagePackUtil.parseMapHeader(unpacker,true);

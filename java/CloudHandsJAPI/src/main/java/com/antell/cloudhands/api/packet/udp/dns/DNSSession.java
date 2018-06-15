@@ -11,18 +11,23 @@ import java.io.IOException;
 /**
  * Created by dell on 2018/6/11.
  */
-public class DNSSession implements BinDataInput,DataOutJson,DataDump {
+public class DNSSession  implements BinDataInput,DataOutJson,DataDump {
 
+    private DNSSessionEntry sessionEntry;
     private DNSRequst dnsRequst;
     private DNSResponse dnsResponse;
 
     public DNSSession(){
+
+        sessionEntry = new DNSSessionEntry();
         dnsRequst = null;
         dnsResponse = null;
     }
 
     @Override
     public void read(DataInput in) throws IOException {
+
+        sessionEntry.read(in);
 
         boolean hasReq = in.readUnsignedByte()==1;
         boolean hasRes = in.readUnsignedByte()==1;
@@ -44,6 +49,10 @@ public class DNSSession implements BinDataInput,DataOutJson,DataDump {
     @Override
     public XContentBuilder dataToJson(XContentBuilder cb) throws IOException {
 
+        XContentBuilder seCB = cb.startObject("sessionEntry");
+        sessionEntry.dataToJson(seCB);
+        seCB.endObject();
+
         XContentBuilder reqCB = cb.startObject("request");
         if(dnsRequst!=null)
             dnsRequst.dataToJson(reqCB);
@@ -61,6 +70,8 @@ public class DNSSession implements BinDataInput,DataOutJson,DataDump {
     public String dataToString() {
 
         StringBuffer sb = new StringBuffer();
+        sb.append(sessionEntry.dataToString());
+
         sb.append("DNS.Request.info::\n\n");
         if(dnsRequst!=null)
             sb.append(dnsRequst.dataToString());
@@ -86,4 +97,7 @@ public class DNSSession implements BinDataInput,DataOutJson,DataDump {
         return dnsResponse;
     }
 
+    public DNSSessionEntry getSessionEntry() {
+        return sessionEntry;
+    }
 }
