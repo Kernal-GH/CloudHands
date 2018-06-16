@@ -1,16 +1,18 @@
 package com.antell.cloudhands.api.packet;
 
+import com.antell.cloudhands.api.BinDataInput;
+import com.antell.cloudhands.api.DataDump;
+import com.antell.cloudhands.api.DataOutJson;
 import com.antell.cloudhands.api.utils.IPUtils;
 import com.antell.cloudhands.api.utils.TextUtils;
-import org.msgpack.core.MessageUnpacker;
-
+import org.elasticsearch.common.xcontent.XContentBuilder;
 import java.io.DataInput;
 import java.io.IOException;
 
 /**
  * Created by dell on 2018/4/16.
  */
-public class ICMPPacket implements DataReadable {
+public class ICMPPacket implements BinDataInput,DataOutJson,DataDump {
 
     private int type;
     private int code;
@@ -35,25 +37,40 @@ public class ICMPPacket implements DataReadable {
     }
 
     @Override
-    public void parse(MessageUnpacker unpacker) {
-
+    public String dataToString() {
+        StringBuffer sb = new StringBuffer();
+        sb.append("Dump ICMP Packet informations:\n");
+        TextUtils.addInt(sb,"type",type);
+        TextUtils.addInt(sb,"code",code);
+        TextUtils.addInt(sb,"ttl",ttl);
+        TextUtils.addInt(sb,"cksum",cksum);
+        TextUtils.addInt(sb,"seqNumber",seqNumber);
+        TextUtils.addText(sb,"sendIP", IPUtils.ipv4Str(sip));
+        TextUtils.addText(sb,"targetIP", IPUtils.ipv4Str(tip));
+        return sb.toString();
     }
 
     @Override
     public String toString()
     {
-        StringBuffer sb = new StringBuffer();
-        sb.append("Dump ICMP Packet informations:\n");
-        TextUtils.addInt(sb,"ICMP Type",type);
-        TextUtils.addInt(sb,"ICMP Code",code);
-        TextUtils.addInt(sb,"ICMP TTL",ttl);
-        TextUtils.addInt(sb,"ICMP CKSum",cksum);
-        TextUtils.addInt(sb,"ICMP SeqNumber",seqNumber);
-        TextUtils.addText(sb,"ICMP Send IP", IPUtils.ipv4Str(sip));
-        TextUtils.addText(sb,"ICMP Target IP", IPUtils.ipv4Str(tip));
 
-        return sb.toString();
+        return dataToString();
     }
+
+    @Override
+    public XContentBuilder dataToJson(XContentBuilder cb) throws IOException {
+
+        cb.field("type",type);
+        cb.field("code",code);
+        cb.field("ttl",ttl);
+        cb.field("cksum",cksum);
+        cb.field("seqNumber",seqNumber);
+        cb.field("sendIP", IPUtils.ipv4Str(sip));
+        cb.field("targetIP", IPUtils.ipv4Str(tip));
+
+        return cb;
+    }
+
 
     public int getType() {
         return type;
@@ -118,4 +135,6 @@ public class ICMPPacket implements DataReadable {
     public void setTip(long tip) {
         this.tip = tip;
     }
+
+
 }

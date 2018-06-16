@@ -1,16 +1,12 @@
 package com.antell.cloudhands.api.packet;
 
-import com.antell.cloudhands.api.utils.MessagePackUtil;
+import com.antell.cloudhands.api.DataDump;
 import com.antell.cloudhands.api.utils.TextUtils;
-import com.google.common.base.Preconditions;
-import org.msgpack.core.MessageUnpacker;
-
-import java.io.IOException;
 
 /**
  * Created by dell on 2018/4/17.
  */
-public abstract class SessionEntry {
+public  class SessionEntry implements DataDump{
 
     private boolean isTimeout;
     private int timeoutTV;
@@ -24,17 +20,6 @@ public abstract class SessionEntry {
      public SessionEntry() {
         this.req = new SessionEndPoint();
         this.res = new SessionEndPoint();
-    }
-
-    public void dump(StringBuffer sb){
-
-        TextUtils.addLong(sb,"SessionID",sessionID);
-        TextUtils.addInt(sb,"TimeoutTV",timeoutTV);
-        TextUtils.addText(sb,"isTimeout",isTimeout?"YES":"NO");
-        sb.append("Dump Req Endpoint Informath:\n");
-        req.dump(sb);
-        sb.append("Dump Res Endpoint Informath:\n");
-        res.dump(sb);
     }
 
 
@@ -207,5 +192,20 @@ public abstract class SessionEntry {
 
     public void setProtocolID(int protocolID) {
         this.protocolID = protocolID;
+    }
+
+    @Override
+    public String dataToString() {
+
+        StringBuffer sb = new StringBuffer();
+        TextUtils.addLong(sb,"SessionID",sessionID);
+        TextUtils.addInt(sb,"TimeoutTV",timeoutTV);
+        TextUtils.addText(sb,"isTimeout",isTimeout?"YES":"NO");
+        sb.append("Dump Req Endpoint Informath:\n");
+        sb.append(req.dataToString());
+        sb.append("Dump Res Endpoint Informath:\n");
+        sb.append(res.dataToString());
+
+        return sb.toString();
     }
 }

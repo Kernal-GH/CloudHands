@@ -1,11 +1,12 @@
 package com.antell.cloudhands.api.packet;
+import com.antell.cloudhands.api.DataDump;
 import com.antell.cloudhands.api.utils.IPUtils;
 import com.antell.cloudhands.api.utils.TextUtils;
 
 /**
  * Created by dell on 2018/4/17.
  */
-public class SessionEndPoint implements Dump {
+public class SessionEndPoint implements DataDump {
 
     private long ip;
     private int port;
@@ -24,16 +25,6 @@ public class SessionEndPoint implements Dump {
         this.startTime = 0;
         this.lastTime = 0;
         this.content = null;
-    }
-
-    public void dump(StringBuffer sb){
-
-        TextUtils.addText(sb,"IP", IPUtils.ipv4Str(ip));
-        TextUtils.addInt(sb,"Port",port);
-        TextUtils.addLong(sb,"Packets",packets);
-        TextUtils.addLong(sb,"Bytes",bytes);
-        TextUtils.addLong(sb,"StartTime",startTime);
-        TextUtils.addLong(sb,"LastTime",lastTime);
     }
 
     public void setStartTime(long startTime) {
@@ -89,5 +80,21 @@ public class SessionEndPoint implements Dump {
 
     public void setContent(ByteData content) {
         this.content = content;
+    }
+
+    @Override
+    public String dataToString() {
+
+        StringBuffer sb = new StringBuffer();
+        TextUtils.addText(sb,"IP", IPUtils.ipv4Str(ip));
+        TextUtils.addInt(sb,"Port",port);
+        TextUtils.addLong(sb,"Packets",packets);
+        TextUtils.addLong(sb,"Bytes",bytes);
+        TextUtils.addLong(sb,"StartTime",startTime);
+        TextUtils.addLong(sb,"LastTime",lastTime);
+        if(content!=null){
+            sb.append(content.toString());
+        }
+        return sb.toString();
     }
 }

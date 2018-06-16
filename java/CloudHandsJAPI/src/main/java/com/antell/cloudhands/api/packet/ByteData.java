@@ -1,7 +1,7 @@
 package com.antell.cloudhands.api.packet;
 
-import com.antell.cloudhands.api.BinDataInput;
-import org.msgpack.core.MessageUnpacker;
+import com.antell.cloudhands.api.utils.Base16;
+import com.antell.cloudhands.api.utils.TextUtils;
 
 import java.io.DataInput;
 import java.io.IOException;
@@ -9,19 +9,12 @@ import java.io.IOException;
 /**
  * Created by dell on 2018/6/9.
  */
-public class ByteData implements BinDataInput{
+public class ByteData {
 
     private long dataSize;
     private byte[] data;
 
-    public ByteData(){
-
-        dataSize = 0;
-        data = null;
-    }
-
-    @Override
-    public void read(DataInput in) throws IOException {
+    public ByteData(DataInput in) throws IOException {
 
         dataSize = in.readLong();
 
@@ -29,6 +22,15 @@ public class ByteData implements BinDataInput{
 
         in.readFully(data,0,(int)dataSize);
 
+    }
+
+    public String toString(){
+
+        StringBuffer sb = new StringBuffer();
+        TextUtils.addLong(sb,"dataSize",dataSize);
+        TextUtils.addText(sb,"data", Base16.toString(data));
+
+        return sb.toString();
     }
 
     public long getDataSize() {
