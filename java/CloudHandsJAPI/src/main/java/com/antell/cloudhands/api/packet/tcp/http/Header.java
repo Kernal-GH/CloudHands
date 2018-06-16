@@ -22,5 +22,13 @@ public class Header {
         return value;
     }
 
+    public String toString(){
 
+        StringBuffer sb = new StringBuffer();
+        sb.append(name);
+        sb.append(":");
+        sb.append(value);
+
+        return sb.toString();
+    }
 }

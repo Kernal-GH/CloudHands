@@ -37,22 +37,7 @@ public abstract class SessionEntry {
         res.dump(sb);
     }
 
-    public void parse(MessageUnpacker unpacker) throws IOException {
 
-        int n = MessagePackUtil.parseMapHeader(unpacker,true);
-
-        Preconditions.checkArgument(n==8,"Invalid msgpack packet of session entry:"+n);
-
-        setProtocolID(MessagePackUtil.parseInt(unpacker));
-        setSessionID(MessagePackUtil.parseLong(unpacker));
-        setReqStartTime(MessagePackUtil.parseLong(unpacker));
-        setResStartTime(MessagePackUtil.parseLong(unpacker));
-        setReqIP(MessagePackUtil.parseInt(unpacker));
-        setResIP(MessagePackUtil.parseInt(unpacker));
-        setReqPort(MessagePackUtil.parseShort(unpacker));
-        setResPort(MessagePackUtil.parseShort(unpacker));
-
-    }
 
     public long getSessionID() {
         return sessionID;

@@ -2,6 +2,8 @@ package com.antell.cloudhands.api.utils;
 
 import java.io.DataInput;
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.List;
 
 public final class TextUtils {
 
@@ -30,6 +32,20 @@ public final class TextUtils {
         sb.append("\n");
     }
 
+    public static void addList(StringBuffer sb, String k, List list){
+
+        Iterator iter = list.iterator();
+
+        sb.append(k);
+        sb.append(":[");
+        while(iter.hasNext()){
+
+            sb.append(iter.next().toString());
+            if(iter.hasNext())
+                sb.append(",");
+        }
+        sb.append("]\n\n");
+    }
 
     public static String readString(DataInput input) throws IOException {
 

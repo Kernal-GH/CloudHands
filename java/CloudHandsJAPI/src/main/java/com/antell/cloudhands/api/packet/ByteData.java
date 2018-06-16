@@ -1,5 +1,6 @@
 package com.antell.cloudhands.api.packet;
 
+import com.antell.cloudhands.api.BinDataInput;
 import org.msgpack.core.MessageUnpacker;
 
 import java.io.DataInput;
@@ -8,7 +9,7 @@ import java.io.IOException;
 /**
  * Created by dell on 2018/6/9.
  */
-public class ByteData implements DataReadable{
+public class ByteData implements BinDataInput{
 
     private long dataSize;
     private byte[] data;
@@ -27,11 +28,6 @@ public class ByteData implements DataReadable{
         this.data = new byte[(int)dataSize];
 
         in.readFully(data,0,(int)dataSize);
-
-    }
-
-    @Override
-    public void parse(MessageUnpacker unpacker) {
 
     }
 

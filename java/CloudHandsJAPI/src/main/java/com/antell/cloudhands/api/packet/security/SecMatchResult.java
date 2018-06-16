@@ -1,7 +1,10 @@
 package com.antell.cloudhands.api.packet.security;
 
-import com.antell.cloudhands.api.packet.DataReadable;
+import com.antell.cloudhands.api.DataDump;
+import com.antell.cloudhands.api.DataOutJson;
+import com.antell.cloudhands.api.MsgPackDataInput;
 import com.antell.cloudhands.api.utils.MessagePackUtil;
+import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.msgpack.core.MessageUnpacker;
 
 import java.io.DataInput;
@@ -12,7 +15,7 @@ import java.util.List;
 /**
  * Created by dell on 2018/6/11.
  */
-public class SecMatchResult implements DataReadable{
+public class SecMatchResult implements MsgPackDataInput,DataOutJson,DataDump{
 
     private int matchCount;
     private final List<MatchInfo> matchInfoList;
@@ -39,15 +42,9 @@ public class SecMatchResult implements DataReadable{
     }
 
     @Override
-    public void read(DataInput in) throws IOException {
-
-    }
-
-    @Override
     public void parse(MessageUnpacker unpacker) throws IOException {
 
         int n  = MessagePackUtil.parseArrayHeader(unpacker,true);
-
         for(int i = 0;i<n;i++){
 
             MatchInfo matchInfo = new MatchInfo();
@@ -55,4 +52,53 @@ public class SecMatchResult implements DataReadable{
             addMatchInfo(matchInfo);
         }
     }
+    @Override
+    public String dataToString() {
+
+        StringBuffer sb = new StringBuffer();
+        sb.append("Dump match info:\n\n");
+        for(MatchInfo matchInfo:matchInfoList){
+
+            sb.append(matchInfo.dataToString());
+            sb.append("\n\n");
+        }
+
+        return sb.toString();
+    }
+
+    public MatchInfo getMainMatchInfo(){
+
+        long minLevel = Long.MAX_VALUE;
+        MatchInfo mainMatchInof = null;
+        for(MatchInfo matchInfo:matchInfoList){
+
+            if(matchInfo.getRuleLevel()<minLevel){
+                minLevel = mainMatchInof.getRuleLevel();
+                mainMatchInof = matchInfo;
+            }
+        }
+
+        return mainMatchInof;
+    }
+
+    @Override
+    public XContentBuilder dataToJson(XContentBuilder cb) throws IOException {
+
+        MatchInfo mainMatchInfo = getMainMatchInfo();
+
+        mainMatchInfo.mainDataToJson(cb);
+
+        XContentBuilder matchCB = cb.startArray("matchInfoList");
+        for(MatchInfo matchInfo:matchInfoList){
+            if(matchInfo == mainMatchInfo)
+                continue;
+
+            matchInfo.dataToJson(matchCB);
+        }
+
+        matchCB.endArray();
+
+        return cb;
+    }
+
 }

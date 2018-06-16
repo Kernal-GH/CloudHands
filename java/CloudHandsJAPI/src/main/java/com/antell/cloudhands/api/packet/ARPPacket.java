@@ -1,7 +1,11 @@
 package com.antell.cloudhands.api.packet;
 
+import com.antell.cloudhands.api.BinDataInput;
+import com.antell.cloudhands.api.DataDump;
+import com.antell.cloudhands.api.DataOutJson;
 import com.antell.cloudhands.api.utils.IPUtils;
 import com.antell.cloudhands.api.utils.TextUtils;
+import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.msgpack.core.MessageUnpacker;
 
 import java.io.DataInput;
@@ -10,7 +14,7 @@ import java.io.IOException;
 /**
  * Created by dell on 2018/4/16.
  */
-public class ARPPacket implements DataReadable {
+public class ARPPacket implements BinDataInput,DataDump,DataOutJson{
 
     private int hardwareAddrFmt;
     private int protoAddrFmt;
@@ -53,12 +57,7 @@ public class ARPPacket implements DataReadable {
     }
 
     @Override
-    public void parse(MessageUnpacker unpacker) {
-
-    }
-
-    @Override
-    public String toString(){
+    public String dataToString() {
 
         StringBuffer sb = new StringBuffer();
 
@@ -78,6 +77,28 @@ public class ARPPacket implements DataReadable {
         TextUtils.addText(sb,"Src Mac address", srcMac.toMacStr());
         TextUtils.addText(sb,"Dst Mac address", dstMac.toMacStr());
         return sb.toString();
+    }
+
+    @Override
+    public XContentBuilder dataToJson(XContentBuilder cb) throws IOException {
+
+        cb.field("hardwareAddrFmt",hardwareAddrFmt);
+        cb.field("protoAddrFmt",protoAddrFmt);
+        cb.field("hardwareAddrLen",hardwareAddrLen);
+        cb.field("protoAddrLen",protoAddrLen);
+        cb.field("opcode",opcode);
+        cb.field("sendIP", IPUtils.ipv4Str(sip));
+        cb.field("targetIP", IPUtils.ipv4Str(tip));
+
+        cb.field("sendMac", sha.toMacStr());
+        cb.field("targetMac", tha.toMacStr());
+        return cb;
+    }
+
+    @Override
+    public String toString(){
+
+        return dataToString();
     }
 
     public int getHardwareAddrFmt() {
@@ -167,4 +188,6 @@ public class ARPPacket implements DataReadable {
     public void setSrcMac(MacAddress srcMac) {
         this.srcMac = srcMac;
     }
+
+
 }

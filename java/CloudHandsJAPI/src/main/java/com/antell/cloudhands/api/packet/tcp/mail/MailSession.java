@@ -1,12 +1,16 @@
 package com.antell.cloudhands.api.packet.tcp.mail;
 
-import com.antell.cloudhands.api.packet.SessionEntry;
+import com.antell.cloudhands.api.DataDump;
+import com.antell.cloudhands.api.DataOutJson;
+import com.antell.cloudhands.api.MsgPackDataInput;
 import com.antell.cloudhands.api.packet.security.SecMatchResult;
+import com.antell.cloudhands.api.packet.tcp.TCPSessionEntry;
 import com.antell.cloudhands.api.utils.MessagePackUtil;
+import com.antell.cloudhands.api.utils.TextUtils;
 import com.google.common.base.Preconditions;
+import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.msgpack.core.MessageUnpacker;
 
-import java.io.DataInput;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +18,9 @@ import java.util.List;
 /**
  * Created by dell on 2018/6/11.
  */
-public class MailSession extends SessionEntry {
+public class MailSession implements MsgPackDataInput,DataOutJson,DataDump {
+
+    private TCPSessionEntry sessionEntry;
 
     private String userName;
     private String passwd;
@@ -32,6 +38,7 @@ public class MailSession extends SessionEntry {
     private SecMatchResult secMatchResult;
 
     public MailSession() {
+        this.sessionEntry = new TCPSessionEntry();
         this.maillAttachEntryList = new ArrayList<>();
         this.mailCCList = new ArrayList<>();
         this.mailToList = new ArrayList<>();
@@ -131,6 +138,9 @@ public class MailSession extends SessionEntry {
     }
 
 
+
+
+
     private class MaillAttachEntry{
 
         private final String name;
@@ -150,11 +160,18 @@ public class MailSession extends SessionEntry {
             return path;
         }
 
-    }
+        public String toString(){
 
-    @Override
-    public void read(DataInput in) throws IOException {
-
+            StringBuffer sb = new StringBuffer();
+            sb.append("attach:{");
+            sb.append("name:");
+            sb.append(name);
+            sb.append(",");
+            sb.append("path:");
+            sb.append(path);
+            sb.append("}");
+            return sb.toString();
+        }
     }
 
     private void parseAttach(MessageUnpacker unpacker) throws IOException {
@@ -223,7 +240,7 @@ public class MailSession extends SessionEntry {
         Preconditions.checkArgument(n==2||n==3,"Invalid mail session messagePack:"+n);
 
         /*parse session entry */
-        super.parse(unpacker);
+        sessionEntry.parse(unpacker);
 
         /* parse mail proto info*/
         n = MessagePackUtil.parseMapHeader(unpacker,true);
@@ -238,6 +255,63 @@ public class MailSession extends SessionEntry {
         }
     }
 
+    public TCPSessionEntry getSessionEntry() {
+        return sessionEntry;
+    }
+
+    @Override
+    public String dataToString() {
+
+        StringBuffer sb = new StringBuffer();
+
+        sb.append(sessionEntry.dataToString());
+        TextUtils.addText(sb,"userName",userName);
+        TextUtils.addText(sb,"passwd",passwd);
+        TextUtils.addText(sb,"subject",subject);
+        TextUtils.addText(sb,"from",from);
+        TextUtils.addText(sb,"contentTxtPath",contentTxtPath);
+        TextUtils.addText(sb,"contentHtmlPath",contentHtmlPath);
+        TextUtils.addList(sb,"mailTo",mailToList);
+        TextUtils.addList(sb,"mailCC",mailCCList);
+        TextUtils.addList(sb,"mailAttach",maillAttachEntryList);
+
+        if(secMatchResult!=null){
+
+            sb.append(secMatchResult.dataToString());
+        }
+        return sb.toString();
+    }
+
+    public String toString(){
+        return dataToString();
+    }
+
+    @Override
+    public XContentBuilder dataToJson(XContentBuilder cb) throws IOException {
+
+        XContentBuilder seCB = cb.startObject("sessionEntry");
+        sessionEntry.dataToJson(seCB);
+        seCB.endObject();
+
+
+        cb.field("userName",userName);
+        cb.field("passwd",passwd);
+        cb.field("subject",subject);
+        cb.field("from",from);
+        cb.field("contentTxtPath",contentTxtPath);
+        cb.field("contentHtmlPath",contentHtmlPath);
+        cb.field("mailTo",mailToList);
+        cb.field("mailCC",mailCCList);
+        cb.field("mailAttach",maillAttachEntryList);
+
+        if(secMatchResult!=null){
+            XContentBuilder attkCB = cb.startObject("attack");
+            secMatchResult.dataToJson(attkCB);
+            attkCB.endObject();
+        }
+
+        return cb;
+    }
 
 
 }

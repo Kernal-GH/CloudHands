@@ -1,12 +1,16 @@
 package com.antell.cloudhands.api.packet.tcp.http;
 
-import com.antell.cloudhands.api.packet.SessionEntry;
+import com.antell.cloudhands.api.DataDump;
+import com.antell.cloudhands.api.DataOutJson;
+import com.antell.cloudhands.api.MsgPackDataInput;
 import com.antell.cloudhands.api.packet.security.SecMatchResult;
+import com.antell.cloudhands.api.packet.tcp.TCPSessionEntry;
 import com.antell.cloudhands.api.utils.MessagePackUtil;
+import com.antell.cloudhands.api.utils.TextUtils;
 import com.google.common.base.Preconditions;
+import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.msgpack.core.MessageUnpacker;
 
-import java.io.DataInput;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,8 +18,9 @@ import java.util.List;
 /**
  * Created by dell on 2018/6/11.
  */
-public class HTTPSession extends SessionEntry{
+public class HTTPSession implements MsgPackDataInput,DataDump,DataOutJson {
 
+    private TCPSessionEntry sessionEntry;
     private String method;
     private String uri;
     private String version;
@@ -33,6 +38,7 @@ public class HTTPSession extends SessionEntry{
 
     public HTTPSession(){
 
+        sessionEntry = new TCPSessionEntry();
         reqHeaders = new ArrayList<>();
         resHeaders = new ArrayList<>();
         secMatchResult = null;
@@ -83,7 +89,7 @@ public class HTTPSession extends SessionEntry{
         Preconditions.checkArgument(n==2||n==3,"Invalid http session messagePack:"+n);
 
         /*parse session entry */
-        super.parse(unpacker);
+        sessionEntry.parse(unpacker);
 
         /*skip http proto name and to parse http proto info*/
         n = MessagePackUtil.parseMapHeader(unpacker,true);
@@ -107,17 +113,62 @@ public class HTTPSession extends SessionEntry{
             secMatchResult.parse(unpacker);
 
         }
-
     }
 
     @Override
-    public void read(DataInput in) throws IOException {
+    public String dataToString() {
 
+        StringBuffer sb = new StringBuffer();
+
+        sb.append(sessionEntry.dataToString());
+        TextUtils.addText(sb,"method",method);
+        TextUtils.addText(sb,"uri",uri);
+        TextUtils.addText(sb,"host",host);
+        TextUtils.addText(sb,"version",version);
+        TextUtils.addInt(sb,"status",status);
+        TextUtils.addText(sb,"reqBodyPath",reqBodyPath);
+        TextUtils.addText(sb,"resBodyPath",resBodyPath);
+        TextUtils.addList(sb,"reqHeaders",reqHeaders);
+        TextUtils.addList(sb,"resHeaders",resHeaders);
+
+        if(secMatchResult!=null){
+
+            sb.append(secMatchResult.dataToString());
+        }
+
+        return sb.toString();
 
     }
 
+    public String toString(){
+        return dataToString();
+    }
 
+    @Override
+    public XContentBuilder dataToJson(XContentBuilder cb) throws IOException {
 
+        XContentBuilder seCB = cb.startObject("sessionEntry");
+        sessionEntry.dataToJson(seCB);
+        seCB.endObject();
+
+        cb.field("method",method);
+        cb.field("uri",uri);
+        cb.field("host",host);
+        cb.field("version",version);
+        cb.field("status",status);
+        cb.field("reqBodyPath",reqBodyPath);
+        cb.field("resBodyPath",resBodyPath);
+        cb.field("reqHeaders",reqHeaders);
+        cb.field("resHeaders",resHeaders);
+
+        if(secMatchResult!=null){
+            XContentBuilder attkCB = cb.startObject("attack");
+            secMatchResult.dataToJson(attkCB);
+            attkCB.endObject();
+        }
+
+        return cb;
+    }
 
     public List<Header> getReqHeaders() {
         return reqHeaders;
@@ -190,4 +241,10 @@ public class HTTPSession extends SessionEntry{
     public void setSecMatchResult(SecMatchResult secMatchResult) {
         this.secMatchResult = secMatchResult;
     }
+
+    public TCPSessionEntry getSessionEntry() {
+        return sessionEntry;
+    }
+
+
 }
