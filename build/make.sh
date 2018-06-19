@@ -63,6 +63,8 @@ cp -r ../tcp $src_path
 cp -r ../app $src_path
 cp -r ../udp $src_path
 cp -r ../StreamAnalyze $src_path
+cp -r ../java $src_path
+cp -r ../sample $src_path
 cp -f ./*.sh ./build_dir/
 
 ###### build file ##############

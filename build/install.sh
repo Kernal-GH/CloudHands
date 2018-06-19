@@ -77,8 +77,15 @@ prepare_dir(){
 
 	if [ ! -d $dpdk_install_prefix/CloudHands/bin ];then
          mkdir -p $dpdk_install_prefix/CloudHands/bin
-     fi
+    fi
 
+	if [ ! -d $dpdk_install_prefix/CloudHands/sample ];then
+         mkdir -p $dpdk_install_prefix/CloudHands/sample
+    fi
+	
+    if [ ! -d $dpdk_install_prefix/CloudHands/lib ];then
+         mkdir -p $dpdk_install_prefix/CloudHands/lib
+    fi
 }
 
 install_cloudhands(){
@@ -103,10 +110,18 @@ install_cloudhands(){
 	cp -rf CloudHands/StreamAnalyze/statistic/StatDump $dpdk_install_prefix/CloudHands/bin
 }
 
+install_java_api(){
+
+    make -C CloudHands/java/jni
+    cp -rf  CloudHands/java/jni/libCloudHandsJNI.so $dpdk_install_prefix/CloudHands/lib
+    mvn install -f CloudHands/java/CloudHandsJAPI/pom.xml
+}
+
 install_all(){
 	install_dpdk
 	comp_lib
 	install_cloudhands
+    install_java_api
 }
 
 install_all
