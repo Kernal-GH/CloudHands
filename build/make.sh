@@ -34,9 +34,9 @@ src_path=./build_dir/package/CloudHands
 mkdir -p $tar_path
 mkdir -p $src_path
 
+. $self_path/dpdk.sh
 
-
-dpdk_ver=17.05.2
+echo $dpdk_ver
 
 if [ ! -f $tar_path/dpdk-${dpdk_ver}.tar.gz ] ; then
 	cp -r ../DPDK .

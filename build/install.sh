@@ -5,7 +5,7 @@
 #        Author: csp001314@163.com
 #   Description: ---
 #        Create: 2016-11-03 20:09:47
-# Last Modified: 2018-06-07 17:57:41
+# Last Modified: 2018-06-19 18:25:01
 #
 
 [ `id -u` -ne 0 ] && {
@@ -13,7 +13,10 @@
 	exit 1
 }
 
-dpdk_ver=17.05.2
+
+self_path=$(cd $(dirname "$0"); pwd)
+
+. $self_path/dpdk.sh
 
 dpdk_install_prefix=/usr/local/dpdk/
 
