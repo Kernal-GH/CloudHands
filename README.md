@@ -5,6 +5,23 @@
 
 ```
 
+### 依赖软件
+```
+1. msgpack
+   wget https://github.com/shajf/msgpack-c/archive/master.zip
+   unzip master.zip
+   cd msgpack-c-master
+   ./bootstrap
+   ./configure
+   make 
+   make install
+   
+2. java8,maven
+  cloudhands 提供了java api用来读取底层协议还原的结果及其一些流量元数据，以便用来
+  进一步的业务处理，比如安全分析，流量分析等等，笔者强烈建议使用者最好使用java或是
+  python等更高层的语言来处理业务相关的问题。另外还提供了java api 使用的sample.
+  所以需要安装java8和maven
+```
 
 ### 编译方法
 ```
