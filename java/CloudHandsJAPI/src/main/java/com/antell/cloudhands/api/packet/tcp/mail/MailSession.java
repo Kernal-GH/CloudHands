@@ -1,10 +1,8 @@
 package com.antell.cloudhands.api.packet.tcp.mail;
 
-import com.antell.cloudhands.api.DataDump;
-import com.antell.cloudhands.api.DataOutJson;
-import com.antell.cloudhands.api.MsgPackDataInput;
 import com.antell.cloudhands.api.packet.security.SecMatchResult;
 import com.antell.cloudhands.api.packet.tcp.TCPSessionEntry;
+import com.antell.cloudhands.api.source.SourceEntry;
 import com.antell.cloudhands.api.utils.MessagePackUtil;
 import com.antell.cloudhands.api.utils.TextUtils;
 import com.google.common.base.Preconditions;
@@ -18,7 +16,7 @@ import java.util.List;
 /**
  * Created by dell on 2018/6/11.
  */
-public class MailSession implements MsgPackDataInput,DataOutJson,DataDump {
+public class MailSession implements SourceEntry {
 
     private TCPSessionEntry sessionEntry;
 
@@ -37,12 +35,14 @@ public class MailSession implements MsgPackDataInput,DataOutJson,DataDump {
     private final List<String> mailToList;
     private SecMatchResult secMatchResult;
 
-    public MailSession() {
+    public MailSession(MessageUnpacker unpacker) throws IOException {
         this.sessionEntry = new TCPSessionEntry();
         this.maillAttachEntryList = new ArrayList<>();
         this.mailCCList = new ArrayList<>();
         this.mailToList = new ArrayList<>();
         this.secMatchResult = null;
+
+        parse(unpacker);
     }
 
     public String getUserName() {
@@ -231,7 +231,6 @@ public class MailSession implements MsgPackDataInput,DataOutJson,DataDump {
 
     }
 
-    @Override
     public void parse(MessageUnpacker unpacker) throws IOException{
 
         int n = MessagePackUtil.parseMapHeader(unpacker,false);

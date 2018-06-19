@@ -1,10 +1,8 @@
 package com.antell.cloudhands.api.packet.tcp.http;
 
-import com.antell.cloudhands.api.DataDump;
-import com.antell.cloudhands.api.DataOutJson;
-import com.antell.cloudhands.api.MsgPackDataInput;
 import com.antell.cloudhands.api.packet.security.SecMatchResult;
 import com.antell.cloudhands.api.packet.tcp.TCPSessionEntry;
+import com.antell.cloudhands.api.source.SourceEntry;
 import com.antell.cloudhands.api.utils.MessagePackUtil;
 import com.antell.cloudhands.api.utils.TextUtils;
 import com.google.common.base.Preconditions;
@@ -18,7 +16,7 @@ import java.util.List;
 /**
  * Created by dell on 2018/6/11.
  */
-public class HTTPSession implements MsgPackDataInput,DataDump,DataOutJson {
+public class HTTPSession implements SourceEntry{
 
     private TCPSessionEntry sessionEntry;
     private String method;
@@ -36,13 +34,15 @@ public class HTTPSession implements MsgPackDataInput,DataDump,DataOutJson {
 
     private SecMatchResult secMatchResult;
 
-    public HTTPSession(){
+    public HTTPSession(MessageUnpacker unpacker) throws IOException {
 
         sessionEntry = new TCPSessionEntry();
         reqHeaders = new ArrayList<>();
         resHeaders = new ArrayList<>();
         secMatchResult = null;
         host = null;
+
+        parse(unpacker);
     }
 
     private boolean isHost(String k){
@@ -80,8 +80,6 @@ public class HTTPSession implements MsgPackDataInput,DataDump,DataOutJson {
     }
 
 
-
-    @Override
     public void parse(MessageUnpacker unpacker) throws IOException {
 
         int n = MessagePackUtil.parseMapHeader(unpacker,false);

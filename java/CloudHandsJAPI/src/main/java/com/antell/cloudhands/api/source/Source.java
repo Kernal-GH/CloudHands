@@ -7,20 +7,22 @@ import com.antell.cloudhands.api.context.Context;
  */
 public interface Source {
 
-    boolean isAccept();
-
     /*init Source*/
-    void init(Context context) throws SourceException;
+    void init(Context context,Filter filter) throws SourceException;
 
     void start() throws SourceException;
 
     void stop();
 
-    /*Get a session from source*/
-    Session take();
+    /*put a entry to source*/
+     void put(SourceEntry entry);
+
+    /*Get a entry from source*/
+    SourceEntry take();
 
     /*Commit a session,*/
-    void commit(Session session);
+    void commit(SourceEntry entry);
+
 }
 
 

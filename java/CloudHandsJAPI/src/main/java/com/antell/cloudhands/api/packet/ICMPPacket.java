@@ -1,8 +1,6 @@
 package com.antell.cloudhands.api.packet;
 
-import com.antell.cloudhands.api.BinDataInput;
-import com.antell.cloudhands.api.DataDump;
-import com.antell.cloudhands.api.DataOutJson;
+import com.antell.cloudhands.api.source.SourceEntry;
 import com.antell.cloudhands.api.utils.IPUtils;
 import com.antell.cloudhands.api.utils.TextUtils;
 import org.elasticsearch.common.xcontent.XContentBuilder;
@@ -12,7 +10,7 @@ import java.io.IOException;
 /**
  * Created by dell on 2018/4/16.
  */
-public class ICMPPacket implements BinDataInput,DataOutJson,DataDump {
+public class ICMPPacket implements SourceEntry {
 
     private int type;
     private int code;
@@ -24,8 +22,8 @@ public class ICMPPacket implements BinDataInput,DataOutJson,DataDump {
     private long sip;
     private long tip;
 
-    @Override
-    public void read(DataInput input) throws IOException {
+    public ICMPPacket(DataInput input) throws IOException {
+
         type = input.readUnsignedByte();
         code = input.readUnsignedByte();
         ttl =  input.readUnsignedByte();
@@ -34,6 +32,7 @@ public class ICMPPacket implements BinDataInput,DataOutJson,DataDump {
         seqNumber = input.readUnsignedShort();
         sip = (long)input.readInt();
         tip = (long)input.readInt();
+
     }
 
     @Override

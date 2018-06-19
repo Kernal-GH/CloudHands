@@ -1,12 +1,9 @@
 package com.antell.cloudhands.api.packet;
 
-import com.antell.cloudhands.api.BinDataInput;
-import com.antell.cloudhands.api.DataDump;
-import com.antell.cloudhands.api.DataOutJson;
+import com.antell.cloudhands.api.source.SourceEntry;
 import com.antell.cloudhands.api.utils.IPUtils;
 import com.antell.cloudhands.api.utils.TextUtils;
 import org.elasticsearch.common.xcontent.XContentBuilder;
-import org.msgpack.core.MessageUnpacker;
 
 import java.io.DataInput;
 import java.io.IOException;
@@ -14,7 +11,7 @@ import java.io.IOException;
 /**
  * Created by dell on 2018/4/16.
  */
-public class ARPPacket implements BinDataInput,DataDump,DataOutJson{
+public class ARPPacket implements SourceEntry{
 
     private int hardwareAddrFmt;
     private int protoAddrFmt;
@@ -31,17 +28,7 @@ public class ARPPacket implements BinDataInput,DataDump,DataOutJson{
     private MacAddress srcMac;
     private MacAddress dstMac;
 
-    public ARPPacket(){
-
-        sha = new MacAddress();
-
-        tha= new MacAddress();
-        srcMac = new MacAddress();
-        dstMac = new MacAddress();
-    }
-
-    @Override
-    public void read(DataInput input) throws IOException {
+    public ARPPacket(DataInput input) throws IOException {
 
         hardwareAddrFmt = input.readUnsignedShort();
         protoAddrFmt = input.readUnsignedShort();
@@ -50,11 +37,15 @@ public class ARPPacket implements BinDataInput,DataDump,DataOutJson{
         opcode = input.readUnsignedShort();
         sip = input.readInt();
         tip = input.readInt();
-        sha.read(input);
-        tha.read(input);
-        srcMac.read(input);
-        dstMac.read(input);
+
+        sha =  new MacAddress(input);
+        tha = new MacAddress(input);
+
+        srcMac = new MacAddress(input);
+
+        dstMac = new MacAddress(input);
     }
+
 
     @Override
     public String dataToString() {

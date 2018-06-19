@@ -1,8 +1,7 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
 import com.antell.cloudhands.api.BinDataInput;
-import com.antell.cloudhands.api.DataDump;
-import com.antell.cloudhands.api.DataOutJson;
+import com.antell.cloudhands.api.source.SourceEntry;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 
 import java.io.DataInput;
@@ -11,22 +10,16 @@ import java.io.IOException;
 /**
  * Created by dell on 2018/6/11.
  */
-public class DNSSession  implements BinDataInput,DataOutJson,DataDump {
+public class DNSSession  implements SourceEntry {
 
     private DNSSessionEntry sessionEntry;
     private DNSRequst dnsRequst;
     private DNSResponse dnsResponse;
 
-    public DNSSession(){
-
+    public DNSSession(DataInput in) throws IOException {
         sessionEntry = new DNSSessionEntry();
         dnsRequst = null;
         dnsResponse = null;
-    }
-
-    @Override
-    public void read(DataInput in) throws IOException {
-
         sessionEntry.read(in);
 
         boolean hasReq = in.readUnsignedByte()==1;

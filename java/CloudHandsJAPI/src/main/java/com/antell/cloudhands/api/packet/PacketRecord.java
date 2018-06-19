@@ -24,7 +24,8 @@ public class PacketRecord {
     public final static int MAIL = 9;
     public final static int FTP = 10;
     public final static int TELNET = 11;
-    public final static int SECRES = 12;
+    public final static int SECRESHTTP = 12;
+    public final static int SECRESMAIL = 13;
 
     public int type;
     public int metaDataSize;

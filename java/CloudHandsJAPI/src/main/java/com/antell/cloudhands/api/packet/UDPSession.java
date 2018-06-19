@@ -1,7 +1,7 @@
 package com.antell.cloudhands.api.packet;
 
 import com.antell.cloudhands.api.BinDataInput;
-import com.antell.cloudhands.api.DataOutJson;
+import com.antell.cloudhands.api.source.SourceEntry;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 
 import java.io.DataInput;
@@ -10,10 +10,9 @@ import java.io.IOException;
 /**
  * Created by dell on 2018/4/16.
  */
-public class UDPSession extends SessionEntry implements BinDataInput,DataOutJson{
+public class UDPSession extends SessionEntry implements SourceEntry{
 
-    @Override
-    public void read(DataInput input) throws IOException {
+    public  UDPSession(DataInput input) throws IOException {
 
         setTimeout(input.readUnsignedByte()!=0);
         setTimeoutTV(input.readUnsignedShort());
@@ -38,15 +37,7 @@ public class UDPSession extends SessionEntry implements BinDataInput,DataOutJson
         setResContent(resContent);
     }
 
-    @Override
-    public String toString(){
 
-        StringBuffer sb = new StringBuffer();
-        sb.append("Dump UDP Packet Session informations:\n");
-        sb.append(dataToString());
-
-        return sb.toString();
-    }
 
     @Override
     public XContentBuilder dataToJson(XContentBuilder cb) throws IOException {
@@ -76,4 +67,18 @@ public class UDPSession extends SessionEntry implements BinDataInput,DataOutJson
 
         return cb;
     }
+
+    @Override
+    public String dataToString() {
+        StringBuffer sb = new StringBuffer();
+        sb.append("Dump UDP Packet Session informations:\n");
+        sb.append(entryToString());
+        return sb.toString();
+    }
+    @Override
+    public String toString(){
+
+        return dataToString();
+    }
+
 }

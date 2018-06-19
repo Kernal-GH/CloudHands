@@ -1,7 +1,7 @@
 package com.antell.cloudhands.api.packet;
 
 import com.antell.cloudhands.api.BinDataInput;
-import com.antell.cloudhands.api.DataOutJson;
+import com.antell.cloudhands.api.source.SourceEntry;
 import com.antell.cloudhands.api.utils.TextUtils;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 
@@ -11,7 +11,7 @@ import java.io.IOException;
 /**
  * Created by dell on 2018/4/16.
  */
-public class TCPSession extends SessionEntry implements BinDataInput,DataOutJson{
+public class TCPSession extends SessionEntry implements SourceEntry{
 
     private int phaseState;
 
@@ -24,8 +24,7 @@ public class TCPSession extends SessionEntry implements BinDataInput,DataOutJson
         this.phaseState = phaseState;
     }
 
-    @Override
-    public void read(DataInput input) throws IOException {
+    public TCPSession(DataInput input) throws IOException {
 
         setTimeout(input.readUnsignedByte()!=0);
         setTimeoutTV(input.readUnsignedShort());
@@ -52,17 +51,7 @@ public class TCPSession extends SessionEntry implements BinDataInput,DataOutJson
 
     }
 
-    @Override
-    public String toString(){
 
-        StringBuffer sb = new StringBuffer();
-        sb.append("Dump TCP Packet Session informations:\n");
-        TextUtils.addInt(sb,"PhaseState",phaseState);
-
-        sb.append(dataToString());
-
-        return sb.toString();
-    }
 
     @Override
     public XContentBuilder dataToJson(XContentBuilder cb) throws IOException {
@@ -92,5 +81,23 @@ public class TCPSession extends SessionEntry implements BinDataInput,DataOutJson
         cb.field("resLastTime",getResLastTime());
 
         return cb;
+    }
+
+    @Override
+    public String dataToString() {
+
+        StringBuffer sb = new StringBuffer();
+        sb.append("Dump TCP Packet Session informations:\n");
+        TextUtils.addInt(sb,"PhaseState",phaseState);
+
+        sb.append(entryToString());
+
+        return sb.toString();
+    }
+
+    @Override
+    public String toString(){
+
+        return dataToString();
     }
 }

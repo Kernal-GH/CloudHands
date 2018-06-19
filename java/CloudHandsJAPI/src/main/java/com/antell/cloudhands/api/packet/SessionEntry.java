@@ -1,12 +1,11 @@
 package com.antell.cloudhands.api.packet;
 
-import com.antell.cloudhands.api.DataDump;
 import com.antell.cloudhands.api.utils.TextUtils;
 
 /**
  * Created by dell on 2018/4/17.
  */
-public  class SessionEntry implements DataDump{
+public  class SessionEntry {
 
     private boolean isTimeout;
     private int timeoutTV;
@@ -194,8 +193,7 @@ public  class SessionEntry implements DataDump{
         this.protocolID = protocolID;
     }
 
-    @Override
-    public String dataToString() {
+    public String entryToString() {
 
         StringBuffer sb = new StringBuffer();
         TextUtils.addLong(sb,"SessionID",sessionID);
