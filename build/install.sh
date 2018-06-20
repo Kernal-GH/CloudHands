@@ -5,7 +5,7 @@
 #        Author: csp001314@163.com
 #   Description: ---
 #        Create: 2016-11-03 20:09:47
-# Last Modified: 2018-06-19 18:25:01
+# Last Modified: 2018-06-20 13:33:31
 #
 
 [ `id -u` -ne 0 ] && {
@@ -108,6 +108,7 @@ install_cloudhands(){
 	cp -rf CloudHands/udp/UDPMain $dpdk_install_prefix/CloudHands/bin
 	cp -rf CloudHands/StreamAnalyze/SAMain $dpdk_install_prefix/CloudHands/bin
 	cp -rf CloudHands/StreamAnalyze/statistic/StatDump $dpdk_install_prefix/CloudHands/bin
+	cp -rf CloudHands/bin/* $dpdk_install_prefix/CloudHands/bin
 }
 
 install_java_api(){
@@ -117,11 +118,22 @@ install_java_api(){
     mvn install -f CloudHands/java/CloudHandsJAPI/pom.xml
 }
 
+install_sample(){
+
+	mvn package -f CloudHands/sample/java/CloudHandsJAPISample/pom.xml
+	cp -rf CloudHands/sample/java/CloudHandsJAPISample/target/CloudHandsJAPISample-1.0.0.jar $dpdk_install_prefix/CloudHands/sample
+	cp -rf CloudHands/sample/java/CloudHandsJAPISample/bin/*  $dpdk_install_prefix/CloudHands/sample
+	cp -rf CloudHands/sample/java/CloudHandsJAPISample/conf/* $dpdk_install_prefix/CloudHands/sample
+}
+
 install_all(){
+
+	source /etc/profile
 	install_dpdk
 	comp_lib
 	install_cloudhands
     install_java_api
+	install_sample
 }
 
 install_all

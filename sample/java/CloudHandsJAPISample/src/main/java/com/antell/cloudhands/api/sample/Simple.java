@@ -84,13 +84,14 @@ public class Simple {
     public static void main(String[] args) throws Exception {
 
         Context context;
-        if(args.length!=2){
+
+        if(args.length!=1){
 
             System.err.println("Usage:<appName> <config file name>");
             System.exit(-1);
         }
 
-        String cfname = args[1];
+        String cfname = args[0];
         /*load config file*/
         try {
             context = new PropertyContext(cfname);
