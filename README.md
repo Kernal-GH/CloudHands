@@ -50,7 +50,28 @@
 --------------/CloudHands/lib    #CloudHands 库文件安装目录
 --------------/CloudHands/sample #CloudHands 使用例子安装目录
 ```
+### 运行方法
+```
+1. cd /usr/local/dpdk/CloudHands/bin
+   修改setup_config 中要绑定dpdk网卡bus_info,和内核驱动名称
+   通过ethtool -i <网卡名称> 获得相关信息
+   比如：INTERFACE=0000:82:00.1
+         DRIVER=igb
+   另外主要程序要绑定的cpu 按照自己的cpu core 数来调整，
+   多个程序可以绑定同一个cpu core,但是cpu 核数充足的情况下，最好单独绑定
 
+2. ./ch_setup.sh start 启动
+   ./ch_setup.sh stop  停止
+   
+   启动之后
+   ps -ef |grep PDispatcher
+   ps -ef |grep TCPMain
+   ps -ef |grep UDPMain
+   ps -ef |grep SAMain
+   ps -ef |grep PPMain
+   看看这几个进程是否起来，若都起来那么启动成功，若是不成功，则查看/opt/cloudhands/log 下面的对应日志
+
+```
 ### 基于TCP的协议还原
 ```
 1. HTTP
