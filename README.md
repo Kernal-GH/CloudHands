@@ -49,6 +49,7 @@
 --------------/CloudHands/conf   #CloudHands 配置文件安装目录
 --------------/CloudHands/lib    #CloudHands 库文件安装目录
 --------------/CloudHands/sample #CloudHands 使用例子安装目录
+
 ```
 ### 运行方法
 ```
@@ -70,7 +71,11 @@
    ps -ef |grep SAMain
    ps -ef |grep PPMain
    看看这几个进程是否起来，若都起来那么启动成功，若是不成功，则查看/opt/cloudhands/log 下面的对应日志
-
+   
+  3. 运行例子
+     cd /usr/local/dpdk/CloudHands/sample
+     ./jsample
+     
 ```
 ### 基于TCP的协议还原
 ```
