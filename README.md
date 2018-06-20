@@ -73,10 +73,14 @@
    ps -ef |grep PPMain
    看看这几个进程是否起来，若都起来那么启动成功，若是不成功，则查看/opt/cloudhands/log 下面的对应日志
    
-  3. 运行例子
-     cd /usr/local/dpdk/CloudHands/sample
-     ./jsample
-     
+3. 运行例子
+   cd /usr/local/dpdk/CloudHands/sample
+   ./jsample
+
+4.查看流量统计信息
+cd /usr/local/dpdk/CloudHands/bin
+./StatDump /opt/cloudhands/data/store/sa_stat.data 10
+除了总流量，总包数外，对tcp,udp,icmp等协议做了统计，统计时间间隔为5分钟，每一个统计值（包数，字节数）
 ```
 ### 基于TCP的协议还原
 ```
