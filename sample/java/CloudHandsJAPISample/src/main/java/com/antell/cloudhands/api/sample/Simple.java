@@ -29,6 +29,8 @@ public class Simple {
                 case PacketRecord.HTTP:
                 case PacketRecord.MAIL:
                 case PacketRecord.DNS:
+				case PacketRecord.ARP:
+				case PacketRecord.ICMP:
                     return true;
                 default:
                         return false;

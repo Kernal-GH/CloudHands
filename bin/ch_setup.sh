@@ -5,7 +5,7 @@
 #        Author: csp001314@163.com 
 #   Description: ---
 #        Create: 2016-08-07 20:23:00
-# Last Modified: 2018-06-20 13:13:05
+# Last Modified: 2018-06-20 18:37:31
 #
 
 
@@ -211,6 +211,8 @@ unbind_nics()
 setup_cloudhands(){
 
 	prefare_dirs
+
+	ulimit -n 1000000
 
 	${RTE_SDK}/CloudHands/bin/${PDIS_MAIN_NAME} ${PDIS_CORE_BIND} ${PDIS_CONFIG_FPATH} 1>/dev/null 2>&1 &
 	sleep 10

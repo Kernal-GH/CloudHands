@@ -1,8 +1,8 @@
 #
 IS_NUNA=0
 HUGE_PAGES=4096
-INTERFACE=0000:02:00.0
-DRIVER=e1000e
+INTERFACE=0000:82:00.1
+DRIVER=igb
 
 #main application cpu core binded,if no same more cpu cores
 #then can be bind into same cpu cores
