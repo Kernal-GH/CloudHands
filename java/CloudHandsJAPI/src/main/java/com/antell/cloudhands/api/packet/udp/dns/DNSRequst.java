@@ -7,6 +7,7 @@ import org.elasticsearch.common.xcontent.XContentBuilder;
 
 import java.io.DataInput;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -22,7 +23,7 @@ public class DNSRequst implements BinDataInput,DataOutJson,DataDump{
     public void read(DataInput in) throws IOException {
 
         header = new Header(in);
-
+        questions = new ArrayList<>();
         int n = header.getCount(Section.QUESTION);
 
         for(int i=0;i<n;i++){
