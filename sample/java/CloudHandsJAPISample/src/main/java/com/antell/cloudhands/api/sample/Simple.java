@@ -63,7 +63,7 @@ public class Simple {
             SourceEntry sourceEntry = source.take();
 
             if (sourceEntry != null) {
-
+				
                 if (sourceEntry instanceof HTTPSession) {
 
                     HTTPSession httpSession = (HTTPSession) sourceEntry;
