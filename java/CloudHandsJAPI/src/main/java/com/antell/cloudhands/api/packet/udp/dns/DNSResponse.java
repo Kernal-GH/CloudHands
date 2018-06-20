@@ -68,6 +68,8 @@ public class DNSResponse implements BinDataInput,DataOutJson,DataDump{
         String fname = Section.longString(i);
 
         List<Record> records = getRecords(i);
+        if(records == null)
+            return cb;
 
         XContentBuilder cbb = cb.startArray(fname);
 
@@ -86,6 +88,8 @@ public class DNSResponse implements BinDataInput,DataOutJson,DataDump{
 
         String fname = Section.longString(Section.QUESTION);
         List<DNSQuestion> questions = getQuestions();
+        if(questions == null)
+            return cb;
 
         XContentBuilder cbb = cb.startArray(fname);
 
@@ -146,6 +150,9 @@ public class DNSResponse implements BinDataInput,DataOutJson,DataDump{
 
         sb.append(Section.longString(Section.QUESTION)+"---------->>\n");
         List<DNSQuestion> dnsQuestions = getQuestions();
+        if(dnsQuestions == null)
+            return;
+
         for(DNSQuestion question:dnsQuestions){
 
             sb.append(question.dataToString());
@@ -157,7 +164,9 @@ public class DNSResponse implements BinDataInput,DataOutJson,DataDump{
 
         sb.append(Section.longString(i)+"---------->>\n");
         List<Record> records = getRecords(i);
-        
+        if(records == null)
+            return;
+
         for(Record record:records){
             sb.append(record.toString());
             sb.append("\n\n");
