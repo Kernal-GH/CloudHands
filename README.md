@@ -45,7 +45,10 @@
 --------------/usertools  #dpdk 操作dpdk相关脚本的安装目录
 --------------/dpdk_src   #指向dpdk源代码的软连接
 --------------/CloudHands #本应用编译结果安装目录
-
+--------------/CloudHands/bin    #CloudHands 可执行文件安装目录
+--------------/CloudHands/conf   #CloudHands 配置文件安装目录
+--------------/CloudHands/lib    #CloudHands 库文件安装目录
+--------------/CloudHands/sample #CloudHands 使用例子安装目录
 ```
 
 ### 基于TCP的协议还原
