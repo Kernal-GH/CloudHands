@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-04-13 15:50:28
- * Last Modified: 2018-05-14 11:19:19
+ * Last Modified: 2018-06-20 19:10:27
  */
 
 #include "ch_udp_session_handler.h"
@@ -33,7 +33,7 @@ static void _udp_session_out(ch_udp_session_handler_t *udp_handler,
 
 	ch_packet_record_t pkt_rcd;
 
-	ch_udp_app_session_dump(udp_app,stdout,udp_session,NULL);
+	//ch_udp_app_session_dump(udp_app,stdout,udp_session,NULL);
 
 	if(-1 == ch_udp_app_session_write(udp_app,dout,udp_session,NULL))
 	{
