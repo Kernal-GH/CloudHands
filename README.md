@@ -35,7 +35,17 @@
 1. cd build
 2. sh make.sh
 3. ./CloudHands_1.0.0.bin
-等待编译和安装，完成之后，将其安装在目录 /usr/local/dpdk
+等待编译和安装，完成之后，将其安装在目录 /usr/local/dpdk,目录结构如下：
+/usr/local/dpdk
+--------------/app        #dpdk 编译产生的自带应用程序安装目录
+--------------/build      #dpdk 编译相关文件存储目录
+--------------/include    #dpdk 编译产生的头文件安装目录
+--------------/kmod       #dpdk 编译产生的内核模块安装目录
+--------------/lib        #dpdk 编译产生的库文件安装目录
+--------------/usertools  #dpdk 操作dpdk相关脚本的安装目录
+--------------/dpdk_src   #指向dpdk源代码的软连接
+--------------/CloudHands #本应用编译结果安装目录
+
 ```
 
 ### 基于TCP的协议还原
