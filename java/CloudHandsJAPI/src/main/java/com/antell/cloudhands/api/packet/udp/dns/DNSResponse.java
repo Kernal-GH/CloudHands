@@ -144,6 +144,7 @@ public class DNSResponse implements BinDataInput,DataOutJson,DataDump{
 
     private void questionsToString(StringBuffer sb){
 
+        sb.append(Section.longString(Section.QUESTION)+"---------->>\n");
         List<DNSQuestion> dnsQuestions = getQuestions();
         for(DNSQuestion question:dnsQuestions){
 
@@ -154,8 +155,9 @@ public class DNSResponse implements BinDataInput,DataOutJson,DataDump{
 
     private void recordsToString(StringBuffer sb,int i){
 
+        sb.append(Section.longString(i)+"---------->>\n");
         List<Record> records = getRecords(i);
-
+        
         for(Record record:records){
             sb.append(record.toString());
             sb.append("\n\n");

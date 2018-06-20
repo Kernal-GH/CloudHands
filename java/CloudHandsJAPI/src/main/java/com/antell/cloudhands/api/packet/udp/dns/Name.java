@@ -162,4 +162,8 @@ public class Name implements Comparable {
         return name;
     }
 
+    public String toString(){
+
+        return name;
+    }
 }

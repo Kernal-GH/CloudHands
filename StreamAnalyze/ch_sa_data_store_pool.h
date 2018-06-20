@@ -55,7 +55,7 @@ extern ch_sa_data_store_pool_t * ch_sa_data_store_pool_create(uint32_t dsize,uin
 		(dst)->dstore_pool = dsp;																	\
 		(dst)->start = (void*)((dst)+1);															\
 		(dst)->pos = (dst)->start;																	\
-		(dst)->end = (dst)->start+sizeof(ch_sa_data_store_t)+(dsp)->dsize;							\
+		(dst)->end = (dst)->start+(dsp)->dsize;														\
 		(dsp)->using_n =  (dsp)->using_n+1;													        \
 		(dsp)->allac_dstore_n+=1;																	\
 	}else{																							\
