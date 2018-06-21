@@ -17,6 +17,7 @@ typedef struct ch_memory_t ch_memory_t;
 #include "ch_constants.h"
 #include "ch_memory_cache.h"
 #include "ch_mpool.h"
+#include "ch_list.h"
 
 enum {
 
@@ -24,9 +25,12 @@ enum {
 	FROM_DPDK,
 };
 
-struct ch_memory_item_t {
+#define M_PROTECT_V 1234
 
-	ch_memory_item_t *next;
+struct ch_memory_item_t {
+	int m_protect;
+	struct list_head node;
+
 	uint8_t type;
 	uint8_t from_cache;
 	size_t size;
@@ -44,6 +48,7 @@ struct ch_memory_t {
 	size_t cache_hits_size; 
 
 };
+
 
 extern ch_memory_t* ch_memory_create(ch_pool_t *mp,size_t max_cache_size,uint64_t timeout);
 

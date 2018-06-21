@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2017-12-27 10:12:11
- * Last Modified: 2018-01-06 18:17:16
+ * Last Modified: 2018-06-21 13:27:21
  */
 
 #include <rte_malloc.h>
@@ -58,7 +58,6 @@ void* do_memory_alloc(ch_memory_t *mm,size_t size,int is_zero){
 		item = ch_memory_cache_find(mm->mcache,rsize);
 		if(item){
 		
-			item->next = NULL;
 			item->size = size;
 			item->rsize = rsize;
 			item->from_cache = 1;
@@ -84,7 +83,7 @@ void* do_memory_alloc(ch_memory_t *mm,size_t size,int is_zero){
 		memset(addr,0,rsize);
 
 	item = (ch_memory_item_t*)addr;
-
+	item->m_protect = M_PROTECT_V;
 	item->type = type;
 	item->size = size;
 	item->rsize = rsize;
@@ -114,11 +113,22 @@ void* ch_memory_calloc(ch_memory_t *mm,size_t size){
 	return do_memory_alloc(mm,size,1);
 }
 
+#define CH_MEMORY_ITEM_CHECK(item) do { \
+	if((item)->m_protect!=M_PROTECT_V)  \
+	{\
+		ch_log(CH_LOG_ERR,"memory item is bad:%d,type:%d,from_cache:%d,size:%d,rsize:%d",\
+			item->m_protect,item->type,item->from_cache,item->size,item->rsize);\
+		abort();						\
+	}\
+}while(0)
+
+
 void  ch_memory_free(ch_memory_t *mm,void *addr){
 
 
 	ch_memory_item_t *item = (ch_memory_item_t*)(addr-sizeof(*item));
 	size_t rsize = item->rsize;
+	CH_MEMORY_ITEM_CHECK(item);
 
 	if(mm->mcache){
 	
@@ -150,6 +160,7 @@ void  ch_memory_free(ch_memory_t *mm,void *addr){
 void ch_memory_item_free(ch_memory_t *mm,ch_memory_item_t *item){
 
 	size_t rsize = item->size;
+	CH_MEMORY_ITEM_CHECK(item);
 
 	switch(item->type){
 	

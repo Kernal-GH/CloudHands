@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-01-03 11:39:25
- * Last Modified: 2018-01-31 10:19:45
+ * Last Modified: 2018-06-21 13:26:39
  */
 
 #include "ch_memory_cache.h"
@@ -45,7 +45,9 @@ ch_memory_cache_t* ch_memory_cache_create(ch_memory_t *mm,size_t max_cache_size,
 		hc->n_nohits = 0;
 		hc->n_caches = 0;
 		hc->last_find_time = (uint64_t)(ch_get_current_timems()/1000); 
-		hc->header = NULL;
+		
+		INIT_LIST_HEAD(&hc->items);
+
 	}
 
 	return mc;
@@ -54,7 +56,7 @@ ch_memory_cache_t* ch_memory_cache_create(ch_memory_t *mm,size_t max_cache_size,
 void ch_memory_cache_reset(ch_memory_cache_t *mc){
 
 	ch_memory_cache_header_t *ch;
-	ch_memory_item_t *mitem,*pre;
+	ch_memory_item_t *mitem,*tmp;
 
 	mc->cur_cache_size = 0;
 	int i;
@@ -67,16 +69,16 @@ void ch_memory_cache_reset(ch_memory_cache_t *mc){
 		ch->n_caches = 0;
 		ch->last_find_time = (uint64_t)(ch_get_current_timems()/1000); 
 
-		mitem = ch->header;
-		
-		while(mitem){
-		
-			pre = mitem;
-			mitem = mitem->next;
 
-			ch_memory_item_free(mc->mm,pre);
+		list_for_each_entry_safe(mitem,tmp,&ch->items,node){
+
+			ch_memory_item_free(mc->mm,mitem);
+			list_del(&mitem->node);
 
 		}
+
+		INIT_LIST_HEAD(&ch->items);
+
 	}
 }
 
@@ -95,15 +97,14 @@ ch_memory_item_t * ch_memory_cache_find(ch_memory_cache_t *mc,size_t size){
 
 	ch = &mc->cache_headers[i];
 	ch->last_find_time = (uint64_t)(ch_get_current_timems()/1000); 
-	if(ch->header == NULL){		
+	if(list_empty(&ch->items)){		
 		
 		ch->n_nohits += 1;
 		return NULL;
 	}
 
-	mitem = ch->header;
-	ch->header = mitem->next;
-	mitem->next = NULL;
+	mitem = list_first_entry(&ch->items,ch_memory_item_t,node);
+	list_del(&mitem->node);
 
 	ch->n_hits += 1;
 	ch->n_caches -= 1;
@@ -149,8 +150,8 @@ int ch_memory_cache_update(ch_memory_cache_t *mc,ch_memory_item_t *mitem){
 	}
 
 	ch->n_caches += 1;
-	mitem->next = ch->header;
-	ch->header = mitem;
+
+	list_add(&mitem->node,&ch->items);
 
 	if(!mitem->from_cache){
 	

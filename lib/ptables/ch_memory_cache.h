@@ -15,6 +15,7 @@ typedef struct ch_memory_cache_t ch_memory_cache_t;
 typedef struct ch_memory_cache_header_t ch_memory_cache_header_t;
 
 #include "ch_memory.h"
+#include "ch_list.h"
 
 #define MAX_CACHE_POW 16
 #define MAX_CACHE_MITEM_SIZE 65536
@@ -28,7 +29,7 @@ struct ch_memory_cache_header_t {
 	size_t n_caches;
 	uint64_t last_find_time;
 
-	ch_memory_item_t *header;
+	struct list_head items;
 };
 
 struct ch_memory_cache_t {
