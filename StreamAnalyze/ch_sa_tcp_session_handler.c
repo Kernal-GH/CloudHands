@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-03-28 15:02:26
- * Last Modified: 2018-06-06 20:05:18
+ * Last Modified: 2018-06-21 16:19:50
  */
 
 #include "ch_sa_tcp_session_handler.h"
@@ -250,11 +250,13 @@ static void _write_session_payload(ch_sa_tcp_session_handler_t *shandler,
 		dstore = sa_entry->req_dstore;
 		if(dstore == NULL){
 		
-			ch_sa_data_store_get(dstore_pool,dstore);
+			dstore = ch_sa_data_store_get(dstore_pool);
+
 			if(dstore == NULL){
 				sa_entry->req_error = 1;
 				return;
 			}
+
 			sa_entry->req_dstore = dstore;
 		}
 
@@ -276,7 +278,7 @@ static void _write_session_payload(ch_sa_tcp_session_handler_t *shandler,
 		dstore = sa_entry->res_dstore;
 		if(dstore == NULL){
 		
-			ch_sa_data_store_get(dstore_pool,dstore);
+			dstore = ch_sa_data_store_get(dstore_pool);
 			if(dstore == NULL){
 				sa_entry->res_error = 1;
 				return;

@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-01-03 11:39:25
- * Last Modified: 2018-06-21 13:26:39
+ * Last Modified: 2018-06-21 16:23:17
  */
 
 #include "ch_memory_cache.h"
@@ -72,8 +72,8 @@ void ch_memory_cache_reset(ch_memory_cache_t *mc){
 
 		list_for_each_entry_safe(mitem,tmp,&ch->items,node){
 
-			ch_memory_item_free(mc->mm,mitem);
 			list_del(&mitem->node);
+			ch_memory_item_free(mc->mm,mitem);
 
 		}
 

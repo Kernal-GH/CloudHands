@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-04-13 15:50:28
- * Last Modified: 2018-06-06 19:51:10
+ * Last Modified: 2018-06-21 16:21:46
  */
 
 #include "ch_sa_udp_session_handler.h"
@@ -142,7 +142,7 @@ static void _udp_data_write(ch_sa_context_t *sa_context,ch_sa_udp_session_handle
 
 	if(dstore == NULL){
 	
-		ch_sa_data_store_get(dstore_pool,dstore);
+		dstore = ch_sa_data_store_get(dstore_pool);
 		if(dstore == NULL){
 			ep->error = 1;
 			return;
