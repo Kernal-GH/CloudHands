@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-06-06 15:22:26
- * Last Modified: 2018-06-06 15:49:34
+ * Last Modified: 2018-06-21 16:39:08
  */
 
 #include "ch_sa_data_store_pool.h"
@@ -43,11 +43,13 @@ ch_sa_data_store_pool_t * ch_sa_data_store_pool_create(uint32_t dsize,uint32_t d
 
 		if(dstore == NULL)
 			break;
+		
+		dstore->ds_protect = DS_PROTECT_V;
 
 		dstore->dstore_pool = dstore_pool;																	
 		dstore->start = (void*)(dstore+1);															
 		dstore->pos = dstore->start;																	
-		dstore->end = dstore->start+sizeof(ch_sa_data_store_t)+dstore_pool->dsize;							
+		dstore->end = dstore->start+dstore_pool->dsize;							
 		dstore_pool->allac_dstore_n+=1;	
 		dstore_pool->free_n += 1;
 		list_add_tail(&dstore->node,&dstore_pool->dstore_free_list);
