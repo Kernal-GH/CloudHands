@@ -71,7 +71,7 @@ public abstract class AbstractSourceReader implements SourceReader{
                         }
 
                     } catch (Exception e) {
-                        //e.printStackTrace();
+                        e.printStackTrace();
                         //log.error(e.getMessage());
                     /*ignore exceptions*/
                     } finally {

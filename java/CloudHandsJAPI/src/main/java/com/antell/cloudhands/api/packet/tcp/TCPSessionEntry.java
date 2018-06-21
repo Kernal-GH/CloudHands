@@ -61,10 +61,10 @@ public class TCPSessionEntry extends SessionEntry implements MsgPackDataInput,Da
         setSessionID(MessagePackUtil.parseLong(unpacker));
         setReqStartTime(MessagePackUtil.parseLong(unpacker));
         setResStartTime(MessagePackUtil.parseLong(unpacker));
-        setReqIP(MessagePackUtil.parseInt(unpacker));
-        setResIP(MessagePackUtil.parseInt(unpacker));
-        setReqPort(MessagePackUtil.parseShort(unpacker));
-        setResPort(MessagePackUtil.parseShort(unpacker));
+        setReqIP(MessagePackUtil.parseLong(unpacker));
+        setResIP(MessagePackUtil.parseLong(unpacker));
+        setReqPort(MessagePackUtil.parseInt(unpacker));
+        setResPort(MessagePackUtil.parseInt(unpacker));
 
     }
 }
