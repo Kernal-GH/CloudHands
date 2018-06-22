@@ -71,6 +71,8 @@ struct ch_sa_udp_session_t {
 		ch_sa_data_store_free(rq_dstore);							\
 	if(rs_dstore)													\
 		ch_sa_data_store_free(rs_dstore);							\
+	usession->endpoint_req.dstore = NULL;							\
+	usession->endpoint_res.dstore = NULL;							\
 }while(0)
 
 static inline uint32_t ch_sa_udp_session_req_data_size(ch_sa_udp_session_t *udp_session) {

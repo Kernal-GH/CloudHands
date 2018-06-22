@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-03-22 11:45:40
- * Last Modified: 2018-06-06 20:05:54
+ * Last Modified: 2018-06-22 18:50:09
  */
 
 #include "ch_sa_tcp_session_request_handler.h"
@@ -202,10 +202,9 @@ _tcp_session_create(ch_sa_tcp_session_request_handler_t *req_handler,
 	ch_sa_session_entry_t *sa_entry = ch_sa_session_tcp_entry_get(req_handler->session_task->tcp_session_handler,tcp_session);
 
 	ch_sa_session_tcp_request_entry_t *req_entry = _sa_session_tcp_request_entry_get(req_handler,sreq);
-	
-	sa_entry->req_start_time = req_entry->req_start_time;
-	sa_entry->res_start_time = req_entry->res_start_time;
-	
+
+	ch_sa_session_entry_init(sa_entry,req_entry);
+
     tcp_session->session_id = ch_atomic64_add_return(cur_session_id_ptr,1)%ULONG_MAX;
 
     /*ok,now handle this data packet,*/

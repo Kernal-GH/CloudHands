@@ -64,13 +64,13 @@ static inline ch_sa_data_store_t *ch_sa_data_store_get(ch_sa_data_store_pool_t *
 	ch_sa_data_store_t *dst = NULL;	
 	struct list_head *free_list = &dsp->dstore_free_list;
 
-	if(dsp->allac_dstore_n>dsp->dstore_limits&&list_empty(free_list)){
+	if(dsp->allac_dstore_n>dsp->dstore_limits&&list_empty_careful(free_list)){
 	
 		ch_log(CH_LOG_ERR,"Cannot get data store,too more memory has been allocated!");
 		return NULL;
 	}
 
-	if(list_empty(free_list)){		
+	if(list_empty_careful(free_list)){		
 		dst = (ch_sa_data_store_t*)ch_palloc(dsp->mp,sizeof(*dst)+dsp->dsize+32);
 		if(dst) {
 			dst->ds_protect = DS_PROTECT_V;
@@ -82,10 +82,11 @@ static inline ch_sa_data_store_t *ch_sa_data_store_get(ch_sa_data_store_pool_t *
 			dsp->allac_dstore_n+=1;
 		}																	
 	}else{																							
+		
 		dst = list_first_entry(free_list,ch_sa_data_store_t,node);					
-		list_del(&dst->node);
 		CH_SA_DATA_STORE_CHECK(dst);
-
+		
+		list_del_init(&dst->node);
 		dsp->free_n-=1;															
 		dsp->using_n+=1;															
 	}
@@ -100,7 +101,9 @@ static inline void ch_sa_data_store_free(ch_sa_data_store_t *dst) {
 	ch_sa_data_store_pool_t *dsp = dst->dstore_pool;			
 	dst->pos = dst->start;									
 	list_add_tail(&dst->node,&dsp->dstore_free_list);		
-	dsp->free_n += 1;											
+	dsp->free_n += 1;
+	dsp->using_n -=1;
+
 }
 
 
@@ -108,6 +111,7 @@ static inline void ch_sa_data_store_write(ch_sa_data_store_t *dst,void *data,siz
 
 	CH_SA_DATA_STORE_CHECK(dst);
 	size_t r_dsize = dst->end-dst->pos;			  
+
 	if(dsize<r_dsize)					
 		r_dsize = dsize;
 
