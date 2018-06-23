@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-05-16 15:50:50
- * Last Modified: 2018-05-17 19:22:39
+ * Last Modified: 2018-06-23 11:29:47
  */
 
 #define HAS_BODY(session,is_req) (is_req?((session)->headers_in.content_length_n>0||(session)->headers_in.chunked):\
@@ -280,6 +280,9 @@ do_http_request_parse(ch_session_entry_t *sentry,void *data,size_t dlen){
 		switch(session->parse_phase){
 		
 		case PARSE_PHASE_STATUS_LINE:
+		case PARSE_PHASE_RES_HEADER:
+		case PARSE_PHASE_RES_BODY:
+		case PARSE_PHASE_DONE:
 			/*Thist request parsed ok,wait corresponding response data,
 			 *so add it into session entry request session list and get a new session
 			 *to continue parse
