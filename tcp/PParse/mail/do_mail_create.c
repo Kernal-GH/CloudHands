@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-05-18 15:36:57
- * Last Modified: 2018-05-18 17:30:22
+ * Last Modified: 2018-06-25 10:34:52
  */
 
 static void *do_mail_session_entry_create(ch_session_entry_t *sentry){
@@ -58,10 +58,11 @@ static void do_mail_session_entry_clean(ch_session_entry_t *sentry){
 		ch_mail_session_destroy(session);
 	}
 
-	ch_pool_destroy(msentry->mp);
+
 
 	ch_mail_tx_buffer_clean(&msentry->cur_req_buf);
 	ch_mail_tx_buffer_clean(&msentry->cur_res_buf);
-
+	
+	ch_pool_destroy(msentry->mp);
 }
 
