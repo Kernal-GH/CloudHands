@@ -83,6 +83,7 @@ public class ARPPacket implements SourceEntry{
 
         cb.field("sendMac", sha.toMacStr());
         cb.field("targetMac", tha.toMacStr());
+
         return cb;
     }
 

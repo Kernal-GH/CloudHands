@@ -2,8 +2,7 @@ package com.antell.cloudhands.api.sample;
 
 import com.antell.cloudhands.api.context.Context;
 import com.antell.cloudhands.api.context.PropertyContext;
-import com.antell.cloudhands.api.packet.PacketRecord;
-import com.antell.cloudhands.api.packet.PacketSource;
+import com.antell.cloudhands.api.packet.*;
 import com.antell.cloudhands.api.packet.tcp.http.HTTPSession;
 import com.antell.cloudhands.api.packet.tcp.mail.MailSession;
 import com.antell.cloudhands.api.packet.udp.dns.DNSSession;
@@ -31,6 +30,8 @@ public class Simple {
                 case PacketRecord.DNS:
 				case PacketRecord.ARP:
 				case PacketRecord.ICMP:
+                case PacketRecord.TCP:
+                case PacketRecord.UDP:
                     return true;
                 default:
                         return false;
@@ -78,9 +79,40 @@ public class Simple {
 
                     DNSSession dnsSession = (DNSSession) sourceEntry;
                     dnsSessionHandle(dnsSession);
+                } else if(sourceEntry instanceof ICMPPacket){
+                    ICMPPacket icmpPacket = (ICMPPacket)sourceEntry;
+                    icmpPacketHandle(icmpPacket);
+                }else if(sourceEntry instanceof ARPPacket){
+                    ARPPacket arpPacket = (ARPPacket)sourceEntry;
+                    arpPacketHandle(arpPacket);
+                }else if(sourceEntry instanceof TCPSession){
+                    TCPSession tcpSession = (TCPSession)sourceEntry;
+                    tcpSessionHandle(tcpSession);
+                }else if(sourceEntry instanceof UDPSession){
+                    UDPSession udpSession = (UDPSession)sourceEntry;
+                    udpSessionHandle(udpSession);
                 }
             }
         }
+    }
+
+    private static void udpSessionHandle(UDPSession udpSession) {
+
+        System.out.println(udpSession);
+    }
+
+    private static void tcpSessionHandle(TCPSession tcpSession) {
+        System.out.println(tcpSession);
+    }
+
+    private static void arpPacketHandle(ARPPacket arpPacket) {
+
+        System.out.println(arpPacket);
+    }
+
+    private static void icmpPacketHandle(ICMPPacket icmpPacket) {
+
+        System.out.println(icmpPacket);
     }
 
     public static void main(String[] args) throws Exception {

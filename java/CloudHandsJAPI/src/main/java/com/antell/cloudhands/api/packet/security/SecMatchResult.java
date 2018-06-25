@@ -1,13 +1,12 @@
 package com.antell.cloudhands.api.packet.security;
 
 import com.antell.cloudhands.api.DataDump;
-import com.antell.cloudhands.api.DataOutJson;
+import com.antell.cloudhands.api.ESIndexable;
 import com.antell.cloudhands.api.MsgPackDataInput;
 import com.antell.cloudhands.api.utils.MessagePackUtil;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.msgpack.core.MessageUnpacker;
 
-import java.io.DataInput;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +14,7 @@ import java.util.List;
 /**
  * Created by dell on 2018/6/11.
  */
-public class SecMatchResult implements MsgPackDataInput,DataOutJson,DataDump{
+public class SecMatchResult implements MsgPackDataInput,ESIndexable,DataDump{
 
     private int matchCount;
     private final List<MatchInfo> matchInfoList;

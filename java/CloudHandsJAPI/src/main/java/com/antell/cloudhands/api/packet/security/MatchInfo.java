@@ -1,7 +1,7 @@
 package com.antell.cloudhands.api.packet.security;
 
 import com.antell.cloudhands.api.DataDump;
-import com.antell.cloudhands.api.DataOutJson;
+import com.antell.cloudhands.api.ESIndexable;
 import com.antell.cloudhands.api.MsgPackDataInput;
 import com.antell.cloudhands.api.utils.MessagePackUtil;
 import com.antell.cloudhands.api.utils.TextUtils;
@@ -15,7 +15,7 @@ import java.io.IOException;
 /**
  * Created by dell on 2018/6/11.
  */
-public class MatchInfo implements MsgPackDataInput,DataOutJson,DataDump{
+public class MatchInfo implements MsgPackDataInput,ESIndexable,DataDump{
 
     private String engineName;
     private int engineType;

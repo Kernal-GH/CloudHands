@@ -2,7 +2,7 @@ package com.antell.cloudhands.api.packet.udp.dns;
 
 import com.antell.cloudhands.api.BinDataInput;
 import com.antell.cloudhands.api.DataDump;
-import com.antell.cloudhands.api.DataOutJson;
+import com.antell.cloudhands.api.ESIndexable;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 
 import java.io.DataInput;
@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * Created by dell on 2018/6/15.
  */
-public class DNSRequst implements BinDataInput,DataOutJson,DataDump{
+public class DNSRequst implements BinDataInput,ESIndexable,DataDump{
 
     private Header header;
     private List<DNSQuestion> questions;

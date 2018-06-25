@@ -1,7 +1,7 @@
 package com.antell.cloudhands.api.packet.tcp;
 
 import com.antell.cloudhands.api.DataDump;
-import com.antell.cloudhands.api.DataOutJson;
+import com.antell.cloudhands.api.ESIndexable;
 import com.antell.cloudhands.api.MsgPackDataInput;
 import com.antell.cloudhands.api.packet.SessionEntry;
 import com.antell.cloudhands.api.utils.*;
@@ -14,7 +14,7 @@ import java.io.IOException;
 /**
  * Created by mala on 2018/6/16.
  */
-public class TCPSessionEntry extends SessionEntry implements MsgPackDataInput,DataOutJson,DataDump {
+public class TCPSessionEntry extends SessionEntry implements MsgPackDataInput,ESIndexable,DataDump {
 
 
     @Override

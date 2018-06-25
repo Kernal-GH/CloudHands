@@ -23,6 +23,7 @@ public interface Source {
     /*Commit a session,*/
     void commit(SourceEntry entry);
 
+    void setSourceReader(SourceReader sourceReader);
 }
 
 

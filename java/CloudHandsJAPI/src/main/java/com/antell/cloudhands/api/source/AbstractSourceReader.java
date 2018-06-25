@@ -1,5 +1,4 @@
 package com.antell.cloudhands.api.source;
-import com.antell.cloudhands.api.context.Context;
 import com.antell.cloudhands.api.packet.PacketRecord;
 
 import java.util.concurrent.ScheduledThreadPoolExecutor;

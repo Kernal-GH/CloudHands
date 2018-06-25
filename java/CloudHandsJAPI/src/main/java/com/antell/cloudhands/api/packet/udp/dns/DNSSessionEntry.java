@@ -2,7 +2,7 @@ package com.antell.cloudhands.api.packet.udp.dns;
 
 import com.antell.cloudhands.api.BinDataInput;
 import com.antell.cloudhands.api.DataDump;
-import com.antell.cloudhands.api.DataOutJson;
+import com.antell.cloudhands.api.ESIndexable;
 import com.antell.cloudhands.api.packet.SessionEntry;
 import com.antell.cloudhands.api.utils.DateUtils;
 import com.antell.cloudhands.api.utils.IPUtils;
@@ -15,7 +15,7 @@ import java.io.IOException;
 /**
  * Created by mala on 2018/6/16.
  */
-public class DNSSessionEntry extends SessionEntry implements BinDataInput,DataOutJson,DataDump {
+public class DNSSessionEntry extends SessionEntry implements BinDataInput,ESIndexable,DataDump {
 
     @Override
     public void read(DataInput in) throws IOException {
