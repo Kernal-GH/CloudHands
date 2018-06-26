@@ -24,6 +24,14 @@ public final class TextUtils {
         sb.append("\n");
     }
 
+    public static void addDouble(StringBuffer sb,String k,double v){
+
+        sb.append(k);
+        sb.append(":");
+        sb.append(v);
+        sb.append("\n");
+    }
+
     public static void addText(StringBuffer sb,String k,String v){
 
         sb.append(k);
