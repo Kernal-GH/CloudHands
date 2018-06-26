@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-05-08 16:27:57
- * Last Modified: 2018-05-11 14:29:11
+ * Last Modified: 2018-06-26 12:14:59
  */
 
 #include "ch_dns_app.h"
@@ -54,6 +54,12 @@ static int _dns_pkt_process(void *dns_session,ch_packet_udp_t *pkt_udp,void *pri
 	if(pkt_udp->pdata == NULL || pkt_udp->payload_len == 0){
 	
 		return PROCESS_CONTINUE;
+	}
+
+	if(pkt_udp->payload_len>512){
+
+		ch_log(CH_LOG_ERR,"too large dns packet:%d",pkt_udp->payload_len);
+		return PROCESS_ERR;
 	}
 
 	base = pkt_udp->pdata;

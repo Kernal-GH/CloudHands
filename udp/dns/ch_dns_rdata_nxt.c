@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-06-12 16:31:13
- * Last Modified: 2018-06-14 14:57:14
+ * Last Modified: 2018-06-26 13:56:24
  */
 
 
@@ -77,6 +77,7 @@ static int _rdata_nxt_parse(ch_pool_t *mp,ch_dns_rdata_t *rdata,void *priv_data 
 	}
 
 	nxt->typebitmap_len = ch_dns_data_input_rdlen(din);
+	CH_DNS_DLEN_CHECK(nxt->typebitmap_len,din,-1);
 	nxt->typebitmap = ch_dns_data_input_bytes_read(din,mp,nxt->typebitmap_len);
 
 	return 0;

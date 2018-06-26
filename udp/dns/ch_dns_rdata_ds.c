@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-06-12 16:31:13
- * Last Modified: 2018-06-13 11:27:19
+ * Last Modified: 2018-06-26 13:48:48
  */
 
 
@@ -74,6 +74,8 @@ static int _rdata_ds_parse(ch_pool_t *mp,ch_dns_rdata_t *rdata,void *priv_data c
 	ds->digestid = ch_dns_data_input_uint8_read(din);
 
 	ds->digest_len = ch_dns_data_input_rdlen(din);
+	
+	CH_DNS_DLEN_CHECK(ds->digest_len,din,-1);
 
 	ds->digest = ch_dns_data_input_rbytes_read(din,mp);
 

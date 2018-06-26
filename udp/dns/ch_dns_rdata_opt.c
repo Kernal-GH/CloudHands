@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-06-12 16:31:13
- * Last Modified: 2018-06-14 19:07:17
+ * Last Modified: 2018-06-26 13:57:41
  */
 
 
@@ -96,6 +96,7 @@ static ch_dns_rdata_opt_entry_t * _opt_entry_create(ch_pool_t *mp,ch_dns_data_in
 	ch_dns_rdata_opt_entry_t *entry = ch_pcalloc(mp,sizeof(*entry));
 	entry->code = ch_dns_data_input_uint16_read(din);
 	entry->dlen = ch_dns_data_input_uint16_read(din);
+	CH_DNS_DLEN_CHECK(entry->dlen,din,NULL);
 	
 	entry->data = ch_dns_data_input_bytes_read(din,mp,entry->dlen);
 

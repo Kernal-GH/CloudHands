@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-06-12 16:31:13
- * Last Modified: 2018-06-15 13:18:53
+ * Last Modified: 2018-06-26 14:02:19
  */
 
 
@@ -77,6 +77,8 @@ static int _rdata_tlsa_parse(ch_pool_t *mp,ch_dns_rdata_t *rdata,void *priv_data
 	
 
 	tlsa->cert_dlen = ch_dns_data_input_rdlen(din);
+	CH_DNS_DLEN_CHECK(tlsa->cert_dlen,din,-1);
+	
 	tlsa->cert_data = ch_dns_data_input_bytes_read(din,mp,tlsa->cert_dlen);
 
 	return 0;

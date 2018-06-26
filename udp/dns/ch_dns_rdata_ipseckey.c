@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-06-12 16:31:13
- * Last Modified: 2018-06-13 16:14:20
+ * Last Modified: 2018-06-26 13:50:20
  */
 
 
@@ -168,6 +168,7 @@ static int _rdata_ipseckey_parse(ch_pool_t *mp,ch_dns_rdata_t *rdata,void *priv_
 	}
 
 	ipseckey->key_len = ch_dns_data_input_rdlen(din);
+	CH_DNS_DLEN_CHECK(ipseckey->key_len,din,-1);
 
 	ipseckey->key = ch_dns_data_input_rbytes_read(din,mp);
 

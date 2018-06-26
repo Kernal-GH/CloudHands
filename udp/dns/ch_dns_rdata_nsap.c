@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-06-12 16:31:13
- * Last Modified: 2018-06-13 19:39:38
+ * Last Modified: 2018-06-26 13:53:02
  */
 
 
@@ -64,6 +64,8 @@ static int _rdata_nsap_parse(ch_pool_t *mp,ch_dns_rdata_t *rdata,void *priv_data
 
 	nsap->addr_len = ch_dns_data_input_rdlen(din);
 
+	CH_DNS_DLEN_CHECK(nsap->addr_len,din,-1);
+	
 	nsap->addr = ch_dns_data_input_rbytes_read(din,mp);
 
 	return 0;

@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-06-12 16:31:13
- * Last Modified: 2018-06-14 19:55:56
+ * Last Modified: 2018-06-26 13:59:41
  */
 
 
@@ -77,6 +77,8 @@ static int _rdata_smimea_parse(ch_pool_t *mp,ch_dns_rdata_t *rdata,void *priv_da
 	
 
 	smimea->cert_dlen = ch_dns_data_input_rdlen(din);
+	CH_DNS_DLEN_CHECK(smimea->cert_dlen,din,-1);
+	
 	smimea->cert_data = ch_dns_data_input_bytes_read(din,mp,smimea->cert_dlen);
 
 	return 0;

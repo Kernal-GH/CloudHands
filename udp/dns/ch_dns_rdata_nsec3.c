@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-06-12 16:31:13
- * Last Modified: 2018-06-14 11:57:11
+ * Last Modified: 2018-06-26 14:07:07
  */
 
 
@@ -94,15 +94,19 @@ static int _rdata_nsec3_parse(ch_pool_t *mp,ch_dns_rdata_t *rdata,void *priv_dat
 	
 	nsec3->salt_len = ch_dns_data_input_uint8_read(din);
 
+	CH_DNS_DLEN_CHECK((uint16_t)nsec3->salt_len,din,-1);
 	if(nsec3->salt_len){
 	
 		nsec3->salt = ch_dns_data_input_bytes_read(din,mp,nsec3->salt_len);
 	}
 
 	nsec3->hash_len = ch_dns_data_input_uint8_read(din);
+	CH_DNS_DLEN_CHECK((uint16_t)nsec3->hash_len,din,-1);
 	nsec3->next = ch_dns_data_input_bytes_read(din,mp,nsec3->hash_len);
 
 	nsec3->typebitmap_len = ch_dns_data_input_rdlen(din);
+
+	CH_DNS_DLEN_CHECK(nsec3->typebitmap_len,din,-1);
 	nsec3->typebitmap = ch_dns_data_input_bytes_read(din,mp,nsec3->typebitmap_len);
 
 	return 0;

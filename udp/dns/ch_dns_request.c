@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-05-07 16:13:58
- * Last Modified: 2018-05-14 11:38:17
+ * Last Modified: 2018-06-26 12:04:00
  */
 
 #include "ch_dns_request.h"
@@ -27,6 +27,9 @@ ch_dns_requst_t *ch_dns_request_parse(ch_pool_t *mp,ch_dns_data_input_t *din){
 	}
 
 	for(i = 0;i<dns_req->hdr.qcount;i++){
+		
+		if(ch_dns_data_input_empty(din))
+			break;
 	
 		dnsq = ch_dns_question_parse(mp,din);
 		if(dnsq == NULL){

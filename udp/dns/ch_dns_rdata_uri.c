@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-05-03 19:28:04
- * Last Modified: 2018-06-15 14:56:11
+ * Last Modified: 2018-06-26 14:04:00
  */
 
 #include "ch_dns_rdata_uri.h"
@@ -71,6 +71,7 @@ static int _rdata_uri_parse(ch_pool_t *mp,ch_dns_rdata_t *rdata,void *priv_data 
 	uri->weight = ch_dns_data_input_uint16_read(din);
 	
 	uri->target_len = ch_dns_data_input_rdlen(din);
+	CH_DNS_DLEN_CHECK(uri->target_len,din,-1);
 
 	if(uri->target_len){
 	

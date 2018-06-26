@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-06-12 16:31:13
- * Last Modified: 2018-06-12 18:07:21
+ * Last Modified: 2018-06-26 13:47:05
  */
 
 
@@ -79,6 +79,7 @@ static int _rdata_dhcid_parse(ch_pool_t *mp,ch_dns_rdata_t *rdata,void *priv_dat
 	ch_dns_rdata_input_init(din,rdata);
 
 	dhcid->dlen = ch_dns_data_input_rdlen(din);
+	CH_DNS_DLEN_CHECK(dhcid->dlen,din,-1);
 
 	dhcid->data = ch_dns_data_input_rbytes_read(din,mp);
 

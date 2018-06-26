@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-05-04 18:29:37
- * Last Modified: 2018-06-23 16:51:24
+ * Last Modified: 2018-06-26 13:27:00
  */
 
 #include "ch_log.h"
@@ -207,7 +207,8 @@ ch_dns_rdata_t * ch_dns_rdata_parse(ch_pool_t *mp,ch_dns_rdata_pool_t *rdata_poo
 
 	rdata->ttl = ch_dns_data_input_uint32_read(din);
 	rdata->dlen = ch_dns_data_input_uint16_read(din);
-	if(rdata->dlen>512){
+
+	if(rdata->dlen>ch_dns_data_input_rdlen(din)){
 	
 		ch_log(CH_LOG_ERR,"Invalid rdata len:%d!",(int)rdata->dlen);
 		return NULL;

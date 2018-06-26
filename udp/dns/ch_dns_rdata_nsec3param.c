@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-06-12 16:31:13
- * Last Modified: 2018-06-14 11:19:28
+ * Last Modified: 2018-06-26 14:07:28
  */
 
 
@@ -83,6 +83,7 @@ static int _rdata_nsec3param_parse(ch_pool_t *mp,ch_dns_rdata_t *rdata,void *pri
 	nsec3param->iterations = ch_dns_data_input_uint16_read(din);
 	
 	nsec3param->salt_len = ch_dns_data_input_uint8_read(din);
+	CH_DNS_DLEN_CHECK((uint16_t)nsec3param->salt_len,din,-1);
 
 	if(nsec3param->salt_len){
 	

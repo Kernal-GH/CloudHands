@@ -32,6 +32,9 @@ public class Simple {
 				case PacketRecord.ICMP:
                 case PacketRecord.TCP:
                 case PacketRecord.UDP:
+                case PacketRecord.SECRESHTTP:
+                case PacketRecord.SECRESMAIL:
+
                     return true;
                 default:
                         return false;

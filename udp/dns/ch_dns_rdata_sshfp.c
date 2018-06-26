@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-06-12 16:31:13
- * Last Modified: 2018-06-15 11:26:47
+ * Last Modified: 2018-06-26 14:00:49
  */
 
 
@@ -73,6 +73,7 @@ static int _rdata_sshfp_parse(ch_pool_t *mp,ch_dns_rdata_t *rdata,void *priv_dat
 	sshfp->digest_type = ch_dns_data_input_uint8_read(din);
 
 	sshfp->fp_len = ch_dns_data_input_rdlen(din);
+	CH_DNS_DLEN_CHECK(sshfp->fp_len,din,-1);
 
 	sshfp->fingerprint = ch_dns_data_input_rbytes_read(din,mp);
 

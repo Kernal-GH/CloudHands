@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-06-12 16:31:13
- * Last Modified: 2018-06-15 14:20:53
+ * Last Modified: 2018-06-26 14:03:16
  */
 
 
@@ -102,6 +102,7 @@ static int _rdata_tsig_parse(ch_pool_t *mp,ch_dns_rdata_t *rdata,void *priv_data
 	tsig->fudge = ch_dns_data_input_uint16_read(din);
 
 	tsig->sig_len = ch_dns_data_input_uint16_read(din);
+	CH_DNS_DLEN_CHECK(tsig->sig_len,din,-1);
 	
 	if(tsig->sig_len){
 	
@@ -112,6 +113,7 @@ static int _rdata_tsig_parse(ch_pool_t *mp,ch_dns_rdata_t *rdata,void *priv_data
 	tsig->error = ch_dns_data_input_uint16_read(din);
 
 	tsig->other_len = ch_dns_data_input_uint16_read(din);
+	CH_DNS_DLEN_CHECK(tsig->other_len,din,-1);
 	if(tsig->other_len){
 	
 		tsig->other = ch_dns_data_input_bytes_read(din,mp,tsig->other_len);

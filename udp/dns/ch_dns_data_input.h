@@ -16,6 +16,7 @@ typedef struct ch_dns_data_input_t ch_dns_data_input_t;
 #include <stdint.h>
 #include <stdlib.h>
 #include "ch_string.h"
+#include "ch_log.h"
 
 struct ch_dns_data_input_t {
 
@@ -129,12 +130,16 @@ static inline unsigned char * ch_dns_data_copy(ch_pool_t *mp,unsigned char* data
 static inline unsigned char* ch_dns_data_input_bstring_read_dup(ch_dns_data_input_t *din,ch_pool_t *mp){
 
 	unsigned char *data;
-	size_t dlen;
+	size_t dlen,rdlen;
 
     if(ch_dns_data_input_read_over(din,sizeof(uint8_t)))
         return NULL;
 
+	rdlen = ch_dns_data_input_rdlen(din);
     dlen = ch_dns_data_input_uint8_read(din);
+
+	if(rdlen<dlen)
+		dlen = rdlen;
 
     data = (unsigned char*)din->pos;
 
@@ -179,5 +184,14 @@ static inline unsigned char * ch_dns_data_input_rbytes_read(ch_dns_data_input_t 
 	return ch_dns_data_copy(mp,data,dlen);
 
 }
+
+#define CH_DNS_DLEN_CHECK(dlen,din,retv) do {											   \
+	size_t vvv = dlen;                                                                       \
+	if(vvv>512||vvv>(size_t)ch_dns_data_input_rdlen(din))											    \
+	{																						\
+		ch_log(CH_LOG_ERR,":%s,%d: too large dns data len:%d", __func__,__LINE__,(int)vvv);   \
+		return (retv);																		\
+	}																						\
+}while(0)
 
 #endif /*CH_DNS_DATA_INPUT_H*/

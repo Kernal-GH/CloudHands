@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-06-12 16:31:13
- * Last Modified: 2018-06-14 19:06:22
+ * Last Modified: 2018-06-26 13:43:34
  */
 
 
@@ -103,6 +103,9 @@ static ch_dns_rdata_apl_entry_t * _apl_entry_create(ch_pool_t *mp,ch_dns_data_in
 
 	entry->neg = (v&0x80)!=0;
 	entry->dlen = v&(~0x80);
+	
+	CH_DNS_DLEN_CHECK(entry->dlen,din,NULL);
+
 	entry->data = ch_dns_data_input_bytes_read(din,mp,entry->dlen);
 
 	return entry;

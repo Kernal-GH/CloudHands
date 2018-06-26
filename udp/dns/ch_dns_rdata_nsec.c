@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-06-12 16:31:13
- * Last Modified: 2018-06-14 14:35:02
+ * Last Modified: 2018-06-26 13:55:27
  */
 
 
@@ -77,6 +77,7 @@ static int _rdata_nsec_parse(ch_pool_t *mp,ch_dns_rdata_t *rdata,void *priv_data
 	}
 
 	nsec->typebitmap_len = ch_dns_data_input_rdlen(din);
+	CH_DNS_DLEN_CHECK(nsec->typebitmap_len,din,-1);
 	nsec->typebitmap = ch_dns_data_input_bytes_read(din,mp,nsec->typebitmap_len);
 
 	return 0;

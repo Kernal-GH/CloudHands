@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-06-12 16:31:13
- * Last Modified: 2018-06-15 12:04:15
+ * Last Modified: 2018-06-26 14:01:51
  */
 
 
@@ -94,12 +94,15 @@ static int _rdata_tkey_parse(ch_pool_t *mp,ch_dns_rdata_t *rdata,void *priv_data
 	tkey->error = ch_dns_data_input_uint16_read(din);
 
 	tkey->key_len = ch_dns_data_input_uint16_read(din);
+	CH_DNS_DLEN_CHECK(tkey->key_len,din,-1);
 	if(tkey->key_len){
 	
 		tkey->key = ch_dns_data_input_bytes_read(din,mp,tkey->key_len);
 	}
 
 	tkey->other_len = ch_dns_data_input_uint16_read(din);
+
+	CH_DNS_DLEN_CHECK(tkey->other_len,din,-1);
 	if(tkey->other_len){
 	
 		tkey->other = ch_dns_data_input_bytes_read(din,mp,tkey->other_len);

@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-05-03 16:08:34
- * Last Modified: 2018-06-15 14:36:01
+ * Last Modified: 2018-06-26 14:04:23
  */
 
 #include "ch_dns_rdata_wks.h"
@@ -72,6 +72,7 @@ static int _rdata_wks_parse(ch_pool_t *mp,ch_dns_rdata_t *rdata,void *priv_data 
 	wks->protocol = ch_dns_data_input_uint8_read(din);
 	
 	wks->map_len = ch_dns_data_input_rdlen(din);
+	CH_DNS_DLEN_CHECK(wks->map_len,din,-1);
 	
 	if(wks->map_len){
 

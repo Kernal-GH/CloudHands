@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-06-12 16:31:13
- * Last Modified: 2018-06-14 14:49:13
+ * Last Modified: 2018-06-26 13:55:50
  */
 
 
@@ -62,6 +62,7 @@ static int _rdata_null_parse(ch_pool_t *mp,ch_dns_rdata_t *rdata,void *priv_data
 	ch_dns_rdata_input_init(din,rdata);
 
 	null->dlen = ch_dns_data_input_rdlen(din);
+	CH_DNS_DLEN_CHECK(null->dlen,din,-1);
 
 	null->data = ch_dns_data_input_rbytes_read(din,mp);
 

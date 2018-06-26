@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-05-07 18:41:54
- * Last Modified: 2018-05-14 11:40:13
+ * Last Modified: 2018-06-26 12:02:55
  */
 
 #include "ch_dns_response.h"
@@ -19,7 +19,10 @@ static int _dns_rr_parse(ch_pool_t *mp,
 	ch_dns_rdata_t *rdata;
 
 	for(i = 0;i<n;i++){
-	
+		
+		if(ch_dns_data_input_empty(din))
+			break;
+
 		rdata = ch_dns_rdata_parse(mp,rdata_pool,din);
 		if(rdata == NULL){
 		
@@ -53,7 +56,10 @@ ch_dns_response_t* ch_dns_response_parse(ch_pool_t *mp,ch_dns_rdata_pool_t *rdat
 	INIT_LIST_HEAD(&dnsr->adlist);
 
 	for(i = 0;i<dnsr->hdr.qcount;i++){
-	
+
+		if(ch_dns_data_input_empty(din))
+			break;
+
 		dnsq = ch_dns_question_parse(mp,din);
 		if(dnsq == NULL){
 		
@@ -76,6 +82,7 @@ ch_dns_response_t* ch_dns_response_parse(ch_pool_t *mp,ch_dns_rdata_pool_t *rdat
 	
 	if(dnsr->hdr.aucount){
 	
+		
 		if(_dns_rr_parse(mp,din,rdata_pool,&dnsr->aulist,dnsr->hdr.aucount)){
 		
 			ch_log(CH_LOG_ERR,"Parse dns response aulist failed!");

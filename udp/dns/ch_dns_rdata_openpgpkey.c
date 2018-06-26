@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-06-12 16:31:13
- * Last Modified: 2018-06-14 15:13:57
+ * Last Modified: 2018-06-26 13:56:48
  */
 
 
@@ -64,6 +64,7 @@ static int _rdata_openpgpkey_parse(ch_pool_t *mp,ch_dns_rdata_t *rdata,void *pri
 	ch_dns_rdata_input_init(din,rdata);
 
 	openpgpkey->key_len = ch_dns_data_input_rdlen(din);
+	CH_DNS_DLEN_CHECK(openpgpkey->key_len,din,-1);
 
 	openpgpkey->key = ch_dns_data_input_rbytes_read(din,mp);
 
