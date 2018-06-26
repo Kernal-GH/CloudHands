@@ -14,15 +14,18 @@ import java.util.List;
 /**
  * Created by dell on 2018/6/11.
  */
-public class SecMatchResult implements MsgPackDataInput,ESIndexable,DataDump{
+public class SecMatchResult implements ESIndexable,DataDump{
 
     private int matchCount;
     private final List<MatchInfo> matchInfoList;
 
 
-    public SecMatchResult() {
+    public SecMatchResult(MessageUnpacker unpacker) throws IOException {
         this.matchCount = 0;
         this.matchInfoList = new ArrayList<>();
+
+        parse(unpacker);
+
     }
 
     public int getMatchCount() {
@@ -40,8 +43,7 @@ public class SecMatchResult implements MsgPackDataInput,ESIndexable,DataDump{
         matchCount+=1;
     }
 
-    @Override
-    public void parse(MessageUnpacker unpacker) throws IOException {
+    private void parse(MessageUnpacker unpacker) throws IOException {
 
         int n  = MessagePackUtil.parseArrayHeader(unpacker,true);
         for(int i = 0;i<n;i++){
@@ -51,6 +53,7 @@ public class SecMatchResult implements MsgPackDataInput,ESIndexable,DataDump{
             addMatchInfo(matchInfo);
         }
     }
+
     @Override
     public String dataToString() {
 

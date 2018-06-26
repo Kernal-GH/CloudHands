@@ -209,8 +209,7 @@ public class MailSession implements SourceEntry {
         /*parse attach*/
         parseAttach(unpacker);
 
-        secMatchResult =  new SecMatchResult();
-        secMatchResult.parse(unpacker);
+        secMatchResult =  new SecMatchResult(unpacker);
 
     }
 

@@ -83,8 +83,9 @@ public class HTTPSession implements SourceEntry{
     public void parse(MessageUnpacker unpacker) throws IOException {
 
         int n = MessagePackUtil.parseMapHeader(unpacker,false);
-
         Preconditions.checkArgument(n==2||n==3,"Invalid http session messagePack:"+n);
+
+        boolean hasSecMatch = n==3;
 
         /*parse session entry */
         sessionEntry.parse(unpacker);
@@ -103,12 +104,10 @@ public class HTTPSession implements SourceEntry{
         unpackHeaders(unpacker,true);
         unpackHeaders(unpacker,false);
 
-        if(n == 3){
+        if(hasSecMatch){
 
             /*parse attack check info*/
-            secMatchResult = new SecMatchResult();
-
-            secMatchResult.parse(unpacker);
+            secMatchResult = new SecMatchResult(unpacker);
 
         }
     }
