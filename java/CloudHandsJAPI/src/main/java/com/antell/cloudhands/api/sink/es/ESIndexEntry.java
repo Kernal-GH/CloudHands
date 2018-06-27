@@ -10,7 +10,7 @@ import java.io.IOException;
  */
 public interface ESIndexEntry {
 
-    void append(ESIndexable indexItem,String name);
+    void append(ESIndexable indexItem,String name) throws IOException;
 
     XContentBuilder toJson() throws IOException;
 
