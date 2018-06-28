@@ -98,4 +98,46 @@ public class SourceEntryUtil {
 
         return (ICMPPacket) sourceEntry;
     }
+
+    public static void setIPPairs(SourceEntry sourceEntry,IPPairs ipPairs){
+
+        if(isArpPacket(sourceEntry)){
+            ARPPacket arpPacket = toARPPacket(sourceEntry);
+
+            ipPairs.setSrcIP(IPUtils.ipv4Str(arpPacket.getSip()));
+            ipPairs.setDstIP(IPUtils.ipv4Str(arpPacket.getTip()));
+        }else if(isICMPPacket(sourceEntry)){
+
+            ICMPPacket icmpPacket = toICMPPacket(sourceEntry);
+            ipPairs.setSrcIP(IPUtils.ipv4Str(icmpPacket.getSip()));
+            ipPairs.setDstIP(IPUtils.ipv4Str(icmpPacket.getTip()));
+        } else if(isTCPSession(sourceEntry)){
+
+            TCPSession tcpSession = toTCPSession(sourceEntry);
+            ipPairs.setSrcIP(IPUtils.ipv4Str(tcpSession.getReqIP()));
+            ipPairs.setDstIP(IPUtils.ipv4Str(tcpSession.getResIP()));
+        }else if(isUDPSession(sourceEntry)){
+            UDPSession udpSession = toUDPSession(sourceEntry);
+
+            ipPairs.setSrcIP(IPUtils.ipv4Str(udpSession.getReqIP()));
+            ipPairs.setDstIP(IPUtils.ipv4Str(udpSession.getResIP()));
+        }else if(isDNSSession(sourceEntry)){
+
+            DNSSession dnsSession = toDNSSession(sourceEntry);
+            ipPairs.setSrcIP(IPUtils.ipv4Str(dnsSession.getSessionEntry().getReqIP()));
+            ipPairs.setDstIP(IPUtils.ipv4Str(dnsSession.getSessionEntry().getResIP()));
+        }else if(isHttpSession(sourceEntry)){
+
+            HTTPSession httpSession = toHttpSession(sourceEntry);
+            ipPairs.setSrcIP(IPUtils.ipv4Str(httpSession.getSessionEntry().getReqIP()));
+            ipPairs.setDstIP(IPUtils.ipv4Str(httpSession.getSessionEntry().getResIP()));
+        }else if(isMailSession(sourceEntry)){
+            MailSession mailSession = toMailSession(sourceEntry);
+            ipPairs.setSrcIP(IPUtils.ipv4Str(mailSession.getSessionEntry().getReqIP()));
+            ipPairs.setDstIP(IPUtils.ipv4Str(mailSession.getSessionEntry().getResIP()));
+        }
+
+    }
+
+
 }
