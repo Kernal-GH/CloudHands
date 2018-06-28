@@ -18,6 +18,15 @@ public class GEOIPItem implements ESIndexable,DataDump{
     private double longitude;
     private double latitude;
 
+    public GEOIPItem(){
+
+        location = "CN";
+        country = "中国";
+        city = "北京";
+        longitude = 0;
+        latitude = 0;
+    }
+
     @Override
     public XContentBuilder dataToJson(XContentBuilder cb) throws IOException {
 

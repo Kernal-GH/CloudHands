@@ -42,10 +42,12 @@ public class MaxmindGEOIPDataBase implements GEOIPDataBase{
     @Override
     public GEOIPItem query(String ip) {
 
+        GEOIPItem item = new GEOIPItem();
+
         if (databaseReader == null) {
 
             logger.error("MaxMing GEOIP databases not been loaded,please open it firstly!");
-            return null;
+            return item;
         }
 
         InetAddress ipAddress = null;
@@ -54,7 +56,7 @@ public class MaxmindGEOIPDataBase implements GEOIPDataBase{
         } catch (UnknownHostException e) {
 
             e.printStackTrace();
-            return null;
+            return item;
         }
 
 
@@ -64,10 +66,10 @@ public class MaxmindGEOIPDataBase implements GEOIPDataBase{
             response = databaseReader.city(ipAddress);
         } catch (IOException e) {
             e.printStackTrace();
-            return null;
+            return item;
         } catch (GeoIp2Exception e) {
             e.printStackTrace();
-            return null;
+            return item;
         }
 
 
@@ -77,10 +79,8 @@ public class MaxmindGEOIPDataBase implements GEOIPDataBase{
 
         String isoCode = country.getIsoCode();
         if (isoCode == null) {
-            return null;
+            return item;
         }
-
-        GEOIPItem item = new GEOIPItem();
 
         if (isoCode.equalsIgnoreCase("TW")) {
 
