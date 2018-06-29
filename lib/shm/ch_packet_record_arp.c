@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-04-11 16:18:35
- * Last Modified: 2018-04-27 12:00:26
+ * Last Modified: 2018-06-29 11:33:30
  */
 
 #include "ch_packet_record_arp.h"
@@ -66,7 +66,6 @@ size_t ch_packet_record_arp_write(ch_packet_record_arp_t *arp_rcd,void *buffer,s
 	ch_bin_format_t btmp,*bfmt=&btmp;
 
 	ch_bf_init_with_len(bfmt,buffer,bsize);
-
     ch_bf_uint16_write(bfmt,arp_rcd->arp_hrd);
     ch_bf_uint16_write(bfmt,arp_rcd->arp_pro);
     ch_bf_uint8_write(bfmt,arp_rcd->arp_hln);

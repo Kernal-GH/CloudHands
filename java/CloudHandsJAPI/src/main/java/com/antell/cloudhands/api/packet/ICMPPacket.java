@@ -1,7 +1,9 @@
 package com.antell.cloudhands.api.packet;
 
 import com.antell.cloudhands.api.source.SourceEntry;
+import com.antell.cloudhands.api.utils.DateUtils;
 import com.antell.cloudhands.api.utils.IPUtils;
+import com.antell.cloudhands.api.utils.Text;
 import com.antell.cloudhands.api.utils.TextUtils;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import java.io.DataInput;
@@ -12,6 +14,7 @@ import java.io.IOException;
  */
 public class ICMPPacket implements SourceEntry {
 
+    private long time;
     private int type;
     private int code;
     private int ttl;
@@ -22,8 +25,9 @@ public class ICMPPacket implements SourceEntry {
     private long sip;
     private long tip;
 
-    public ICMPPacket(DataInput input) throws IOException {
+    public ICMPPacket(DataInput input,long time) throws IOException {
 
+        this.time = time;
         type = input.readUnsignedByte();
         code = input.readUnsignedByte();
         ttl =  input.readUnsignedByte();
@@ -39,10 +43,12 @@ public class ICMPPacket implements SourceEntry {
     public String dataToString() {
         StringBuffer sb = new StringBuffer();
         sb.append("Dump ICMP Packet informations:\n");
+        TextUtils.addLong(sb,"time",time);
         TextUtils.addInt(sb,"type",type);
         TextUtils.addInt(sb,"code",code);
         TextUtils.addInt(sb,"ttl",ttl);
         TextUtils.addInt(sb,"cksum",cksum);
+        TextUtils.addInt(sb,"ident",ident);
         TextUtils.addInt(sb,"seqNumber",seqNumber);
         TextUtils.addText(sb,"sendIP", IPUtils.ipv4Str(sip));
         TextUtils.addText(sb,"targetIP", IPUtils.ipv4Str(tip));
@@ -59,10 +65,13 @@ public class ICMPPacket implements SourceEntry {
     @Override
     public XContentBuilder dataToJson(XContentBuilder cb) throws IOException {
 
+        cb.field("time",time);
+        cb.field("timeDate", DateUtils.format(time));
         cb.field("type",type);
         cb.field("code",code);
         cb.field("ttl",ttl);
         cb.field("cksum",cksum);
+        cb.field("ident",ident);
         cb.field("seqNumber",seqNumber);
         cb.field("sendIP", IPUtils.ipv4Str(sip));
         cb.field("targetIP", IPUtils.ipv4Str(tip));

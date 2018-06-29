@@ -22,11 +22,11 @@ public class PacketSourceEntryParser implements SourceEntryParser {
         switch (type){
 
             case PacketRecord.ARP:
-                entry = new ARPPacket(packetRecord.getDataInput());
+                entry = new ARPPacket(packetRecord.getDataInput(),packetRecord.getTime());
                 break;
 
             case PacketRecord.ICMP:
-                entry = new ICMPPacket(packetRecord.getDataInput());
+                entry = new ICMPPacket(packetRecord.getDataInput(),packetRecord.getTime());
                 break;
 
             case PacketRecord.TCP:

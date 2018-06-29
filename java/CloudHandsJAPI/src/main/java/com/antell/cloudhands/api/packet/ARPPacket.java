@@ -1,6 +1,7 @@
 package com.antell.cloudhands.api.packet;
 
 import com.antell.cloudhands.api.source.SourceEntry;
+import com.antell.cloudhands.api.utils.DateUtils;
 import com.antell.cloudhands.api.utils.IPUtils;
 import com.antell.cloudhands.api.utils.TextUtils;
 import org.elasticsearch.common.xcontent.XContentBuilder;
@@ -13,6 +14,7 @@ import java.io.IOException;
  */
 public class ARPPacket implements SourceEntry{
 
+    private long time;
     private int hardwareAddrFmt;
     private int protoAddrFmt;
     private int hardwareAddrLen;
@@ -28,8 +30,9 @@ public class ARPPacket implements SourceEntry{
     private MacAddress srcMac;
     private MacAddress dstMac;
 
-    public ARPPacket(DataInput input) throws IOException {
+    public ARPPacket(DataInput input,long time) throws IOException {
 
+        this.time = time;
         hardwareAddrFmt = input.readUnsignedShort();
         protoAddrFmt = input.readUnsignedShort();
         hardwareAddrLen = input.readUnsignedByte();
@@ -53,6 +56,7 @@ public class ARPPacket implements SourceEntry{
         StringBuffer sb = new StringBuffer();
 
         sb.append("Dump The ARP Packet Informations:\n");
+        TextUtils.addLong(sb,"time",time);
         TextUtils.addInt(sb,"format of hardware address",hardwareAddrFmt);
         TextUtils.addInt(sb,"format of protocol address",protoAddrFmt);
         TextUtils.addInt(sb,"length of hardware address",hardwareAddrLen);
@@ -73,6 +77,8 @@ public class ARPPacket implements SourceEntry{
     @Override
     public XContentBuilder dataToJson(XContentBuilder cb) throws IOException {
 
+        cb.field("time",time);
+        cb.field("timeDate", DateUtils.format(time));
         cb.field("hardwareAddrFmt",hardwareAddrFmt);
         cb.field("protoAddrFmt",protoAddrFmt);
         cb.field("hardwareAddrLen",hardwareAddrLen);
@@ -84,6 +90,9 @@ public class ARPPacket implements SourceEntry{
         cb.field("sendMac", sha.toMacStr());
         cb.field("targetMac", tha.toMacStr());
 
+        cb.field("srcMac", srcMac.toMacStr());
+        cb.field("dstMac", dstMac.toMacStr());
+
         return cb;
     }
 
@@ -91,6 +100,14 @@ public class ARPPacket implements SourceEntry{
     public String toString(){
 
         return dataToString();
+    }
+
+    public long getTime() {
+        return time;
+    }
+
+    public void setTime(long time) {
+        this.time = time;
     }
 
     public int getHardwareAddrFmt() {

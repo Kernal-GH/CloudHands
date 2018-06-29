@@ -2,6 +2,8 @@ package com.antell.cloudhands.api.packet;
 
 import com.antell.cloudhands.api.BinDataInput;
 import com.antell.cloudhands.api.source.SourceEntry;
+import com.antell.cloudhands.api.utils.DateUtils;
+import com.antell.cloudhands.api.utils.IPUtils;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 
 import java.io.DataInput;
@@ -43,14 +45,15 @@ public class UDPSession extends SessionEntry implements SourceEntry{
     public XContentBuilder dataToJson(XContentBuilder cb) throws IOException {
 
         cb.field("proto","udp");
-        cb.field("srcIP",getReqIP());
-        cb.field("dstIP",getResIP());
+        cb.field("srcIP", IPUtils.ipv4Str(getReqIP()));
+        cb.field("dstIP",IPUtils.ipv4Str(getResIP()));
         cb.field("srcPort",getReqPort());
         cb.field("dstPort",getResPort());
         cb.field("sessionID",getSessionID());
         cb.field("reqPackets",getReqPackets());
         cb.field("reqBytes",getReqBytes());
-        cb.field("resPackets",getResBytes());
+        cb.field("resPackets",getResPackets());
+        cb.field("resBytes",getResBytes());
 
         ByteData reqContent = getReqContent();
         cb.field("reqDataSize",reqContent!=null?reqContent.getDataSize():0);
@@ -64,6 +67,7 @@ public class UDPSession extends SessionEntry implements SourceEntry{
         cb.field("reqLastTime",getReqLastTime());
         cb.field("resStartTime",getResStartTime());
         cb.field("resLastTime",getResLastTime());
+        cb.field("timeDate", DateUtils.format(getReqStartTime()));
 
         return cb;
     }

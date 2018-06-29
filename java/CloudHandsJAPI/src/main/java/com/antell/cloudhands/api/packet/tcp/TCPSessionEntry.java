@@ -27,8 +27,8 @@ public class TCPSessionEntry extends SessionEntry implements MsgPackDataInput,ES
         cb.field("srcPort",getReqPort());
         cb.field("dstPort",getResPort());
         cb.field("reqStartTime", getReqStartTime());
-        cb.field("reqLastTime", getReqLastTime());
-
+        cb.field("resStartTime", getResStartTime());
+        cb.field("timeDate",DateUtils.format(getReqStartTime()));
         return cb;
     }
 
@@ -46,7 +46,7 @@ public class TCPSessionEntry extends SessionEntry implements MsgPackDataInput,ES
         TextUtils.addInt(sb,"srcPort",getReqPort());
         TextUtils.addInt(sb,"dstPort",getResPort());
         TextUtils.addText(sb,"reqStartTime", DateUtils.format(getReqStartTime()));
-        TextUtils.addText(sb,"reqLastTime", DateUtils.format(getReqLastTime()));
+        TextUtils.addText(sb,"resStartTime", DateUtils.format(getResStartTime()));
 
         return sb.toString();
     }

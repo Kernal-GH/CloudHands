@@ -86,7 +86,7 @@ public class MatchInfo implements MsgPackDataInput,ESIndexable,DataDump{
     public XContentBuilder mainDataToJson(XContentBuilder cb) throws IOException {
 
         cb.field("mainEngineName",engineName);
-        cb.field("MainEngineType",engineType);
+        cb.field("mainEngineType",engineType);
         cb.field("mainEngineLevel",engineLevel);
         cb.field("mainRuleID",ruleID);
         cb.field("mainRuleLevel",ruleLevel);

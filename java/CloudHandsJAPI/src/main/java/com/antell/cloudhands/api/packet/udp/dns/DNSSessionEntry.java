@@ -62,8 +62,8 @@ public class DNSSessionEntry extends SessionEntry implements BinDataInput,ESInde
     public XContentBuilder dataToJson(XContentBuilder cb) throws IOException {
 
         cb.field("sessionID",getSessionID());
-        cb.field("srcIP",getReqIP());
-        cb.field("dstIP",getResIP());
+        cb.field("srcIP",IPUtils.ipv4Str(getReqIP()));
+        cb.field("dstIP",IPUtils.ipv4Str(getResIP()));
         cb.field("srcPort",getReqPort());
         cb.field("dstPort",getResPort());
         cb.field("reqPackets",getReqPackets());
@@ -74,7 +74,7 @@ public class DNSSessionEntry extends SessionEntry implements BinDataInput,ESInde
         cb.field("reqLastTime", getReqLastTime());
         cb.field("resStartTime", getResStartTime());
         cb.field("resLastTime", getResLastTime());
-
+        cb.field("timeDate",DateUtils.format(getReqStartTime()));
         return cb;
     }
 }
