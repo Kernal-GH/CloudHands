@@ -54,7 +54,7 @@ public class ESIndexBuilder {
         /*if index not existed,then create it and putting mappings*/
         if(!isIndexExisted(client,indexName)){
 
-            createIndex(client,mappingJson,indexName,docType);
+            createIndex(client,mappingJson,docType,indexName);
         }
 
         return new IndexRequest(indexName,docType).source(content);

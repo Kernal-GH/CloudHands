@@ -75,7 +75,7 @@ public class SecMatchResult implements ESIndexable,DataDump{
         for(MatchInfo matchInfo:matchInfoList){
 
             if(matchInfo.getRuleLevel()<minLevel){
-                minLevel = mainMatchInof.getRuleLevel();
+                minLevel = matchInfo.getRuleLevel();
                 mainMatchInof = matchInfo;
             }
         }

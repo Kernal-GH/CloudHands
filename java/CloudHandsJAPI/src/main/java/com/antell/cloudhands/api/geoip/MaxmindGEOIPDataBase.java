@@ -64,11 +64,10 @@ public class MaxmindGEOIPDataBase implements GEOIPDataBase{
         CityResponse response = null;
         try {
             response = databaseReader.city(ipAddress);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return item;
-        } catch (GeoIp2Exception e) {
-            e.printStackTrace();
+        } catch(Exception e){
+
+            //e.printStackTrace();
+            //logger.error(e.getMessage());
             return item;
         }
 

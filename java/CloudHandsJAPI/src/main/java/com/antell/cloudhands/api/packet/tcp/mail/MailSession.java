@@ -257,6 +257,14 @@ public class MailSession implements SourceEntry {
         return sessionEntry;
     }
 
+    private boolean hasMatchSec(){
+
+        if(secMatchResult == null)
+            return false;
+
+        return secMatchResult.getMatchCount()>0;
+    }
+
     @Override
     public String dataToString() {
 
@@ -273,7 +281,7 @@ public class MailSession implements SourceEntry {
         TextUtils.addList(sb,"mailCC",mailCCList);
         TextUtils.addList(sb,"mailAttach",maillAttachEntryList);
 
-        if(secMatchResult!=null){
+        if(hasMatchSec()){
 
             sb.append(secMatchResult.dataToString());
         }
@@ -302,7 +310,7 @@ public class MailSession implements SourceEntry {
         cb.field("mailCC",mailCCList);
         cb.field("mailAttach",maillAttachEntryList);
 
-        if(secMatchResult!=null){
+        if(hasMatchSec()){
             XContentBuilder attkCB = cb.startObject("attack");
             secMatchResult.dataToJson(attkCB);
             attkCB.endObject();

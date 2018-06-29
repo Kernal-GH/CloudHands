@@ -112,6 +112,14 @@ public class HTTPSession implements SourceEntry{
         }
     }
 
+    private boolean hasMatchSec(){
+
+        if(secMatchResult == null)
+            return false;
+
+        return secMatchResult.getMatchCount()>0;
+    }
+
     @Override
     public String dataToString() {
 
@@ -128,7 +136,7 @@ public class HTTPSession implements SourceEntry{
         TextUtils.addList(sb,"reqHeaders",reqHeaders);
         TextUtils.addList(sb,"resHeaders",resHeaders);
 
-        if(secMatchResult!=null){
+        if(hasMatchSec()){
 
             sb.append(secMatchResult.dataToString());
         }
@@ -158,7 +166,7 @@ public class HTTPSession implements SourceEntry{
         cb.field("reqHeaders",reqHeaders);
         cb.field("resHeaders",resHeaders);
 
-        if(secMatchResult!=null){
+        if(hasMatchSec()){
             XContentBuilder attkCB = cb.startObject("attack");
             secMatchResult.dataToJson(attkCB);
             attkCB.endObject();

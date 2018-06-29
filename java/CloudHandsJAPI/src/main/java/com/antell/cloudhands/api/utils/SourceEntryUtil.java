@@ -4,6 +4,7 @@ import com.antell.cloudhands.api.packet.ARPPacket;
 import com.antell.cloudhands.api.packet.ICMPPacket;
 import com.antell.cloudhands.api.packet.TCPSession;
 import com.antell.cloudhands.api.packet.UDPSession;
+import com.antell.cloudhands.api.packet.security.SecMatchResult;
 import com.antell.cloudhands.api.packet.tcp.http.HTTPSession;
 import com.antell.cloudhands.api.packet.tcp.mail.MailSession;
 import com.antell.cloudhands.api.packet.udp.dns.DNSSession;
@@ -28,9 +29,15 @@ public class SourceEntryUtil {
 
     public static boolean isHttpSessionWithAttack(SourceEntry sourceEntry){
 
-        HTTPSession httpSession = toHttpSession(sourceEntry);
+        if(!isHttpSession(sourceEntry))
+            return false;
 
-        return httpSession.getSecMatchResult()!=null;
+        HTTPSession httpSession = toHttpSession(sourceEntry);
+        SecMatchResult secMatchResult = httpSession.getSecMatchResult();
+        if(secMatchResult == null)
+            return false;
+
+        return secMatchResult.getMatchCount()>0;
     }
 
     public static boolean isMailSession(SourceEntry sourceEntry){
@@ -45,8 +52,16 @@ public class SourceEntryUtil {
 
     public static boolean isMailSessionWithAttack(SourceEntry sourceEntry){
 
+        if(!isMailSession(sourceEntry))
+            return false;
+
         MailSession mailSession = toMailSession(sourceEntry);
-        return mailSession.getSecMatchResult()!=null;
+
+        SecMatchResult secMatchResult = mailSession.getSecMatchResult();
+        if(secMatchResult == null)
+            return false;
+
+        return secMatchResult.getMatchCount()>0;
     }
 
     public static boolean isTCPSession(SourceEntry sourceEntry){
