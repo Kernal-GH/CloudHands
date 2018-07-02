@@ -67,11 +67,13 @@ public class DNSResponse implements BinDataInput,ESIndexable,DataDump{
 
         String fname = Section.longString(i);
 
-        List<Record> records = getRecords(i);
-        if(records == null)
-            return cb;
 
         XContentBuilder cbb = cb.startArray(fname);
+        List<Record> records = getRecords(i);
+        if(records == null) {
+            cbb.endArray();
+            return cb;
+        }
 
         for (Record record :records) {
             XContentBuilder cbo = cbb.startObject();
@@ -87,17 +89,23 @@ public class DNSResponse implements BinDataInput,ESIndexable,DataDump{
     private XContentBuilder questionsToJson(XContentBuilder cb) throws IOException {
 
         String fname = Section.longString(Section.QUESTION);
-        List<DNSQuestion> questions = getQuestions();
-        if(questions == null)
-            return cb;
+
 
         XContentBuilder cbb = cb.startArray(fname);
+
+        List<DNSQuestion> questions = getQuestions();
+        if(questions == null)
+        {
+            cbb.endArray();
+            return cb;
+        }
 
         for (DNSQuestion question :questions) {
             XContentBuilder cbo = cbb.startObject();
             question.dataToJson(cbo);
             cbo.endObject();
         }
+
         cbb.endArray();
 
         return cb;
@@ -112,21 +120,18 @@ public class DNSResponse implements BinDataInput,ESIndexable,DataDump{
             header.toJson(hcb);
             hcb.endObject();
 
-            XContentBuilder rdatacb = cb.startArray("resRDatas");
-            for (int i = 0; i < 4; i++) {
+            questionsToJson(cb);
 
-                if(i == Section.QUESTION)
-                    questionsToJson(cb);
-                else
-                    recordsToJson(rdatacb,i);
+            for (int i = 1; i < 4; i++) {
+
+                recordsToJson(cb,i);
             }
 
-            rdatacb.endArray();
-            return cb;
         } catch (Exception e) {
             e.printStackTrace();
-            return null;
         }
+
+        return cb;
     }
 
     public List getQuestions(){

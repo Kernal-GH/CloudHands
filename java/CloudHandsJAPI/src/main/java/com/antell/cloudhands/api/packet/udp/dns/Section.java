@@ -58,10 +58,10 @@ public final class Section {
         sections.add(AUTHORITY, "au");
         sections.add(ADDITIONAL, "ad");
 
-        longSections[QUESTION] = "QUESTIONS";
-        longSections[ANSWER] = "ANSWERS";
-        longSections[AUTHORITY] = "AUTHORITY RECORDS";
-        longSections[ADDITIONAL] = "ADDITIONAL RECORDS";
+        longSections[QUESTION] = "questions";
+        longSections[ANSWER] = "answerRecords";
+        longSections[AUTHORITY] = "authorityRecords";
+        longSections[ADDITIONAL] = "additionalRecords";
 
         updateSections[ZONE] = "ZONE";
         updateSections[PREREQ] = "PREREQUISITES";
