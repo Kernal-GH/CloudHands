@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-05-17 14:55:00
- * Last Modified: 2018-05-18 18:24:04
+ * Last Modified: 2018-07-03 18:18:48
  */
 
 #include "ch_pp_pool.h"
@@ -15,6 +15,7 @@
 
 #define IS_SESSION_CLOSE(tcp_record) ((tcp_record)->packet_type == PACKET_TYPE_FLUSH || (tcp_record)->packet_type ==PACKET_TYPE_CLOSE)
 
+#if 0
 static void _session_entry_timeout_cb(ch_ptable_entry_t *entry,uint64_t tv ch_unused,void *priv_data ch_unused){
 
 	ch_session_entry_t *sentry = (ch_session_entry_t*)entry;
@@ -23,6 +24,7 @@ static void _session_entry_timeout_cb(ch_ptable_entry_t *entry,uint64_t tv ch_un
 
 
 }
+#endif 
 
 static void _session_entry_clean(ch_session_entry_pool_t *sentry_pool,ch_session_entry_t *sentry){
 
@@ -51,7 +53,7 @@ ch_pp_pool_t * ch_pp_pool_create(ch_pp_work_t *pwork){
 	}
 
 
-	pp_pool->sentry_pool = ch_session_entry_pool_create(pcontext,_session_entry_timeout_cb,(void*)pp_pool); 
+	pp_pool->sentry_pool = ch_session_entry_pool_create(pcontext,NULL,NULL); //_session_entry_timeout_cb,(void*)pp_pool); 
 
 	if(pp_pool->sentry_pool == NULL){
 	
@@ -86,7 +88,7 @@ void ch_pp_session_parse(ch_pp_pool_t *pp_pool,ch_tcp_record_t *tcp_record){
 	void *data;
 	size_t dlen;
 
-	size_t c = 0;
+	//size_t c = 0;
 	ch_session_entry_t *sentry = NULL;
 	ch_session_entry_pool_t *sentry_pool = pp_pool->sentry_pool;
 	ch_pp_parser_t *pp_parser;
@@ -111,6 +113,8 @@ void ch_pp_session_parse(ch_pp_pool_t *pp_pool,ch_tcp_record_t *tcp_record){
 
 	}
 
+	ch_session_entry_update(sentry,tcp_record);
+
 	data = tcp_record->shm_rcd.data;
 	dlen = tcp_record->shm_rcd.data_len;
 
@@ -123,10 +127,12 @@ void ch_pp_session_parse(ch_pp_pool_t *pp_pool,ch_tcp_record_t *tcp_record){
 
 		if(tcp_record->session_direct == SESSION_DIRECT_REQ){
 		
-			rc = pp_parser->request_parse(sentry,data,dlen); 
+			ch_session_entry_req_pbytes_update(sentry,dlen);
+			rc = pp_parser->request_parse(sentry,data,dlen);
 		}else{
 		
-			rc = pp_parser->response_parse(sentry,data,dlen); 
+			ch_session_entry_res_pbytes_update(sentry,dlen);
+			rc = pp_parser->response_parse(sentry,data,dlen);
 		}
 
 		if(rc == PARSE_BREAK||rc == PARSE_DONE){
@@ -135,11 +141,14 @@ void ch_pp_session_parse(ch_pp_pool_t *pp_pool,ch_tcp_record_t *tcp_record){
 		}
 	}
 
+#if 0
 	c = ch_session_entry_pool_timeout_free(sentry_pool);
 	if(c){
 	
 		ch_session_entry_pool_tbl_dump(sentry_pool);
 	}
+
+#endif
 
 }
 

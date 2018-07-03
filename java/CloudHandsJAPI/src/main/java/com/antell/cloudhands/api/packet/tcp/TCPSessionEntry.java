@@ -16,6 +16,8 @@ import java.io.IOException;
  */
 public class TCPSessionEntry extends SessionEntry implements MsgPackDataInput,ESIndexable,DataDump {
 
+    private long reqPBytes;
+    private long resPBytes;
 
     @Override
     public XContentBuilder dataToJson(XContentBuilder cb) throws IOException {
@@ -29,6 +31,14 @@ public class TCPSessionEntry extends SessionEntry implements MsgPackDataInput,ES
         cb.field("reqStartTime", getReqStartTime());
         cb.field("resStartTime", getResStartTime());
         cb.field("timeDate",DateUtils.format(getReqStartTime()));
+        cb.field("reqPackets",getReqPackets());
+        cb.field("reqBytes",getReqBytes());
+        cb.field("reqPBytes",getReqPBytes());
+
+        cb.field("resPackets",getResPackets());
+        cb.field("resBytes",getResBytes());
+        cb.field("resPBytes",getResPBytes());
+
         return cb;
     }
 
@@ -47,7 +57,13 @@ public class TCPSessionEntry extends SessionEntry implements MsgPackDataInput,ES
         TextUtils.addInt(sb,"dstPort",getResPort());
         TextUtils.addText(sb,"reqStartTime", DateUtils.format(getReqStartTime()));
         TextUtils.addText(sb,"resStartTime", DateUtils.format(getResStartTime()));
+        TextUtils.addLong(sb,"reqPackets",getReqPackets());
+        TextUtils.addLong(sb,"reqBytes",getReqBytes());
+        TextUtils.addLong(sb,"reqPBytes",getReqPBytes());
 
+        TextUtils.addLong(sb,"resPackets",getResPackets());
+        TextUtils.addLong(sb,"resBytes",getResBytes());
+        TextUtils.addLong(sb,"resPBytes",getResPBytes());
         return sb.toString();
     }
 
@@ -55,7 +71,7 @@ public class TCPSessionEntry extends SessionEntry implements MsgPackDataInput,ES
     public void parse(MessageUnpacker unpacker) throws IOException {
 
         int n = MessagePackUtil.parseMapHeader(unpacker,true);
-        Preconditions.checkArgument(n==8,"Invalid msgpack packet of session entry:"+n);
+        Preconditions.checkArgument(n==14,"Invalid msgpack packet of session entry:"+n);
 
         setProtocolID(MessagePackUtil.parseInt(unpacker));
         setSessionID(MessagePackUtil.parseLong(unpacker));
@@ -65,6 +81,29 @@ public class TCPSessionEntry extends SessionEntry implements MsgPackDataInput,ES
         setResIP(MessagePackUtil.parseLong(unpacker));
         setReqPort(MessagePackUtil.parseInt(unpacker));
         setResPort(MessagePackUtil.parseInt(unpacker));
+        setReqPackets(MessagePackUtil.parseLong(unpacker));
+        setReqBytes(MessagePackUtil.parseLong(unpacker));
+        setReqPBytes(MessagePackUtil.parseLong(unpacker));
 
+        setResPackets(MessagePackUtil.parseLong(unpacker));
+        setResBytes(MessagePackUtil.parseLong(unpacker));
+        setResPBytes(MessagePackUtil.parseLong(unpacker));
+
+    }
+
+    public long getReqPBytes() {
+        return reqPBytes;
+    }
+
+    public void setReqPBytes(long reqPBytes) {
+        this.reqPBytes = reqPBytes;
+    }
+
+    public long getResPBytes() {
+        return resPBytes;
+    }
+
+    public void setResPBytes(long resPBytes) {
+        this.resPBytes = resPBytes;
     }
 }

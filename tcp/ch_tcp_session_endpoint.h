@@ -41,10 +41,18 @@ struct ch_tcp_session_endpoint_t {
     
     uint16_t port;
 
-    
+
+	uint64_t packets;
+	uint64_t bytes;
+
     void *priv_data;
 
 };
+
+#define ch_tcp_session_endpoint_update(ep,dlen) do { \
+	(ep)->packets+=1;								 \
+	(ep)->bytes+=(dlen);							 \
+}while(0) 
 
 static inline uint32_t ch_tcp_session_endpoint_offset_get(ch_tcp_session_endpoint_t *ep,uint32_t seq){
 

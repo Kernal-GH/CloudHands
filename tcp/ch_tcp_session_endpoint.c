@@ -29,6 +29,8 @@ void ch_tcp_session_endpoint_init(ch_tcp_session_endpoint_t *ep,uint32_t ip,uint
     ep->port = port;
     ep->priv_data = NULL;
     ep->time = ch_get_current_timems();
+	ep->packets = 0;
+	ep->bytes = 0;
 }
 
 void ch_tcp_session_endpoint_fin(ch_tcp_session_endpoint_t *ep){

@@ -72,6 +72,17 @@ struct  ch_tcp_session_t {
 #define ch_tcp_session_dstport_get(tcp_session) ((tcp_session)->endpoint_res.port)
 #define ch_tcp_session_srcip_get(tcp_session)   ((tcp_session)->endpoint_req.ip)
 #define ch_tcp_session_dstip_get(tcp_session)   ((tcp_session)->endpoint_res.ip)
+#define ch_tcp_session_src_packets_get(tcp_session) ((tcp_session)->endpoint_req.packets)
+#define ch_tcp_session_src_bytes_get(tcp_session) ((tcp_session)->endpoint_req.bytes)
+#define ch_tcp_session_dst_packets_get(tcp_session) ((tcp_session)->endpoint_res.packets)
+#define ch_tcp_session_dst_bytes_get(tcp_session) ((tcp_session)->endpoint_res.bytes)
+
+#define ch_tcp_session_stat_reset(tcp_session) do { \
+	(tcp_session)->endpoint_req.packets = 0;		\
+	(tcp_session)->endpoint_req.bytes = 0;			\
+	(tcp_session)->endpoint_res.packets = 0;		\
+	(tcp_session)->endpoint_res.bytes = 0;			\
+}while(0)
 
 #define ch_tcp_session_state_set(tcp_session,st) ((tcp_session)->state = st)
 

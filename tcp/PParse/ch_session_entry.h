@@ -32,7 +32,26 @@ struct ch_session_entry_t {
     uint32_t dst_ip;
     uint16_t src_port;
     uint16_t dst_port;
+
+	uint64_t req_packets;
+	uint64_t req_bytes;
+	uint64_t req_pbytes;
+
+	uint64_t res_packets;
+	uint64_t res_bytes;
+	uint64_t res_pbytes;
+	
 };
+
+#define ch_session_entry_update(sen,tcp_rcd) do { \
+	(sen)->req_packets+=(tcp_rcd)->req_packets;   \
+	(sen)->req_bytes += (tcp_rcd)->req_bytes;     \
+	(sen)->res_packets+=(tcp_rcd)->res_packets;   \
+	(sen)->res_bytes += (tcp_rcd)->res_bytes;     \
+}while(0)
+
+#define ch_session_entry_req_pbytes_update(sen,dlen) ((sen)->req_pbytes+=(dlen))
+#define ch_session_entry_res_pbytes_update(sen,dlen) ((sen)->res_pbytes+=(dlen))
 
 extern int ch_session_entry_init(ch_session_entry_t *sentry,ch_pp_parser_t *pparser,ch_tcp_record_t *tcp_record);
 

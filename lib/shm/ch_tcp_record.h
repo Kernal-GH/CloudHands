@@ -30,9 +30,15 @@ struct ch_tcp_record_t {
     uint32_t dst_ip;
     uint16_t src_port;
     uint16_t dst_port;
+
+	uint64_t req_packets;
+	uint64_t req_bytes;
+	
+	uint64_t res_packets;
+	uint64_t res_bytes;
 };
 
-#define CH_TCP_RECORD_HEADER_SIZE (sizeof(uint8_t)*2+sizeof(uint16_t)*2+sizeof(uint32_t)*6+sizeof(uint64_t)*2+sizeof(size_t))
+#define CH_TCP_RECORD_HEADER_SIZE (sizeof(uint8_t)*2+sizeof(uint16_t)*2+sizeof(uint32_t)*6+sizeof(uint64_t)*6+sizeof(size_t))
 
 extern ch_shm_format_t * ch_shm_format_tcp_with_mmap_create(ch_pool_t *mp,const char *fname,uint64_t fsize,uint64_t entry_size,
 	uint64_t priv_data_size,int is_write);

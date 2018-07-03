@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-02-05 11:06:43
- * Last Modified: 2018-04-19 10:43:29
+ * Last Modified: 2018-07-03 17:45:00
  */
 
 #include "ch_tcp_session_handler.h"
@@ -16,6 +16,68 @@
 static inline const char * _get_name(ch_pool_t *mp,const char *prefix,uint32_t tsk_id){
 
 	return ch_psprintf(mp,"%s/tcp_session_%lu",prefix,(unsigned long)tsk_id);
+}
+
+static inline uint8_t _session_direct(ch_tcp_session_t *tcp_session){
+
+    if(tcp_session->cur_ep == &tcp_session->endpoint_req){
+
+        return SESSION_DIRECT_REQ; 
+    }
+
+    return SESSION_DIRECT_RES;
+}
+
+static inline void  
+_init_record(ch_tcp_session_t *tcp_session,
+	ch_tcp_record_t *tcp_rcd,
+	uint8_t packet_type,
+	void *data,
+	uint32_t dlen){
+
+
+	tcp_rcd->shm_rcd.magic = EIMAGIC;
+
+
+	tcp_rcd->shm_rcd.record_size = CH_TCP_RECORD_HEADER_SIZE+dlen;
+
+	tcp_rcd->shm_rcd.data_offset = tcp_session->cur_ep->last_offset-dlen;
+
+	tcp_rcd->shm_rcd.data_len = dlen;
+	tcp_rcd->shm_rcd.data = data; 
+
+	tcp_rcd->packet_type = packet_type;
+	tcp_rcd->session_direct = _session_direct(tcp_session);
+	tcp_rcd->session_id = tcp_session->session_id;
+	tcp_rcd->time = tcp_session->cur_ep->time;
+	tcp_rcd->src_ip = ch_tcp_session_srcip_get(tcp_session);
+	tcp_rcd->dst_ip = ch_tcp_session_dstip_get(tcp_session);
+	tcp_rcd->src_port = ch_tcp_session_srcport_get(tcp_session);
+	tcp_rcd->dst_port = ch_tcp_session_dstport_get(tcp_session);
+
+	tcp_rcd->req_packets = ch_tcp_session_src_packets_get(tcp_session);
+	tcp_rcd->req_bytes = ch_tcp_session_src_bytes_get(tcp_session);
+	tcp_rcd->res_packets = ch_tcp_session_dst_packets_get(tcp_session);
+	tcp_rcd->res_bytes = ch_tcp_session_dst_bytes_get(tcp_session);
+	
+	ch_tcp_session_stat_reset(tcp_session);
+}
+
+
+static void _tcp_session_timeout_cb(ch_ptable_entry_t *entry,uint64_t tv,void *priv_data){
+
+	tv = tv;
+
+	ch_tcp_record_t tcp_rcd;
+	ch_tcp_session_t *tcp_session = (ch_tcp_session_t*)entry;
+	ch_tcp_session_handler_t *shandler = (ch_tcp_session_handler_t*)priv_data;
+
+	_init_record(tcp_session,&tcp_rcd,PACKET_TYPE_CLOSE,NULL,0);
+
+    ch_app_context_content_close(shandler->tcp_work->app_context,
+		tcp_session->app,shandler->shm_fmt,(ch_shm_record_t*)(&tcp_rcd));
+
+
 }
 
 ch_tcp_session_handler_t * 
@@ -30,7 +92,7 @@ ch_tcp_session_handler_create(ch_tcp_work_t *tcp_work,ch_tcp_session_task_t *ses
 
 	shandler->tcp_work = tcp_work;
 	shandler->session_task = session_task;
-	shandler->spool = ch_tcp_session_pool_create(tcp_context,0,NULL,NULL);
+	shandler->spool = ch_tcp_session_pool_create(tcp_context,0,_tcp_session_timeout_cb,(void*)shandler);
 
 	if(shandler->spool == NULL){
 	
@@ -95,43 +157,8 @@ static inline void _process_fin_packet(ch_tcp_session_handler_t *shandler ch_unu
 
 }
 
-static inline uint8_t _session_direct(ch_tcp_session_t *tcp_session){
-
-    if(tcp_session->cur_ep == &tcp_session->endpoint_req){
-
-        return SESSION_DIRECT_REQ; 
-    }
-
-    return SESSION_DIRECT_RES;
-}
-
-static inline void  
-_init_record(ch_tcp_session_t *tcp_session,
-	ch_tcp_record_t *tcp_rcd,
-	uint8_t packet_type,
-	void *data,
-	uint32_t dlen){
 
 
-	tcp_rcd->shm_rcd.magic = EIMAGIC;
-
-
-	tcp_rcd->shm_rcd.record_size = CH_TCP_RECORD_HEADER_SIZE+dlen;
-
-	tcp_rcd->shm_rcd.data_offset = tcp_session->cur_ep->last_offset-dlen;
-
-	tcp_rcd->shm_rcd.data_len = dlen;
-	tcp_rcd->shm_rcd.data = data; 
-
-	tcp_rcd->packet_type = packet_type;
-	tcp_rcd->session_direct = _session_direct(tcp_session);
-	tcp_rcd->session_id = tcp_session->session_id;
-	tcp_rcd->time = tcp_session->cur_ep->time;
-	tcp_rcd->src_ip = ch_tcp_session_srcip_get(tcp_session);
-	tcp_rcd->dst_ip = ch_tcp_session_dstip_get(tcp_session);
-	tcp_rcd->src_port = ch_tcp_session_srcport_get(tcp_session);
-	tcp_rcd->dst_port = ch_tcp_session_dstport_get(tcp_session);
-}
 
 static void _tcp_session_close(ch_tcp_session_handler_t *shandler,ch_tcp_session_t *tcp_session){
 
@@ -185,6 +212,7 @@ static void _process_data_packet(ch_tcp_session_handler_t *shandler,
 		_init_record(tcp_session,&tcp_rcd,PACKET_TYPE_DATA,tcp_pkt->pdata,tcp_pkt->payload_len);
 
         rc = ch_app_context_content_process(shandler->tcp_work->app_context,tcp_session->app,shandler->shm_fmt,(ch_shm_record_t*)(&tcp_rcd));
+		
 
         if(rc == PARSE_RETURN_DISCARD||rc == PARSE_RETURN_CLOSE){
             _tcp_session_close(shandler,tcp_session); 
@@ -242,6 +270,8 @@ int ch_tcp_session_packet_handle(ch_tcp_session_handler_t *shandler,
             break;
         }
 
+		ch_tcp_session_endpoint_update(ep,tcp_pkt->payload_len);
+
         tcp_session->cur_ep = ep;
 
 #if 0
@@ -262,7 +292,7 @@ int ch_tcp_session_packet_handle(ch_tcp_session_handler_t *shandler,
            _process_data_packet(shandler,tcp_session,ep,tcp_pkt); 
         }
 
-	#if 0
+#if 0
         /*fin ack packet!*/
         if(_is_fin1_ack(tcp_session,tcp_pkt)){
             _process_fin1_ack_packet(shandler,tcp_session,tcp_pkt);

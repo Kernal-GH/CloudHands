@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-05-17 11:17:01
- * Last Modified: 2018-05-17 19:06:10
+ * Last Modified: 2018-07-03 15:23:14
  */
 
 #include "ch_session_store.h"
@@ -67,7 +67,7 @@ int ch_session_store_put(ch_session_entry_t *sentry,void *session){
 
 	/*packer the common data into msgpack*/
 	ch_msgpack_map_start(pk,NULL,2);
-	ch_msgpack_map_start(pk,"common",8);
+	ch_msgpack_map_start(pk,"common",14);
 
 	ch_msgpack_write_uint32(pk,"protoID",sentry->protocol_id);
 	ch_msgpack_write_uint64(pk,"sessionID",sentry->session_id);
@@ -77,6 +77,13 @@ int ch_session_store_put(ch_session_entry_t *sentry,void *session){
 	ch_msgpack_write_uint32(pk,"dstIP",sentry->dst_ip);
 	ch_msgpack_write_uint16(pk,"srcPort",sentry->src_port);
 	ch_msgpack_write_uint16(pk,"dstPort",sentry->dst_port);
+	ch_msgpack_write_uint64(pk,"reqPackets",sentry->req_packets);
+	ch_msgpack_write_uint64(pk,"reqBytes",sentry->req_bytes);
+	ch_msgpack_write_uint64(pk,"reqPBytes",sentry->req_pbytes);
+	
+	ch_msgpack_write_uint64(pk,"resPackets",sentry->res_packets);
+	ch_msgpack_write_uint64(pk,"resBytes",sentry->res_bytes);
+	ch_msgpack_write_uint64(pk,"resPBytes",sentry->res_pbytes);
 
 	/*packer the session data into msgpack*/
 

@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-01-29 11:43:49
- * Last Modified: 2018-02-06 19:07:37
+ * Last Modified: 2018-07-03 11:38:10
  */
 
 #include "ch_tcp_record.h"
@@ -31,6 +31,11 @@ static void _tcp_record_write(ch_shm_format_t *fmt,ch_shm_record_t *rcd){
     ch_bf_uint32_write(bfmt,tcp_rcd->dst_ip);
     ch_bf_uint16_write(bfmt,tcp_rcd->src_port);
     ch_bf_uint16_write(bfmt,tcp_rcd->dst_port);
+	ch_bf_uint64_write(bfmt,tcp_rcd->req_packets);
+	ch_bf_uint64_write(bfmt,tcp_rcd->req_bytes);
+	ch_bf_uint64_write(bfmt,tcp_rcd->res_packets);
+	ch_bf_uint64_write(bfmt,tcp_rcd->res_bytes);
+
 
 }
 
@@ -46,7 +51,10 @@ static ch_shm_record_t * _tcp_record_read(ch_shm_entry_iterator_t *iter,ch_bin_f
     g_tcp_rcd_ptr->dst_ip = ch_bf_uint32_read(bfmt);
     g_tcp_rcd_ptr->src_port = ch_bf_uint16_read(bfmt);
     g_tcp_rcd_ptr->dst_port = ch_bf_uint16_read(bfmt);
-
+	g_tcp_rcd_ptr->req_packets = ch_bf_uint64_read(bfmt);
+	g_tcp_rcd_ptr->req_bytes = ch_bf_uint64_read(bfmt);
+	g_tcp_rcd_ptr->res_packets = ch_bf_uint64_read(bfmt);
+	g_tcp_rcd_ptr->res_bytes = ch_bf_uint64_read(bfmt);
 
 	return (ch_shm_record_t*)g_tcp_rcd_ptr;
 }

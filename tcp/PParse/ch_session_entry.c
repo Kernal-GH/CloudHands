@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-05-14 17:45:37
- * Last Modified: 2018-05-17 19:05:29
+ * Last Modified: 2018-07-03 15:17:14
  */
 
 #include "ch_session_entry.h"
@@ -36,6 +36,14 @@ int ch_session_entry_init(ch_session_entry_t *sentry,ch_pp_parser_t *pparser,ch_
     sentry->dst_ip = tcp_record->dst_ip;
     sentry->src_port = tcp_record->src_port;
     sentry->dst_port = tcp_record->dst_port;
+
+	sentry->req_packets = 0;
+	sentry->req_bytes = 0;
+	sentry->req_pbytes = 0;
+
+	sentry->res_packets = 0;
+	sentry->res_bytes = 0;
+	sentry->res_pbytes = 0;
 
 	/*ok*/
 	return 0;
