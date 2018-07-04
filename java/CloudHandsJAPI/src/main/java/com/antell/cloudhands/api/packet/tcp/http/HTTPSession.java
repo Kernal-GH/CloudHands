@@ -3,6 +3,7 @@ package com.antell.cloudhands.api.packet.tcp.http;
 import com.antell.cloudhands.api.packet.security.SecMatchResult;
 import com.antell.cloudhands.api.packet.tcp.TCPSessionEntry;
 import com.antell.cloudhands.api.source.SourceEntry;
+import com.antell.cloudhands.api.utils.Content;
 import com.antell.cloudhands.api.utils.MessagePackUtil;
 import com.antell.cloudhands.api.utils.TextUtils;
 import com.google.common.base.Preconditions;
@@ -21,8 +22,11 @@ public class HTTPSession implements SourceEntry{
     private TCPSessionEntry sessionEntry;
     private String method;
     private String uri;
+    private String extName;
     private String version;
+
     private String host;
+    private String contentType;
 
     private int status;
 
@@ -41,16 +45,14 @@ public class HTTPSession implements SourceEntry{
         resHeaders = new ArrayList<>();
         secMatchResult = null;
         host = null;
+        contentType = null;
 
         parse(unpacker);
     }
 
-    private boolean isHost(String k){
+    private final  static boolean isHeader(String k,String sk){
 
-        if(k.length()!=4)
-            return false;
-
-        return k.equalsIgnoreCase("Host");
+        return k.equalsIgnoreCase(sk);
     }
 
     private void unpackHeaders(MessageUnpacker unpacker,boolean isReq) throws IOException {
@@ -70,11 +72,14 @@ public class HTTPSession implements SourceEntry{
             Header header = new Header(k,v);
             headers.add(header);
 
-            if(!isReq||host!=null)
-                continue;
-
-            if(isHost(k))
-                setHost(v);
+            if(isReq&&host == null){
+                if(isHeader(k,"Host"))
+                    setHost(v);
+            }
+            if(!isReq&&contentType==null){
+                if(isHeader(k,"Content-Type"))
+                    setContentType(v);
+            }
         }
 
     }
@@ -110,6 +115,9 @@ public class HTTPSession implements SourceEntry{
             secMatchResult = new SecMatchResult(unpacker);
 
         }
+
+        setExtName(Content.getExtName(contentType,uri));
+
     }
 
     private boolean hasMatchSec(){
@@ -128,7 +136,9 @@ public class HTTPSession implements SourceEntry{
         sb.append(sessionEntry.dataToString());
         TextUtils.addText(sb,"method",method);
         TextUtils.addText(sb,"uri",uri);
+        TextUtils.addText(sb,"extName",extName);
         TextUtils.addText(sb,"host",host);
+        TextUtils.addText(sb,"contentType",contentType);
         TextUtils.addText(sb,"version",version);
         TextUtils.addInt(sb,"status",status);
         TextUtils.addText(sb,"reqBodyPath",reqBodyPath);
@@ -158,7 +168,9 @@ public class HTTPSession implements SourceEntry{
 
         cb.field("method",method);
         cb.field("uri",uri);
+        cb.field("extName",extName);
         cb.field("host",host);
+        cb.field("contentType",contentType);
         cb.field("version",version);
         cb.field("status",status);
         cb.field("reqBodyPath",reqBodyPath);
@@ -252,4 +264,19 @@ public class HTTPSession implements SourceEntry{
     }
 
 
+    public String getExtName() {
+        return extName;
+    }
+
+    public void setExtName(String extName) {
+        this.extName = extName;
+    }
+
+    public String getContentType() {
+        return contentType;
+    }
+
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
+    }
 }

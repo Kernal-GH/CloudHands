@@ -38,6 +38,7 @@ public class PacketRecord {
     public PacketRecord(long bsize){
 
         curDataBufferSize = bsize;
+
         dataBuffer = ByteBuffer.allocateDirect((int) bsize);
         reset();
     }

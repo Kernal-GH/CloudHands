@@ -24,8 +24,8 @@ public class TCPSessionEntry extends SessionEntry implements MsgPackDataInput,ES
 
         cb.field("sessionID",getSessionID());
         cb.field("protocol",Constants.protoID2String[getProtocolID()]);
-        cb.field("srcIP",getReqIP());
-        cb.field("dstIP",getResIP());
+        cb.field("srcIP",IPUtils.ipv4Str(getReqIP()));
+        cb.field("dstIP",IPUtils.ipv4Str(getResIP()));
         cb.field("srcPort",getReqPort());
         cb.field("dstPort",getResPort());
         cb.field("reqStartTime", getReqStartTime());
