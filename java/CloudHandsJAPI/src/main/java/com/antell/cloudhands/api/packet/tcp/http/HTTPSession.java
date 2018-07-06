@@ -5,6 +5,7 @@ import com.antell.cloudhands.api.packet.tcp.TCPSessionEntry;
 import com.antell.cloudhands.api.source.SourceEntry;
 import com.antell.cloudhands.api.utils.Content;
 import com.antell.cloudhands.api.utils.MessagePackUtil;
+import com.antell.cloudhands.api.utils.Text;
 import com.antell.cloudhands.api.utils.TextUtils;
 import com.google.common.base.Preconditions;
 import org.elasticsearch.common.xcontent.XContentBuilder;
@@ -26,7 +27,10 @@ public class HTTPSession implements SourceEntry{
     private String version;
 
     private String host;
-    private String contentType;
+
+    private String reqContentType;
+    private String resContentType;
+    private String contentEncoding;
 
     private int status;
 
@@ -45,7 +49,10 @@ public class HTTPSession implements SourceEntry{
         resHeaders = new ArrayList<>();
         secMatchResult = null;
         host = null;
-        contentType = null;
+
+        reqContentType = "";
+        resContentType = "";
+        contentEncoding = "";
 
         parse(unpacker);
     }
@@ -72,14 +79,26 @@ public class HTTPSession implements SourceEntry{
             Header header = new Header(k,v);
             headers.add(header);
 
-            if(isReq&&host == null){
+            if(isReq&&TextUtils.isEmpty(host)){
                 if(isHeader(k,"Host"))
                     setHost(v);
             }
-            if(!isReq&&contentType==null){
+            if(isReq&&TextUtils.isEmpty(reqContentType)){
+
                 if(isHeader(k,"Content-Type"))
-                    setContentType(v);
+                    setReqContentType(v);
             }
+            if(!isReq&& TextUtils.isEmpty(resContentType)){
+                if(isHeader(k,"Content-Type"))
+                    setResContentType(v);
+            }
+
+            if(!isReq&& TextUtils.isEmpty(contentEncoding)){
+                if(isHeader(k,"Content-Encoding"))
+                    setContentEncoding(v);
+            }
+
+
         }
 
     }
@@ -116,7 +135,7 @@ public class HTTPSession implements SourceEntry{
 
         }
 
-        setExtName(Content.getExtName(contentType,uri));
+        setExtName(Content.getExtName(resContentType,uri));
 
     }
 
@@ -138,7 +157,9 @@ public class HTTPSession implements SourceEntry{
         TextUtils.addText(sb,"uri",uri);
         TextUtils.addText(sb,"extName",extName);
         TextUtils.addText(sb,"host",host);
-        TextUtils.addText(sb,"contentType",contentType);
+        TextUtils.addText(sb,"reqContentType",reqContentType);
+        TextUtils.addText(sb,"resContentType",resContentType);
+        TextUtils.addText(sb,"contentEncoding",contentEncoding);
         TextUtils.addText(sb,"version",version);
         TextUtils.addInt(sb,"status",status);
         TextUtils.addText(sb,"reqBodyPath",reqBodyPath);
@@ -170,7 +191,9 @@ public class HTTPSession implements SourceEntry{
         cb.field("uri",uri);
         cb.field("extName",extName);
         cb.field("host",host);
-        cb.field("contentType",contentType);
+        cb.field("reqContentType",reqContentType);
+        cb.field("resContentType",resContentType);
+        cb.field("contentEncoding",contentEncoding);
         cb.field("version",version);
         cb.field("status",status);
         cb.field("reqBodyPath",reqBodyPath);
@@ -272,11 +295,27 @@ public class HTTPSession implements SourceEntry{
         this.extName = extName;
     }
 
-    public String getContentType() {
-        return contentType;
+    public String getReqContentType() {
+        return reqContentType;
     }
 
-    public void setContentType(String contentType) {
-        this.contentType = contentType;
+    public void setReqContentType(String reqContentType) {
+        this.reqContentType = reqContentType;
+    }
+
+    public String getResContentType() {
+        return resContentType;
+    }
+
+    public void setResContentType(String resContentType) {
+        this.resContentType = resContentType;
+    }
+
+    public String getContentEncoding() {
+        return contentEncoding;
+    }
+
+    public void setContentEncoding(String contentEncoding) {
+        this.contentEncoding = contentEncoding;
     }
 }

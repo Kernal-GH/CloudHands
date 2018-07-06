@@ -1,5 +1,6 @@
 package com.antell.cloudhands.api.sink.es;
 
+import com.antell.cloudhands.api.utils.TextUtils;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequest;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsResponse;
@@ -45,7 +46,13 @@ public class ESIndexBuilder {
         String indexPrefix = indexEntry.getIndexDB().getIndexPrefix();
         String docType = indexEntry.getIndexDB().getDocType();
         String mappingJson = indexEntry.getIndexDB().getMapping();
+
+        String id = TextUtils.getUUID();
+
         XContentBuilder content = indexEntry.toJson();
+        content.field("id",id);
+
+        content.endObject();
 
         /*build index name*/
         String indexName = indexNameBuilder.build(indexPrefix,docType);
@@ -57,7 +64,7 @@ public class ESIndexBuilder {
             createIndex(client,mappingJson,docType,indexName);
         }
 
-        return new IndexRequest(indexName,docType).source(content);
+        return new IndexRequest(indexName,docType,id).source(content);
 
     }
 

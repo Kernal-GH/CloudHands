@@ -4,6 +4,7 @@ import java.io.DataInput;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 public final class TextUtils {
 
@@ -113,4 +114,10 @@ public final class TextUtils {
 
         return v==null?"":v;
     }
+
+    public static String getUUID(){
+
+        return UUID.randomUUID().toString().replace("-","");
+    }
+
 }
