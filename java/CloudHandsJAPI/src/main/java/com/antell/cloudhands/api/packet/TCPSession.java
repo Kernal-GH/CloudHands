@@ -65,6 +65,7 @@ public class TCPSession extends SessionEntry implements SourceEntry{
         cb.field("dstPort",getResPort());
         cb.field("phaseState",getPhaseState());
         cb.field("sessionID",getSessionID());
+        cb.field("bytes",getReqBytes()+getResBytes());
         cb.field("reqPackets",getReqPackets());
         cb.field("reqBytes",getReqBytes());
         cb.field("resPackets",getResPackets());

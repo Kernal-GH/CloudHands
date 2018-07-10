@@ -50,6 +50,7 @@ public class UDPSession extends SessionEntry implements SourceEntry{
         cb.field("srcPort",getReqPort());
         cb.field("dstPort",getResPort());
         cb.field("sessionID",getSessionID());
+        cb.field("bytes",getReqBytes()+getResBytes());
         cb.field("reqPackets",getReqPackets());
         cb.field("reqBytes",getReqBytes());
         cb.field("resPackets",getResPackets());
