@@ -84,6 +84,13 @@ public class TCPSession extends SessionEntry implements SourceEntry{
         cb.field("resLastTime",getResLastTime());
         cb.field("timeDate", DateUtils.format(getReqStartTime()));
 
+        XContentBuilder cbb = cb.startObject("app");
+
+        PortItem portItem = Portmap.getPortItem(getReqPort(),getResPort());
+        portItem.toJson(cbb);
+
+        cbb.endObject();
+
         return cb;
     }
 
