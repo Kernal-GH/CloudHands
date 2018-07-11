@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-05-17 11:40:55
- * Last Modified: 2018-05-17 11:51:49
+ * Last Modified: 2018-07-11 14:01:34
  */
 
 #include "ch_net_util.h"
@@ -53,7 +53,7 @@ ch_ip_to_str(char *buf, size_t buf_len,uint32_t ip)
     char *b=buf;
 	const uint8_t* ad = (const uint8_t*)&ip;
 
-	if(buf_len < MAX_IP_STR_LEN ){
+	if(buf_len < MAX_IP_STR_LEN || ip == 0){
         return "0.0.0.0";
     }
 	

@@ -13,18 +13,96 @@
 
 typedef struct ch_session_monitor_t ch_session_monitor_t;
 typedef struct ch_session_monitor_item_t ch_session_monitor_item_t;
+typedef struct ch_session_monitor_hdr_t ch_session_monitor_hdr_t;
 
+/*monitor states*/
+#define MON_STATE_INIT 0
+#define MON_STATE_START 1
+#define MON_STATE_STOP 2
+#define MON_STATE_LIVING 3
+#define MON_STATE_DEL 4
+
+/*item types*/
+#define MON_ITEM_TYPE_IP 0
+#define MON_ITEM_TYPE_PORT 1
+#define MON_ITEM_TYPE_IP_PORT 2
+#define MON_ITEM_TYPE_SESSION 3
 
 struct ch_session_monitor_t {
 
+	int fd;
+
+	ch_session_monitor_hdr_t *monitor_hdr;
+	ch_session_monitor_item_t *monitor_items;
+};
+
+#define CHECK_VALUE 1234
+
+#pragma pack(push,1)
+struct ch_session_monitor_hdr_t {
+
+	int check_start;
+	uint32_t item_number;
+	uint32_t item_free_number;
 
 };
 
-
+#pragma pack(push,1)
 struct ch_session_monitor_item_t {
 
+	int check_start;
+	uint64_t id;
+	uint32_t src_ip;
+	uint32_t dst_ip;
+
+	uint16_t src_port;
+	uint16_t dst_port;
+
+	uint64_t monitor_time_tv;
+	uint64_t monitor_start_time;
+	uint64_t monitor_last_time;
+	int monitor_type;
+	int monitor_state;
 
 };
+#pragma pack(pop)
 
+#define MON_VALUE_CHECK(v) do { \
+	if((v)!=CHECK_VALUE)        \
+		abort();                \
+}while(0)
+
+extern int ch_session_monitor_load(ch_session_monitor_t *monitor,const char *mmap_fname,size_t msize);
+
+extern void ch_session_monitor_exit(ch_session_monitor_t *monitor);
+
+extern ch_session_monitor_item_t * ch_session_monitor_item_find(ch_session_monitor_t *monitor,
+	uint32_t src_ip,uint32_t dst_ip,uint16_t src_port,uint16_t dst_port);
+
+extern ch_session_monitor_item_t * ch_session_monitor_item_findById(ch_session_monitor_t *monitor,uint64_t id);
+
+
+extern uint64_t ch_session_monitor_item_add_ip(ch_session_monitor_t *monitor,uint32_t ip,uint64_t monitor_time_tv);
+
+extern uint64_t ch_session_monitor_item_add_port(ch_session_monitor_t *monitor,uint32_t port,uint64_t monitor_time_tv);
+
+extern uint64_t ch_session_monitor_item_add_ip_port(ch_session_monitor_t *monitor,uint32_t ip,uint64_t monitor_time_tv);
+
+extern uint64_t ch_session_monitor_item_add_session(ch_session_monitor_t *monitor,
+	uint32_t src_ip,uint32_t dst_ip,uint16_t src_port,uint16_t dst_port,
+	uint64_t monitor_time_tv);
+
+
+extern void ch_sesson_monitor_item_del(ch_session_monitor_t *monitor,uint64_t id);
+
+extern void ch_session_monitor_item_stop(ch_session_monitor_t *monitor,uint64_t id);
+
+
+extern void ch_session_monitor_item_restart(ch_session_monitor_t *monitor,uint64_t id);
+
+
+extern void ch_session_monitor_dump(ch_session_monitor_t *monitor,FILE *fp);
+
+extern void ch_session_monitor_item_dump(ch_session_monitor_item_t *item,FILE *fp);
 
 #endif /*CH_SESSION_MONITOR_H*/
