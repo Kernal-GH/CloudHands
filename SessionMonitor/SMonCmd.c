@@ -156,19 +156,56 @@ static int _run_add(ch_session_monitor_t *monitor,int argc,char **argv){
 		break;
 
 	case 2:
+		if(argc!=4){
+		
+			printf("Invalid args add item by ip and port!\n");
+			print_usage();
+			rc = -1;
+		}else{
+            uint32_t ip = (uint32_t)to_long(argv[1]);
+			uint16_t port = (uint16_t)to_long(argv[2]);
+			tv = to_long(argv[3]);
+			rc = (int)ch_session_monitor_item_add_ip_port(monitor,ip,port,tv);
+		}
 		break;
 
 	case 3:
+		if(argc!=6){
+		
+			printf("Invalid args add item by session!\n");
+			print_usage();
+			rc = -1;
+		}else{
+            uint32_t sip = (uint32_t)to_long(argv[1]);
+			uint16_t sport = (uint16_t)to_long(argv[2]);
+            uint32_t dip = (uint32_t)to_long(argv[3]);
+			uint16_t dport = (uint16_t)to_long(argv[4]);
+
+			tv = to_long(argv[5]);
+
+			rc = (int)ch_session_monitor_item_add_session(monitor,sip,dip,sport,dport,tv);
+		}
 		break;
 
 	default:
 		break;
 	}
+
+    if(rc<12345){
+    
+        printf("add a item into monitor failed!\n");
+
+    }else{
+    
+        printf("add a item into monitor ok,id:%d\n",rc);
+    }
+    return rc;
 }
 
 static int _parse_rum_cmd(ch_session_monitor_t *monitor,int argc,char **argv){
 
-	const char *cmd;
+	uint64_t id;
+    const char *cmd;
 	int p = 0;
 	int rc = 0;
 
@@ -185,6 +222,8 @@ static int _parse_rum_cmd(ch_session_monitor_t *monitor,int argc,char **argv){
 		break;
 
 	case 'a':
+        printf("Start to add:\n");
+        rc = _run_add(monitor,argc,argv+p);
 		break;
 
 	case 'f':
@@ -193,12 +232,21 @@ static int _parse_rum_cmd(ch_session_monitor_t *monitor,int argc,char **argv){
 		break;
 
 	case 'd':
+        printf("Start to delete:\n");
+        id = to_long(argv[0]);
+        ch_session_monitor_item_del(monitor,id);
 		break;
 
 	case 's':
+        printf("Start to stop:\n");
+        id = to_long(argv[0]);
+        ch_session_monitor_item_stop(monitor,id);
 		break;
 
 	case 'r':
+        printf("Restart a item:\n");
+        id = to_long(argv[0]);
+        ch_session_monitor_item_restart(monitor,id);
 		break;
 
 	default:
@@ -207,7 +255,7 @@ static int _parse_rum_cmd(ch_session_monitor_t *monitor,int argc,char **argv){
 		rc = -1;
 	}
 
-
+    return rc;
 }
 
 int main(int argc,char ** argv){
@@ -240,4 +288,7 @@ int main(int argc,char ** argv){
 	
 		return _parse_rum_cmd(monitor,argc,argv);
 	}
+
+    return 0;
 }
+

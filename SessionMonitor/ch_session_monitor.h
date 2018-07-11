@@ -84,16 +84,17 @@ extern ch_session_monitor_item_t * ch_session_monitor_item_findById(ch_session_m
 
 extern uint64_t ch_session_monitor_item_add_ip(ch_session_monitor_t *monitor,uint32_t ip,uint64_t monitor_time_tv);
 
-extern uint64_t ch_session_monitor_item_add_port(ch_session_monitor_t *monitor,uint32_t port,uint64_t monitor_time_tv);
+extern uint64_t ch_session_monitor_item_add_port(ch_session_monitor_t *monitor,uint16_t port,uint64_t monitor_time_tv);
 
-extern uint64_t ch_session_monitor_item_add_ip_port(ch_session_monitor_t *monitor,uint32_t ip,uint64_t monitor_time_tv);
+extern uint64_t ch_session_monitor_item_add_ip_port(ch_session_monitor_t *monitor,uint32_t ip,uint16_t port,
+        uint64_t monitor_time_tv);
 
 extern uint64_t ch_session_monitor_item_add_session(ch_session_monitor_t *monitor,
 	uint32_t src_ip,uint32_t dst_ip,uint16_t src_port,uint16_t dst_port,
 	uint64_t monitor_time_tv);
 
 
-extern void ch_sesson_monitor_item_del(ch_session_monitor_t *monitor,uint64_t id);
+extern void ch_session_monitor_item_del(ch_session_monitor_t *monitor,uint64_t id);
 
 extern void ch_session_monitor_item_stop(ch_session_monitor_t *monitor,uint64_t id);
 
