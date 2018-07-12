@@ -5,13 +5,13 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-07-11 17:11:31
- * Last Modified: 2018-07-11 18:38:12
+ * Last Modified: 2018-07-12 10:41:53
  */
 
 
 #include <stdio.h>
 #include <stdlib.h>
-//#include "ch_session_monitor.h"
+#include "ch_session_monitor.h"
 
 static void print_usage(void){
 
@@ -93,7 +93,7 @@ static int _run_find(ch_session_monitor_t *monitor,int argc,char **argv){
 		return 0;
 	}
 
-	fprintf("Invalid monitor find args!\n");
+	printf("Invalid monitor find args!\n");
 	print_usage();
 
 	return -1;
@@ -232,21 +232,56 @@ static int _parse_rum_cmd(ch_session_monitor_t *monitor,int argc,char **argv){
 		break;
 
 	case 'd':
-        printf("Start to delete:\n");
-        id = to_long(argv[0]);
-        ch_session_monitor_item_del(monitor,id);
+		if(argc!=1){
+		
+			printf("Invalid delete cmd args!\n");
+			print_usage();
+			rc = -1;
+		}else{
+        
+			id = to_long(argv[1]);
+        
+			printf("Start to delete:%lu\n",(unsigned long)id);
+		
+		
+			ch_session_monitor_item_del(monitor,id);
+		
+			rc = id;
+		}
+
 		break;
 
 	case 's':
-        printf("Start to stop:\n");
-        id = to_long(argv[0]);
-        ch_session_monitor_item_stop(monitor,id);
+		
+		if(argc!=1){
+		
+			printf("Invalid stop cmd args!\n");
+			print_usage();
+			rc = -1;
+		}else{
+			id = to_long(argv[1]);
+			printf("Start to stop:%lu\n",(unsigned long)id);
+	
+			ch_session_monitor_item_stop(monitor,id);
+			rc = id;
+		}
+
 		break;
 
 	case 'r':
-        printf("Restart a item:\n");
-        id = to_long(argv[0]);
-        ch_session_monitor_item_restart(monitor,id);
+		
+		if(argc!=1){
+		
+			printf("Invalid restart cmd args!\n");
+			print_usage();
+			rc = -1;
+		}else{
+			id = to_long(argv[1]);
+			printf("Start to restart:%lu\n",(unsigned long)id);
+			ch_session_monitor_item_restart(monitor,id);
+			rc = id;
+		}
+
 		break;
 
 	default:
@@ -269,6 +304,7 @@ int main(int argc,char ** argv){
 	if(argc <3){
 	
 		print_usage();
+		return -1;
 	}
 
 	mmap_fname = argv[1];

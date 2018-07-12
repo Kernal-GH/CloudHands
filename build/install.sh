@@ -5,7 +5,7 @@
 #        Author: csp001314@163.com
 #   Description: ---
 #        Create: 2016-11-03 20:09:47
-# Last Modified: 2018-06-20 17:18:05
+# Last Modified: 2018-07-12 11:35:30
 #
 
 [ `id -u` -ne 0 ] && {
@@ -70,6 +70,7 @@ comp_lib(){
 	make -C CloudHands/tcp/PParse/mail
 	make -C CloudHands/udp/dns
 	make -C CloudHands/StreamAnalyze/statistic
+	make -C CloudHands/SessionMonitor
 
 }
 
@@ -100,6 +101,7 @@ install_cloudhands(){
 	make -C CloudHands/udp
 	make -C CloudHands/StreamAnalyze
 	make -C CloudHands/StreamAnalyze/statistic -f MakefileDump
+	make -C CloudHands/SessionMonitor -f MakefileCmd
 
 	cp -rf CloudHands/conf $dpdk_install_prefix/CloudHands
 	cp -rf CloudHands/PDispatcher/PDispatcher $dpdk_install_prefix/CloudHands/bin
@@ -109,6 +111,8 @@ install_cloudhands(){
 	cp -rf CloudHands/StreamAnalyze/SAMain $dpdk_install_prefix/CloudHands/bin
 	cp -rf CloudHands/StreamAnalyze/statistic/StatDump $dpdk_install_prefix/CloudHands/bin
 	cp -rf CloudHands/bin/* $dpdk_install_prefix/CloudHands/bin
+	cp -rf CloudHands/SessionMonitor/SMonCmd $dpdk_install_prefix/CloudHands/bin
+
 }
 
 install_java_api(){

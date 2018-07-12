@@ -66,6 +66,7 @@ cp -r ../StreamAnalyze $src_path
 cp -r ../java $src_path
 cp -r ../sample $src_path
 cp -r ../bin $src_path
+cp -r ../SessionMonitor $src_path
 cp -f ./*.sh ./build_dir/
 
 ###### build file ##############

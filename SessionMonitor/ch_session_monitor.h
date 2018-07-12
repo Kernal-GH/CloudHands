@@ -15,6 +15,10 @@ typedef struct ch_session_monitor_t ch_session_monitor_t;
 typedef struct ch_session_monitor_item_t ch_session_monitor_item_t;
 typedef struct ch_session_monitor_hdr_t ch_session_monitor_hdr_t;
 
+#include <stdint.h>
+#include <stdlib.h>
+#include <stdio.h>
+
 /*monitor states*/
 #define MON_STATE_INIT 0
 #define MON_STATE_START 1
@@ -38,13 +42,14 @@ struct ch_session_monitor_t {
 
 #define CHECK_VALUE 1234
 
+#define ID_INIT_VALUE 12345
+
 #pragma pack(push,1)
 struct ch_session_monitor_hdr_t {
 
 	int check_start;
 	uint32_t item_number;
-	uint32_t item_free_number;
-
+	uint64_t next_id;
 };
 
 #pragma pack(push,1)
@@ -71,6 +76,15 @@ struct ch_session_monitor_item_t {
 	if((v)!=CHECK_VALUE)        \
 		abort();                \
 }while(0)
+
+static inline uint64_t ch_session_monitor_alloc_id(ch_session_monitor_t *monitor){
+
+	uint64_t id = monitor->monitor_hdr->next_id;
+
+	 monitor->monitor_hdr->next_id = (monitor->monitor_hdr->next_id+1)%UINT64_MAX;
+
+	 return id;
+}
 
 extern int ch_session_monitor_load(ch_session_monitor_t *monitor,const char *mmap_fname,size_t msize);
 

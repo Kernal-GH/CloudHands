@@ -1,0 +1,34 @@
+include ../make.include
+CFLAGS  = ${BUILD_CFLAGS}  -O0 -rdynamic -D_GNU_SOURCE
+CFLAGS += -I../lib/common
+
+smonCmd_package= SMonCmd
+
+smonCmd_SOURCES = ch_session_monitor.c \
+				  ../lib/common/ch_net_util.c \
+				  SMonCmd.c 
+
+smonCmd_OBJECTS =$(patsubst %.c,%.o,$(smonCmd_SOURCES))
+smonCmd_DEPENDS =$(patsubst %.c,%.d,$(smonCmd_SOURCES))
+smonCmd_ASMFILE =$(patsubst %.c,%.s,$(smonCmd_SOURCES))
+
+quiet_cmd_dpdk = LINK   $@ 
+	cmd_smonCmd = ${CC} ${CFLAGS} -o $@ $(smonCmd_OBJECTS)  \
+					$(common_package) \
+					$(LDFLAGS)
+
+.PHONY: all clean
+
+all: $(smonCmd_package)
+
+$(smonCmd_package): $(smonCmd_OBJECTS) 
+	$(call cmd,smonCmd)
+-include $(smonCmd_DEPENDS)
+
+$(common_package):
+	$(call,make)
+
+clean:
+	@rm -rf $(smonCmd_OBJECTS) $(smonCmd_DEPENDS) $(smonCmd_ASMFILE) $(smonCmd_package)
+
+

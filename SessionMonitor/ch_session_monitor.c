@@ -5,21 +5,16 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-07-11 11:08:14
- * Last Modified: 2018-07-11 16:52:48
+ * Last Modified: 2018-07-12 10:55:11
  */
 
+#include <sys/mman.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <time.h>
 #include "ch_session_monitor.h"
-
-static uint64_t cur_id = 12345;
-
-uint64_t _alloc_a_id(){
-
-	uint64_t res = cur_id;
-
-	cur_id = (cur_id+1)%UINT64_MAX;
-
-	return res;
-}
+#include "ch_util.h"
+#include "ch_net_util.h"
 
 static int _mmap_file_open(const char *fname,uint64_t fsize,int existed) {
    
@@ -83,7 +78,7 @@ int ch_session_monitor_load(ch_session_monitor_t *monitor,const char *mmap_fname
 
 	if(!existed&&msize==0){
 	
-		fprintf(stdout,"Please specify the mmap size,mmapFile:%s\n");
+		fprintf(stdout,"Please specify the mmap size,mmapFile:%s\n",mmap_fname);
 		return -1;
 	}
 	if(existed){
@@ -128,7 +123,7 @@ int ch_session_monitor_load(ch_session_monitor_t *monitor,const char *mmap_fname
 
 		hdr->check_start = CHECK_VALUE;
 		hdr->item_number = 0;
-		hdr->item_free_number = 0;
+		hdr->next_id = ID_INIT_VALUE;
 
 		while(((void*)(cur_item+1))<addr_end){
 		
@@ -145,7 +140,6 @@ int ch_session_monitor_load(ch_session_monitor_t *monitor,const char *mmap_fname
 			cur_item->monitor_state = MON_STATE_INIT;
 
 			hdr->item_number += 1;
-			hdr->item_free_number += 1;
 
 			cur_item += 1;
 		}
@@ -209,34 +203,40 @@ static const char * _type_string_get(int type){
 
 }
 
+void ch_session_monitor_item_dump(ch_session_monitor_item_t *cur_item,FILE *fp){
+
+	
+	char buf[64] = {0};
+	fprintf(fp,"item.id:%lu\n",(unsigned long)cur_item->id);
+	fprintf(fp,"item.srcIP:%s\n",ch_ip_to_str(buf,63,cur_item->src_ip));
+	fprintf(fp,"item.dstIP:%s\n",ch_ip_to_str(buf,63,cur_item->dst_ip));
+
+	fprintf(fp,"item.srcPort:%lu\n",(unsigned long)cur_item->src_port);
+	fprintf(fp,"item.dstPort:%lu\n",(unsigned long)cur_item->dst_port);
+	fprintf(fp,"item.monitor_time_tv:%lu\n",(unsigned long)cur_item->monitor_time_tv);
+	fprintf(fp,"item.monitor_start_time:%lu\n",(unsigned long)cur_item->monitor_start_time);
+	fprintf(fp,"item.monitor_last_time:%lu\n",(unsigned long)cur_item->monitor_last_time);
+	fprintf(fp,"item.monitor_state:%s\n",_state_string_get(cur_item->monitor_state));
+	fprintf(fp,"item.monitor_type:%s\n",_type_string_get(cur_item->monitor_type));
+
+}
+
 void ch_session_monitor_dump(ch_session_monitor_t *monitor,FILE *fp){
 
-	int i = 0;
+	uint32_t i = 0;
 
-	char buf[64] = {0};
 
 	ch_session_monitor_hdr_t *hdr = monitor->monitor_hdr;
 	ch_session_monitor_item_t *cur_item = monitor->monitor_items;
 
 	fprintf(fp,"Dump session monitir informations:\n");
 	fprintf(fp,"item.number:%lu\n",(unsigned long)hdr->item_number);
-	fprintf(fp,"item.free.number:%lu\n",(unsigned long)hdr->item_free_number);
+	fprintf(fp,"item.nextID:%lu\n",(unsigned long)hdr->next_id);
 
 	fprintf(fp,"Dump the Monitor items informations:\n");
 	while((i++)<hdr->item_number&&cur_item->monitor_state!=MON_STATE_INIT){
 	
-		fprintf(fp,"item.id:%lu\n",(unsigned long)cur_item->id);
-		fprintf(fp,"item.srcIP:%s\n",ch_ip_to_str(buf,63,cur_item->src_ip));
-		fprintf(fp,"item.dstIP:%s\n",ch_ip_to_str(buf,63,cur_item->dst_ip));
-
-		fprintf(fp,"item.srcPort:%lu\n",(unsigned long)cur_item->src_port);
-		fprintf(fp,"item.dstPort:%lu\n",(unsigned long)cur_item->dst_port);
-		fprintf(fp,"item.monitor_time_tv:%lu\n",(unsigned long)cur_item->monitor_time_tv);
-		fprintf(fp,"item.monitor_start_time:%lu\n",(unsigned long)cur_item->monitor_start_time);
-		fprintf(fp,"item.monitor_last_time:%lu\n",(unsigned long)cur_item->monitor_last_time);
-		fprintf(fp,"item.monitor_state:%s\n",_state_string_get(cur_item->monitor_state));
-		fprintf(fp,"item.monitor_type:%s\n",_type_string_get(cur_item->monitor_type));
-
+		ch_session_monitor_item_dump(cur_item,fp);
 		cur_item += 1;
 	}
 
@@ -261,7 +261,7 @@ static inline int is_match(ch_session_monitor_item_t *item,
 		return (item->src_ip == src_ip&&item->src_port == src_port&&item->dst_ip == dst_ip&&item->dst_port == dst_port)||\
 			   (item->src_ip == dst_ip&&item->src_port == dst_port&&item->dst_ip == src_ip&&item->dst_port == src_port);
 
-	case default:
+	default:
 		return 0;
 	}
 
@@ -272,8 +272,8 @@ ch_session_monitor_item_t * ch_session_monitor_item_find(ch_session_monitor_t *m
 	uint32_t src_ip,uint32_t dst_ip,uint16_t src_port,uint16_t dst_port){
 
 
-	int i = 0;
-	ch_session_monitor_item_t *item = NULL,*cur_item = monitor->monitor_items,*tmp_item;
+	uint32_t i = 0;
+	ch_session_monitor_item_t *item = NULL,*cur_item = monitor->monitor_items;
 	ch_session_monitor_hdr_t *hdr = monitor->monitor_hdr;
 
 	while((i++)<hdr->item_number&&cur_item->monitor_state!=MON_STATE_INIT){
@@ -309,23 +309,28 @@ ch_session_monitor_item_t * ch_session_monitor_item_find(ch_session_monitor_t *m
 
 static ch_session_monitor_item_t * _alloc_item(ch_session_monitor_t *monitor){
 
-	int i = 0;
+	uint32_t i = 0;
 
 	ch_session_monitor_hdr_t *hdr = monitor->monitor_hdr;
 	ch_session_monitor_item_t *cur_item = monitor->monitor_items;
 
-	if(hdr->item_free_number == 0)
-		return NULL;
-
 	while((i++)<hdr->item_number){
 
-		if(cur_item->monitor_state == MON_STATE_DEL || cur_item->monitor_state == MON_STATE_INIT)
+		if(cur_item->monitor_state == MON_STATE_DEL || cur_item->monitor_state == MON_STATE_INIT){
+		
 			return cur_item;
-
+		}
 		cur_item += 1;
 	}
 
 	return NULL;
+}
+
+static uint64_t _time_get(void)
+{
+   struct timeval tv;
+   gettimeofday(&tv,NULL);
+   return tv.tv_sec * 1000 + tv.tv_usec / 1000;
 }
 
 uint64_t _item_add(ch_session_monitor_t *monitor,int type,
@@ -350,13 +355,13 @@ uint64_t _item_add(ch_session_monitor_t *monitor,int type,
 	}
 
 	item->check_start = CHECK_VALUE;
-	item->id = _alloc_a_id();
+	item->id = ch_session_monitor_alloc_id(monitor);
 	item->src_ip = src_ip;
 	item->dst_ip = dst_ip;
 	item->src_port = src_port;
 	item->dst_port = dst_port;
 	item->monitor_time_tv = monitor_time_tv;
-	item->monitor_start_time = ch_get_current_timems()/1000;
+	item->monitor_start_time = _time_get()/1000;
 	item->monitor_last_time = item->monitor_start_time;
 	item->monitor_type = type;
 	item->monitor_state = MON_STATE_START;
@@ -380,7 +385,6 @@ uint64_t ch_session_monitor_item_add_ip(ch_session_monitor_t *monitor,uint32_t i
 
 uint64_t ch_session_monitor_item_add_port(ch_session_monitor_t *monitor,uint16_t port,uint64_t monitor_time_tv){
 
-	ch_session_monitor_item_t *item;
 
 	if(port == 0){
 	
@@ -423,8 +427,8 @@ uint64_t ch_session_monitor_item_add_session(ch_session_monitor_t *monitor,
 
 ch_session_monitor_item_t * ch_session_monitor_item_findById(ch_session_monitor_t *monitor,uint64_t id){
 
-	int i = 0;
-	ch_session_monitor_item_t *item = NULL,*cur_item = monitor->monitor_items,*tmp_item;
+	uint32_t i = 0;
+	ch_session_monitor_item_t *cur_item = monitor->monitor_items;
 	ch_session_monitor_hdr_t *hdr = monitor->monitor_hdr;
 
 	while((i++)<hdr->item_number&&cur_item->monitor_state!=MON_STATE_INIT){
@@ -443,7 +447,7 @@ void ch_session_monitor_item_del(ch_session_monitor_t *monitor,uint64_t id){
 	ch_session_monitor_item_t *item = ch_session_monitor_item_findById(monitor,id);
 
 	if(item){
-	
+
 		item->monitor_state = MON_STATE_DEL;
 	}
 }
