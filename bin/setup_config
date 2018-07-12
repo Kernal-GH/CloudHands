@@ -18,10 +18,10 @@ LOG_STORE_DIR=/opt/cloudhands/log
 #config files information
 CH_CONFIG_DIR=/usr/local/dpdk/CloudHands/conf
 PDIS_CONFIG_FPATH=$CH_CONFIG_DIR/pdispatcher.conf
-TCP_CONFIG_FPATH=$CH_CONFIG_DIR/TCPSession.conf
-UDP_CONFIG_FPATH=$CH_CONFIG_DIR/UDP.conf
-SA_CONFIG_FPATH=$CH_CONFIG_DIR/SA.conf
-PP_CONFIG_FPATH=$CH_CONFIG_DIR/PPMain.conf
+TCP_CONFIG_FPATH=$CH_CONFIG_DIR/tcp/TCPMain.conf
+UDP_CONFIG_FPATH=$CH_CONFIG_DIR/udp/UDPMain.conf
+SA_CONFIG_FPATH=$CH_CONFIG_DIR/sa/SAMain.conf
+PP_CONFIG_FPATH=$CH_CONFIG_DIR/tcp/PParser/PPMain.conf
 
 #main application names
 PDIS_MAIN_NAME=PDispatcher

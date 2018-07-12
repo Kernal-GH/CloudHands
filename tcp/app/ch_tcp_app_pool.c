@@ -29,28 +29,32 @@ static int _register_all_apps(ch_tcp_app_pool_t *ta_pool,ch_tcp_app_context_t *t
 		process_register_retv(rc,"http");
 	}
 
-	return 0;
+	if(tcontext->smtp_is_on){
+		rc = ch_smtp_init(ta_pool,tcontext->smtp_cfname);
+		process_register_retv(rc,"smtp");
+	}
 
-#if 0
-	if(tcontext->smtp_is_on)
-		ch_smtp_init(ta_pool,tcontext->smtp_cfname);
+	if(tcontext->pop3_is_on){
+		rc = ch_pop3_init(ta_pool,tcontext->pop3_cfname);
+		process_register_retv(rc,"pop3");
+	}
 	
-	if(tcontext->pop3_is_on)
-		ch_pop3_init(ta_pool,tcontext->pop3_cfname);
-	
-	if(tcontext->imap_is_on)
-		ch_imap_init(ta_pool,tcontext->imap_cfname);
-	
-	if(tcontext->telnet_is_on)
-		ch_telnet_init(ta_pool,tcontext->telnet_cfname);
-	
-	if(tcontext->ftp_is_on)
-		ch_ftp_init(ta_pool,tcontext->ftp_cfname);
-	
-	if(tcontext->smon_is_on)
-		ch_smon_init(ta_pool,tcontext->smon_cfname);
+	if(tcontext->imap_is_on){
+		rc = ch_imap_init(ta_pool,tcontext->imap_cfname);
+		process_register_retv(rc,"imap");
+	}
 
-#endif
+	if(tcontext->telnet_is_on){
+		rc = ch_telnet_init(ta_pool,tcontext->telnet_cfname);
+		process_register_retv(rc,"telnet");
+	}
+
+	if(tcontext->ftp_is_on){
+		rc = ch_ftp_init(ta_pool,tcontext->ftp_cfname);
+		process_register_retv(rc,"ftp");
+	}
+
+    return 0;
 }
 
 

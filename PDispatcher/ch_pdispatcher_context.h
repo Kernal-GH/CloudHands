@@ -32,10 +32,10 @@ typedef struct ch_pdispatcher_context_t ch_pdispatcher_context_t;
 
 #define LOG_NAME_DEFAULT "/tmp/pdispatcher.log"
 #define LOG_LEVEL_DEFAULT CH_LOG_NOTICE
-#define PORT_CFNAME_DEFAULT "/usr/local/dpdk/Cloudhands/conf/port.conf"
-#define PINT_TCP_CFNAME_DEFAULT "/usr/local/dpdk/Cloudhands/conf/TCPPint.conf"
-#define PINT_SA_CFNAME_DEFAULT "/usr/local/dpdk/Cloudhands/conf/SAPint.conf"
-#define PINT_UDP_CFNAME_DEFAULT "/usr/local/dpdk/Cloudhands/conf/UDPPint.conf"
+#define PORT_CFNAME_DEFAULT "/usr/local/dpdk/CloudHands/conf/port.conf"
+#define PINT_TCP_CFNAME_DEFAULT "/usr/local/dpdk/CloudHands/conf/tcp/TCPPint.conf"
+#define PINT_SA_CFNAME_DEFAULT "/usr/local/dpdk/CloudHands/conf/sa/SAPint.conf"
+#define PINT_UDP_CFNAME_DEFAULT "/usr/local/dpdk/CloudHands/conf/udp/UDPPint.conf"
 
 struct ch_pdispatcher_context_t {
 

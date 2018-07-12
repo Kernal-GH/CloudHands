@@ -56,15 +56,14 @@ comp_lib(){
 	make -C CloudHands/lib/fstore
 	make -C CloudHands/packet
 	make -C CloudHands/MProcess
-	make -C CloudHands/app
-	cp -rf  CloudHands/app/tcp_app/*.o CloudHands/app/
-	cp -rf  CloudHands/app/tcp_app/debug/*.o CloudHands/app/
-	cp -rf  CloudHands/app/tcp_app/http/*.o CloudHands/app/
-	cp -rf  CloudHands/app/tcp_app/ftp/*.o CloudHands/app/
-	cp -rf  CloudHands/app/tcp_app/imap/*.o CloudHands/app/
-	cp -rf  CloudHands/app/tcp_app/pop3/*.o CloudHands/app/
-	cp -rf  CloudHands/app/tcp_app/smtp/*.o CloudHands/app/
-	cp -rf  CloudHands/app/tcp_app/telnet/*.o CloudHands/app/
+	make -C CloudHands/tcp/app
+	cp -rf  CloudHands/tcp/app/http/*.o CloudHands/tcp/app/
+	cp -rf  CloudHands/tcp/app/smtp/*.o CloudHands/tcp/app/
+	cp -rf  CloudHands/tcp/app/pop3/*.o CloudHands/tcp/app/
+	cp -rf  CloudHands/tcp/app/imap/*.o CloudHands/tcp/app/
+	cp -rf  CloudHands/tcp/app/telnet/*.o CloudHands/tcp/app/
+	cp -rf  CloudHands/tcp/app/ftp/*.o CloudHands/tcp/app/
+
 
 	make -C CloudHands/tcp/PParse/http
 	make -C CloudHands/tcp/PParse/mail

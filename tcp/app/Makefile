@@ -18,7 +18,11 @@ CFLAGS += -I../ -I.  -I${DPDK}/include -include ${DPDK}/include/rte_config.h
 ch_tcp_app_SOURCES = ch_tcp_app_context.c \
 					 ch_tcp_app_pool.c \
 					 http/ch_http.c \
-					 smtp/ch_smtp.c
+					 smtp/ch_smtp.c \
+					 pop3/ch_pop3.c \
+					 imap/ch_imap.c \
+					 telnet/ch_telnet.c \
+					 ftp/ch_ftp.c
 
 ch_tcp_app_OBJECTS = $(patsubst %.c,%.o,$(ch_tcp_app_SOURCES))
 ch_tcp_app_DEPENDS = $(patsubst %.c,%.d,$(ch_tcp_app_SOURCES))
