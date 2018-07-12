@@ -5,12 +5,11 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-04-04 16:42:26
- * Last Modified: 2018-04-13 10:48:20
+ * Last Modified: 2018-07-12 18:43:47
  */
 
 #include "ch_tcp_work.h"
 #include "ch_log.h"
-#include "ch_app_context_tcp.h"
 
 ch_tcp_work_t *
 ch_tcp_work_create(ch_pool_t *mp,const char *cfname){
@@ -44,10 +43,10 @@ ch_tcp_work_create(ch_pool_t *mp,const char *cfname){
 
 	}
 
-	tcp_work->app_context = ch_app_context_tcp_create(tcp_work->mp,tcp_context->tcp_app_cfname);
-	if(tcp_work->app_context == NULL){
+	tcp_work->ta_pool = ch_tcp_app_pool_create(tcp_work->mp,tcp_context->app_pool_cfname);
+	if(tcp_work->ta_pool == NULL){
 	
-		ch_log(CH_LOG_ERR,"Cannot create tcp application context:%s",tcp_context->tcp_app_cfname);
+		ch_log(CH_LOG_ERR,"Cannot create tcp application pool:%s",tcp_context->app_pool_cfname);
 		return NULL;
 	}
 

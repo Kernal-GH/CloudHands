@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-02-02 11:44:08
- * Last Modified: 2018-04-04 17:17:46
+ * Last Modified: 2018-07-12 18:59:48
  */
 
 #include "ch_tcp_session_request_handler.h"
@@ -123,7 +123,7 @@ static int
 _tcp_session_create(ch_tcp_session_request_handler_t *req_handler,
 	ch_tcp_session_request_t *sreq,
 	ch_packet_tcp_t *tcp_pkt,
-	ch_app_t *app){
+	ch_tcp_app_t *app){
 
     ch_tcp_session_t *tcp_session;
 	ch_tcp_session_pool_t *ts_pool = session_pool_get(req_handler);
@@ -150,7 +150,7 @@ static int
 _three_way_handshake_process(ch_tcp_session_request_handler_t *req_handler,
 	ch_tcp_session_request_t *sreq,
 	ch_packet_tcp_t *tcp_pkt,
-	ch_app_t *app){
+	ch_tcp_app_t *app){
 
     int rc = PROCESSOR_RET_DROP;
 	int ret;
@@ -237,11 +237,11 @@ int ch_tcp_session_request_packet_handle(ch_tcp_session_request_handler_t *req_h
     int res = PROCESSOR_RET_OK;
     ch_tcp_session_request_t *sreq = NULL;
     ch_tcp_session_t *tcp_session = NULL;
-    ch_app_t *app;
+    ch_tcp_app_t *app;
 
 
 	do{
-		app = ch_app_context_recognize_by_port(req_handler->tcp_work->app_context,tcp_pkt->src_port,tcp_pkt->dst_port); 
+		app = ch_tcp_app_find_by_port(req_handler->tcp_work->ta_pool,tcp_pkt); 
 
 		if(app == NULL){
 			/*no application handles this packet!,skip it!*/

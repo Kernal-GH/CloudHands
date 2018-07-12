@@ -26,9 +26,9 @@ typedef struct ch_tcp_session_t ch_tcp_session_t;
 #include "ch_tcp_session_endpoint.h"
 #include "ch_tcp_session_request_pool.h"
 #include "ch_util.h"
-#include "ch_app_context.h"
 #include "ch_memory.h"
 #include "ch_packet_tcp.h"
+#include "ch_tcp_app_pool.h"
 
 enum {
     SESSION_STATE_INIT=0,
@@ -53,7 +53,7 @@ struct  ch_tcp_session_t {
     
     ch_tcp_session_endpoint_t endpoint_res;
 
-    ch_app_t *app;
+    ch_tcp_app_t *app;
     
     ch_tcp_session_endpoint_t *cur_ep;
 
@@ -90,7 +90,7 @@ struct  ch_tcp_session_t {
 
 #define ch_tcp_session_state_is_rst(tcp_session) ((tcp_session)->state == SESSION_STATE_RST)
 
-extern int ch_tcp_session_init(ch_tcp_session_t *tcp_session,ch_tcp_session_request_t *sreq,ch_app_t *app,ch_memory_t *mm); 
+extern int ch_tcp_session_init(ch_tcp_session_t *tcp_session,ch_tcp_session_request_t *sreq,ch_tcp_app_t *app,ch_memory_t *mm); 
 
 extern void ch_tcp_session_fin(ch_tcp_session_t *tcp_session);
 

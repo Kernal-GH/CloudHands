@@ -52,7 +52,7 @@ struct ch_tcp_context_t {
 	size_t mm_max_cache_size;
 	uint64_t mm_timeout;
 
-	const char *tcp_app_cfname;
+	const char *app_pool_cfname;
 
 	const char *pint_cfname;
 

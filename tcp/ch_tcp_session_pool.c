@@ -126,7 +126,7 @@ void ch_tcp_session_pool_destroy(ch_tcp_session_pool_t *tspt){
 }
 
 ch_tcp_session_t * 
-ch_tcp_session_pool_entry_create(ch_tcp_session_pool_t *tspt,ch_tcp_session_request_t *sreq,ch_app_t *app,
+ch_tcp_session_pool_entry_create(ch_tcp_session_pool_t *tspt,ch_tcp_session_request_t *sreq,ch_tcp_app_t *app,
         ch_packet_tcp_t *tcp_pkt){
 
     ch_tcp_session_t *tcp_session = NULL;

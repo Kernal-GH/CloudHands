@@ -47,4 +47,7 @@ extern ch_shm_format_t * ch_shm_format_tcp_with_mmap_create(ch_pool_t *mp,const 
 extern ch_shm_format_t * ch_shm_format_tcp_with_shm_create(ch_pool_t *mp,const char *key,int proj_id,uint64_t size,
 	uint64_t entry_size,uint64_t priv_data_size,int is_write);
 
+
+extern int ch_tcp_record_put(ch_shm_format_t *shm_fmt,ch_tcp_record_t *tcp_rcd);
+
 #endif /*CH_TCP_RECORD_H*/

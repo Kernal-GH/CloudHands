@@ -5,14 +5,13 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-01-30 12:19:59
- * Last Modified: 2018-04-13 14:44:09
+ * Last Modified: 2018-07-12 18:56:47
  */
 
 #include "ch_config.h"
 #include "ch_tcp_context.h"
 #include "ch_entry_pool.h"
 #include "ch_log.h"
-#include "ch_app_context_tcp.h"
 
 static void do_tcp_context_init(ch_tcp_context_t *tcp_context){
 
@@ -40,7 +39,7 @@ static void do_tcp_context_init(ch_tcp_context_t *tcp_context){
 
 	tcp_context->mm_max_cache_size = 128*1024*1024;
 	tcp_context->mm_timeout = 60;
-	tcp_context->tcp_app_cfname = NULL;
+	tcp_context->app_pool_cfname = NULL;
 
 	tcp_context->pint_cfname = NULL;
 
@@ -335,7 +334,7 @@ static const char *cmd_app_cfname(cmd_parms *cmd ch_unused, void *_dcfg, const c
 
 
     ch_tcp_context_t *context = (ch_tcp_context_t*)_dcfg;
-	context->tcp_app_cfname = p1;
+	context->app_pool_cfname = p1;
 
     return NULL;
 }
@@ -527,7 +526,7 @@ static inline void dump_tcp_context(ch_tcp_context_t *tcp_context){
     fprintf(stdout,"tcp process interface config file name:%s\n",tcp_context->pint_cfname);
     fprintf(stdout,"tcp memory max cache size:%lu\n",(unsigned long)tcp_context->mm_max_cache_size);
     fprintf(stdout,"tcp memory timeout:%lu\n",(unsigned long)tcp_context->mm_timeout);
-    fprintf(stdout,"tcp application config name:%s\n",tcp_context->tcp_app_cfname);
+    fprintf(stdout,"tcp application config name:%s\n",tcp_context->app_pool_cfname);
 
 }
 

@@ -15,9 +15,9 @@ typedef struct ch_tcp_work_t ch_tcp_work_t;
 
 #include "ch_mpool.h"
 #include "ch_process_interface_tcp_context.h"
-#include "ch_app_context.h"
 #include "ch_tcp_session_task_pool.h"
 #include "ch_tcp_context.h"
+#include "ch_tcp_app_pool.h"
 
 struct ch_tcp_work_t {
 
@@ -27,7 +27,7 @@ struct ch_tcp_work_t {
 
 	ch_process_interface_tcp_context_t *pint_context;
 
-	ch_app_context_t *app_context;
+	ch_tcp_app_pool_t *ta_pool;
 
 	ch_tcp_session_task_pool_t *tstpool;
 

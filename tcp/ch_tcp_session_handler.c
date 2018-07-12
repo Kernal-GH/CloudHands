@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-02-05 11:06:43
- * Last Modified: 2018-07-03 17:45:00
+ * Last Modified: 2018-07-12 19:16:57
  */
 
 #include "ch_tcp_session_handler.h"
@@ -28,39 +28,22 @@ static inline uint8_t _session_direct(ch_tcp_session_t *tcp_session){
     return SESSION_DIRECT_RES;
 }
 
-static inline void  
-_init_record(ch_tcp_session_t *tcp_session,
-	ch_tcp_record_t *tcp_rcd,
-	uint8_t packet_type,
-	void *data,
-	uint32_t dlen){
+
+static int _content_data_output(ch_tcp_session_handler_t *shandler,ch_tcp_session_t *tsession,void *data,size_t dlen){
 
 
-	tcp_rcd->shm_rcd.magic = EIMAGIC;
+	int rc;
+
+	if(tsession->cur_ep == &tsession->endpoint_req)
+		rc = ch_tcp_app_request_content_process(tsession->app,shandler->shm_fmt,tsession,data,dlen); 
+	else
+		rc = ch_tcp_app_response_content_process(tsession->app,shandler->shm_fmt,tsession,data,dlen);
+
+	ch_tcp_session_stat_reset(tsession);
 
 
-	tcp_rcd->shm_rcd.record_size = CH_TCP_RECORD_HEADER_SIZE+dlen;
+	return rc;
 
-	tcp_rcd->shm_rcd.data_offset = tcp_session->cur_ep->last_offset-dlen;
-
-	tcp_rcd->shm_rcd.data_len = dlen;
-	tcp_rcd->shm_rcd.data = data; 
-
-	tcp_rcd->packet_type = packet_type;
-	tcp_rcd->session_direct = _session_direct(tcp_session);
-	tcp_rcd->session_id = tcp_session->session_id;
-	tcp_rcd->time = tcp_session->cur_ep->time;
-	tcp_rcd->src_ip = ch_tcp_session_srcip_get(tcp_session);
-	tcp_rcd->dst_ip = ch_tcp_session_dstip_get(tcp_session);
-	tcp_rcd->src_port = ch_tcp_session_srcport_get(tcp_session);
-	tcp_rcd->dst_port = ch_tcp_session_dstport_get(tcp_session);
-
-	tcp_rcd->req_packets = ch_tcp_session_src_packets_get(tcp_session);
-	tcp_rcd->req_bytes = ch_tcp_session_src_bytes_get(tcp_session);
-	tcp_rcd->res_packets = ch_tcp_session_dst_packets_get(tcp_session);
-	tcp_rcd->res_bytes = ch_tcp_session_dst_bytes_get(tcp_session);
-	
-	ch_tcp_session_stat_reset(tcp_session);
 }
 
 
@@ -68,16 +51,11 @@ static void _tcp_session_timeout_cb(ch_ptable_entry_t *entry,uint64_t tv,void *p
 
 	tv = tv;
 
-	ch_tcp_record_t tcp_rcd;
-	ch_tcp_session_t *tcp_session = (ch_tcp_session_t*)entry;
+	ch_tcp_session_t *tsession = (ch_tcp_session_t*)entry;
 	ch_tcp_session_handler_t *shandler = (ch_tcp_session_handler_t*)priv_data;
 
-	_init_record(tcp_session,&tcp_rcd,PACKET_TYPE_CLOSE,NULL,0);
-
-    ch_app_context_content_close(shandler->tcp_work->app_context,
-		tcp_session->app,shandler->shm_fmt,(ch_shm_record_t*)(&tcp_rcd));
-
-
+	ch_tcp_app_content_close(tsession->app,shandler->shm_fmt,tsession,NULL,0);
+	ch_tcp_session_stat_reset(tsession);
 }
 
 ch_tcp_session_handler_t * 
@@ -160,17 +138,14 @@ static inline void _process_fin_packet(ch_tcp_session_handler_t *shandler ch_unu
 
 
 
-static void _tcp_session_close(ch_tcp_session_handler_t *shandler,ch_tcp_session_t *tcp_session){
+static void _tcp_session_close(ch_tcp_session_handler_t *shandler,ch_tcp_session_t *tsession){
 
-	ch_tcp_record_t tcp_rcd;
 
-	_init_record(tcp_session,&tcp_rcd,PACKET_TYPE_CLOSE,NULL,0);
-
-    ch_app_context_content_close(shandler->tcp_work->app_context,
-		tcp_session->app,shandler->shm_fmt,(ch_shm_record_t*)(&tcp_rcd));
+	ch_tcp_app_content_close(tsession->app,shandler->shm_fmt,tsession,NULL,0);
+	ch_tcp_session_stat_reset(tsession);
 
     /*free this tcp  session */
-    ch_tcp_session_pool_entry_free(shandler->spool,tcp_session);
+    ch_tcp_session_pool_entry_free(shandler->spool,tsession);
 
 }
 
@@ -185,7 +160,6 @@ static void _process_data_packet(ch_tcp_session_handler_t *shandler,
 	ch_tcp_session_t *tcp_session,ch_tcp_session_endpoint_t *ep,
         ch_packet_tcp_t *tcp_pkt){
 
-	ch_tcp_record_t tcp_rcd;
     int rc;
     ch_data_fragment_t *df;
 
@@ -209,21 +183,16 @@ static void _process_data_packet(ch_tcp_session_handler_t *shandler,
         tcp_pkt->payload_len-=diff;
         ep->last_offset = end_offset;
 
-		_init_record(tcp_session,&tcp_rcd,PACKET_TYPE_DATA,tcp_pkt->pdata,tcp_pkt->payload_len);
-
-        rc = ch_app_context_content_process(shandler->tcp_work->app_context,tcp_session->app,shandler->shm_fmt,(ch_shm_record_t*)(&tcp_rcd));
-		
+		rc = _content_data_output(shandler,tcp_session,tcp_pkt->pdata,tcp_pkt->payload_len);
 
         if(rc == PARSE_RETURN_DISCARD||rc == PARSE_RETURN_CLOSE){
             _tcp_session_close(shandler,tcp_session); 
         }else{
             df = ch_assemble_fragment_pop(&ep->as_frag,ep->last_offset);
             if(df){
-				_init_record(tcp_session,&tcp_rcd,PACKET_TYPE_DATA,df->data,df->len);
+		
+				rc = _content_data_output(shandler,tcp_session,df->data,df->len);
         
-				rc = ch_app_context_content_process(shandler->tcp_work->app_context,tcp_session->app,
-					shandler->shm_fmt,(ch_shm_record_t*)(&tcp_rcd));
-
                 if(rc == PARSE_RETURN_DISCARD||rc == PARSE_RETURN_CLOSE){
                     _tcp_session_close(shandler,tcp_session);
 

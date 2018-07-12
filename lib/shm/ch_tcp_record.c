@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-01-29 11:43:49
- * Last Modified: 2018-07-03 11:38:10
+ * Last Modified: 2018-07-12 16:54:16
  */
 
 #include "ch_tcp_record.h"
@@ -97,3 +97,43 @@ ch_shm_format_t * ch_shm_format_tcp_with_shm_create(ch_pool_t *mp,const char *ke
 		_tcp_record_read);
 
 }
+
+int ch_tcp_record_put(ch_shm_format_t *fmt,ch_tcp_record_t *tcp_rcd){
+
+    int rc;
+	ch_shm_record_t *rcd = (ch_shm_record_t*)tcp_rcd;
+
+    for(;;){
+
+        rc = ch_shm_format_put(fmt,(ch_shm_record_t*)tcp_rcd);
+        if(rc == 0){
+			/*ok*/
+            return 0;
+        }
+
+        if(rc == -2){
+
+            ch_log(CH_LOG_ERR,"The data is too large:%lu,discard it!",rcd->data_len);
+            /*write a close packet*/
+			tcp_rcd->packet_type = PACKET_TYPE_CLOSE;
+			rcd->data = NULL;
+			rcd->data_len = 0;
+			rcd->data_offset = 0;
+			rcd->record_size = CH_TCP_RECORD_HEADER_SIZE;
+
+            
+            while(ch_shm_format_put(fmt,rcd)){
+                usleep(5);
+            }
+
+            return -2;
+        }
+
+        ch_log(CH_LOG_WARN,"The shm is full,sleep and try again!");
+
+        usleep(5);
+    }
+
+	return 0;
+}
+
