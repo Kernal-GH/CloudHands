@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-07-13 13:16:29
- * Last Modified: 2018-07-13 15:26:19
+ * Last Modified: 2018-07-13 16:39:58
  */
 
 #include "ch_smon_session_entry.h"
@@ -51,6 +51,7 @@ void ch_smon_session_entry_write(ch_smon_session_entry_t *smon_entry,void *data,
 	if(fp){
 	
 		fwrite(data,dlen,1,fp);
+		fflush(fp);
 	}
 
 }
