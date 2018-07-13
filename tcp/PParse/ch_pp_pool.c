@@ -5,13 +5,14 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-05-17 14:55:00
- * Last Modified: 2018-07-03 18:18:48
+ * Last Modified: 2018-07-13 15:55:56
  */
 
 #include "ch_pp_pool.h"
 #include "ch_log.h"
 #include "ch_http_parser.h"
 #include "ch_mail_parser.h"
+#include "ch_smon_parser.h"
 
 #define IS_SESSION_CLOSE(tcp_record) ((tcp_record)->packet_type == PACKET_TYPE_FLUSH || (tcp_record)->packet_type ==PACKET_TYPE_CLOSE)
 
@@ -75,6 +76,12 @@ ch_pp_pool_t * ch_pp_pool_create(ch_pp_work_t *pwork){
 		return NULL;
 	}
 
+	/*init smon parser*/
+	if(ch_smon_parser_init(pp_pool,pcontext->smon_pp_cfile)){
+	
+		ch_log(CH_LOG_ERR,"Cannot register smon proto parser!");
+		return NULL;
+	}
 
 	return pp_pool;
 }

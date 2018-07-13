@@ -31,6 +31,7 @@ typedef struct ch_packet_record_t ch_packet_record_t;
 #define PKT_RECORD_TYPE_TCP_MAIL 9
 #define PKT_RECORD_TYPE_TCP_FTP  10
 #define PKT_RECORD_TYPE_TCP_TELNET 11
+#define PKT_RECORD_TYPE_TCP_SMON 12
 
 struct ch_packet_record_t {
 

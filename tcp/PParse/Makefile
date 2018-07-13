@@ -6,7 +6,7 @@ DPDK_LIB_FLAGS = $(shell cat ${DPDK}/lib/ldflags.txt)
 
 CFLAGS  = ${BUILD_CFLAGS}  -O0 -rdynamic -D_GNU_SOURCE  ${DPDK_FLAGS} -pthread
 CFLAGS += -I../../lib/common  -I../../lib/shm -I../../lib/thread -I../../lib/ptables -I../../lib/fstore 
-CFLAGS += -I./http -I./mail
+CFLAGS += -I./http -I./mail -I./smon
 CFLAGS += -I./ -I${DPDK}/include -include ${DPDK}/include/rte_config.h
 
 
@@ -23,6 +23,7 @@ mail_package = ./mail/*.o
 smtp_package = ./mail/smtp/*.o
 imap_package = ./mail/imap/*.o
 pop3_package = ./mail/pop3/*.o
+smon_package = ./smon/*.o
 
 pp_package= PPMain
 
@@ -41,7 +42,7 @@ pp_ASMFILE =$(patsubst %.c,%.s,$(pp_SOURCES))
 quiet_cmd_dpdk = LINK   $@ 
 	cmd_pp = ${CC} ${CFLAGS} -o $@ $(pp_OBJECTS)  \
 				   $(common_package) $(cpool_package) $(shm_package) $(ptables_package) $(fstore_package)\
-				   $(http_package) $(mail_package) $(smtp_package) $(imap_package) $(pop3_package)\
+				   $(http_package) $(mail_package) $(smtp_package) $(imap_package) $(pop3_package) $(smon_package)\
 				   $(LDFLAGS)
 
 .PHONY: all clean
@@ -82,6 +83,8 @@ $(imap_package):
 $(pop3_package):
 	$(call,make)
 
+$(smon_package):
+	$(call,make)
 
 
 clean:

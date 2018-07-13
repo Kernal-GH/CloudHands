@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@163.com
  *   Description: ---
  *        Create: 2016-10-27 00:16:46
- * Last Modified: 2018-05-17 19:43:33
+ * Last Modified: 2018-07-13 15:53:37
  */
 
 #include "ch_log.h"
@@ -32,6 +32,7 @@ static inline void _pp_context_init(ch_pp_context_t *pcontext){
 	pcontext->debug_pp_cfile = NULL;
 	pcontext->telnet_pp_cfile = NULL;
 	pcontext->ftp_pp_cfile = NULL;
+	pcontext->smon_pp_cfile = NULL;
 
 	pcontext->fmt_type = FMT_TYPE_MSGPACK;
 	pcontext->work_sleep_time = 10000;/* 10ms */
@@ -168,6 +169,18 @@ static const char *cmd_ftp_pp_config_file(cmd_parms *cmd, void *_dcfg, const cha
 	ch_pp_context_t *pcontext = (ch_pp_context_t*)_dcfg;
 
 	pcontext->ftp_pp_cfile = p1;
+	return NULL;
+}
+
+static const char *cmd_smon_pp_config_file(cmd_parms *cmd, void *_dcfg, const char *p1){
+
+	/* unused */
+	cmd = cmd;
+	
+	ch_pp_context_t *pcontext = (ch_pp_context_t*)_dcfg;
+
+	pcontext->smon_pp_cfile = p1;
+
 	return NULL;
 }
 
@@ -426,6 +439,14 @@ static const command_rec pp_context_directives[] = {
             NULL,
             0,
             "set the ftp pp config file full path name"
+            ),
+	
+	CH_INIT_TAKE1(
+            "PSmonCFile",
+            cmd_smon_pp_config_file,
+            NULL,
+            0,
+            "set the session monitor pp config file full path name"
             ),
 
     CH_INIT_TAKE1(

@@ -48,6 +48,7 @@ struct ch_pp_context_t {
 	const char *debug_pp_cfile;
 	const char *telnet_pp_cfile;
 	const char *ftp_pp_cfile;
+	const char *smon_pp_cfile;
 
 	int fmt_type;
 
