@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-07-12 14:13:07
- * Last Modified: 2018-07-13 10:05:36
+ * Last Modified: 2018-07-13 11:38:18
  */
 
 #include "ch_tcp_app_pool.h"
@@ -16,6 +16,7 @@
 #include "ch_imap.h"
 #include "ch_telnet.h"
 #include "ch_ftp.h"
+#include "ch_smon.h"
 
 #define process_register_retv(rc,proto) do { \
 	if(rc){\
@@ -57,6 +58,11 @@ static int _register_all_apps(ch_tcp_app_pool_t *ta_pool,ch_tcp_app_context_t *t
 	if(tcontext->ftp_is_on){
 		rc = ch_ftp_init(ta_pool,tcontext->ftp_cfname);
 		process_register_retv(rc,"ftp");
+	}
+	
+	if(tcontext->smon_is_on){
+		rc = ch_smon_init(ta_pool,tcontext->smon_cfname);
+		process_register_retv(rc,"smon");
 	}
 
     return 0;

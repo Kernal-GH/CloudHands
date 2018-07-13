@@ -9,7 +9,7 @@ DPDK=/usr/local/dpdk/dpdk_src
 DPDK_FLAGS=$(shell cat ${DPDK}/include/cflags.txt)
 DPDK_LIB_FLAGS = $(shell cat ${DPDK}/lib/ldflags.txt)
 CFLAGS  = ${BUILD_CFLAGS}  -O0 -rdynamic -D_GNU_SOURCE  ${DPDK_FLAGS} -pthread
-CFLAGS += -I../../lib/common  -I../../lib/shm -I../../lib/ptables -I../../packet
+CFLAGS += -I../../lib/common  -I../../lib/shm -I../../lib/ptables -I../../packet -I../../SessionMonitor
 
 CFLAGS += -I./http -I./smtp -I./imap -I./pop3 -I./telnet -I./ftp -I./smon
 
@@ -22,7 +22,8 @@ ch_tcp_app_SOURCES = ch_tcp_app_context.c \
 					 pop3/ch_pop3.c \
 					 imap/ch_imap.c \
 					 telnet/ch_telnet.c \
-					 ftp/ch_ftp.c
+					 ftp/ch_ftp.c \
+					 smon/ch_smon.c
 
 ch_tcp_app_OBJECTS = $(patsubst %.c,%.o,$(ch_tcp_app_SOURCES))
 ch_tcp_app_DEPENDS = $(patsubst %.c,%.d,$(ch_tcp_app_SOURCES))

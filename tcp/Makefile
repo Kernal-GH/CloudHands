@@ -14,6 +14,7 @@ shm_package = ../lib/shm/*.o
 ptables_package = ../lib/ptables/*.o
 pkt_package = ../packet/*.o
 mprocess_package = ../MProcess/*.o
+smon_package = ../SessionMonitor/*.o
 app_package=./app/*.o
 
 tcp_package= TCPMain
@@ -38,7 +39,7 @@ tcp_ASMFILE =$(patsubst %.c,%.s,$(tcp_SOURCES))
 quiet_cmd_dpdk = LINK   $@ 
 	cmd_tcp = ${CC} ${CFLAGS} -o $@ $(tcp_OBJECTS)  \
 				   $(common_package) $(cpool_package) $(shm_package) $(ptables_package)\
-				   $(pkt_package) $(app_package) $(mprocess_package)\
+				   $(pkt_package) $(app_package) $(mprocess_package) $(smon_package)\
 				   $(LDFLAGS)
 
 .PHONY: all clean
@@ -68,6 +69,9 @@ $(mprocess_package):
 	$(call,make)
 
 $(app_package):
+	$(call,make)
+
+$(smon_package):
 	$(call,make)
 
 clean:

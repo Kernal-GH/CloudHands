@@ -58,7 +58,7 @@ struct  ch_tcp_session_t {
     ch_tcp_session_endpoint_t *cur_ep;
 
     uint64_t session_id;
-    uint32_t fin1_seq;
+	uint32_t fin1_seq;
     uint32_t fin2_seq;
 
     unsigned state:2;

@@ -50,7 +50,8 @@ typedef struct ch_shm_entry_iterator_t ch_shm_entry_iterator_t;
 #define PROTOCOL_DEBUG 5
 #define PROTOCOL_TELNET 6
 #define PROTOCOL_FTP 7
-#define PROTOCOL_MAX 8
+#define PROTOCOL_SMON 8
+#define PROTOCOL_MAX 9
 
 struct ch_shm_entry_header_t {
 
