@@ -5,12 +5,17 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-07-12 14:13:07
- * Last Modified: 2018-07-12 19:33:19
+ * Last Modified: 2018-07-13 10:05:36
  */
 
 #include "ch_tcp_app_pool.h"
 #include "ch_log.h"
 #include "ch_http.h"
+#include "ch_smtp.h"
+#include "ch_pop3.h"
+#include "ch_imap.h"
+#include "ch_telnet.h"
+#include "ch_ftp.h"
 
 #define process_register_retv(rc,proto) do { \
 	if(rc){\
