@@ -51,6 +51,7 @@ struct ch_session_monitor_hdr_t {
 	uint32_t item_number;
 	uint64_t next_id;
 };
+#pragma pack(pop)
 
 #pragma pack(push,1)
 struct ch_session_monitor_item_t {

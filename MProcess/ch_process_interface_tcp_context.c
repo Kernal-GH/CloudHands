@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-02-06 11:16:43
- * Last Modified: 2018-05-11 16:53:34
+ * Last Modified: 2018-07-13 17:59:01
  */
 
 #include "ch_process_interface_tcp_context.h"
@@ -67,6 +67,23 @@ static const char *cmd_process_interface_size(cmd_parms *cmd ch_unused, void *_d
     if(context->qnumber <=0||context->qsize<=0){
         return "invalid process pool queue number and queue size config value !";
     }
+
+    return NULL;
+}
+
+static const char *cmd_smon(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1,const char *p2){
+
+    char *endptr;
+
+    ch_process_interface_tcp_context_t *context = (ch_process_interface_tcp_context_t*)_dcfg;
+
+	if(p1 == NULL||strlen(p1)==0)
+		return "must specify session monitor mmapFileName!";
+
+    context->smon_mmap_fname = p1;
+
+    context->smon_mmap_fsize = (size_t)strtoul(p2,&endptr,10);
+    
 
     return NULL;
 }
@@ -134,6 +151,13 @@ static const command_rec pint_context_tcp_directives[] = {
             "set  tcp accept ports"
             ),
 
+    CH_INIT_TAKE2(
+            "CHTCPSmon",
+            cmd_smon,
+            NULL,
+            0,
+            "set tcp process interface session monitor mmapFileName and mmapFileSize"
+            ),
 };
 
 static inline void dump_pint_tcp_context(ch_process_interface_tcp_context_t *pint_context){
@@ -146,6 +170,8 @@ static inline void dump_pint_tcp_context(ch_process_interface_tcp_context_t *pin
     fprintf(stdout,"tcp process interface queue prefix:%s\n",pint_context->qprefix);
     fprintf(stdout,"tcp process interface queue number:%lu\n",(unsigned long)pint_context->qnumber);
     fprintf(stdout,"tcp process interface queue size:%lu\n",(unsigned long)pint_context->qsize);
+    fprintf(stdout,"tcp process interface smon.mmapFIleName:%s\n",pint_context->smon_mmap_fname);
+    fprintf(stdout,"tcp process interface smon.mmapFIleSize:%lu\n",pint_context->smon_mmap_fsize);
 
 	fprintf(stdout,"accept tcp ports:\n");
 	for(i = 0;i<MAX_PORT_ARRAY_SIZE;i++){
@@ -171,12 +197,14 @@ static int _tcp_filter(ch_packet_t *pkt,void *priv_data){
 
 	ch_packet_tcp_init_from_pkt(&tcp_pkt,pkt);
 
-	if(!ch_ports_equal(pint_context->accept_ports,MAX_PORT_ARRAY_SIZE,
+	if(ch_ports_equal(pint_context->accept_ports,MAX_PORT_ARRAY_SIZE,
 			tcp_pkt.src_port,tcp_pkt.dst_port))
-		return 1;
+		return 0;
 
+	if(ch_session_monitor_item_find(&pint_context->monitor,0,0,tcp_pkt.src_port,tcp_pkt.dst_port)!=NULL)
+		return 0;
 
-	return 0;
+	return 1;
 }
 
 static uint32_t _tcp_hash(ch_packet_t *pkt,void *priv_data){
@@ -223,6 +251,14 @@ ch_process_interface_tcp_context_t * ch_process_interface_tcp_context_create(ch_
 			_tcp_filter,
 			_tcp_hash,
 			(void*)pint_context);
+		
+		if(ch_session_monitor_load(&pint_context->monitor,pint_context->smon_mmap_fname,pint_context->smon_mmap_fsize))
+		{
+		
+			ch_log(CH_LOG_ERR,"Cannot load session monitor from MMapFile:%s",pint_context->smon_mmap_fname);
+			return NULL;
+
+		}
 
 	}else {
 	
@@ -237,6 +273,8 @@ ch_process_interface_tcp_context_t * ch_process_interface_tcp_context_create(ch_
 		ch_log(CH_LOG_ERR,"Cannot create process interface!");
 		return NULL;
 	}
+
+
 
     dump_pint_tcp_context(pint_context);
 

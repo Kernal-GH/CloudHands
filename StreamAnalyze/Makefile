@@ -14,6 +14,7 @@ shm_package = ../lib/shm/*.o
 ptables_package = ../lib/ptables/*.o
 pkt_package = ../packet/*.o
 mprocess_package = ../MProcess/*.o
+smon_package = ../SessionMonitor/*.o
 stat_package = ./statistic/*.o
 
 tcp_package=../tcp/ch_assemble_fragment.o \
@@ -47,7 +48,7 @@ sa_ASMFILE =$(patsubst %.c,%.s,$(sa_SOURCES))
 quiet_cmd_dpdk = LINK   $@ 
 	cmd_sa = ${CC} ${CFLAGS} -o $@ $(sa_OBJECTS)  \
 				   $(common_package) $(cpool_package) $(shm_package) $(ptables_package)\
-				   $(pkt_package)  $(mprocess_package) $(tcp_package)  $(stat_package)\
+				   $(pkt_package)  $(mprocess_package) $(tcp_package)  $(stat_package) $(smon_package)\
 				   $(LDFLAGS)
 
 .PHONY: all clean
@@ -80,6 +81,9 @@ $(tcp_package):
 	$(call,make)
 
 $(stat_package):
+	$(call,make)
+
+$(smon_package):
 	$(call,make)
 
 clean:

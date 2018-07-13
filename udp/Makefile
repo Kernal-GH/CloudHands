@@ -14,6 +14,7 @@ shm_package = ../lib/shm/*.o
 ptables_package = ../lib/ptables/*.o
 pkt_package = ../packet/*.o
 mprocess_package = ../MProcess/*.o
+smon_package = ../SessionMonitor/*.o
 dns_package = ./dns/*.o
 
 
@@ -36,7 +37,7 @@ udp_ASMFILE =$(patsubst %.c,%.s,$(udp_SOURCES))
 quiet_cmd_dpdk = LINK   $@ 
 	cmd_udp = ${CC} ${CFLAGS} -o $@ $(udp_OBJECTS)  \
 				   $(common_package) $(cpool_package) $(shm_package) $(ptables_package)\
-				   $(pkt_package)  $(mprocess_package) $(dns_package)\
+				   $(pkt_package)  $(mprocess_package) $(dns_package) $(smon_package)\
 				   $(LDFLAGS)
 
 .PHONY: all clean
@@ -66,6 +67,9 @@ $(mprocess_package):
 	$(call,make)
 
 $(dns_package):
+	$(call,make)
+
+$(smon_package):
 	$(call,make)
 
 clean:
