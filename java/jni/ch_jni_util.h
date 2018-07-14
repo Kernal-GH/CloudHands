@@ -45,4 +45,9 @@ static inline void ch_send_data_to_java(JNIEnv *jenv,jobject jobj,void *data,lon
 
 }
 
+static inline const char * ch_string_arg_get(JNIEnv *jenv,jstring jstr){
+
+    return (*jenv)->GetStringUTFChars(jenv,jstr, JNI_FALSE);
+}
+
 #endif /*CH_JNI_UTIL_H*/
