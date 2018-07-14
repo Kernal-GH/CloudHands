@@ -4,7 +4,7 @@
 ##########################################################
 
 CFLAGS  = ${BUILD_CFLAGS} -ggdb3 -O0 -rdynamic -D_GNU_SOURCE -pthread
-CFLAGS += -fPIC -shared -I../../lib/common -I../../lib/shm -I../../StreamAnalyze/statistic  -I${JAVA_HOME}/include -I${JAVA_HOME}/include/linux
+CFLAGS += -fPIC -shared -I../../lib/common -I../../lib/shm -I../../StreamAnalyze/statistic  -I../../SessionMonitor -I${JAVA_HOME}/include -I${JAVA_HOME}/include/linux
 
 jni_SOURCES = ../../lib/common/ch_file_open.c \
 		  ../../lib/common/ch_errno.c  \
@@ -20,8 +20,11 @@ jni_SOURCES = ../../lib/common/ch_file_open.c \
 		  ../../StreamAnalyze/statistic/ch_stat_pool.c \
 		  ../../StreamAnalyze/statistic/ch_stat_mpool.c \
 		  ../../StreamAnalyze/statistic/ch_stat_obj.c \
+		  ../../SessionMonitor/ch_session_monitor.c \
 		  ch_stat_pool_reader.c \
-		  ch_packet_record_reader.c
+		  ch_packet_record_reader.c \
+		  ch_session_monitor_cmd.c \
+		  ch_jni_context_pool.c
 
 jni_package = libCloudHandsJNI.so
 

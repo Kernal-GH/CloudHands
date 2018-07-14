@@ -12,14 +12,18 @@ public class PacketSource extends AbstractSource {
     @Override
     public void init(Context context, Filter filter) throws SourceException {
 
-        String mmap = context.getString("com.antell.cloudhands.api.packet.source.mmapFile",null);
+        String mmaps = context.getString("com.antell.cloudhands.api.packet.source.mmapFiles",null);
         
 		//Preconditions.checkArgument(mmap!=null,"must specify mmap file names to read!");
 
-        SourceReader sourceReader = new PacketSourceReader(this,filter,mmap);
+        String[] mmapFiles = mmaps.split(",");
 
-        setSourceReader(sourceReader);
+        for(String mmapFile :mmapFiles) {
 
+            SourceReader sourceReader = new PacketSourceReader(this, filter, mmapFile);
+
+            addSourceReader(sourceReader);
+        }
     }
 
 

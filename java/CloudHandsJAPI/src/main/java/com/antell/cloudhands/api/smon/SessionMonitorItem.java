@@ -24,7 +24,7 @@ public class SessionMonitorItem {
 
         StringBuffer sb = new StringBuffer();
 
-        
+
         return sb.toString();
     }
 

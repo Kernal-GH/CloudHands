@@ -1,5 +1,7 @@
 package com.antell.cloudhands.api.source;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
@@ -8,31 +10,36 @@ import java.util.concurrent.LinkedBlockingQueue;
 public abstract class AbstractSource implements Source {
 
     protected final LinkedBlockingQueue<SourceEntry> sourceEntries;
-    private   SourceReader sourceReader;
+    private final List<SourceReader> sourceReaders;
 
     public AbstractSource() {
 
         this.sourceEntries = new LinkedBlockingQueue<>();
-        this.sourceReader = null;
+        this.sourceReaders = new ArrayList<>();
     }
 
     @Override
-    public void setSourceReader(SourceReader sourceReader) {
+    public void addSourceReader(SourceReader sourceReader) {
 
-        this.sourceReader = sourceReader;
+        this.sourceReaders.add(sourceReader);
     }
 
     @Override
     public void start() throws SourceException {
 
-        sourceReader.start();
+        for(SourceReader sourceReader:sourceReaders){
+
+            sourceReader.start();
+        }
     }
 
     @Override
     public void stop() {
 
-        sourceReader.stop();
+        for(SourceReader sourceReader:sourceReaders){
 
+            sourceReader.stop();
+        }
     }
 
     @Override

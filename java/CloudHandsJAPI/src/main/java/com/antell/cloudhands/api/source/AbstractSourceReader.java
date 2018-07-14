@@ -25,11 +25,6 @@ public abstract class AbstractSourceReader implements SourceReader{
     @Override
     public void start() throws SourceException{
 
-        if(open() == -1){
-
-            throw new SourceException("Cannot open source reader to read!");
-        }
-
         scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(1);
 
         sourceReadRunnable = new SourceReadRunnable();
@@ -48,9 +43,24 @@ public abstract class AbstractSourceReader implements SourceReader{
 
     private class SourceReadRunnable implements Runnable{
 
+        private boolean isOpen;
+
+        public SourceReadRunnable(){
+            isOpen = false;
+        }
+
 
         @Override
         public void run() {
+
+            if(!isOpen){
+
+                if(open() == -1){
+
+                    throw new SourceException("Cannot open source reader to read!");
+                }
+                isOpen = true;
+            }
 
             while (true) {
                 PacketRecord packetRecord = read();

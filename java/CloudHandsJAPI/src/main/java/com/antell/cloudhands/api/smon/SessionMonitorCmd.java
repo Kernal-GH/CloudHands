@@ -27,13 +27,15 @@ public class SessionMonitorCmd {
 
     public native int open(String mmapFileName);
 
-    public native long add(long ip);
+    public native void close();
 
-    public native long add(int port);
+    public native long add(long ip,long tv);
 
-    public native long add(long ip,int port);
+    public native long add(int port,long tv);
 
-    public native long add(long srcIP,int srcPort,long dstIP,int dstPort);
+    public native long add(long ip,int port,long tv);
+
+    public native long add(long srcIP,int srcPort,long dstIP,int dstPort,long tv);
 
     public native int  find(SessionMonitorItem item,long id);
 

@@ -17,35 +17,43 @@ JNIEXPORT jint JNICALL Java_com_antell_cloudhands_api_smon_SessionMonitorCmd_ope
 
 /*
  * Class:     com_antell_cloudhands_api_smon_SessionMonitorCmd
- * Method:    add
- * Signature: (J)J
+ * Method:    close
+ * Signature: ()V
  */
-JNIEXPORT jlong JNICALL Java_com_antell_cloudhands_api_smon_SessionMonitorCmd_add__J
-  (JNIEnv *, jobject, jlong);
+JNIEXPORT void JNICALL Java_com_antell_cloudhands_api_smon_SessionMonitorCmd_close
+  (JNIEnv *, jobject);
 
 /*
  * Class:     com_antell_cloudhands_api_smon_SessionMonitorCmd
  * Method:    add
- * Signature: (I)J
+ * Signature: (JJ)J
  */
-JNIEXPORT jlong JNICALL Java_com_antell_cloudhands_api_smon_SessionMonitorCmd_add__I
-  (JNIEnv *, jobject, jint);
+JNIEXPORT jlong JNICALL Java_com_antell_cloudhands_api_smon_SessionMonitorCmd_add__JJ
+  (JNIEnv *, jobject, jlong, jlong);
 
 /*
  * Class:     com_antell_cloudhands_api_smon_SessionMonitorCmd
  * Method:    add
- * Signature: (JI)J
+ * Signature: (IJ)J
  */
-JNIEXPORT jlong JNICALL Java_com_antell_cloudhands_api_smon_SessionMonitorCmd_add__JI
-  (JNIEnv *, jobject, jlong, jint);
+JNIEXPORT jlong JNICALL Java_com_antell_cloudhands_api_smon_SessionMonitorCmd_add__IJ
+  (JNIEnv *, jobject, jint, jlong);
 
 /*
  * Class:     com_antell_cloudhands_api_smon_SessionMonitorCmd
  * Method:    add
- * Signature: (JIJI)J
+ * Signature: (JIJ)J
  */
-JNIEXPORT jlong JNICALL Java_com_antell_cloudhands_api_smon_SessionMonitorCmd_add__JIJI
-  (JNIEnv *, jobject, jlong, jint, jlong, jint);
+JNIEXPORT jlong JNICALL Java_com_antell_cloudhands_api_smon_SessionMonitorCmd_add__JIJ
+  (JNIEnv *, jobject, jlong, jint, jlong);
+
+/*
+ * Class:     com_antell_cloudhands_api_smon_SessionMonitorCmd
+ * Method:    add
+ * Signature: (JIJIJ)J
+ */
+JNIEXPORT jlong JNICALL Java_com_antell_cloudhands_api_smon_SessionMonitorCmd_add__JIJIJ
+  (JNIEnv *, jobject, jlong, jint, jlong, jint, jlong);
 
 /*
  * Class:     com_antell_cloudhands_api_smon_SessionMonitorCmd
