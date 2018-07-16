@@ -3,7 +3,7 @@ DPDK=/usr/local/dpdk/dpdk_src
 DPDK_FLAGS=$(shell cat ${DPDK}/include/cflags.txt)
 DPDK_LIB_FLAGS = $(shell cat ${DPDK}/lib/ldflags.txt)
 CFLAGS  = ${BUILD_CFLAGS}  -O0 -rdynamic -D_GNU_SOURCE -DUSE_DPDK ${DPDK_FLAGS} -pthread
-CFLAGS += -I../lib/common  -I../lib/shm -I../lib/thread -I../lib/ptables  -I../packet -I../MProcess -I./dns/ -I. -I${DPDK}/include -include ${DPDK}/include/rte_config.h
+CFLAGS += -I../lib/common  -I../lib/shm -I../lib/thread -I../lib/ptables  -I../packet -I../MProcess -I./app/ -I. -I${DPDK}/include -include ${DPDK}/include/rte_config.h
 
 LDFLAGS  = ${BUILD_LDFLAGS} ${DPDK_LIB_FLAGS}
 
@@ -15,14 +15,13 @@ ptables_package = ../lib/ptables/*.o
 pkt_package = ../packet/*.o
 mprocess_package = ../MProcess/*.o
 smon_package = ../SessionMonitor/*.o
-dns_package = ./dns/*.o
+app_package = ./app/*.o
 
 
 udp_package= UDPMain
 
 udp_SOURCES = UDPMain.c \
 			 ch_udp_context.c \
-			 ch_udp_app_pool.c \
 			 ch_udp_session.c \
 			 ch_udp_session_handler.c \
 			 ch_udp_session_pool.c \
@@ -37,7 +36,7 @@ udp_ASMFILE =$(patsubst %.c,%.s,$(udp_SOURCES))
 quiet_cmd_dpdk = LINK   $@ 
 	cmd_udp = ${CC} ${CFLAGS} -o $@ $(udp_OBJECTS)  \
 				   $(common_package) $(cpool_package) $(shm_package) $(ptables_package)\
-				   $(pkt_package)  $(mprocess_package) $(dns_package) $(smon_package)\
+				   $(pkt_package)  $(mprocess_package) $(app_package) $(smon_package)\
 				   $(LDFLAGS)
 
 .PHONY: all clean
@@ -66,7 +65,7 @@ $(pkt_package):
 $(mprocess_package):
 	$(call,make)
 
-$(dns_package):
+$(app_package):
 	$(call,make)
 
 $(smon_package):
