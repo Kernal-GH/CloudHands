@@ -16,6 +16,7 @@ pkt_package = ../packet/*.o
 mprocess_package = ../MProcess/*.o
 smon_package = ../SessionMonitor/*.o
 app_package = ./app/*.o
+fstore_package = ../lib/fstore/*.o
 
 
 udp_package= UDPMain
@@ -36,7 +37,7 @@ udp_ASMFILE =$(patsubst %.c,%.s,$(udp_SOURCES))
 quiet_cmd_dpdk = LINK   $@ 
 	cmd_udp = ${CC} ${CFLAGS} -o $@ $(udp_OBJECTS)  \
 				   $(common_package) $(cpool_package) $(shm_package) $(ptables_package)\
-				   $(pkt_package)  $(mprocess_package) $(app_package) $(smon_package)\
+				   $(pkt_package)  $(mprocess_package) $(app_package) $(smon_package) $(fstore_package)\
 				   $(LDFLAGS)
 
 .PHONY: all clean
@@ -69,6 +70,9 @@ $(app_package):
 	$(call,make)
 
 $(smon_package):
+	$(call,make)
+
+$(fstore_package):
 	$(call,make)
 
 clean:
