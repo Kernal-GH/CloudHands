@@ -17,13 +17,15 @@ typedef struct ch_dns_session_t ch_dns_session_t;
 #include "ch_dns_request.h"
 #include "ch_dns_response.h"
 #include "ch_data_output.h"
+#include "ch_udp_app_pool.h"
 
 struct ch_dns_session_t {
+
+	ch_udp_app_session_t app_session;
 
 	ch_pool_t *mp;
 	ch_dns_requst_t *dns_req;
 	ch_dns_response_t *dns_res;
-
 };
 
 extern ch_dns_session_t * ch_dns_session_create(ch_pool_t *mp);

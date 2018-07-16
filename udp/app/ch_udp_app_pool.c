@@ -5,45 +5,105 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-05-08 15:49:46
- * Last Modified: 2018-05-11 17:39:40
+ * Last Modified: 2018-07-16 17:32:28
  */
 
 #include "ch_udp_app_pool.h"
 #include "ch_log.h"
 #include "ch_net_util.h"
 #include "ch_dns_app.h"
+#include "ch_smon_app.h"
 
-ch_udp_app_pool_t * ch_udp_app_pool_create(ch_pool_t *mp){
+#define process_register_retv(rc,proto) do { \
+	if(rc){\
+		ch_log(CH_LOG_ERR,"register proto:%s failed!",proto);\
+		return -1;\
+	}\
+}while(0)
+
+static int _register_all_apps(ch_udp_app_pool_t *upool,ch_udp_app_context_t *ucontext){
+
+	int rc;
+
+	if(ucontext->dns_is_on){
+		rc = ch_dns_app_init(upool,ucontext->dns_cfname);
+		process_register_retv(rc,"dns");
+	}
+
+	if(ucontext->smon_is_on){
+		rc = ch_smon_app_init(upool,ucontext->smon_cfname);
+		process_register_retv(rc,"smon");
+	}
+
+    return 0;
+}
+
+
+ch_udp_app_pool_t * ch_udp_app_pool_create(ch_pool_t *mp,const char *cfname){
 
 	ch_udp_app_pool_t *upool = ch_pcalloc(mp,sizeof(*upool));
 	upool->mp = mp;
 
+	upool->ucontext = ch_udp_app_context_create(mp,cfname);
+	if(upool->ucontext == NULL){
+	
+		ch_log(CH_LOG_ERR,"Create udp context failed for udp app pool!");
+		return NULL;
+	}
+
 	upool->apps = ch_array_make(mp,16,sizeof(ch_udp_app_t*));
 
-	ch_dns_app_init(upool);
+	if(_register_all_apps(upool,upool->ucontext)){
+	
+		return NULL;
+	}
 
 	return upool;
 }
 
 
-void* ch_udp_app_session_create(ch_udp_app_t *uapp,void *priv_data){
+ch_udp_app_session_t* ch_udp_app_session_create(ch_udp_app_pool_t *app_pool,ch_packet_udp_t *pkt_udp){
+
+	ch_udp_app_session_t *app_session = NULL;
+
+	int i;
+	ch_udp_app_t **apps,*app = NULL;
+
+	apps = (ch_udp_app_t**)app_pool->apps->elts;
+	
+	for(i = 0;i<app_pool->apps->nelts;i++){
+	
+		app = apps[i];
+
+		app_session = app->app_session_create(app,pkt_udp);
+		if(app_session){
+		
+			app_session->app = app;
+
+			return app_session;
+		
+		}
+	}
 
 
-	if(uapp->app_session_create == NULL)
-		return NULL;
-
-	return uapp->app_session_create(priv_data);  
+	return NULL;
 }
 
-int  ch_udp_app_packet_process(ch_udp_app_t *uapp,ch_udp_session_t *usession,ch_packet_udp_t *pkt_udp,void *priv_data){
 
-	if(uapp->pkt_process == NULL)
-		return PROCESS_DONE;
+int  ch_udp_app_session_packet_process(ch_udp_app_session_t *app_session,ch_packet_udp_t *pkt_udp){
 
-	return uapp->pkt_process(usession->app_session,pkt_udp,priv_data);
+	ch_udp_app_t *app = app_session->app;
+
+	if(app->is_request(app_session,pkt_udp))
+		return app->req_pkt_process(app_session,pkt_udp);
+	else
+		return app->res_pkt_process(app_session,pkt_udp);
+
 }
 
-ssize_t  ch_udp_app_session_write(ch_udp_app_t *uapp,ch_data_output_t *dout,ch_udp_session_t *udp_session,void *priv_data){
+ssize_t  
+ch_udp_app_session_write(ch_udp_session_t *udp_session,ch_udp_app_session_t *app_session,ch_data_output_t *dout)
+{
 
 	ssize_t len = 0,rc;
 	/*write udp session */
@@ -63,15 +123,16 @@ ssize_t  ch_udp_app_session_write(ch_udp_app_t *uapp,ch_data_output_t *dout,ch_u
 	CH_DOUT_UINT64_WRITE(dout,ch_udp_session_res_last_time(udp_session),len,rc);
 
 	/*write app session*/
-	if(uapp->app_session_write)
-		return uapp->app_session_write(dout,udp_session->app_session,priv_data);
+	rc = app_session->app->app_session_write(app_session,dout);
+	if(rc == -1)
+		return -1;
 
 
-	return 0;
+	return len+rc;
 }
 
-void ch_udp_app_session_dump(ch_udp_app_t *uapp,FILE *fp,ch_udp_session_t *udp_session,void *priv_data){
-
+void ch_udp_app_session_dump(ch_udp_app_session_t *app_session,ch_udp_session_t *udp_session,FILE *fp){
+	
 	char b[64] = {0};
 
 	fprintf(fp,"Dump UDP APP Informations---------------------------------------\n");
@@ -91,13 +152,15 @@ void ch_udp_app_session_dump(ch_udp_app_t *uapp,FILE *fp,ch_udp_session_t *udp_s
 	fprintf(fp,"udp.session.res.startTime:%lu\n",(unsigned long)ch_udp_session_res_start_time(udp_session));
 	fprintf(fp,"udp.session.res.lastTime:%lu\n",(unsigned long)ch_udp_session_res_last_time(udp_session));
 
-	if(uapp->app_session_dump)
-		uapp->app_session_dump(fp,udp_session->app_session,priv_data);
+	if(app_session->app->app_session_dump)
+		app_session->app->app_session_dump(app_session,fp);
+
 }
 
-void ch_udp_app_session_fin(ch_udp_app_t *uapp,ch_udp_session_t *usession,void *priv_data){
 
-	if(uapp->app_session_fin)
-		uapp->app_session_fin(usession->app_session,priv_data);
+void ch_udp_app_session_fin(ch_udp_app_session_t *app_session){
+	
+	if(app_session->app->app_session_fin)
+		app_session->app->app_session_fin(app_session);
 
 }

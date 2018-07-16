@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-07-11 11:08:14
- * Last Modified: 2018-07-12 10:55:11
+ * Last Modified: 2018-07-16 15:33:51
  */
 
 #include <sys/mman.h>
@@ -286,6 +286,47 @@ ch_session_monitor_item_t * ch_session_monitor_item_find(ch_session_monitor_t *m
 		
 		}
 
+		if(!is_match(cur_item,src_ip,src_port,dst_ip,dst_port)){
+	
+			cur_item += 1;
+			continue;
+		}
+
+		if(item == NULL){
+		
+			item = cur_item;
+		}else{
+			if(item->monitor_type<cur_item->monitor_type){
+			
+				item = cur_item;
+			}
+		}
+		cur_item += 1;
+	}
+
+	return item;
+}
+
+ch_session_monitor_item_t * ch_session_monitor_item_find_ignore_state(ch_session_monitor_t *monitor,
+	uint32_t src_ip,uint32_t dst_ip,uint16_t src_port,uint16_t dst_port){
+
+
+	uint32_t i = 0;
+	ch_session_monitor_item_t *item = NULL,*cur_item = monitor->monitor_items;
+	ch_session_monitor_hdr_t *hdr = monitor->monitor_hdr;
+
+	while((i++)<hdr->item_number&&cur_item->monitor_state!=MON_STATE_INIT){
+
+#if 0
+		if(cur_item->monitor_state == MON_STATE_STOP || cur_item->monitor_state == MON_STATE_DEL){
+		
+			cur_item += 1;
+
+			continue;
+		
+		}
+
+#endif
 		if(!is_match(cur_item,src_ip,src_port,dst_ip,dst_port)){
 	
 			cur_item += 1;

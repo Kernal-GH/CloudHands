@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-05-08 10:42:39
- * Last Modified: 2018-05-11 12:09:11
+ * Last Modified: 2018-07-16 12:23:41
  */
 
 #include "ch_udp_context.h"
@@ -18,6 +18,7 @@ static void do_udp_context_init(ch_udp_context_t *udp_context){
 	udp_context->log_name = "/tmp/UDPMain.log";
 	udp_context->log_level = CH_LOG_NOTICE;
 
+	udp_context->app_udp_cfname = NULL;
 	udp_context->pint_udp_cfname = NULL;
 	udp_context->entry_size = 16*1024*1024UL;
 	udp_context->shm_size = 4*1024*1024*1024UL;
@@ -140,6 +141,16 @@ static const char *cmd_shm_size(cmd_parms *cmd ch_unused, void *_dcfg, const cha
     return NULL;
 }
 
+static const char *cmd_udp_app_cfname(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1){
+
+
+    ch_udp_context_t *context = (ch_udp_context_t*)_dcfg;
+
+    context->app_udp_cfname = p1;
+
+    return NULL;
+}
+
 static const char *cmd_udp_pint_cfname(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1){
 
 
@@ -235,6 +246,14 @@ static const command_rec udp_context_directives[] = {
             NULL,
             0,
             "set udp log name and level"
+            ),
+	
+	CH_INIT_TAKE1(
+            "CHUDPAppCFName",
+            cmd_udp_app_cfname,
+            NULL,
+            0,
+            "set udp application config file name"
             ),
 	
 	CH_INIT_TAKE1(
@@ -345,6 +364,7 @@ static inline void dump_udp_context(ch_udp_context_t *udp_context){
     fprintf(stdout,"share memory entry size:%lu\n",(unsigned long)udp_context->entry_size);
     fprintf(stdout,"share memory key:%s\n",udp_context->key==NULL?"":udp_context->key);
     fprintf(stdout,"share memory projID:%d\n",udp_context->proj_id);
+    fprintf(stdout,"udp application config file name:%s\n",udp_context->app_udp_cfname);
     fprintf(stdout,"udp process interface config file name:%s\n",udp_context->pint_udp_cfname);
     fprintf(stdout,"mmap file dir:%s\n",udp_context->mmap_file_dir == NULL?"":udp_context->mmap_file_dir);
 	

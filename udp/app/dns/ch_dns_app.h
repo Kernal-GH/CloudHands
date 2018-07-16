@@ -14,7 +14,7 @@
 #include "ch_udp_app_pool.h"
 
 
-extern void ch_dns_app_init(ch_udp_app_pool_t *upool);
+extern int ch_dns_app_init(ch_udp_app_pool_t *upool,const char *cfname);
 
 
 #endif /*CH_DNS_APP_H*/

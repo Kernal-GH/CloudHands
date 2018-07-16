@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-05-10 16:27:54
- * Last Modified: 2018-05-11 12:03:02
+ * Last Modified: 2018-07-16 12:24:18
  */
 #include "ch_udp_work.h"
 #include "ch_udp_context.h"
@@ -51,7 +51,7 @@ ch_udp_work_t * ch_udp_work_create(ch_pool_t *mp,const char *cfname){
 		return NULL;
 	}
 
-	udp_work->app_pool = ch_udp_app_pool_create(mp); 
+	udp_work->app_pool = ch_udp_app_pool_create(mp,udp_context->app_udp_cfname); 
 	if(udp_work->app_pool == NULL){
 	
 		ch_log(CH_LOG_ERR,"Cannot create udp app pool!");

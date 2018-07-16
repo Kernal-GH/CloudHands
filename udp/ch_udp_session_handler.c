@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-04-13 15:50:28
- * Last Modified: 2018-06-20 19:08:34
+ * Last Modified: 2018-07-16 17:40:09
  */
 
 #include "ch_udp_session_handler.h"
@@ -25,17 +25,14 @@ static void _udp_session_out(ch_udp_session_handler_t *udp_handler,
 	size_t dlen = 0;
 	void *data;
 
-	ch_udp_app_t *udp_app = udp_session->app;
-
 	ch_udp_session_task_t *udp_session_task = udp_handler->session_task;
 	ch_data_output_t *dout = &udp_session_task->dout;
 	CH_DOUT_RESET(dout);
 
 	ch_packet_record_t pkt_rcd;
 
-	//ch_udp_app_session_dump(udp_app,stdout,udp_session,NULL);
 
-	if(-1 == ch_udp_app_session_write(udp_app,dout,udp_session,NULL))
+	if(-1 == ch_udp_app_session_write(udp_session,udp_session->app_session,dout))
 	{
 	
 		ch_log(CH_LOG_ERR,"Write UDP APP Data Failed!");
@@ -45,7 +42,7 @@ static void _udp_session_out(ch_udp_session_handler_t *udp_handler,
 	dlen = CH_DOUT_CONTENT_SIZE(dout);
 	data = CH_DOUT_CONTENT(dout);
 
-	pkt_rcd.type = udp_app->type;
+	pkt_rcd.type = udp_session->app_session->app->type;
 	pkt_rcd.meta_data_size = 0;
 	pkt_rcd.time = ch_udp_session_req_start_time(udp_session);
 
@@ -64,7 +61,7 @@ static void _udp_session_timeout_cb(ch_ptable_entry_t *entry,uint64_t tv,void *p
 	
 	_udp_session_out(udp_handler,udp_session,1,tv);
 	
-	ch_udp_app_session_fin(udp_session->app,udp_session,NULL);
+	ch_udp_app_session_fin(udp_session->app_session);
 
 }
 
@@ -95,13 +92,12 @@ ch_udp_session_handler_create(ch_udp_work_t *udp_work,ch_udp_session_task_t *ses
 
 static void _udp_app_pkt_handle(ch_udp_session_handler_t *udp_session_handler,
 	ch_udp_session_t *udp_session,
-	ch_udp_app_t *app,
 	ch_packet_udp_t *pkt_udp){
 
 
 	int rc;
 
-	rc = app->pkt_process(udp_session->app_session,pkt_udp,NULL);
+	rc = ch_udp_app_session_packet_process(udp_session->app_session,pkt_udp);
 	if(rc == PROCESS_CONTINUE)
 		return;
 
@@ -109,7 +105,8 @@ static void _udp_app_pkt_handle(ch_udp_session_handler_t *udp_session_handler,
 		_udp_session_out(udp_session_handler,udp_session,0,0);
 	}
 
-	ch_udp_app_session_fin(app,udp_session,NULL);
+	ch_udp_app_session_fin(udp_session->app_session);
+
 	ch_udp_session_pool_entry_free(udp_session_handler->udp_pool,udp_session);
 }
 
@@ -122,7 +119,7 @@ int ch_udp_session_packet_handle(ch_udp_session_handler_t *udp_handler,ch_packet
 	ch_udp_session_t *udp_session = NULL;
 	ch_udp_session_endpoint_t *ep = NULL;
 	ch_udp_app_pool_t *app_pool = udp_handler->udp_work->app_pool;
-	ch_udp_app_t *udp_app;
+	ch_udp_app_session_t *app_session;
 
 	if(ch_packet_udp_init_from_pkt(pkt_udp,pkt)){
 	
@@ -134,22 +131,14 @@ int ch_udp_session_packet_handle(ch_udp_session_handler_t *udp_handler,ch_packet
 	
 	if(udp_session == NULL){
 
-		udp_app = ch_udp_app_find(app_pool,pkt_udp);
-		if(udp_app == NULL){
-		
+		app_session = ch_udp_app_session_create(app_pool,pkt_udp);
+		if(app_session == NULL)
 			return -1;
-		}
-		if(!ch_udp_app_session_is_request(udp_app,pkt_udp))
-		{
-		
-			/*no request !*/
-			return -1;
-		}
 
 		/*create a new udp session*/
 		sid = ch_atomic64_add_return(cur_session_id_ptr,1)%ULONG_MAX;
 
-		udp_session = ch_udp_session_pool_entry_create(udp_handler->udp_pool,pkt_udp,udp_app,sid);
+		udp_session = ch_udp_session_pool_entry_create(udp_handler->udp_pool,pkt_udp,app_session,sid);
 
 		if(udp_session == NULL){
 		
@@ -160,11 +149,11 @@ int ch_udp_session_packet_handle(ch_udp_session_handler_t *udp_handler,ch_packet
 		ep = &udp_session->endpoint_req;
 	}else{
 
-		udp_app = udp_session->app;
+		app_session = udp_session->app_session;
 		ep = ch_udp_session_endpoint_get(udp_session,pkt_udp); 
 	}
 
-	if(ep == NULL || udp_app == NULL){
+	if(ep == NULL || app_session == NULL){
 	
 		ch_log(CH_LOG_ERR,"Cannot Get UDP Session endpoint or udp app!");
 		return -1;
@@ -172,7 +161,7 @@ int ch_udp_session_packet_handle(ch_udp_session_handler_t *udp_handler,ch_packet
 
 	ch_udp_session_update(udp_session,ep,pkt_udp);
 	
-	_udp_app_pkt_handle(udp_handler,udp_session,udp_app,pkt_udp);
+	_udp_app_pkt_handle(udp_handler,udp_session,pkt_udp);
 
 	
 	c = ch_ptable_entries_timeout_free(udp_handler->udp_pool->udp_session_tbl,

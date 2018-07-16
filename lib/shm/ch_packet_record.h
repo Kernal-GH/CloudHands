@@ -25,13 +25,14 @@ typedef struct ch_packet_record_t ch_packet_record_t;
 /*Define udp app record types*/
 #define PKT_RECORD_TYPE_UDP_DNS 6
 #define PKT_RECORD_TYPE_UDP_TFTP 7
+#define PKT_RECORD_TYPE_UDP_SMON 8
 
 /*Define tcp app record types*/
-#define PKT_RECORD_TYPE_TCP_HTTP 8
-#define PKT_RECORD_TYPE_TCP_MAIL 9
-#define PKT_RECORD_TYPE_TCP_FTP  10
-#define PKT_RECORD_TYPE_TCP_TELNET 11
-#define PKT_RECORD_TYPE_TCP_SMON 12
+#define PKT_RECORD_TYPE_TCP_HTTP 9
+#define PKT_RECORD_TYPE_TCP_MAIL 10
+#define PKT_RECORD_TYPE_TCP_FTP  11
+#define PKT_RECORD_TYPE_TCP_TELNET 12
+#define PKT_RECORD_TYPE_TCP_SMON 13
 
 struct ch_packet_record_t {
 

@@ -42,9 +42,7 @@ struct ch_udp_session_t {
 
 	uint64_t session_id;
 	
-	ch_udp_app_t *app;
-
-	void *app_session;
+	ch_udp_app_session_t *app_session;
 };
 
 #define ch_udp_session_srcport_get(udp_session) ((udp_session)->endpoint_req.port)
@@ -65,7 +63,7 @@ struct ch_udp_session_t {
 #define EP_EQUAL(ep,eip,eport) ((ep->ip == eip)&&(ep->port == eport))
 
 
-extern int ch_udp_session_init(ch_udp_session_t *udp_session,ch_packet_udp_t *pkt_udp,ch_udp_app_t *app,
+extern int ch_udp_session_init(ch_udp_session_t *udp_session,ch_packet_udp_t *pkt_udp,ch_udp_app_session_t *app_session,
 	uint64_t session_id);
 
 static inline void 

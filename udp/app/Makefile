@@ -7,10 +7,11 @@ include ../../make.include
 DPDK=/usr/local/dpdk/dpdk_src
 DPDK_FLAGS=$(shell cat ${DPDK}/include/cflags.txt)
 CFLAGS  = ${BUILD_CFLAGS}  -O0 -rdynamic -D_GNU_SOURCE -DUSE_DPDK ${DPDK_FLAGS}
-CFLAGS += -I../../lib/common  -I../../lib/ptables -I../../packet -I../../lib/shm -I../ -I./ -I./dns  -I${DPDK}/include -include ${DPDK}/include/rte_config.h
+CFLAGS += -I../../lib/common  -I../../lib/ptables -I../../packet -I../../lib/shm -I../ -I./ -I./dns -I./smon -I${DPDK}/include -include ${DPDK}/include/rte_config.h
 CFLAGS +=  -fPIC
 
-ch_udp_app_SOURCES = ch_udp_app_pool.c
+ch_udp_app_SOURCES = ch_udp_app_pool.c \
+					 ch_udp_app_context.c
 
 ch_udp_app_OBJECTS = $(patsubst %.c,%.o,$(ch_udp_app_SOURCES))
 ch_udp_app_DEPENDS = $(patsubst %.c,%.d,$(ch_udp_app_SOURCES))

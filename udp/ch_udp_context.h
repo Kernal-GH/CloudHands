@@ -27,6 +27,8 @@ struct ch_udp_context_t {
 	const char *key;
 	int proj_id;
 
+	const char *app_udp_cfname;
+	
 	const char *pint_udp_cfname;
 	
 	const char *mmap_file_dir;

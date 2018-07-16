@@ -94,6 +94,9 @@ extern void ch_session_monitor_exit(ch_session_monitor_t *monitor);
 extern ch_session_monitor_item_t * ch_session_monitor_item_find(ch_session_monitor_t *monitor,
 	uint32_t src_ip,uint32_t dst_ip,uint16_t src_port,uint16_t dst_port);
 
+extern ch_session_monitor_item_t * ch_session_monitor_item_find_ignore_state(ch_session_monitor_t *monitor,
+	uint32_t src_ip,uint32_t dst_ip,uint16_t src_port,uint16_t dst_port);
+
 extern ch_session_monitor_item_t * ch_session_monitor_item_findById(ch_session_monitor_t *monitor,uint64_t id);
 
 
