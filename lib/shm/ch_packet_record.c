@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-04-10 14:28:42
- * Last Modified: 2018-04-10 16:00:17
+ * Last Modified: 2018-07-17 13:43:46
  */
 
 #include "ch_packet_record.h"
@@ -13,7 +13,6 @@
 #include "ch_shm_mmap.h"
 #include "ch_shm_memory.h"
 
-static ch_packet_record_t g_pkt_rcd,*g_pkt_rcd_ptr = &g_pkt_rcd;
 
 static void _pkt_record_write(ch_shm_format_t *fmt,ch_shm_record_t *rcd){
 
@@ -29,16 +28,16 @@ static void _pkt_record_write(ch_shm_format_t *fmt,ch_shm_record_t *rcd){
 
 }
 
-static ch_shm_record_t * _pkt_record_read(ch_shm_entry_iterator_t *iter,ch_bin_format_t *bfmt){
+static int  _pkt_record_read(ch_shm_entry_iterator_t *iter,ch_bin_format_t *bfmt,ch_shm_record_t *shm_record){
 
-    g_pkt_rcd_ptr->type = ch_bf_uint8_read(bfmt);
+	ch_packet_record_t *pkt_rcd = (ch_packet_record_t*)shm_record;
+
+    pkt_rcd->type = ch_bf_uint8_read(bfmt); 
+	pkt_rcd->meta_data_size = ch_bf_uint16_read(bfmt);
+    pkt_rcd->time = ch_bf_uint64_read(bfmt);
     
-	g_pkt_rcd_ptr->meta_data_size = ch_bf_uint16_read(bfmt);
 
-    g_pkt_rcd_ptr->time = ch_bf_uint64_read(bfmt);
-    
-
-	return (ch_shm_record_t*)g_pkt_rcd_ptr;
+	return 0;
 }
 
 
@@ -46,6 +45,7 @@ ch_shm_format_t * ch_shm_format_pkt_with_mmap_create(ch_pool_t *mp,const char *f
 	uint64_t priv_data_size,int is_write){
 
 	ch_shm_interface_t *shm_int = NULL;
+	ch_packet_record_t *pkt_rcd = (ch_packet_record_t*)ch_pcalloc(mp,sizeof(*pkt_rcd));
 
 	shm_int = ch_shm_mmap_create(mp,fname,fsize,entry_size,priv_data_size,is_write);
 	if(shm_int == NULL){
@@ -56,6 +56,7 @@ ch_shm_format_t * ch_shm_format_pkt_with_mmap_create(ch_pool_t *mp,const char *f
 
 	return ch_shm_format_create(mp,shm_int,entry_size,
 		CH_PKT_RECORD_HEADER_SIZE,
+		(ch_shm_record_t*)pkt_rcd,
 		_pkt_record_write,
 		_pkt_record_read);
 
@@ -64,6 +65,7 @@ ch_shm_format_t * ch_shm_format_pkt_with_mmap_create(ch_pool_t *mp,const char *f
 ch_shm_format_t * ch_shm_format_pkt_with_shm_create(ch_pool_t *mp,const char *key,int proj_id,uint64_t size,
 	uint64_t entry_size,uint64_t priv_data_size,int is_write){
 
+	ch_packet_record_t *pkt_rcd = (ch_packet_record_t*)ch_pcalloc(mp,sizeof(*pkt_rcd));
 	ch_shm_interface_t *shm_int = NULL;
 	
 	shm_int = ch_shm_memory_create(mp,key,proj_id,size,entry_size,priv_data_size,is_write);
@@ -75,6 +77,7 @@ ch_shm_format_t * ch_shm_format_pkt_with_shm_create(ch_pool_t *mp,const char *ke
 
 	return ch_shm_format_create(mp,shm_int,entry_size,
 		CH_PKT_RECORD_HEADER_SIZE,
+		(ch_shm_record_t*)pkt_rcd,
 		_pkt_record_write,
 		_pkt_record_read);
 

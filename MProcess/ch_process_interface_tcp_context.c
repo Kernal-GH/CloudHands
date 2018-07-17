@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-02-06 11:16:43
- * Last Modified: 2018-07-13 17:59:01
+ * Last Modified: 2018-07-17 09:37:19
  */
 
 #include "ch_process_interface_tcp_context.h"
@@ -22,6 +22,9 @@ static void do_pint_tcp_context_init(ch_process_interface_tcp_context_t *pint_co
 	pint_context->qprefix = "tcp_process_interface_queue";
 	pint_context->qnumber = 1;
 	pint_context->qsize = 65536;
+
+	pint_context->smon_mmap_fname = NULL;
+	pint_context->smon_mmap_fsize = 0;
 
 	memset(pint_context->accept_ports,0,MAX_PORT_ARRAY_SIZE);
 }

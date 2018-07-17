@@ -11,34 +11,36 @@ public class PacketRecordReader {
     private final String fname;
     private final String key;
     private final int projID;
+    private final int id;
 
     static {
         System.loadLibrary("CloudHandsJNI");
     };
 
-    public PacketRecordReader(String fname, String key, int projID, long bsize){
+    public PacketRecordReader(int id,String fname, String key, int projID, long bsize){
 
         packetRecord = new PacketRecord(bsize);
         this.fname = fname;
         this.key = key;
         this.projID  = projID;
 
+        this.id = id;
     }
 
     public int open(){
 
         if(!TextUtils.isEmpty(fname))
-            return openMMap(fname);
+            return openMMap(id,fname);
 
-        return openSHM(key,projID);
+        return openSHM(id,key,projID);
     }
 
-    public native int openMMap(String fname);
-    public native int openSHM(String key,int projID);
+    public native int openMMap(int id,String fname);
+    public native int openSHM(int id,String key,int projID);
 
     public PacketRecord read(){
 
-        int ret = read(packetRecord);
+        int ret = read(id,packetRecord);
 
         if(ret == 0)
             return packetRecord;
@@ -46,7 +48,13 @@ public class PacketRecordReader {
         return null;
     }
 
-    public native int read(PacketRecord packetRecord);
+    public void close(){
 
-    public native void close();
+        close(id);
+
+    }
+
+    public native int read(int id,PacketRecord packetRecord);
+
+    public native void close(int id);
 }

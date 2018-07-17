@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-06-09 15:09:31
- * Last Modified: 2018-07-14 18:58:28
+ * Last Modified: 2018-07-17 10:34:30
  */
 
 #include "ch_packet_record_reader.h"
@@ -13,45 +13,47 @@
 #include "ch_mpool.h"
 #include "ch_shm_format.h"
 #include "ch_packet_record.h"
-#include "ch_jni_context_pool.h"
-#include <pthread.h>
 
-static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
+#define MAX_PKT_RCD_CONTEXT_N 64
 
 typedef struct ch_packet_record_reader_context_t ch_packet_record_reader_context_t;
 
 
 struct ch_packet_record_reader_context_t {
-	ch_jni_context_t jcontext;
-
 	ch_pool_t *mp;
 	ch_shm_format_t *shm_fmt;
 	ch_shm_entry_iterator_t *eiter;
 };
 
-static ch_jni_context_pool_t _pkt_reader_cp = {
-	{
-		.next = &_pkt_reader_cp.contexts,
-		.prev = &_pkt_reader_cp.contexts
-	},
-	.context_size = sizeof(ch_packet_record_reader_context_t)
-};
+static ch_packet_record_reader_context_t pkt_rcd_contexts[MAX_PKT_RCD_CONTEXT_N];
 
-static ch_jni_context_pool_t *g_pkt_reader_context_pool = &_pkt_reader_cp;
+static inline ch_packet_record_reader_context_t * _pkt_rcd_context_get(int id){
+
+	if(id >= MAX_PKT_RCD_CONTEXT_N||id<0)
+		return NULL;
+
+	return &pkt_rcd_contexts[id];
+}
 
 
 /*
  * Class:     com_antell_cloudhands_api_packet_PacketRecordReader
  * Method:    openMMap
- * Signature: (Ljava/lang/String;)I
+ * Signature: (ILjava/lang/String;)I
  */
 JNIEXPORT jint JNICALL Java_com_antell_cloudhands_api_packet_PacketRecordReader_openMMap
-  (JNIEnv *jenv, jobject jthis, jstring jfname){
-	  
+  (JNIEnv *jenv, jobject jthis, jint id, jstring jfname){
+
 	  ch_packet_record_reader_context_t *pcontext;
 	  ch_shm_format_t *shm_fmt;
 	  ch_pool_t *mp;
-	  const char *open_fname = ch_string_arg_get(jenv,jfname);
+	  const char *open_fname;
+	  
+	  pcontext = _pkt_rcd_context_get(id);
+	  if(pcontext == NULL)
+		  return -1;
+
+	  open_fname = ch_string_arg_get(jenv,jfname);
 	  if(open_fname == NULL || strlen(open_fname) == 0)
 		  return -1;
 	  /*create global apr memory pool*/
@@ -59,15 +61,9 @@ JNIEXPORT jint JNICALL Java_com_antell_cloudhands_api_packet_PacketRecordReader_
 	  if(mp == NULL){
 		  return -1;
 	  }
+	  
 	  shm_fmt = ch_shm_format_pkt_with_mmap_create(mp,open_fname,0,0,0,0);
 	  if(shm_fmt == NULL)
-		  return -1;
-
-	  pthread_mutex_lock(&lock);
-	  pcontext = (ch_packet_record_reader_context_t*)ch_jni_context_pool_create(g_pkt_reader_context_pool,jenv);
-	  pthread_mutex_unlock(&lock);
-	
-	  if(pcontext == NULL)
 		  return -1;
 
 
@@ -82,19 +78,26 @@ JNIEXPORT jint JNICALL Java_com_antell_cloudhands_api_packet_PacketRecordReader_
   
   }
 
+	  
 /*
  * Class:     com_antell_cloudhands_api_packet_PacketRecordReader
  * Method:    openSHM
- * Signature: (Ljava/lang/String;I)I
+ * Signature: (ILjava/lang/String;I)I
  */
 JNIEXPORT jint JNICALL Java_com_antell_cloudhands_api_packet_PacketRecordReader_openSHM
-  (JNIEnv *jenv, jobject jthis, jstring key, jint proj_id){
-	  
+  (JNIEnv *jenv, jobject jthis, jint id, jstring key, jint proj_id){
+
 	  ch_packet_record_reader_context_t *pcontext;
 	  ch_shm_format_t *shm_fmt;
 	  ch_pool_t *mp;
 	  
-	  const char *open_key = ch_string_arg_get(jenv,key);
+	  const char *open_key;
+	  
+	  pcontext = _pkt_rcd_context_get(id);
+	  if(pcontext == NULL)
+		  return -1;
+	  
+	  open_key = ch_string_arg_get(jenv,key);
 
 	  if(open_key == NULL|| strlen(open_key) == 0)
 		  return -1;
@@ -109,14 +112,6 @@ JNIEXPORT jint JNICALL Java_com_antell_cloudhands_api_packet_PacketRecordReader_
 	  if(shm_fmt == NULL)
 		  return -1;
 	  
-	  pthread_mutex_lock(&lock);
-	  pcontext = (ch_packet_record_reader_context_t*)ch_jni_context_pool_create(g_pkt_reader_context_pool,jenv);
-	  pthread_mutex_unlock(&lock);
-	
-	  if(pcontext == NULL)
-		  return -1;
-
-	
 	  pcontext->mp = mp;
 
 	  pcontext->shm_fmt = shm_fmt;
@@ -143,15 +138,14 @@ static inline int _prepare_iter_ok(ch_packet_record_reader_context_t *pcontext){
     return 1;
 }
 
-
 /*
  * Class:     com_antell_cloudhands_api_packet_PacketRecordReader
  * Method:    read
- * Signature: (Lcom/antell/cloudhands/api/packet/PacketRecord;)I
+ * Signature: (ILcom/antell/cloudhands/api/packet/PacketRecord;)I
  */
 JNIEXPORT jint JNICALL Java_com_antell_cloudhands_api_packet_PacketRecordReader_read
-  (JNIEnv *jenv, jobject jthis, jobject jpacketRecord){
-	  
+  (JNIEnv *jenv, jobject jthis, jint id, jobject jpacketRecord){
+
 	  ch_packet_record_reader_context_t *pcontext = NULL;
 	  ch_shm_format_t *shm_fmt;
 	  ch_shm_entry_iterator_t *eiter;
@@ -159,9 +153,9 @@ JNIEXPORT jint JNICALL Java_com_antell_cloudhands_api_packet_PacketRecordReader_
 	  ch_packet_record_t *pkt_rcd;
 	  ch_shm_record_t *shm_rcd;
 	  
-	  pthread_mutex_lock(&lock);
-	  pcontext = (ch_packet_record_reader_context_t*)ch_jni_context_pool_find(g_pkt_reader_context_pool,jenv);
-	  pthread_mutex_unlock(&lock);
+	  pcontext = _pkt_rcd_context_get(id);
+	  if(pcontext == NULL)
+		  return -1;
 
      if(_prepare_iter_ok(pcontext) == 0){
 		 /* no data to be read */
@@ -197,20 +191,18 @@ JNIEXPORT jint JNICALL Java_com_antell_cloudhands_api_packet_PacketRecordReader_
   
   }
 
+  
 /*
  * Class:     com_antell_cloudhands_api_packet_PacketRecordReader
  * Method:    close
- * Signature: ()V
+ * Signature: (I)V
  */
 JNIEXPORT void JNICALL Java_com_antell_cloudhands_api_packet_PacketRecordReader_close
-  (JNIEnv *jenv, jobject jthis){
-  
-	  ch_packet_record_reader_context_t *pcontext = NULL;
+  (JNIEnv *jenv, jobject jthis, jint id){
 
-	  pthread_mutex_lock(&lock);
-	  pcontext = (ch_packet_record_reader_context_t*)ch_jni_context_pool_find(g_pkt_reader_context_pool,jenv);
-	  pthread_mutex_unlock(&lock);
+      ch_packet_record_reader_context_t *pcontext = NULL;
 
+	  pcontext = _pkt_rcd_context_get(id);
 	  if(pcontext == NULL)
 		  return;
 
@@ -221,8 +213,5 @@ JNIEXPORT void JNICALL Java_com_antell_cloudhands_api_packet_PacketRecordReader_
 
 	  ch_pool_destroy(pcontext->mp);
 
-	  pthread_mutex_lock(&lock);
-	  ch_jni_context_pool_remove(g_pkt_reader_context_pool,(ch_jni_context_t*)pcontext); 
-	  pthread_mutex_unlock(&lock);
   }
 

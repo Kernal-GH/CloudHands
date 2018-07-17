@@ -11,10 +11,10 @@ public class PacketSourceReader extends AbstractSourceReader {
 
     private PacketRecordReader packetRecordReader;
 
-    protected PacketSourceReader(Source source, Filter filter,String mmapFileName) {
+    protected PacketSourceReader(Source source, Filter filter,int id,String mmapFileName) {
 
         super(source,new PacketSourceEntryParser(), filter);
-        this.packetRecordReader = new PacketRecordReader(mmapFileName,null,0,4096);
+        this.packetRecordReader = new PacketRecordReader(id,mmapFileName,null,0,4096);
 
     }
 

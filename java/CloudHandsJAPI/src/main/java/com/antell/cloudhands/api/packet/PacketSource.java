@@ -18,9 +18,12 @@ public class PacketSource extends AbstractSource {
 
         String[] mmapFiles = mmaps.split(",");
 
+        int i = 0;
+
         for(String mmapFile :mmapFiles) {
 
-            SourceReader sourceReader = new PacketSourceReader(this, filter, mmapFile);
+            SourceReader sourceReader = new PacketSourceReader(this, filter, i,mmapFile);
+            i++;
 
             addSourceReader(sourceReader);
         }

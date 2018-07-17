@@ -32,18 +32,29 @@ static inline void ch_set_long_field(JNIEnv *jenv,jobject jobj,const char *f,lon
 static inline void ch_send_data_to_java(JNIEnv *jenv,jobject jobj,void *data,long dlen){
 
 	jclass cls = (*jenv)->GetObjectClass(jenv,jobj);
-	/*call java function updateByteBuffer to adjust the buf*/
-	jmethodID upfun = (*jenv)->GetMethodID(jenv,cls,"updateByteBuffer","(J)V");
-	(*jenv)->CallVoidMethod(jenv,jobj,upfun,dlen);
 
 	/*copy data into java bytebuffer*/
 	jfieldID fid = (*jenv)->GetFieldID(jenv,cls, "dataBuffer", "Ljava/nio/ByteBuffer;");
 	jobject jb = (*jenv)->GetObjectField(jenv,jobj, fid);
+	
+	jsize cap = (*jenv)->GetDirectBufferCapacity(jenv,jb);
+	if(dlen>cap){
+		printf("Too large data:%ld,cap:%ld\n",dlen,(long)cap);
+		return;
+	}
+
 	void *jb_ptr = (void*)(*jenv)->GetDirectBufferAddress(jenv,jb);
+
+	if(jb_ptr == NULL){
+	
+		printf("jb_ptr:%p,%lu\n",jb_ptr,(unsigned long)dlen);
+		return;
+	}
 
 	memcpy(jb_ptr,data,dlen);
 
 }
+
 
 static inline const char * ch_string_arg_get(JNIEnv *jenv,jstring jstr){
 

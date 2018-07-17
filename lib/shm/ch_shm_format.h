@@ -66,19 +66,6 @@ struct ch_shm_entry_header_t {
 };
 #define CH_SHM_ENTRY_HEADER_LEN (sizeof(uint32_t)*5)
 
-struct ch_shm_format_t {
-
-   ch_shm_entry_header_t cur_header;
-   ch_pool_t *mp;
-   ch_shm_interface_t *shm_int;
-   int has_header;
-   uint32_t entry_size;
-   uint32_t record_header_size;
-
-   void (*shm_record_write)(ch_shm_format_t *fmt,ch_shm_record_t *record);
-   ch_shm_record_t * (*shm_record_read)(ch_shm_entry_iterator_t *iter,ch_bin_format_t *bfmt);
-};
-
 struct ch_shm_entry_iterator_t {
 
    ch_shm_format_t *fmt;
@@ -86,6 +73,24 @@ struct ch_shm_entry_iterator_t {
    ch_shm_record_t* (*next)(ch_shm_entry_iterator_t *iter);
    uint32_t entries_count;
 };
+
+struct ch_shm_format_t {
+
+   ch_shm_entry_header_t cur_header;
+   ch_shm_entry_iterator_t shm_iter;
+   ch_shm_record_t *shm_record;
+
+   ch_pool_t *mp;
+   ch_shm_interface_t *shm_int;
+   int has_header;
+   uint32_t entry_size;
+   uint32_t record_header_size;
+
+   void (*shm_record_write)(ch_shm_format_t *fmt,ch_shm_record_t *record);
+   int  (*shm_record_read)(ch_shm_entry_iterator_t *iter,ch_bin_format_t *bfmt,ch_shm_record_t *shm_record);
+};
+
+
 
 struct ch_shm_record_t {
 
@@ -104,8 +109,9 @@ static inline uint32_t ch_shm_record_len(ch_shm_format_t *fmt,ch_shm_record_t *r
 
 extern ch_shm_format_t * ch_shm_format_create(ch_pool_t *mp,ch_shm_interface_t *shm_int,uint32_t entry_size,
   uint32_t record_header_size,
+  ch_shm_record_t *shm_record,
   void (*shm_record_write)(ch_shm_format_t *fmt,ch_shm_record_t *record),
-  ch_shm_record_t * (*shm_record_read)(ch_shm_entry_iterator_t *iter,ch_bin_format_t *bfmt));
+  int (*shm_record_read)(ch_shm_entry_iterator_t *iter,ch_bin_format_t *bfmt,ch_shm_record_t *shm_record));
 
 
 extern int ch_shm_format_put(ch_shm_format_t *fmt,ch_shm_record_t *record);

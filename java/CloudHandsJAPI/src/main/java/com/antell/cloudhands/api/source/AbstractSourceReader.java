@@ -1,4 +1,5 @@
 package com.antell.cloudhands.api.source;
+
 import com.antell.cloudhands.api.packet.PacketRecord;
 
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -7,7 +8,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Created by dell on 2018/6/19.
  */
-public abstract class AbstractSourceReader implements SourceReader{
+public abstract class AbstractSourceReader implements SourceReader {
 
     protected final Source source;
     protected final SourceEntryParser parser;
@@ -23,10 +24,15 @@ public abstract class AbstractSourceReader implements SourceReader{
     }
 
     @Override
-    public void start() throws SourceException{
+    public void start() throws SourceException {
 
         scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(1);
 
+        if (open() == -1) {
+
+            throw new SourceException("Cannot open source reader to read!");
+
+        }
         sourceReadRunnable = new SourceReadRunnable();
 
         scheduledThreadPoolExecutor.scheduleAtFixedRate(sourceReadRunnable, 500, 500,
@@ -41,31 +47,16 @@ public abstract class AbstractSourceReader implements SourceReader{
         scheduledThreadPoolExecutor.remove(sourceReadRunnable);
     }
 
-    private class SourceReadRunnable implements Runnable{
-
-        private boolean isOpen;
-
-        public SourceReadRunnable(){
-            isOpen = false;
-        }
-
+    private class SourceReadRunnable implements Runnable {
 
         @Override
         public void run() {
 
-            if(!isOpen){
-
-                if(open() == -1){
-
-                    throw new SourceException("Cannot open source reader to read!");
-                }
-                isOpen = true;
-            }
 
             while (true) {
                 PacketRecord packetRecord = read();
                 if (packetRecord != null) {
-                    if(filter!=null&&!filter.isAccept(packetRecord)){
+                    if (filter != null && !filter.isAccept(packetRecord)) {
                         readEnd(packetRecord);
                         continue;
                     }
@@ -74,8 +65,7 @@ public abstract class AbstractSourceReader implements SourceReader{
                     try {
 
                         SourceEntry sourceEntry = parser.parse(packetRecord);
-                        if(filter==null||filter.isAccept(sourceEntry))
-                        {
+                        if (filter == null || filter.isAccept(sourceEntry)) {
                             source.put(sourceEntry);
                         }
 
@@ -86,13 +76,15 @@ public abstract class AbstractSourceReader implements SourceReader{
                     } finally {
                         readEnd(packetRecord);
                     }
-                }else{
+                } else {
                     /*na data to read,return thread fun and sleep some times*/
                     break;
                 }
             }
         }
 
-    };
+    }
+
+    ;
 
 }

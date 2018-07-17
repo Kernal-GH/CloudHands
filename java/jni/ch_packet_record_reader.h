@@ -10,34 +10,34 @@ extern "C" {
 /*
  * Class:     com_antell_cloudhands_api_packet_PacketRecordReader
  * Method:    openMMap
- * Signature: (Ljava/lang/String;)I
+ * Signature: (ILjava/lang/String;)I
  */
 JNIEXPORT jint JNICALL Java_com_antell_cloudhands_api_packet_PacketRecordReader_openMMap
-  (JNIEnv *, jobject, jstring);
+  (JNIEnv *, jobject, jint, jstring);
 
 /*
  * Class:     com_antell_cloudhands_api_packet_PacketRecordReader
  * Method:    openSHM
- * Signature: (Ljava/lang/String;I)I
+ * Signature: (ILjava/lang/String;I)I
  */
 JNIEXPORT jint JNICALL Java_com_antell_cloudhands_api_packet_PacketRecordReader_openSHM
-  (JNIEnv *, jobject, jstring, jint);
+  (JNIEnv *, jobject, jint, jstring, jint);
 
 /*
  * Class:     com_antell_cloudhands_api_packet_PacketRecordReader
  * Method:    read
- * Signature: (Lcom/antell/cloudhands/api/packet/PacketRecord;)I
+ * Signature: (ILcom/antell/cloudhands/api/packet/PacketRecord;)I
  */
 JNIEXPORT jint JNICALL Java_com_antell_cloudhands_api_packet_PacketRecordReader_read
-  (JNIEnv *, jobject, jobject);
+  (JNIEnv *, jobject, jint, jobject);
 
 /*
  * Class:     com_antell_cloudhands_api_packet_PacketRecordReader
  * Method:    close
- * Signature: ()V
+ * Signature: (I)V
  */
 JNIEXPORT void JNICALL Java_com_antell_cloudhands_api_packet_PacketRecordReader_close
-  (JNIEnv *, jobject);
+  (JNIEnv *, jobject, jint);
 
 #ifdef __cplusplus
 }

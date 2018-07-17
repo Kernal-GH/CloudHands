@@ -27,19 +27,23 @@ public class PacketRecord {
     public final static int SECRESHTTP = 12;
     public final static int SECRESMAIL = 13;
 
+    /*64K*/
+    public final static int DATA_SIZE_MIN = 65536;
+
     public int type;
     public int metaDataSize;
     public int dataSize;
     public long time;
 
-    public long curDataBufferSize;
     public ByteBuffer dataBuffer;
 
     public PacketRecord(long bsize){
 
-        curDataBufferSize = bsize;
+        if(bsize<DATA_SIZE_MIN)
+            bsize = DATA_SIZE_MIN;
 
         dataBuffer = ByteBuffer.allocateDirect((int) bsize);
+
         reset();
     }
 
@@ -58,7 +62,9 @@ public class PacketRecord {
         byte[] data = new byte[dataSize];
 
         dataBuffer.get(data);
+
         return MessagePack.newDefaultUnpacker(data);
+
     }
 
     public void reset(){
@@ -67,14 +73,6 @@ public class PacketRecord {
         metaDataSize = 0;
         dataSize = 0;
         dataBuffer.clear();
-    }
-
-    public void updateByteBuffer(long dsize){
-
-        if(dsize>curDataBufferSize){
-            dataBuffer = ByteBuffer.allocateDirect((int)dsize+8);
-            curDataBufferSize = dsize;
-        }
     }
 
     public void setDataSize(int dataSize) {
@@ -121,7 +119,6 @@ public class PacketRecord {
         TextUtils.addInt(sb,"dataSize",dataSize);
         TextUtils.addInt(sb,"metaDataSize",metaDataSize);
         TextUtils.addLong(sb,"time",time);
-        TextUtils.addLong(sb,"curDataBufferSize",curDataBufferSize);
 
         return sb.toString();
     }

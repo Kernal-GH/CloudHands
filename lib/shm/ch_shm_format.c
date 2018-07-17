@@ -18,13 +18,12 @@
 #include "ch_log.h"
 #include "ch_shm_format.h"
 
-static ch_shm_entry_iterator_t g_iter,*g_iter_ptr = &g_iter;
-
 ch_shm_format_t * ch_shm_format_create(ch_pool_t *mp,ch_shm_interface_t *shm_int,
   uint32_t entry_size,
   uint32_t record_header_size,
+  ch_shm_record_t *shm_record,
   void (*shm_record_write)(ch_shm_format_t *fmt,ch_shm_record_t *record),
-  ch_shm_record_t * (*shm_record_read)(ch_shm_entry_iterator_t *iter,ch_bin_format_t *bfmt)){
+  int (*shm_record_read)(ch_shm_entry_iterator_t *iter,ch_bin_format_t *bfmt,ch_shm_record_t *shm_record)){
 
 
    ch_shm_format_t *fmt = NULL;
@@ -38,6 +37,8 @@ ch_shm_format_t * ch_shm_format_create(ch_pool_t *mp,ch_shm_interface_t *shm_int
    fmt->record_header_size = record_header_size;
    fmt->shm_record_write = shm_record_write;
    fmt->shm_record_read = shm_record_read;
+
+   fmt->shm_record = shm_record;
 
    return fmt;
 }
@@ -208,9 +209,8 @@ static inline int has_next(ch_shm_entry_iterator_t *iter){
     return 1;
 }
 
-static inline ch_shm_record_t * _record_read(ch_shm_entry_iterator_t *iter,ch_bin_format_t *bfmt){
+static inline int  _record_read(ch_shm_entry_iterator_t *iter,ch_bin_format_t *bfmt,ch_shm_record_t *record){
 
-    ch_shm_record_t *record;
     uint32_t magic;
     uint32_t record_size;
 
@@ -219,11 +219,15 @@ static inline ch_shm_record_t * _record_read(ch_shm_entry_iterator_t *iter,ch_bi
     if(magic!=EIMAGIC){
         ch_log(CH_LOG_ERR,"record magic:%lu is invalid!",magic);
         iter->header = NULL;
-        return NULL;
+        return -1;
     }
     
     record_size = ch_bf_uint32_read(bfmt);
-    record = iter->fmt->shm_record_read(iter,bfmt);
+    if(iter->fmt->shm_record_read(iter,bfmt,record)){
+	
+		/*error*/
+		return -1;
+	}
     
     record->magic = magic;
     record->record_size = record_size;
@@ -231,12 +235,14 @@ static inline ch_shm_record_t * _record_read(ch_shm_entry_iterator_t *iter,ch_bi
 
     ch_bf_bytes_read(bfmt,(unsigned char**)(&record->data),&record->data_len);
 
-    return record;
+    return 0;
 }
 
 static ch_shm_record_t * record_next(ch_shm_entry_iterator_t *iter){
 
-    ch_shm_record_t *record = NULL;
+	int rc;
+
+    ch_shm_record_t *record = iter->fmt->shm_record;
     ch_shm_entry_header_t *header = iter->header;
 
     ch_bin_format_t *bfmt = &header->bfmt;
@@ -245,19 +251,22 @@ static ch_shm_record_t * record_next(ch_shm_entry_iterator_t *iter){
         return NULL;
     }
 
-    record = _record_read(iter,bfmt);
+    rc =  _record_read(iter,bfmt,record);
 
-    if(record){
+    if(rc == 0){
 
         iter->entries_count+=1;
+		return record;
     }
 
-    return record;
+    return NULL;
 }
 
 ch_shm_entry_iterator_t * ch_shm_entry_iterator_prefare(ch_shm_format_t *fmt){
 
     ch_shm_entry_t *shm_entry = &fmt->cur_header.shm_entry;
+	ch_shm_entry_iterator_t *g_iter_ptr = &fmt->shm_iter;
+
     g_iter_ptr->fmt = fmt;
     g_iter_ptr->header = NULL;
     g_iter_ptr->next = record_next;
