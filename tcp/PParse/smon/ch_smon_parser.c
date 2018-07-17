@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-07-13 14:23:08
- * Last Modified: 2018-07-13 14:29:24
+ * Last Modified: 2018-07-17 16:49:35
  */
 
 
@@ -53,6 +53,12 @@ int ch_smon_parser_init(ch_pp_pool_t *pp_pool,const char *cfname){
 	if(parse_context->req_fpath == NULL || parse_context->res_fpath == NULL){
 	
 		ch_log(CH_LOG_ERR,"Cannot create file path for store smon body!");
+		return -1;
+	}
+
+	if(ch_session_monitor_load(&parse_context->monitor,parse_context->scontext->smon_mmap_fname,0)){
+	
+		ch_log(CH_LOG_ERR,"Cannot load session monitor!");
 		return -1;
 	}
 

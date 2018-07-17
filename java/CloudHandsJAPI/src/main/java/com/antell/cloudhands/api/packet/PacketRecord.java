@@ -20,12 +20,16 @@ public class PacketRecord {
     public final static int OTHER = 5;
     public final static int DNS = 6;
     public final static int TFTP = 7;
-    public final static int HTTP = 8;
-    public final static int MAIL = 9;
-    public final static int FTP = 10;
-    public final static int TELNET = 11;
-    public final static int SECRESHTTP = 12;
-    public final static int SECRESMAIL = 13;
+    public final static int UDPSMON = 8;
+
+    public final static int HTTP = 9;
+    public final static int MAIL = 10;
+    public final static int FTP = 11;
+    public final static int TELNET = 12;
+    public final static int TCPSMON = 13;
+
+    public final static int SECRESHTTP = 14;
+    public final static int SECRESMAIL = 15;
 
     /*64K*/
     public final static int DATA_SIZE_MIN = 65536;

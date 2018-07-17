@@ -1,5 +1,6 @@
 package com.antell.cloudhands.api.packet.tcp.mail;
 
+import com.antell.cloudhands.api.packet.SessionEntry;
 import com.antell.cloudhands.api.packet.security.SecMatchResult;
 import com.antell.cloudhands.api.packet.tcp.TCPSessionEntry;
 import com.antell.cloudhands.api.source.SourceEntry;
@@ -18,7 +19,7 @@ import java.util.List;
  */
 public class MailSession implements SourceEntry {
 
-    private TCPSessionEntry sessionEntry;
+    private SessionEntry sessionEntry;
 
     private String userName;
     private String passwd;
@@ -253,7 +254,7 @@ public class MailSession implements SourceEntry {
         }
     }
 
-    public TCPSessionEntry getSessionEntry() {
+    public SessionEntry getSessionEntry() {
         return sessionEntry;
     }
 

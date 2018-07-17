@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-07-13 13:16:29
- * Last Modified: 2018-07-13 16:39:58
+ * Last Modified: 2018-07-17 16:53:55
  */
 
 #include "ch_smon_session_entry.h"
@@ -13,7 +13,9 @@
 
 void ch_smon_session_entry_init(ch_smon_session_entry_t *smon_entry,ch_pool_t *mp){
 
+
 	smon_entry->mp = mp;
+	smon_entry->id = 0;
 	smon_entry->req_content_fpath = NULL;
 	smon_entry->res_content_fpath = NULL;
 	smon_entry->req_content_fp = NULL;

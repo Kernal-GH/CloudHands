@@ -9,7 +9,7 @@ DPDK=/usr/local/dpdk/dpdk_src
 DPDK_FLAGS=$(shell cat ${DPDK}/include/cflags.txt)
 DPDK_LIB_FLAGS = $(shell cat ${DPDK}/lib/ldflags.txt)
 CFLAGS  = ${BUILD_CFLAGS}  -O0 -rdynamic -D_GNU_SOURCE  ${DPDK_FLAGS} -pthread
-CFLAGS += -I../../../lib/common  -I../../../lib/ptables -I../../../lib/fstore -I../../../lib/shm -I../  -I${DPDK}/include -include ${DPDK}/include/rte_config.h
+CFLAGS += -I../../../lib/common  -I../../../lib/ptables -I../../../lib/fstore -I../../../lib/shm -I../../../SessionMonitor -I../  -I${DPDK}/include -include ${DPDK}/include/rte_config.h
 
 ch_smon_SOURCES = ch_smon_context.c \
 				  ch_smon_session_entry.c \

@@ -1,5 +1,6 @@
 package com.antell.cloudhands.api.packet;
 
+import com.antell.cloudhands.api.packet.smon.SMonSession;
 import com.antell.cloudhands.api.packet.tcp.http.HTTPSession;
 import com.antell.cloudhands.api.packet.tcp.mail.MailSession;
 import com.antell.cloudhands.api.packet.udp.dns.DNSSession;
@@ -50,6 +51,15 @@ public class PacketSourceEntryParser implements SourceEntryParser {
             case PacketRecord.SECRESMAIL:
                 entry = new MailSession(packetRecord.getMessageUnpacker());
                 break;
+
+            case PacketRecord.TCPSMON:
+                entry = new SMonSession(packetRecord.getMessageUnpacker());
+                break;
+
+            case PacketRecord.UDPSMON:
+                entry = new SMonSession(packetRecord.getDataInput());
+                break;
+
             default:
                 entry = null;
                 break;

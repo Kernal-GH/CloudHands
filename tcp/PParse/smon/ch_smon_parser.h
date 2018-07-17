@@ -16,8 +16,11 @@ typedef struct ch_smon_parse_context_t ch_smon_parse_context_t;
 #include "ch_pp_pool.h"
 #include "ch_fpath.h"
 #include "ch_smon_context.h"
+#include "ch_session_monitor.h"
 
 struct ch_smon_parse_context_t {
+
+	ch_session_monitor_t monitor;
 
 	ch_smon_context_t *scontext;
 

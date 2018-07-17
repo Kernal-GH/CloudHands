@@ -1,6 +1,7 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
-import com.antell.cloudhands.api.BinDataInput;
+import com.antell.cloudhands.api.packet.SessionEntry;
+import com.antell.cloudhands.api.packet.udp.UDPSessionEntry;
 import com.antell.cloudhands.api.source.SourceEntry;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 
@@ -12,12 +13,12 @@ import java.io.IOException;
  */
 public class DNSSession  implements SourceEntry {
 
-    private DNSSessionEntry sessionEntry;
+    private SessionEntry sessionEntry;
     private DNSRequst dnsRequst;
     private DNSResponse dnsResponse;
 
     public DNSSession(DataInput in) throws IOException {
-        sessionEntry = new DNSSessionEntry();
+        sessionEntry = new UDPSessionEntry();
         dnsRequst = null;
         dnsResponse = null;
         sessionEntry.read(in);
@@ -90,7 +91,7 @@ public class DNSSession  implements SourceEntry {
         return dnsResponse;
     }
 
-    public DNSSessionEntry getSessionEntry() {
+    public SessionEntry getSessionEntry() {
         return sessionEntry;
     }
 }

@@ -5,6 +5,7 @@ import com.antell.cloudhands.api.packet.ICMPPacket;
 import com.antell.cloudhands.api.packet.TCPSession;
 import com.antell.cloudhands.api.packet.UDPSession;
 import com.antell.cloudhands.api.packet.security.SecMatchResult;
+import com.antell.cloudhands.api.packet.smon.SMonSession;
 import com.antell.cloudhands.api.packet.tcp.http.HTTPSession;
 import com.antell.cloudhands.api.packet.tcp.mail.MailSession;
 import com.antell.cloudhands.api.packet.udp.dns.DNSSession;
@@ -48,6 +49,16 @@ public class SourceEntryUtil {
     public static MailSession toMailSession(SourceEntry sourceEntry){
 
         return (MailSession)sourceEntry;
+    }
+
+    public static boolean isSmonSession(SourceEntry sourceEntry){
+
+        return sourceEntry instanceof SMonSession;
+    }
+
+    public static SMonSession toSmonSession(SourceEntry sourceEntry){
+
+        return (SMonSession)sourceEntry;
     }
 
     public static boolean isMailSessionWithAttack(SourceEntry sourceEntry){
@@ -150,8 +161,12 @@ public class SourceEntryUtil {
             MailSession mailSession = toMailSession(sourceEntry);
             ipPairs.setSrcIP(IPUtils.ipv4Str(mailSession.getSessionEntry().getReqIP()));
             ipPairs.setDstIP(IPUtils.ipv4Str(mailSession.getSessionEntry().getResIP()));
-        }
+        }else if(isSmonSession(sourceEntry)){
 
+            SMonSession sMonSession = toSmonSession(sourceEntry);
+            ipPairs.setSrcIP(IPUtils.ipv4Str(sMonSession.getSessionEntry().getReqIP()));
+            ipPairs.setDstIP(IPUtils.ipv4Str(sMonSession.getSessionEntry().getResIP()));
+        }
     }
 
 

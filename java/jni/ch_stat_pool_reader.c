@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-06-08 11:57:05
- * Last Modified: 2018-06-08 14:24:43
+ * Last Modified: 2018-07-17 15:18:49
  */
 
 #include "ch_stat_pool_reader.h"
@@ -75,7 +75,7 @@ JNIEXPORT jint JNICALL Java_com_antell_cloudhands_api_statistic_StatDataReader_r
 	  dsize = CH_DOUT_CONTENT_SIZE(dout);
 
 	  ch_set_int_field(jenv,jst_din,"dataSize",dsize);
-	  ch_send_data_to_java(jenv,jst_din,data,dsize);
+	  ch_send_data_to_java2(jenv,jst_din,data,dsize);
 
 	  return 0;
   }
@@ -106,7 +106,7 @@ JNIEXPORT jint JNICALL Java_com_antell_cloudhands_api_statistic_StatDataReader_r
 	  dsize = CH_DOUT_CONTENT_SIZE(dout);
 
 	  ch_set_int_field(jenv,jst_din,"dataSize",dsize);
-	  ch_send_data_to_java(jenv,jst_din,data,dsize);
+	  ch_send_data_to_java2(jenv,jst_din,data,dsize);
 
 	  return 0;
   

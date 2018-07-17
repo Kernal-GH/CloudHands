@@ -1,5 +1,6 @@
 package com.antell.cloudhands.api.packet.tcp.http;
 
+import com.antell.cloudhands.api.packet.SessionEntry;
 import com.antell.cloudhands.api.packet.security.SecMatchResult;
 import com.antell.cloudhands.api.packet.tcp.TCPSessionEntry;
 import com.antell.cloudhands.api.source.SourceEntry;
@@ -20,7 +21,7 @@ import java.util.List;
  */
 public class HTTPSession implements SourceEntry{
 
-    private TCPSessionEntry sessionEntry;
+    private SessionEntry sessionEntry;
     private String method;
     private String uri;
     private String extName;
@@ -282,7 +283,7 @@ public class HTTPSession implements SourceEntry{
         this.secMatchResult = secMatchResult;
     }
 
-    public TCPSessionEntry getSessionEntry() {
+    public SessionEntry getSessionEntry() {
         return sessionEntry;
     }
 

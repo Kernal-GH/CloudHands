@@ -1,10 +1,10 @@
 package com.antell.cloudhands.api.packet;
 
-import com.antell.cloudhands.api.BinDataInput;
 import com.antell.cloudhands.api.source.SourceEntry;
 import com.antell.cloudhands.api.utils.DateUtils;
 import com.antell.cloudhands.api.utils.IPUtils;
 import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.msgpack.core.MessageUnpacker;
 
 import java.io.DataInput;
 import java.io.IOException;
@@ -93,4 +93,13 @@ public class UDPSession extends SessionEntry implements SourceEntry{
         return dataToString();
     }
 
+    @Override
+    public void read(DataInput in) throws IOException {
+        
+    }
+
+    @Override
+    public void parse(MessageUnpacker unpacker) throws IOException {
+
+    }
 }

@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@163.com
  *   Description: ---
  *        Create: 2016-07-27 19:05:36
- * Last Modified: 2018-07-13 13:52:19
+ * Last Modified: 2018-07-17 16:45:31
  */
 
 #include "ch_log.h"
@@ -31,6 +31,14 @@ static const char *cmd_smon_resbody_dir(cmd_parms *cmd ch_unused, void *_dcfg, c
 	return NULL;
 }
 
+static const char *cmd_smon_mmap_fname(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1){
+
+	ch_smon_context_t *scontext = (ch_smon_context_t*)_dcfg;
+
+	scontext->smon_mmap_fname = p1;
+
+	return NULL;
+}
 
 static const char *cmd_smon_body_dir_create_type(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1){
 
@@ -73,6 +81,14 @@ static const command_rec smon_context_directives[] = {
             NULL,
             0,
             "set the type created of smon body dir by time"
+            ),
+
+    CH_INIT_TAKE1(
+            "PSMONMMapFileName",
+            cmd_smon_mmap_fname,
+            NULL,
+            0,
+            "set the session monitor mmap file path"
             ),
 
 };

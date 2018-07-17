@@ -3,9 +3,9 @@ package com.antell.cloudhands.api.packet;
 import com.antell.cloudhands.api.source.SourceEntry;
 import com.antell.cloudhands.api.utils.DateUtils;
 import com.antell.cloudhands.api.utils.IPUtils;
-import com.antell.cloudhands.api.utils.Text;
 import com.antell.cloudhands.api.utils.TextUtils;
 import org.elasticsearch.common.xcontent.XContentBuilder;
+
 import java.io.DataInput;
 import java.io.IOException;
 

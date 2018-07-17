@@ -1,11 +1,21 @@
 package com.antell.cloudhands.api.packet;
 
+import com.antell.cloudhands.api.BinDataInput;
+import com.antell.cloudhands.api.DataDump;
+import com.antell.cloudhands.api.ESIndexable;
+import com.antell.cloudhands.api.MsgPackDataInput;
+import com.antell.cloudhands.api.utils.Constants;
+import com.antell.cloudhands.api.utils.DateUtils;
+import com.antell.cloudhands.api.utils.IPUtils;
 import com.antell.cloudhands.api.utils.TextUtils;
+import org.elasticsearch.common.xcontent.XContentBuilder;
+
+import java.io.IOException;
 
 /**
  * Created by dell on 2018/4/17.
  */
-public  class SessionEntry {
+public abstract class SessionEntry implements MsgPackDataInput,BinDataInput,ESIndexable,DataDump{
 
     private boolean isTimeout;
     private int timeoutTV;
@@ -21,7 +31,56 @@ public  class SessionEntry {
         this.res = new SessionEndPoint();
     }
 
+    @Override
+    public XContentBuilder dataToJson(XContentBuilder cb) throws IOException {
 
+        cb.field("sessionID",getSessionID());
+        cb.field("protocol", Constants.protoID2String[getProtocolID()]);
+        cb.field("srcIP", IPUtils.ipv4Str(getReqIP()));
+        cb.field("dstIP",IPUtils.ipv4Str(getResIP()));
+        cb.field("srcPort",getReqPort());
+        cb.field("dstPort",getResPort());
+        cb.field("reqStartTime", getReqStartTime());
+        cb.field("reqLastTime", getReqLastTime());
+        cb.field("resStartTime", getResStartTime());
+        cb.field("resLastTime", getResLastTime());
+        cb.field("timeDate", DateUtils.format(getReqStartTime()));
+        cb.field("reqPackets",getReqPackets());
+        cb.field("reqBytes",getReqBytes());
+
+        cb.field("resPackets",getResPackets());
+        cb.field("resBytes",getResBytes());
+
+
+        return cb;
+    }
+
+    @Override
+    public String dataToString() {
+
+        StringBuffer sb = new StringBuffer();
+
+        sb.append("TCP.Session.Entry.info:\n\n");
+
+        TextUtils.addText(sb,"proto",Constants.protoID2String[getProtocolID()]);
+        TextUtils.addLong(sb,"sessionID",getSessionID());
+        TextUtils.addText(sb,"srcIP", IPUtils.ipv4Str(getReqIP()));
+        TextUtils.addText(sb,"dstIP", IPUtils.ipv4Str(getResIP()));
+        TextUtils.addInt(sb,"srcPort",getReqPort());
+        TextUtils.addInt(sb,"dstPort",getResPort());
+        TextUtils.addText(sb,"reqStartTime", DateUtils.format(getReqStartTime()));
+        TextUtils.addText(sb,"reqLastTime", DateUtils.format(getReqLastTime()));
+        TextUtils.addText(sb,"resStartTime", DateUtils.format(getResStartTime()));
+        TextUtils.addText(sb,"resLastTime", DateUtils.format(getResLastTime()));
+        TextUtils.addLong(sb,"reqPackets",getReqPackets());
+        TextUtils.addLong(sb,"reqBytes",getReqBytes());
+
+        TextUtils.addLong(sb,"resPackets",getResPackets());
+        TextUtils.addLong(sb,"resBytes",getResBytes());
+
+
+        return sb.toString();
+    }
 
     public long getSessionID() {
         return sessionID;

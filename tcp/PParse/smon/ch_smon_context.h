@@ -25,6 +25,8 @@ struct ch_smon_context_t {
 
 	int create_body_dir_type;
 
+	const char *smon_mmap_fname;
+
 };
 
 extern ch_smon_context_t *ch_smon_context_create(ch_pp_context_t *pcontext,const char *cfname);

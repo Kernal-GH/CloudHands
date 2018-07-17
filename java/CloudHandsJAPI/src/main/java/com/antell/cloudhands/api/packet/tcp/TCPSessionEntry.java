@@ -1,20 +1,19 @@
 package com.antell.cloudhands.api.packet.tcp;
 
-import com.antell.cloudhands.api.DataDump;
-import com.antell.cloudhands.api.ESIndexable;
-import com.antell.cloudhands.api.MsgPackDataInput;
 import com.antell.cloudhands.api.packet.SessionEntry;
-import com.antell.cloudhands.api.utils.*;
+import com.antell.cloudhands.api.utils.MessagePackUtil;
+import com.antell.cloudhands.api.utils.TextUtils;
 import com.google.common.base.Preconditions;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.msgpack.core.MessageUnpacker;
 
+import java.io.DataInput;
 import java.io.IOException;
 
 /**
  * Created by mala on 2018/6/16.
  */
-public class TCPSessionEntry extends SessionEntry implements MsgPackDataInput,ESIndexable,DataDump {
+public class TCPSessionEntry extends SessionEntry {
 
     private long reqPBytes;
     private long resPBytes;
@@ -22,21 +21,9 @@ public class TCPSessionEntry extends SessionEntry implements MsgPackDataInput,ES
     @Override
     public XContentBuilder dataToJson(XContentBuilder cb) throws IOException {
 
-        cb.field("sessionID",getSessionID());
-        cb.field("protocol",Constants.protoID2String[getProtocolID()]);
-        cb.field("srcIP",IPUtils.ipv4Str(getReqIP()));
-        cb.field("dstIP",IPUtils.ipv4Str(getResIP()));
-        cb.field("srcPort",getReqPort());
-        cb.field("dstPort",getResPort());
-        cb.field("reqStartTime", getReqStartTime());
-        cb.field("resStartTime", getResStartTime());
-        cb.field("timeDate",DateUtils.format(getReqStartTime()));
-        cb.field("reqPackets",getReqPackets());
-        cb.field("reqBytes",getReqBytes());
-        cb.field("reqPBytes",getReqPBytes());
+        super.dataToJson(cb);
 
-        cb.field("resPackets",getResPackets());
-        cb.field("resBytes",getResBytes());
+        cb.field("reqPBytes",getReqPBytes());
         cb.field("resPBytes",getResPBytes());
 
         return cb;
@@ -48,21 +35,9 @@ public class TCPSessionEntry extends SessionEntry implements MsgPackDataInput,ES
         StringBuffer sb = new StringBuffer();
 
         sb.append("TCP.Session.Entry.info:\n\n");
+        sb.append(super.dataToString());
 
-        TextUtils.addText(sb,"proto",Constants.protoID2String[getProtocolID()]);
-        TextUtils.addLong(sb,"sessionID",getSessionID());
-        TextUtils.addText(sb,"srcIP", IPUtils.ipv4Str(getReqIP()));
-        TextUtils.addText(sb,"dstIP", IPUtils.ipv4Str(getResIP()));
-        TextUtils.addInt(sb,"srcPort",getReqPort());
-        TextUtils.addInt(sb,"dstPort",getResPort());
-        TextUtils.addText(sb,"reqStartTime", DateUtils.format(getReqStartTime()));
-        TextUtils.addText(sb,"resStartTime", DateUtils.format(getResStartTime()));
-        TextUtils.addLong(sb,"reqPackets",getReqPackets());
-        TextUtils.addLong(sb,"reqBytes",getReqBytes());
         TextUtils.addLong(sb,"reqPBytes",getReqPBytes());
-
-        TextUtils.addLong(sb,"resPackets",getResPackets());
-        TextUtils.addLong(sb,"resBytes",getResBytes());
         TextUtils.addLong(sb,"resPBytes",getResPBytes());
         return sb.toString();
     }
@@ -105,5 +80,10 @@ public class TCPSessionEntry extends SessionEntry implements MsgPackDataInput,ES
 
     public void setResPBytes(long resPBytes) {
         this.resPBytes = resPBytes;
+    }
+
+    @Override
+    public void read(DataInput in) throws IOException {
+
     }
 }
