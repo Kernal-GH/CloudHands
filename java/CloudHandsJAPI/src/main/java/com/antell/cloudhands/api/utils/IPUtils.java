@@ -66,4 +66,12 @@ public class IPUtils {
 
     }
 
+    public static void main(String[] args){
+
+        long aBE = ipv4LongBE("192.168.1.22");
+        long aLE = ipv4LongLE("192.168.1.22");
+
+        System.out.println(ipv4Str(aBE));
+        System.out.println(ipv4Str(aLE));
+    }
 }

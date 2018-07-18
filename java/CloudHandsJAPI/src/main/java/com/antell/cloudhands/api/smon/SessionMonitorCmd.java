@@ -47,21 +47,21 @@ public class SessionMonitorCmd {
         return add(contextID,port,tv);
     }
 
-    public native long add(int contextID,int port,long tv);
+    private native long add(int contextID,int port,long tv);
 
     public long add(long ip,int port,long tv){
 
         return add(contextID,ip,port,tv);
     }
 
-    public native long add(int contextID,long ip,int port,long tv);
+    private native long add(int contextID,long ip,int port,long tv);
 
     public long add(long srcIP,int srcPort,long dstIP,int dstPort,long tv){
 
         return add(contextID,srcIP,srcPort,dstIP,dstPort,tv);
     }
 
-    public native long add(int contextID,long srcIP,int srcPort,long dstIP,int dstPort,long tv);
+    private native long add(int contextID,long srcIP,int srcPort,long dstIP,int dstPort,long tv);
 
     public SessionMonitorItem find(long id){
 
@@ -73,7 +73,7 @@ public class SessionMonitorCmd {
         return item;
     }
 
-    public native int  find(int contextID,SessionMonitorItem item,long id);
+    private native int  find(int contextID,SessionMonitorItem item,long id);
 
     public SessionMonitorItem find(long srcIP,int srcPort,long dstIP,int dstPort){
 
@@ -84,28 +84,28 @@ public class SessionMonitorCmd {
         return item;
     }
 
-    public native int  find(int contextID,SessionMonitorItem item,long srcIP,int srcPort,long dstIP,int dstPort);
+    private native int  find(int contextID,SessionMonitorItem item,long srcIP,int srcPort,long dstIP,int dstPort);
 
     public void delete(long id){
 
         delete(contextID,id);
     }
 
-    public native int  delete(int contextID,long id);
+    private native int  delete(int contextID,long id);
 
     public void stop(long id){
 
         stop(contextID,id);
     }
 
-    public native void  stop(int contextID,long id);
+    private native void  stop(int contextID,long id);
 
     public void restart(long id){
 
         restart(contextID,id);
     }
 
-    public native void  restart(int contextID,long id);
+    private native void  restart(int contextID,long id);
 
 
     public SessionMonitorItem get(int index){
@@ -117,7 +117,7 @@ public class SessionMonitorCmd {
         return item;
     }
 
-    public native int get(int contextID,SessionMonitorItem item,int index);
+    private native int get(int contextID,SessionMonitorItem item,int index);
 
 
     public int count(){
@@ -125,7 +125,7 @@ public class SessionMonitorCmd {
         return count(contextID);
     }
 
-    public native int count(int contextID);
+    private native int count(int contextID);
 
     public int getContextID() {
         return contextID;

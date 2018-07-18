@@ -19,6 +19,11 @@ public class SessionMonitorItem {
     private int type;
     private int state;
 
+    public SessionMonitorItem(){
+
+        id = -1;
+
+    }
 
     public String toString(){
 
