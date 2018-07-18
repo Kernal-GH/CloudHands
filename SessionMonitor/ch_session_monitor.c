@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-07-11 11:08:14
- * Last Modified: 2018-07-16 15:33:51
+ * Last Modified: 2018-07-18 16:31:44
  */
 
 #include <sys/mman.h>
@@ -305,6 +305,36 @@ ch_session_monitor_item_t * ch_session_monitor_item_find(ch_session_monitor_t *m
 	}
 
 	return item;
+}
+
+ch_session_monitor_item_t * ch_session_monitor_item_get(ch_session_monitor_t *monitor,int index){
+
+	ch_session_monitor_item_t *item,*cur_item = monitor->monitor_items;
+	ch_session_monitor_hdr_t *hdr = monitor->monitor_hdr;
+
+	if(index>=(int)hdr->item_number)
+		return NULL;
+
+	item = cur_item+index;
+	if(item->monitor_state == MON_STATE_INIT||item->monitor_state == MON_STATE_DEL)
+		return NULL;
+
+	return item;
+}
+
+int ch_session_monitor_item_count(ch_session_monitor_t *monitor){
+
+	ch_session_monitor_item_t *item,*cur_item = monitor->monitor_items;
+	ch_session_monitor_hdr_t *hdr = monitor->monitor_hdr;
+
+	uint32_t i = 0;
+	
+	int c = 0;
+
+	while((i++)<hdr->item_number&&cur_item->monitor_state!=MON_STATE_INIT)
+		c++;
+
+	return c;
 }
 
 ch_session_monitor_item_t * ch_session_monitor_item_find_ignore_state(ch_session_monitor_t *monitor,

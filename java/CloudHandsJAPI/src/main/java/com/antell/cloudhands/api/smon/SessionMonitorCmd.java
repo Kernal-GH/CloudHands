@@ -26,21 +26,21 @@ public class SessionMonitorCmd {
 
     }
 
-    public native int open(int contextID,String mmapFileName);
+    private native int open(int contextID,String mmapFileName);
 
     public void close(){
 
         close(contextID);
     }
 
-    public native void close(int contextID);
+    private native void close(int contextID);
 
     public long add(long ip,long tv){
 
         return add(contextID,ip,tv);
     }
 
-    public native long add(int contextID,long ip,long tv);
+    private native long add(int contextID,long ip,long tv);
 
     public long add(int port,long tv){
 
@@ -106,6 +106,26 @@ public class SessionMonitorCmd {
     }
 
     public native void  restart(int contextID,long id);
+
+
+    public SessionMonitorItem get(int index){
+
+        SessionMonitorItem item = new SessionMonitorItem();
+        if(get(contextID,item,index) == -1)
+            return null;
+
+        return item;
+    }
+
+    public native int get(int contextID,SessionMonitorItem item,int index);
+
+
+    public int count(){
+
+        return count(contextID);
+    }
+
+    public native int count(int contextID);
 
     public int getContextID() {
         return contextID;

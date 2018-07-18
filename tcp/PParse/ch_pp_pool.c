@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-05-17 14:55:00
- * Last Modified: 2018-07-13 15:55:56
+ * Last Modified: 2018-07-17 19:17:49
  */
 
 #include "ch_pp_pool.h"
@@ -16,7 +16,6 @@
 
 #define IS_SESSION_CLOSE(tcp_record) ((tcp_record)->packet_type == PACKET_TYPE_FLUSH || (tcp_record)->packet_type ==PACKET_TYPE_CLOSE)
 
-#if 0
 static void _session_entry_timeout_cb(ch_ptable_entry_t *entry,uint64_t tv ch_unused,void *priv_data ch_unused){
 
 	ch_session_entry_t *sentry = (ch_session_entry_t*)entry;
@@ -25,7 +24,6 @@ static void _session_entry_timeout_cb(ch_ptable_entry_t *entry,uint64_t tv ch_un
 
 
 }
-#endif 
 
 static void _session_entry_clean(ch_session_entry_pool_t *sentry_pool,ch_session_entry_t *sentry){
 
@@ -54,7 +52,7 @@ ch_pp_pool_t * ch_pp_pool_create(ch_pp_work_t *pwork){
 	}
 
 
-	pp_pool->sentry_pool = ch_session_entry_pool_create(pcontext,NULL,NULL); //_session_entry_timeout_cb,(void*)pp_pool); 
+	pp_pool->sentry_pool = ch_session_entry_pool_create(pcontext,_session_entry_timeout_cb,(void*)pp_pool); 
 
 	if(pp_pool->sentry_pool == NULL){
 	
@@ -95,7 +93,7 @@ void ch_pp_session_parse(ch_pp_pool_t *pp_pool,ch_tcp_record_t *tcp_record){
 	void *data;
 	size_t dlen;
 
-	//size_t c = 0;
+	size_t c = 0;
 	ch_session_entry_t *sentry = NULL;
 	ch_session_entry_pool_t *sentry_pool = pp_pool->sentry_pool;
 	ch_pp_parser_t *pp_parser;
@@ -148,14 +146,12 @@ void ch_pp_session_parse(ch_pp_pool_t *pp_pool,ch_tcp_record_t *tcp_record){
 		}
 	}
 
-#if 0
 	c = ch_session_entry_pool_timeout_free(sentry_pool);
 	if(c){
 	
 		ch_session_entry_pool_tbl_dump(sentry_pool);
 	}
 
-#endif
 
 }
 

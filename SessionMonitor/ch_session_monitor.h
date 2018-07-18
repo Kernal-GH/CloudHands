@@ -119,6 +119,9 @@ extern void ch_session_monitor_item_stop(ch_session_monitor_t *monitor,uint64_t 
 
 extern void ch_session_monitor_item_restart(ch_session_monitor_t *monitor,uint64_t id);
 
+extern ch_session_monitor_item_t * ch_session_monitor_item_get(ch_session_monitor_t *monitor,int index);
+
+extern int ch_session_monitor_item_count(ch_session_monitor_t *monitor);
 
 extern void ch_session_monitor_dump(ch_session_monitor_t *monitor,FILE *fp);
 

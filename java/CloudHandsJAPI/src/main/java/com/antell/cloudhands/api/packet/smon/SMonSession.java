@@ -55,7 +55,7 @@ public class SMonSession implements SourceEntry {
     private void parse(MessageUnpacker unpacker) throws IOException {
 
         int n = MessagePackUtil.parseMapHeader(unpacker,false);
-        Preconditions.checkArgument(n==2,"Invalid smon session messagePack:"+n);
+        Preconditions.checkArgument(n==2 ||n == 3,"Invalid smon session messagePack:"+n);
 
         /*parse session entry */
         sessionEntry.parse(unpacker);
@@ -66,7 +66,7 @@ public class SMonSession implements SourceEntry {
 
         id = MessagePackUtil.parseLong(unpacker);
         reqBodyPath = MessagePackUtil.parseText(unpacker);
-        reqBodyPath = MessagePackUtil.parseText(unpacker);
+        resBodyPath = MessagePackUtil.parseText(unpacker);
 
     }
 

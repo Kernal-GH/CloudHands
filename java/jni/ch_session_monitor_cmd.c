@@ -5,86 +5,145 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-07-14 14:05:35
- * Last Modified: 2018-07-14 14:56:15
+ * Last Modified: 2018-07-18 16:31:45
  */
 
 #include "ch_session_monitor.h"
 #include "ch_session_monitor_cmd.h"
 #include "ch_jni_util.h"
 
-static ch_session_monitor_t tmp_monitor,*monitor = &tmp_monitor;
+#define MAX_SESSION_MONITOR_CONTEXT_N 32
+
+typedef struct ch_session_monitor_context_t ch_session_monitor_context_t;
+
+struct ch_session_monitor_context_t {
+
+	ch_session_monitor_t monitor;
+
+};
+
+static ch_session_monitor_context_t smon_contexts[MAX_SESSION_MONITOR_CONTEXT_N];
+
+static inline ch_session_monitor_context_t* _smon_context_get(int context_id){
+
+	if(context_id>=MAX_SESSION_MONITOR_CONTEXT_N||context_id<0)
+		return NULL;
+
+	return &smon_contexts[context_id];
+}
+
+
 
 /*
  * Class:     com_antell_cloudhands_api_smon_SessionMonitorCmd
  * Method:    open
- * Signature: (Ljava/lang/String;)I
+ * Signature: (ILjava/lang/String;)I
  */
 JNIEXPORT jint JNICALL Java_com_antell_cloudhands_api_smon_SessionMonitorCmd_open
-  (JNIEnv *jenv, jobject jthis, jstring jmmap_fname){
-  
+  (JNIEnv *jenv, jobject jthis, jint context_id, jstring jmmap_fname){
+
+	  ch_session_monitor_context_t *context;
+
 	  const char *mmap_fname = ch_string_arg_get(jenv,jmmap_fname);
+
 	  if(mmap_fname == NULL || strlen(mmap_fname) == 0)
 		  return -1;
 
-	  return ch_session_monitor_load(monitor,mmap_fname,0);
+	  context = _smon_context_get(context_id);
+
+	  if(context == NULL)
+		  return -1;
+
+	  if(ch_session_monitor_load(&context->monitor,mmap_fname,0))
+		  return -1;
+
+	  return 0;
 
   }
 
 /*
  * Class:     com_antell_cloudhands_api_smon_SessionMonitorCmd
  * Method:    close
- * Signature: ()V
+ * Signature: (I)V
  */
 JNIEXPORT void JNICALL Java_com_antell_cloudhands_api_smon_SessionMonitorCmd_close
-  (JNIEnv *jenv, jobject jthis){
-  
-	  ch_session_monitor_exit(monitor);
+  (JNIEnv *jenv, jobject jthis, jint context_id) {
+
+
+	  ch_session_monitor_context_t *context = _smon_context_get(context_id);
+
+	  if(context == NULL)
+		  return;
+
+	  ch_session_monitor_exit(&context->monitor);
 
   }
 
 /*
  * Class:     com_antell_cloudhands_api_smon_SessionMonitorCmd
  * Method:    add
- * Signature: (JJ)J
+ * Signature: (IJJ)J
  */
-JNIEXPORT jlong JNICALL Java_com_antell_cloudhands_api_smon_SessionMonitorCmd_add__JJ
-  (JNIEnv *jenv, jobject jthis, jlong ip, jlong tv){
-  
-	  return ch_session_monitor_item_add_ip(monitor,ip,tv);
+JNIEXPORT jlong JNICALL Java_com_antell_cloudhands_api_smon_SessionMonitorCmd_add__IJJ
+  (JNIEnv *jenv, jobject jthis, jint context_id, jlong ip, jlong tv){
+
+	  ch_session_monitor_context_t *context = _smon_context_get(context_id);
+
+	  if(context == NULL)
+		  return -1;
+	  
+	  return ch_session_monitor_item_add_ip(&context->monitor,ip,tv);
   }
 
+ 
 /*
  * Class:     com_antell_cloudhands_api_smon_SessionMonitorCmd
  * Method:    add
- * Signature: (IJ)J
+ * Signature: (IIJ)J
  */
-JNIEXPORT jlong JNICALL Java_com_antell_cloudhands_api_smon_SessionMonitorCmd_add__IJ
-  (JNIEnv *jenv, jobject jthis, jint port, jlong tv){
-  
-	  return ch_session_monitor_item_add_port(monitor,port,tv);
+JNIEXPORT jlong JNICALL Java_com_antell_cloudhands_api_smon_SessionMonitorCmd_add__IIJ
+  (JNIEnv *jenv, jobject jthis, jint context_id, jint port, jlong tv){
+
+	  ch_session_monitor_context_t *context = _smon_context_get(context_id);
+
+	  if(context == NULL)
+		  return -1;
+
+	  return ch_session_monitor_item_add_port(&context->monitor,port,tv);
   }
 
+ 
 /*
  * Class:     com_antell_cloudhands_api_smon_SessionMonitorCmd
  * Method:    add
- * Signature: (JIJ)J
+ * Signature: (IJIJ)J
  */
-JNIEXPORT jlong JNICALL Java_com_antell_cloudhands_api_smon_SessionMonitorCmd_add__JIJ
-  (JNIEnv *jenv, jobject jthis, jlong ip, jint port, jlong tv){
-  
-	  return ch_session_monitor_item_add_ip_port(monitor,ip,port,tv);
+JNIEXPORT jlong JNICALL Java_com_antell_cloudhands_api_smon_SessionMonitorCmd_add__IJIJ
+  (JNIEnv *jenv, jobject jthis, jint context_id, jlong ip, jint port, jlong tv){
+
+	  ch_session_monitor_context_t *context = _smon_context_get(context_id);
+
+	  if(context == NULL)
+		  return -1;
+
+	  return ch_session_monitor_item_add_ip_port(&context->monitor,ip,port,tv);
   }
 
+  
 /*
  * Class:     com_antell_cloudhands_api_smon_SessionMonitorCmd
  * Method:    add
- * Signature: (JIJIJ)J
+ * Signature: (IJIJIJ)J
  */
-JNIEXPORT jlong JNICALL Java_com_antell_cloudhands_api_smon_SessionMonitorCmd_add__JIJIJ
-  (JNIEnv *jenv, jobject jthis, jlong src_ip, jint src_port, jlong dst_ip, jint dst_port, jlong tv){
-  
+JNIEXPORT jlong JNICALL Java_com_antell_cloudhands_api_smon_SessionMonitorCmd_add__IJIJIJ
+  (JNIEnv *jenv, jobject jthis, jint context_id, jlong src_ip, jint src_port, jlong dst_ip, jint dst_port, jlong tv){
 
-	  return ch_session_monitor_item_add_session(monitor,src_ip,dst_ip,src_port,dst_port,tv);
+	  ch_session_monitor_context_t *context = _smon_context_get(context_id);
+
+	  if(context == NULL)
+		  return -1;
+
+	  return ch_session_monitor_item_add_session(&context->monitor,src_ip,dst_ip,src_port,dst_port,tv);
   }
 
 
@@ -109,12 +168,17 @@ static inline void _item_fill(JNIEnv *jenv,jobject jmonitor_item,ch_session_moni
 /*
  * Class:     com_antell_cloudhands_api_smon_SessionMonitorCmd
  * Method:    find
- * Signature: (Lcom/antell/cloudhands/api/smon/SessionMonitorItem;J)I
+ * Signature: (ILcom/antell/cloudhands/api/smon/SessionMonitorItem;J)I
  */
-JNIEXPORT jint JNICALL Java_com_antell_cloudhands_api_smon_SessionMonitorCmd_find__Lcom_antell_cloudhands_api_smon_SessionMonitorItem_2J
-  (JNIEnv *jenv, jobject jthis, jobject jmonitor_item , jlong id){
-  
-	  ch_session_monitor_item_t *item = ch_session_monitor_item_findById(monitor,id);
+JNIEXPORT jint JNICALL Java_com_antell_cloudhands_api_smon_SessionMonitorCmd_find__ILcom_antell_cloudhands_api_smon_SessionMonitorItem_2J
+  (JNIEnv * jenv, jobject jthis, jint context_id, jobject jmonitor_item, jlong id){
+
+	  ch_session_monitor_context_t *context = _smon_context_get(context_id);
+
+	  if(context == NULL)
+		  return -1;
+
+	  ch_session_monitor_item_t *item = ch_session_monitor_item_findById(&context->monitor,id);
 	  if(item == NULL)
 		  return -1;
 
@@ -122,15 +186,23 @@ JNIEXPORT jint JNICALL Java_com_antell_cloudhands_api_smon_SessionMonitorCmd_fin
 
 	  return 0;
   }
+
+
 /*
  * Class:     com_antell_cloudhands_api_smon_SessionMonitorCmd
  * Method:    find
- * Signature: (Lcom/antell/cloudhands/api/smon/SessionMonitorItem;JIJI)I
+ * Signature: (ILcom/antell/cloudhands/api/smon/SessionMonitorItem;JIJI)I
  */
-JNIEXPORT jint JNICALL Java_com_antell_cloudhands_api_smon_SessionMonitorCmd_find__Lcom_antell_cloudhands_api_smon_SessionMonitorItem_2JIJI
-  (JNIEnv *jenv, jobject jthis, jobject jmonitor_item, jlong src_ip, jint src_port, jlong dst_ip, jint dst_port){
- 
-	  ch_session_monitor_item_t *item = ch_session_monitor_item_find(monitor,src_ip,dst_ip,src_port,dst_port);
+JNIEXPORT jint JNICALL Java_com_antell_cloudhands_api_smon_SessionMonitorCmd_find__ILcom_antell_cloudhands_api_smon_SessionMonitorItem_2JIJI
+  (JNIEnv *jenv, jobject jthis, jint context_id, jobject jmonitor_item, jlong src_ip, jint src_port, jlong dst_ip, jint dst_port){
+
+
+	  ch_session_monitor_context_t *context = _smon_context_get(context_id);
+
+	  if(context == NULL)
+		  return -1;
+	  
+	  ch_session_monitor_item_t *item = ch_session_monitor_item_find(&context->monitor,src_ip,dst_ip,src_port,dst_port);
 	  if(item == NULL)
 		  return -1;
 
@@ -143,36 +215,95 @@ JNIEXPORT jint JNICALL Java_com_antell_cloudhands_api_smon_SessionMonitorCmd_fin
 /*
  * Class:     com_antell_cloudhands_api_smon_SessionMonitorCmd
  * Method:    delete
- * Signature: (J)I
+ * Signature: (IJ)I
  */
 JNIEXPORT jint JNICALL Java_com_antell_cloudhands_api_smon_SessionMonitorCmd_delete
-  (JNIEnv *jenv, jobject jthis, jlong id){
-  
-	  ch_session_monitor_item_del(monitor,id);
+  (JNIEnv *jenv, jobject jthis, jint context_id, jlong id){
+
+	  ch_session_monitor_context_t *context = _smon_context_get(context_id);
+
+	  if(context == NULL)
+		  return -1;
+	  
+	  ch_session_monitor_item_del(&context->monitor,id);
+
 	  return 0;
   }
 
 /*
  * Class:     com_antell_cloudhands_api_smon_SessionMonitorCmd
  * Method:    stop
- * Signature: (J)I
+ * Signature: (IJ)V
  */
-JNIEXPORT jint JNICALL Java_com_antell_cloudhands_api_smon_SessionMonitorCmd_stop
-  (JNIEnv *jenv, jobject jthis, jlong id){
-  
-	  ch_session_monitor_item_stop(monitor,id);
-	  return 0;
+JNIEXPORT void JNICALL Java_com_antell_cloudhands_api_smon_SessionMonitorCmd_stop
+  (JNIEnv * jenv, jobject jthis, jint context_id, jlong id){
+
+	  ch_session_monitor_context_t *context = _smon_context_get(context_id);
+
+	  if(context == NULL)
+		  return;
+
+	  ch_session_monitor_item_stop(&context->monitor,id);
+
   }
+
+  
 /*
  * Class:     com_antell_cloudhands_api_smon_SessionMonitorCmd
  * Method:    restart
- * Signature: (J)I
+ * Signature: (IJ)V
  */
-JNIEXPORT jint JNICALL Java_com_antell_cloudhands_api_smon_SessionMonitorCmd_restart
-  (JNIEnv *jenv, jobject jthis, jlong id){
+JNIEXPORT void JNICALL Java_com_antell_cloudhands_api_smon_SessionMonitorCmd_restart
+  (JNIEnv *jenv, jobject jthis, jint context_id, jlong id){
+
+	  ch_session_monitor_context_t *context = _smon_context_get(context_id);
+
+	  if(context == NULL)
+		  return;
+
+	  ch_session_monitor_item_restart(&context->monitor,id);
+
+  }
+
+/*
+ * Class:     com_antell_cloudhands_api_smon_SessionMonitorCmd
+ * Method:    get
+ * Signature: (ILcom/antell/cloudhands/api/smon/SessionMonitorItem;I)I
+ */
+JNIEXPORT jint JNICALL Java_com_antell_cloudhands_api_smon_SessionMonitorCmd_get
+  (JNIEnv *jenv, jobject jthis, jint context_id, jobject jmonitor_item, jint index){
   
-	  ch_session_monitor_item_restart(monitor,id);
+	  ch_session_monitor_context_t *context = _smon_context_get(context_id);
+
+	  if(context == NULL)
+		  return -1;
+
+	  ch_session_monitor_item_t *item = ch_session_monitor_item_get(&context->monitor,index);
+	  if(item == NULL)
+		  return -1;
+
+	  _item_fill(jenv,jmonitor_item,item);
 
 	  return 0;
+
+  }
+
+
+/*
+ * Class:     com_antell_cloudhands_api_smon_SessionMonitorCmd
+ * Method:    count
+ * Signature: (I)I
+ */
+JNIEXPORT jint JNICALL Java_com_antell_cloudhands_api_smon_SessionMonitorCmd_count
+  (JNIEnv *jenv, jobject jthis, jint context_id){
+  
+	  ch_session_monitor_context_t *context = _smon_context_get(context_id);
+
+	  if(context == NULL)
+		  return -1;
+
+
+	  return ch_session_monitor_item_count(&context->monitor);
+
   }
 
