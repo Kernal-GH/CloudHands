@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-07-11 11:08:14
- * Last Modified: 2018-07-18 16:31:44
+ * Last Modified: 2018-07-19 11:37:56
  */
 
 #include <sys/mman.h>
@@ -331,8 +331,13 @@ int ch_session_monitor_item_count(ch_session_monitor_t *monitor){
 	
 	int c = 0;
 
-	while((i++)<hdr->item_number&&cur_item->monitor_state!=MON_STATE_INIT)
-		c++;
+	while((i++)<hdr->item_number&&cur_item->monitor_state!=MON_STATE_INIT){
+
+		if(cur_item->monitor_state!=MON_STATE_DEL)
+			c++;
+
+		cur_item++;
+	}
 
 	return c;
 }
