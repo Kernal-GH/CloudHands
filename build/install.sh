@@ -5,7 +5,7 @@
 #        Author: csp001314@163.com
 #   Description: ---
 #        Create: 2016-11-03 20:09:47
-# Last Modified: 2018-07-16 19:35:47
+# Last Modified: 2018-07-19 13:53:29
 #
 
 [ `id -u` -ne 0 ] && {
@@ -124,6 +124,7 @@ install_java_api(){
 
     make -C CloudHands/java/jni
     cp -rf  CloudHands/java/jni/libCloudHandsJNI.so $dpdk_install_prefix/CloudHands/lib
+    cp -rf  CloudHands/java/jni/libCloudHandsJNI.so /usr/lib/
     mvn install -f CloudHands/java/CloudHandsJAPI/pom.xml
 }
 

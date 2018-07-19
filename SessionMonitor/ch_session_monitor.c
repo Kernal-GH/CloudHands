@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-07-11 11:08:14
- * Last Modified: 2018-07-19 11:37:56
+ * Last Modified: 2018-07-19 19:26:53
  */
 
 #include <sys/mman.h>
@@ -53,6 +53,18 @@ static void * _mmap_file_attach(int fd,uint64_t r_msize){
 
 }
 
+#define ITEM_INIT(item) do {                 \
+	(item)->check_start = CHECK_VALUE;		 \
+	(item)->id = 0;							 \
+	(item)->src_ip = 0;						 \
+	(item)->dst_ip = 0;						 \
+	(item)->src_port = 0;					 \
+	(item)->dst_port = 0;					 \
+	(item)->monitor_time_tv = 0;			 \
+	(item)->monitor_start_time = 0;			 \
+	(item)->monitor_last_time = 0;			 \
+	(item)->monitor_state = MON_STATE_INIT;  \
+}while(0)
 
 int ch_session_monitor_load(ch_session_monitor_t *monitor,const char *mmap_fname,size_t msize){
 
@@ -127,20 +139,9 @@ int ch_session_monitor_load(ch_session_monitor_t *monitor,const char *mmap_fname
 
 		while(((void*)(cur_item+1))<addr_end){
 		
-			cur_item->check_start = CHECK_VALUE;
-			cur_item->id = 0;
-			cur_item->src_ip = 0;
-			cur_item->dst_ip = 0;
-			cur_item->src_port = 0;
-			cur_item->dst_port = 0;
-
-			cur_item->monitor_time_tv = 0;
-			cur_item->monitor_start_time = 0;
-			cur_item->monitor_last_time = 0;
-			cur_item->monitor_state = MON_STATE_INIT;
 
 			hdr->item_number += 1;
-
+			ITEM_INIT(cur_item);
 			cur_item += 1;
 		}
 
@@ -168,9 +169,6 @@ static const char * _state_string_get(int state){
 
 	case MON_STATE_LIVING:
 		return "living";
-
-	case MON_STATE_DEL:
-		return "delete";
 
 	case MON_STATE_STOP:
 		return "stop";
@@ -278,7 +276,7 @@ ch_session_monitor_item_t * ch_session_monitor_item_find(ch_session_monitor_t *m
 
 	while((i++)<hdr->item_number&&cur_item->monitor_state!=MON_STATE_INIT){
 
-		if(cur_item->monitor_state == MON_STATE_STOP || cur_item->monitor_state == MON_STATE_DEL){
+		if(cur_item->monitor_state == MON_STATE_STOP){
 		
 			cur_item += 1;
 
@@ -316,7 +314,7 @@ ch_session_monitor_item_t * ch_session_monitor_item_get(ch_session_monitor_t *mo
 		return NULL;
 
 	item = cur_item+index;
-	if(item->monitor_state == MON_STATE_INIT||item->monitor_state == MON_STATE_DEL)
+	if(item->monitor_state == MON_STATE_INIT)
 		return NULL;
 
 	return item;
@@ -333,9 +331,7 @@ int ch_session_monitor_item_count(ch_session_monitor_t *monitor){
 
 	while((i++)<hdr->item_number&&cur_item->monitor_state!=MON_STATE_INIT){
 
-		if(cur_item->monitor_state!=MON_STATE_DEL)
-			c++;
-
+		c++;
 		cur_item++;
 	}
 
@@ -352,16 +348,6 @@ ch_session_monitor_item_t * ch_session_monitor_item_find_ignore_state(ch_session
 
 	while((i++)<hdr->item_number&&cur_item->monitor_state!=MON_STATE_INIT){
 
-#if 0
-		if(cur_item->monitor_state == MON_STATE_STOP || cur_item->monitor_state == MON_STATE_DEL){
-		
-			cur_item += 1;
-
-			continue;
-		
-		}
-
-#endif
 		if(!is_match(cur_item,src_ip,src_port,dst_ip,dst_port)){
 	
 			cur_item += 1;
@@ -392,7 +378,7 @@ static ch_session_monitor_item_t * _alloc_item(ch_session_monitor_t *monitor){
 
 	while((i++)<hdr->item_number){
 
-		if(cur_item->monitor_state == MON_STATE_DEL || cur_item->monitor_state == MON_STATE_INIT){
+		if(cur_item->monitor_state == MON_STATE_INIT){
 		
 			return cur_item;
 		}
@@ -518,13 +504,49 @@ ch_session_monitor_item_t * ch_session_monitor_item_findById(ch_session_monitor_
 	return NULL;
 }
 
+#define ITEM_COPY(d_item,s_item) do {							\
+	(d_item)->check_start = (s_item)->check_start;				\
+	(d_item)->id = (s_item)->id;								\
+	(d_item)->src_ip = (s_item)->src_ip;						\
+	(d_item)->dst_ip = (s_item)->dst_ip;						\
+	(d_item)->src_port = (s_item)->src_port;					\
+	(d_item)->dst_port = (s_item)->dst_port;					\
+	(d_item)->monitor_time_tv = (s_item)->monitor_time_tv;		\
+	(d_item)->monitor_start_time = (s_item)->monitor_start_time;\
+	(d_item)->monitor_last_time = (s_item)->monitor_last_time;	\
+	(d_item)->monitor_type = (s_item)->monitor_type;			\
+	(d_item)->monitor_state = (s_item)->monitor_state;			\
+}while(0)
+
+static void elements_move(ch_session_monitor_t *monitor,ch_session_monitor_item_t *start_item){
+
+
+	uint32_t start_index = ch_session_monitor_item_index(monitor,start_item);
+	uint32_t i =  start_index+1;
+
+	ch_session_monitor_item_t *cur_item = start_item+1;
+
+	ch_session_monitor_hdr_t *hdr = monitor->monitor_hdr;
+
+
+	while((i++)<hdr->item_number&&cur_item->monitor_state!=MON_STATE_INIT){
+
+		ITEM_COPY(cur_item-1,cur_item);
+		cur_item++;
+	}
+	
+	ITEM_INIT(cur_item-1);
+
+}
+
 void ch_session_monitor_item_del(ch_session_monitor_t *monitor,uint64_t id){
 
 	ch_session_monitor_item_t *item = ch_session_monitor_item_findById(monitor,id);
 
 	if(item){
 
-		item->monitor_state = MON_STATE_DEL;
+		elements_move(monitor,item);
+
 	}
 }
 

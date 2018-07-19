@@ -78,6 +78,8 @@ struct ch_session_monitor_item_t {
 		abort();                \
 }while(0)
 
+#define ch_session_monitor_item_index(monitor,item) ((item)-(monitor)->monitor_items)
+
 static inline uint64_t ch_session_monitor_alloc_id(ch_session_monitor_t *monitor){
 
 	uint64_t id = monitor->monitor_hdr->next_id;
