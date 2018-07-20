@@ -6,6 +6,7 @@ import com.antell.cloudhands.api.packet.TCPSession;
 import com.antell.cloudhands.api.packet.UDPSession;
 import com.antell.cloudhands.api.packet.security.SecMatchResult;
 import com.antell.cloudhands.api.packet.smon.SMonSession;
+import com.antell.cloudhands.api.packet.tcp.FileTranSession;
 import com.antell.cloudhands.api.packet.tcp.http.HTTPSession;
 import com.antell.cloudhands.api.packet.tcp.mail.MailSession;
 import com.antell.cloudhands.api.packet.udp.dns.DNSSession;
@@ -14,158 +15,174 @@ import com.antell.cloudhands.api.source.SourceEntry;
 /**
  * Created by dell on 2018/6/27.
  */
-public class SourceEntryUtil {
+public final class SourceEntryUtil {
 
-    private SourceEntryUtil(){}
+    private SourceEntryUtil() {
+    }
 
-    public static boolean isHttpSession(SourceEntry sourceEntry){
+    public static boolean isHttpSession(SourceEntry sourceEntry) {
 
         return sourceEntry instanceof HTTPSession;
     }
 
-    public static HTTPSession toHttpSession(SourceEntry sourceEntry){
+    public static HTTPSession toHttpSession(SourceEntry sourceEntry) {
 
-        return (HTTPSession)sourceEntry;
+        return (HTTPSession) sourceEntry;
     }
 
-    public static boolean isHttpSessionWithAttack(SourceEntry sourceEntry){
+    public static boolean isHttpSessionWithAttack(SourceEntry sourceEntry) {
 
-        if(!isHttpSession(sourceEntry))
+        if (!isHttpSession(sourceEntry))
             return false;
 
         HTTPSession httpSession = toHttpSession(sourceEntry);
         SecMatchResult secMatchResult = httpSession.getSecMatchResult();
-        if(secMatchResult == null)
+        if (secMatchResult == null)
             return false;
 
-        return secMatchResult.getMatchCount()>0;
+        return secMatchResult.getMatchCount() > 0;
     }
 
-    public static boolean isMailSession(SourceEntry sourceEntry){
+    public static boolean isMailSession(SourceEntry sourceEntry) {
 
         return sourceEntry instanceof MailSession;
     }
 
-    public static MailSession toMailSession(SourceEntry sourceEntry){
+    public static MailSession toMailSession(SourceEntry sourceEntry) {
 
-        return (MailSession)sourceEntry;
+        return (MailSession) sourceEntry;
     }
 
-    public static boolean isSmonSession(SourceEntry sourceEntry){
+    public static boolean isSmonSession(SourceEntry sourceEntry) {
 
         return sourceEntry instanceof SMonSession;
     }
 
-    public static SMonSession toSmonSession(SourceEntry sourceEntry){
+    public static SMonSession toSmonSession(SourceEntry sourceEntry) {
 
-        return (SMonSession)sourceEntry;
+        return (SMonSession) sourceEntry;
     }
 
-    public static boolean isMailSessionWithAttack(SourceEntry sourceEntry){
+    public static boolean isMailSessionWithAttack(SourceEntry sourceEntry) {
 
-        if(!isMailSession(sourceEntry))
+        if (!isMailSession(sourceEntry))
             return false;
 
         MailSession mailSession = toMailSession(sourceEntry);
 
         SecMatchResult secMatchResult = mailSession.getSecMatchResult();
-        if(secMatchResult == null)
+        if (secMatchResult == null)
             return false;
 
-        return secMatchResult.getMatchCount()>0;
+        return secMatchResult.getMatchCount() > 0;
     }
 
-    public static boolean isTCPSession(SourceEntry sourceEntry){
+    public static boolean isFileTranSession(SourceEntry sourceEntry) {
+
+        return sourceEntry instanceof FileTranSession;
+    }
+
+    public static FileTranSession toFileTranSession(SourceEntry sourceEntry) {
+
+        return (FileTranSession) sourceEntry;
+    }
+
+    public static boolean isTCPSession(SourceEntry sourceEntry) {
 
         return sourceEntry instanceof TCPSession;
     }
 
-    public static TCPSession toTCPSession(SourceEntry sourceEntry){
+    public static TCPSession toTCPSession(SourceEntry sourceEntry) {
 
-        return (TCPSession)sourceEntry;
+        return (TCPSession) sourceEntry;
     }
 
-    public static boolean isUDPSession(SourceEntry sourceEntry){
+    public static boolean isUDPSession(SourceEntry sourceEntry) {
 
         return sourceEntry instanceof UDPSession;
     }
 
-    public static UDPSession toUDPSession(SourceEntry sourceEntry){
+    public static UDPSession toUDPSession(SourceEntry sourceEntry) {
 
-        return (UDPSession)sourceEntry;
+        return (UDPSession) sourceEntry;
     }
 
-    public static boolean isDNSSession(SourceEntry sourceEntry){
+    public static boolean isDNSSession(SourceEntry sourceEntry) {
 
         return sourceEntry instanceof DNSSession;
     }
 
-    public static DNSSession toDNSSession(SourceEntry sourceEntry){
+    public static DNSSession toDNSSession(SourceEntry sourceEntry) {
 
-        return (DNSSession)sourceEntry;
+        return (DNSSession) sourceEntry;
     }
 
-    public static boolean isArpPacket(SourceEntry sourceEntry){
+    public static boolean isArpPacket(SourceEntry sourceEntry) {
 
         return sourceEntry instanceof ARPPacket;
     }
 
-    public static ARPPacket toARPPacket(SourceEntry sourceEntry){
+    public static ARPPacket toARPPacket(SourceEntry sourceEntry) {
 
         return (ARPPacket) sourceEntry;
     }
 
-    public static boolean isICMPPacket(SourceEntry sourceEntry){
+    public static boolean isICMPPacket(SourceEntry sourceEntry) {
 
         return sourceEntry instanceof ICMPPacket;
     }
 
-    public static ICMPPacket toICMPPacket(SourceEntry sourceEntry){
+    public static ICMPPacket toICMPPacket(SourceEntry sourceEntry) {
 
         return (ICMPPacket) sourceEntry;
     }
 
-    public static void setIPPairs(SourceEntry sourceEntry,IPPairs ipPairs){
+    public static void setIPPairs(SourceEntry sourceEntry, IPPairs ipPairs) {
 
-        if(isArpPacket(sourceEntry)){
+        if (isArpPacket(sourceEntry)) {
             ARPPacket arpPacket = toARPPacket(sourceEntry);
 
             ipPairs.setSrcIP(IPUtils.ipv4Str(arpPacket.getSip()));
             ipPairs.setDstIP(IPUtils.ipv4Str(arpPacket.getTip()));
-        }else if(isICMPPacket(sourceEntry)){
+        } else if (isICMPPacket(sourceEntry)) {
 
             ICMPPacket icmpPacket = toICMPPacket(sourceEntry);
             ipPairs.setSrcIP(IPUtils.ipv4Str(icmpPacket.getSip()));
             ipPairs.setDstIP(IPUtils.ipv4Str(icmpPacket.getTip()));
-        } else if(isTCPSession(sourceEntry)){
+        } else if (isTCPSession(sourceEntry)) {
 
             TCPSession tcpSession = toTCPSession(sourceEntry);
             ipPairs.setSrcIP(IPUtils.ipv4Str(tcpSession.getReqIP()));
             ipPairs.setDstIP(IPUtils.ipv4Str(tcpSession.getResIP()));
-        }else if(isUDPSession(sourceEntry)){
+        } else if (isUDPSession(sourceEntry)) {
             UDPSession udpSession = toUDPSession(sourceEntry);
 
             ipPairs.setSrcIP(IPUtils.ipv4Str(udpSession.getReqIP()));
             ipPairs.setDstIP(IPUtils.ipv4Str(udpSession.getResIP()));
-        }else if(isDNSSession(sourceEntry)){
+        } else if (isDNSSession(sourceEntry)) {
 
             DNSSession dnsSession = toDNSSession(sourceEntry);
             ipPairs.setSrcIP(IPUtils.ipv4Str(dnsSession.getSessionEntry().getReqIP()));
             ipPairs.setDstIP(IPUtils.ipv4Str(dnsSession.getSessionEntry().getResIP()));
-        }else if(isHttpSession(sourceEntry)){
+        } else if (isHttpSession(sourceEntry)) {
 
             HTTPSession httpSession = toHttpSession(sourceEntry);
             ipPairs.setSrcIP(IPUtils.ipv4Str(httpSession.getSessionEntry().getReqIP()));
             ipPairs.setDstIP(IPUtils.ipv4Str(httpSession.getSessionEntry().getResIP()));
-        }else if(isMailSession(sourceEntry)){
+        } else if (isMailSession(sourceEntry)) {
             MailSession mailSession = toMailSession(sourceEntry);
             ipPairs.setSrcIP(IPUtils.ipv4Str(mailSession.getSessionEntry().getReqIP()));
             ipPairs.setDstIP(IPUtils.ipv4Str(mailSession.getSessionEntry().getResIP()));
-        }else if(isSmonSession(sourceEntry)){
+        } else if (isSmonSession(sourceEntry)) {
 
             SMonSession sMonSession = toSmonSession(sourceEntry);
             ipPairs.setSrcIP(IPUtils.ipv4Str(sMonSession.getSessionEntry().getReqIP()));
             ipPairs.setDstIP(IPUtils.ipv4Str(sMonSession.getSessionEntry().getResIP()));
+        }else if(isFileTranSession(sourceEntry)){
+
+            FileTranSession fileTranSession = toFileTranSession(sourceEntry);
+            ipPairs.setSrcIP(fileTranSession.getSrcIP());
+            ipPairs.setDstIP(fileTranSession.getDstIP());
         }
     }
 

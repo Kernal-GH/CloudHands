@@ -2,12 +2,10 @@ package com.antell.cloudhands.api.packet.tcp.mail;
 
 import com.antell.cloudhands.api.packet.SessionEntry;
 import com.antell.cloudhands.api.packet.security.SecMatchResult;
+import com.antell.cloudhands.api.packet.tcp.FileTranSession;
 import com.antell.cloudhands.api.packet.tcp.TCPSessionEntry;
 import com.antell.cloudhands.api.source.SourceEntry;
-import com.antell.cloudhands.api.utils.MailAddrUtil;
-import com.antell.cloudhands.api.utils.MessagePackUtil;
-import com.antell.cloudhands.api.utils.Text;
-import com.antell.cloudhands.api.utils.TextUtils;
+import com.antell.cloudhands.api.utils.*;
 import com.google.common.base.Preconditions;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.msgpack.core.MessageUnpacker;
@@ -15,12 +13,14 @@ import org.msgpack.core.MessageUnpacker;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by dell on 2018/6/11.
  */
 public class MailSession implements SourceEntry {
 
+    private final String objectId;
     private SessionEntry sessionEntry;
 
     private String userName;
@@ -39,6 +39,9 @@ public class MailSession implements SourceEntry {
     private SecMatchResult secMatchResult;
 
     public MailSession(MessageUnpacker unpacker) throws IOException {
+
+        this.objectId = TextUtils.getUUID();
+
         this.sessionEntry = new TCPSessionEntry();
         this.maillAttachEntryList = new ArrayList<>();
         this.mailCCList = new ArrayList<>();
@@ -140,9 +143,9 @@ public class MailSession implements SourceEntry {
         this.secMatchResult = secMatchResult;
     }
 
-
-
-
+    public String getObjectId() {
+        return objectId;
+    }
 
     private class MaillAttachEntry{
 
@@ -175,6 +178,43 @@ public class MailSession implements SourceEntry {
             sb.append("}");
             return sb.toString();
         }
+    }
+
+    private final static String getExtName(String fileName){
+
+        if(TextUtils.isEmpty(fileName))
+            return "data";
+
+        int index = fileName.lastIndexOf(".");
+        if(index<0)
+            return "data";
+
+        return fileName.substring(index+1);
+    }
+
+    private FileTranSession toFileTranSession(MaillAttachEntry entry){
+
+
+        FileTranSession fileTranSession = new FileTranSession();
+
+        fileTranSession.setProto("mail");
+        fileTranSession.setParentObjectId(objectId);
+        fileTranSession.setSrcIP(IPUtils.ipv4Str(sessionEntry.getReqIP()));
+        fileTranSession.setSrcPort(sessionEntry.getReqPort());
+        fileTranSession.setDstIP(IPUtils.ipv4Str(sessionEntry.getResIP()));
+        fileTranSession.setDstPort(sessionEntry.getResPort());
+        fileTranSession.setTime(sessionEntry.getReqStartTime());
+        fileTranSession.setBytes(sessionEntry.getResBytes());
+        fileTranSession.setContentPath(entry.getPath());
+        fileTranSession.setFname(entry.getName());
+        fileTranSession.setExtName(getExtName(entry.getName()));
+
+        return fileTranSession;
+    }
+
+    @Override
+    public List<SourceEntry> generate(){
+        return maillAttachEntryList.stream().map(entry -> toFileTranSession(entry)).collect(Collectors.toList());
     }
 
     private void parseAttach(MessageUnpacker unpacker) throws IOException {
@@ -302,11 +342,11 @@ public class MailSession implements SourceEntry {
         sessionEntry.dataToJson(seCB);
         seCB.endObject();
 
-
+        cb.field("objectId",objectId);
         cb.field("userName",userName);
         cb.field("passwd",passwd);
         cb.field("subject", Text.decode(subject==null?"".getBytes():subject.getBytes()));
-        cb.field("from", from);
+        cb.field("from",MailAddrUtil.getMailAddrFromString(from));
         cb.field("contentTxtPath",contentTxtPath);
         cb.field("contentHtmlPath",contentHtmlPath);
         cb.field("mailTo",MailAddrUtil.toSimpleFromArray(mailToList));

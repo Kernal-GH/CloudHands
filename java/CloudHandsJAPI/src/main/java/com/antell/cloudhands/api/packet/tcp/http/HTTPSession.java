@@ -2,25 +2,25 @@ package com.antell.cloudhands.api.packet.tcp.http;
 
 import com.antell.cloudhands.api.packet.SessionEntry;
 import com.antell.cloudhands.api.packet.security.SecMatchResult;
+import com.antell.cloudhands.api.packet.tcp.FileTranSession;
 import com.antell.cloudhands.api.packet.tcp.TCPSessionEntry;
 import com.antell.cloudhands.api.source.SourceEntry;
-import com.antell.cloudhands.api.utils.Content;
-import com.antell.cloudhands.api.utils.MessagePackUtil;
-import com.antell.cloudhands.api.utils.Text;
-import com.antell.cloudhands.api.utils.TextUtils;
+import com.antell.cloudhands.api.utils.*;
 import com.google.common.base.Preconditions;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.msgpack.core.MessageUnpacker;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.*;
 
 /**
  * Created by dell on 2018/6/11.
  */
 public class HTTPSession implements SourceEntry{
 
+    private final String objectId;
     private SessionEntry sessionEntry;
     private String method;
     private String uri;
@@ -43,8 +43,11 @@ public class HTTPSession implements SourceEntry{
 
     private SecMatchResult secMatchResult;
 
+
+
     public HTTPSession(MessageUnpacker unpacker) throws IOException {
 
+        objectId = TextUtils.getUUID();
         sessionEntry = new TCPSessionEntry();
         reqHeaders = new ArrayList<>();
         resHeaders = new ArrayList<>();
@@ -56,6 +59,53 @@ public class HTTPSession implements SourceEntry{
         contentEncoding = "";
 
         parse(unpacker);
+    }
+
+    private final static String getFileName(String path){
+
+        int index = path.lastIndexOf("/");
+        if(index<0)
+            return path;
+
+        return path.substring(index+1);
+
+    }
+    private   FileTranSession toFileTranSession(String path,long fsize){
+
+        FileTranSession fileTranSession = new FileTranSession();
+
+        fileTranSession.setProto("http");
+        fileTranSession.setParentObjectId(objectId);
+        fileTranSession.setSrcIP(IPUtils.ipv4Str(sessionEntry.getReqIP()));
+        fileTranSession.setSrcPort(sessionEntry.getReqPort());
+        fileTranSession.setDstIP(IPUtils.ipv4Str(sessionEntry.getResIP()));
+        fileTranSession.setDstPort(sessionEntry.getResPort());
+        fileTranSession.setTime(sessionEntry.getReqStartTime());
+        fileTranSession.setContentPath(path);
+        fileTranSession.setFname(getFileName(path));
+        fileTranSession.setExtName(extName);
+        fileTranSession.setBytes(fsize);
+
+        return fileTranSession;
+    }
+
+    @Override
+    public List<SourceEntry> generate(){
+
+        if(TextUtils.isEmpty(resBodyPath)||!HttpFileTransTypes.isFileTrans(extName))
+            return null;
+
+        long fsize = 0;
+
+        try {
+            fsize =  Files.size(Paths.get(resBodyPath));
+        } catch (IOException e) {
+            return  null;
+        }
+
+
+        return Arrays.asList(toFileTranSession(resBodyPath,fsize));
+
     }
 
     private final  static boolean isHeader(String k,String sk){
@@ -318,5 +368,9 @@ public class HTTPSession implements SourceEntry{
 
     public void setContentEncoding(String contentEncoding) {
         this.contentEncoding = contentEncoding;
+    }
+
+    public String getObjectId() {
+        return objectId;
     }
 }
