@@ -1,16 +1,26 @@
 package com.antell.cloudhands.api.utils;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Created by lenovo on 2016/11/2.
  */
-public class MailAddrUtil {
+public final class MailAddrUtil {
     private static final String pattern = "[\\w!#$%&'*+/=?^_`{|}~-]+(?:\\.[\\w!#$%&'*+/=?^_`{|}~-]+)*@(?:[\\w](?:[\\w-]*[\\w])?\\.)+[\\w](?:[\\w-]*[\\w])?";
     private static  final Pattern regex = Pattern.compile(pattern);
 
-    public static String getMailAddrFromString(String str) {
+    private MailAddrUtil(){
+
+    }
+    public final static String getMailAddrFromString(String str) {
+
+        if(TextUtils.isEmpty(str))
+            return "";
+
         Matcher matcher = regex.matcher(str);
 
         if (matcher.find()) {
@@ -19,4 +29,11 @@ public class MailAddrUtil {
         /* If not match, return the input string directory. */
         return str;
     }
+
+    public final static List<String> toSimpleFromArray(List<String> list){
+
+        return list.stream().map(e->getMailAddrFromString(e)).collect(Collectors.toList());
+    }
+
+
 }

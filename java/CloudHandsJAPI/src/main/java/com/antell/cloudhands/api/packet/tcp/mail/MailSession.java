@@ -4,7 +4,9 @@ import com.antell.cloudhands.api.packet.SessionEntry;
 import com.antell.cloudhands.api.packet.security.SecMatchResult;
 import com.antell.cloudhands.api.packet.tcp.TCPSessionEntry;
 import com.antell.cloudhands.api.source.SourceEntry;
+import com.antell.cloudhands.api.utils.MailAddrUtil;
 import com.antell.cloudhands.api.utils.MessagePackUtil;
+import com.antell.cloudhands.api.utils.Text;
 import com.antell.cloudhands.api.utils.TextUtils;
 import com.google.common.base.Preconditions;
 import org.elasticsearch.common.xcontent.XContentBuilder;
@@ -303,12 +305,12 @@ public class MailSession implements SourceEntry {
 
         cb.field("userName",userName);
         cb.field("passwd",passwd);
-        cb.field("subject",subject);
-        cb.field("from",from);
+        cb.field("subject", Text.decode(subject==null?"".getBytes():subject.getBytes()));
+        cb.field("from", from);
         cb.field("contentTxtPath",contentTxtPath);
         cb.field("contentHtmlPath",contentHtmlPath);
-        cb.field("mailTo",mailToList);
-        cb.field("mailCC",mailCCList);
+        cb.field("mailTo",MailAddrUtil.toSimpleFromArray(mailToList));
+        cb.field("mailCC",MailAddrUtil.toSimpleFromArray(mailCCList));
         cb.field("mailAttach",maillAttachEntryList);
 
         if(hasMatchSec()){
