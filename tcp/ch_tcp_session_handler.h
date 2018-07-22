@@ -15,9 +15,9 @@ typedef struct ch_tcp_session_handler_t ch_tcp_session_handler_t;
 
 #include "ch_tcp_session_task.h"
 #include "ch_tcp_work.h"
-#include "ch_shm_format.h"
 #include "ch_tcp_session_pool.h"
 #include "ch_packet_tcp.h"
+#include "ch_proto_session_store.h"
 
 struct ch_tcp_session_handler_t {
 
@@ -27,8 +27,7 @@ struct ch_tcp_session_handler_t {
 
 	ch_tcp_session_pool_t *spool;
 
-	ch_shm_format_t *shm_fmt;
-
+    ch_proto_session_store_t *pstore;
 };
 
 extern ch_tcp_session_handler_t * 

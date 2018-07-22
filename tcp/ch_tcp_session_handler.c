@@ -15,7 +15,7 @@
 
 static inline const char * _get_name(ch_pool_t *mp,const char *prefix,uint32_t tsk_id){
 
-	return ch_psprintf(mp,"%s/tcp_session_%lu",prefix,(unsigned long)tsk_id);
+	return ch_psprintf(mp,"%s/pstore_%lu",prefix,(unsigned long)tsk_id);
 }
 
 static inline uint8_t _session_direct(ch_tcp_session_t *tcp_session){
@@ -35,11 +35,9 @@ static int _content_data_output(ch_tcp_session_handler_t *shandler,ch_tcp_sessio
 	int rc;
 
 	if(tsession->cur_ep == &tsession->endpoint_req)
-		rc = ch_tcp_app_request_content_process(tsession->app,shandler->shm_fmt,tsession,data,dlen); 
+		rc = ch_tcp_app_request_content_parse(tsession->app,shandler->pstore,tsession,data,dlen); 
 	else
-		rc = ch_tcp_app_response_content_process(tsession->app,shandler->shm_fmt,tsession,data,dlen);
-
-	ch_tcp_session_stat_reset(tsession);
+		rc = ch_tcp_app_response_content_parse(tsession->app,shandler->pstore,tsession,data,dlen);
 
 
 	return rc;
@@ -54,8 +52,8 @@ static void _tcp_session_timeout_cb(ch_ptable_entry_t *entry,uint64_t tv,void *p
 	ch_tcp_session_t *tsession = (ch_tcp_session_t*)entry;
 	ch_tcp_session_handler_t *shandler = (ch_tcp_session_handler_t*)priv_data;
 
-	ch_tcp_app_content_close(tsession->app,shandler->shm_fmt,tsession,NULL,0);
-	ch_tcp_session_stat_reset(tsession);
+	ch_tcp_app_session_entry_clean(tsession->app,shandler->pstore,tsession);
+
 }
 
 ch_tcp_session_handler_t * 
@@ -77,29 +75,17 @@ ch_tcp_session_handler_create(ch_tcp_work_t *tcp_work,ch_tcp_session_task_t *ses
 		ch_log(CH_LOG_ERR,"Create tcp session handler failed,cannot create tcp session pool!");
 		return NULL;
 	}
+    
+    shandler->spool->shandler = shandler;
 
-	shandler->shm_fmt = NULL;
-
-	if(tcp_context->mmap_file_dir){
+	shandler->pstore = ch_proto_session_store_create(tcp_work->mp,session_task->task.tsk_id,
+            _get_name(tcp_context->mp,tcp_context->mmap_file_dir,session_task->task.tsk_id),
+            tcp_context->shm_size,
+            tcp_context->entry_size);
 	
-		shandler->shm_fmt = ch_shm_format_tcp_with_mmap_create(tcp_context->mp,
-			_get_name(tcp_context->mp,tcp_context->mmap_file_dir,session_task->task.tsk_id),
-			tcp_context->shm_size,
-			tcp_context->entry_size,0,1);
-
-	}else if(tcp_context->key){
-		
-		shandler->shm_fmt = ch_shm_format_tcp_with_shm_create(tcp_context->mp,
-			_get_name(tcp_context->mp,tcp_context->key,session_task->task.tsk_id),
-			tcp_context->proj_id,
-			tcp_context->shm_size,
-			tcp_context->entry_size,0,1);
+    if(shandler->pstore == NULL){
 	
-	}
-	
-	if(shandler->shm_fmt == NULL){
-	
-		ch_log(CH_LOG_ERR,"Create tcp session handler failed,cannot create shm format!");
+		ch_log(CH_LOG_ERR,"Create tcp session handler failed,cannot create protocol sesssion store!");
 		return NULL;
 	}
 
@@ -141,9 +127,9 @@ static inline void _process_fin_packet(ch_tcp_session_handler_t *shandler ch_unu
 static void _tcp_session_close(ch_tcp_session_handler_t *shandler,ch_tcp_session_t *tsession){
 
 
-	ch_tcp_app_content_close(tsession->app,shandler->shm_fmt,tsession,NULL,0);
-	ch_tcp_session_stat_reset(tsession);
 
+	ch_tcp_app_session_entry_clean(tsession->app,shandler->pstore,tsession);
+    
     /*free this tcp  session */
     ch_tcp_session_pool_entry_free(shandler->spool,tsession);
 
@@ -185,7 +171,7 @@ static void _process_data_packet(ch_tcp_session_handler_t *shandler,
 
 		rc = _content_data_output(shandler,tcp_session,tcp_pkt->pdata,tcp_pkt->payload_len);
 
-        if(rc == PARSE_RETURN_DISCARD||rc == PARSE_RETURN_CLOSE){
+        if(rc == PARSE_BEAK){
             _tcp_session_close(shandler,tcp_session); 
         }else{
             df = ch_assemble_fragment_pop(&ep->as_frag,ep->last_offset);
@@ -193,7 +179,7 @@ static void _process_data_packet(ch_tcp_session_handler_t *shandler,
 		
 				rc = _content_data_output(shandler,tcp_session,df->data,df->len);
         
-                if(rc == PARSE_RETURN_DISCARD||rc == PARSE_RETURN_CLOSE){
+                if(rc == PARSE_BEAK){
                     _tcp_session_close(shandler,tcp_session);
 
                 }else {

@@ -27,6 +27,12 @@ ch_proto_session_store_t *ch_proto_session_store_create(ch_pool_t *mp,uint32_t t
 		ch_log(CH_LOG_ERR,"Cannot Create shm store failed for proto session store!");
 		return NULL;
 	}
+	
+    if(ch_buffer_init(&pstore->g_buffer)){
+	
+		ch_log(CH_LOG_ERR,"Cannot create buffer for protocol session store!");
+		return NULL;
+	}
 
     msgpack_sbuffer_init(&pstore->pk_buf);
     msgpack_packer_init(&pstore->pk,&pstore->pk_buf,msgpack_sbuffer_write);

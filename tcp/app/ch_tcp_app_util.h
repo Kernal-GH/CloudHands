@@ -88,6 +88,4 @@ static inline const char *ch_config_ports(uint16_t *ports,int argc,char *const a
     return NULL;
 }
 
-#define  ch_trans_tcp_record_put_returnv(rc) ((rc)==-2?PARSE_RETURN_DISCARD:PARSE_RETURN_DONE)
-
 #endif /*CH_TCP_APP_UTIL_H*/

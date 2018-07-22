@@ -21,6 +21,12 @@ typedef struct private_http_context_t private_http_context_t;
 
 struct private_http_context_t {
 
+	const char *req_body_dir;
+	const char *res_body_dir;
+
+
+	int create_body_dir_type;
+
 	uint16_t http_ports[HTTP_PORTS_MAX];
 
 };
@@ -29,6 +35,9 @@ static  private_http_context_t tmp_context,*g_hcontext = &tmp_context;
 
 
 #include "do_http_context.c"
+#include "do_http_create.c"
+#include "do_http_format.c"
+#include "do_http_parse.c"
 
 static int is_accept_by_port_for_http(ch_tcp_app_t *app,ch_packet_tcp_t *tcp_pkt){
 
@@ -46,72 +55,24 @@ static int is_accept_by_content_for_http(ch_tcp_app_t *app ch_unused,ch_packet_t
 }
 
 
-static int request_content_process_for_http(ch_tcp_app_t *app ch_unused,ch_shm_format_t *fmt,
-	ch_tcp_session_t *tsession,void *data,size_t dlen){
-
-	int rc;
-
-	ch_tcp_record_t tmp_rcd,*tcp_rcd = &tmp_rcd;
-
-	ch_tcp_record_init(tcp_rcd,tsession,PACKET_TYPE_DATA,data,dlen,PROTOCOL_HTTP,SESSION_DIRECT_REQ);
-
-	rc = ch_tcp_record_put(fmt,tcp_rcd);
-
-    return ch_trans_tcp_record_put_returnv(rc);
-}
-
-static int response_content_process_for_http(ch_tcp_app_t *app ch_unused,ch_shm_format_t *fmt,
-	ch_tcp_session_t *tsession,void *data,size_t dlen){
-
-	int rc;
-
-	ch_tcp_record_t tmp_rcd,*tcp_rcd = &tmp_rcd;
-
-	ch_tcp_record_init(tcp_rcd,tsession,PACKET_TYPE_DATA,data,dlen,PROTOCOL_HTTP,SESSION_DIRECT_RES);
-
-	rc = ch_tcp_record_put(fmt,tcp_rcd);
-
-    return ch_trans_tcp_record_put_returnv(rc);
-}
-
-static void content_flush_for_http(ch_tcp_app_t *app ch_unused,ch_shm_format_t *fmt,
-	ch_tcp_session_t *tsession,void *data,size_t dlen){
-
-
-	ch_tcp_record_t tmp_rcd,*tcp_rcd = &tmp_rcd;
-
-	ch_tcp_record_init(tcp_rcd,tsession,PACKET_TYPE_FLUSH,data,dlen,PROTOCOL_HTTP,SESSION_DIRECT_RES);
-
-	ch_tcp_record_put(fmt,tcp_rcd);
-
-}
-
-static void content_close_for_http(ch_tcp_app_t *app ch_unused,ch_shm_format_t *fmt,
-	ch_tcp_session_t *tsession,void *data,size_t dlen){
-
-
-	ch_tcp_record_t tmp_rcd,*tcp_rcd = &tmp_rcd;
-
-	ch_tcp_record_init(tcp_rcd,tsession,PACKET_TYPE_CLOSE,data,dlen,PROTOCOL_HTTP,SESSION_DIRECT_RES);
-
-	ch_tcp_record_put(fmt,tcp_rcd);
-}
-
-
 static ch_tcp_app_t http_app = {
+    .protocol_id = PROTOCOL_HTTP ,
+    .pkt_rcd_type = PKT_RECORD_TYPE_TCP_HTTP,
     .context = NULL,
 	.is_accept_by_port = is_accept_by_port_for_http,
 	.is_accept_by_content = is_accept_by_content_for_http,
-	.request_content_process = request_content_process_for_http,
-	.response_content_process = response_content_process_for_http,
-	.content_flush = content_flush_for_http,
-	.content_close = content_close_for_http
+    .proto_session_entry_create = do_http_session_entry_create,
+    .proto_session_entry_clean = do_http_session_entry_clean,
+    .proto_session_format = do_http_session_format,
+	.request_content_parse = do_http_request_parse,
+	.response_content_parse = do_http_response_parse 
 };
 
 
 
 int ch_http_init(ch_tcp_app_pool_t *ta_pool,const char *cfname){
 
+    memset(g_hcontext->http_ports,0,HTTP_PORTS_MAX);
 	if(do_http_context_init(ta_pool->mp,g_hcontext,cfname)){
 	
 		ch_log(CH_LOG_ERR,"Load TCP APP Http config file:%s failed!",cfname);

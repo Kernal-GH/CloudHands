@@ -54,7 +54,8 @@ struct  ch_tcp_session_t {
     ch_tcp_session_endpoint_t endpoint_res;
 
     ch_tcp_app_t *app;
-    
+    void *sentry;
+
     ch_tcp_session_endpoint_t *cur_ep;
 
     uint64_t session_id;
@@ -93,7 +94,9 @@ struct  ch_tcp_session_t {
 
 #define ch_tcp_session_state_is_rst(tcp_session) ((tcp_session)->state == SESSION_STATE_RST)
 
-extern int ch_tcp_session_init(ch_tcp_session_t *tcp_session,ch_tcp_session_request_t *sreq,ch_tcp_app_t *app,ch_memory_t *mm); 
+extern int ch_tcp_session_init(ch_tcp_session_t *tcp_session,ch_tcp_session_request_t *sreq,ch_tcp_app_t *app,
+        void *sentry,
+        ch_memory_t *mm); 
 
 extern void ch_tcp_session_fin(ch_tcp_session_t *tcp_session);
 

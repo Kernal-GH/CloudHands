@@ -129,19 +129,30 @@ ch_tcp_session_t *
 ch_tcp_session_pool_entry_create(ch_tcp_session_pool_t *tspt,ch_tcp_session_request_t *sreq,ch_tcp_app_t *app,
         ch_packet_tcp_t *tcp_pkt){
 
+    void *sentry = NULL;
     ch_tcp_session_t *tcp_session = NULL;
 
 	do{
-		tcp_session = (ch_tcp_session_t*)ch_ptable_entry_create(tspt->tcp_session_tbl,(void*)tcp_pkt);
+        
+        sentry = ch_tcp_app_session_entry_create(app,tspt->shandler->pstore);
+        if(sentry == NULL)
+        {
+        
+			ch_log(CH_LOG_ERR,"create tcp app session entry failed!");
+			break;
+        }
+		
+        tcp_session = (ch_tcp_session_t*)ch_ptable_entry_create(tspt->tcp_session_tbl,(void*)tcp_pkt);
 
 		if(tcp_session == NULL){
 			ch_log(CH_LOG_ERR,"create tcp session failed!");
 			break;
 		}
 
-		if(ch_tcp_session_init(tcp_session,sreq,app,tspt->mm)){
+		if(ch_tcp_session_init(tcp_session,sreq,app,sentry,tspt->mm)){
 
 			ch_log(CH_LOG_ERR,"init tcp  session failed!");
+            ch_tcp_app_session_entry_clean(app,tspt->shandler->pstore,tcp_session);
 			ch_tcp_session_pool_entry_free(tspt,tcp_session);
 			tcp_session = NULL;
 			break;

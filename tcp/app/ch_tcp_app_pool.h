@@ -21,10 +21,10 @@ typedef struct ch_tcp_app_t ch_tcp_app_t;
 #include "ch_proto_session_store.h"
 #include "ch_tcp_session.h"
 
-#define PARSE_RETURN_CONTINUE 0X01
-#define PARSE_RETURN_DONE     0X02
-#define PARSE_RETURN_DISCARD  0X04
-#define PARSE_RETURN_CLOSE    0X08
+/* Parse data status returned! */
+#define PARSE_DONE 0
+#define PARSE_CONTINUE 1
+#define PARSE_BREAK 2
 
 struct ch_tcp_app_pool_t {
 
@@ -46,17 +46,13 @@ struct ch_tcp_app_t {
 	
 	int (*is_accept_by_content)(ch_tcp_app_t *app,ch_packet_tcp_t *tcp_pkt,void *data,size_t dlen);
 
-	void *(*proto_session_entry_create)(ch_tcp_app_t *app);
-	void  (*proto_session_entry_destroy)(ch_tcp_app_t *app,ch_tcp_session_t *tsession,void *sentry);
+	void *(*proto_session_entry_create)(ch_tcp_app_t *app,ch_proto_session_store_t *pstore);
+	void  (*proto_session_entry_clean)(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,ch_tcp_session_t *tsession);
 	void (*proto_session_format)(msgpack_packer *pk,void *session);
 
-	int (*request_content_process)(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,ch_tcp_session_t *tsession,void *data,size_t dlen);
+	int (*request_content_parse)(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,ch_tcp_session_t *tsession,void *data,size_t dlen);
 	
-	int (*response_content_process)(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,ch_tcp_session_t *tsession,void *data,size_t dlen);
-
-	void (*content_flush)(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,ch_tcp_session_t *tsession,void *data,size_t dlen);
-	
-	void (*content_close)(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,ch_tcp_session_t *tsession,void *data,size_t dlen);
+	int (*response_content_parse)(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,ch_tcp_session_t *tsession,void *data,size_t dlen);
 
 };
 
@@ -75,19 +71,17 @@ extern ch_tcp_app_t * ch_tcp_app_find_by_port(ch_tcp_app_pool_t *ta_pool,ch_pack
 extern ch_tcp_app_t * ch_tcp_app_find_by_content(ch_tcp_app_pool_t *ta_pool,ch_packet_tcp_t *tcp_pkt,void *data,size_t dlen);
 
 
-extern int ch_tcp_app_request_content_process(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,
+extern int ch_tcp_app_request_content_parse(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,
 	ch_tcp_session_t *tsession,void *data,size_t dlen);
 
 
-extern int ch_tcp_app_response_content_process(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,
+extern int ch_tcp_app_response_content_parse(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,
 	 ch_tcp_session_t *tsession,void *data,size_t dlen);
 
-extern void ch_tcp_app_content_flush(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,
-	 ch_tcp_session_t *tsession,void *data,size_t dlen);
+extern void* ch_tcp_app_session_entry_create(ch_tcp_app_t *app,ch_proto_session_store_t *pstore);
 
 
-extern void ch_tcp_app_content_close(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,
-	 ch_tcp_session_t *tsession,void *data,size_t dlen);
+extern void  ch_tcp_app_session_entry_clean(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,ch_tcp_session_t *tsession);
 
 
 #endif /*CH_TCP_APP_POOL_H*/

@@ -27,11 +27,14 @@ typedef struct ch_tcp_session_pool_t ch_tcp_session_pool_t;
 #include "ch_tcp_context.h"
 #include "ch_memory.h"
 #include "ch_packet_tcp.h"
+#include "ch_tcp_session_handler.h"
 
 struct ch_tcp_session_pool_t {
 
 	ch_pool_t *mp;
     ch_tcp_context_t *tcp_context;
+
+    ch_tcp_session_handler_t *shandler;
 
     ch_ptable_t *tcp_session_tbl;
 

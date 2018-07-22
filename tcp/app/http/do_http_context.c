@@ -8,6 +8,42 @@
  * Last Modified: 2018-07-12 19:27:23
  */
 
+static const char *cmd_http_reqbody_dir(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1){
+
+	private_http_context_t *hcontext = (private_http_context_t*)_dcfg;
+
+	hcontext->req_body_dir = p1;
+
+	return NULL;
+}
+
+static const char *cmd_http_resbody_dir(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1){
+
+	private_http_context_t *hcontext = (private_http_context_t*)_dcfg;
+
+	hcontext->res_body_dir = p1;
+
+	return NULL;
+}
+
+
+static const char *cmd_http_body_dir_create_type(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1){
+
+	int rc;
+
+	private_http_context_t *hcontext = (private_http_context_t*)_dcfg;
+
+	rc = ch_fpath_create_type_get(p1);
+	if(rc == -1){
+	
+		return "Invalid http header dir create type config item!";
+
+	}
+
+	hcontext->create_body_dir_type = rc;
+	return NULL;
+}
+
 static const char *cmd_http_ports(cmd_parms * cmd ch_unused, void *_dcfg, int argc,char *const argv[]){
 
     private_http_context_t *hcontext = (private_http_context_t*)_dcfg;
@@ -16,6 +52,31 @@ static const char *cmd_http_ports(cmd_parms * cmd ch_unused, void *_dcfg, int ar
 }
 
 static const command_rec hcontext_directives[] = {
+    
+    CH_INIT_TAKE1(
+            "CHTCPAPPHttpReqBodyDir",
+            cmd_http_reqbody_dir,
+            NULL,
+            0,
+            "set the store path of http request body"
+            ),
+
+    CH_INIT_TAKE1(
+            "CHTCPAPPHttpResBodyDir",
+            cmd_http_resbody_dir,
+            NULL,
+            0,
+            "set the store path of http response body"
+            ),
+
+    CH_INIT_TAKE1(
+            "CHTCPAPPHttpBodyDirCreateType",
+            cmd_http_body_dir_create_type,
+            NULL,
+            0,
+            "set the type created of http body dir by time"
+            ),
+
 
 	CH_INIT_TAKE_ARGV(
             "CHTCPAPPHttpPorts",
@@ -31,8 +92,6 @@ static int do_http_context_init(ch_pool_t *mp,private_http_context_t *hcontext,c
 
     const char * msg = NULL;
 	
-	memset(hcontext->http_ports,0,HTTP_PORTS_MAX);
-
     msg = ch_process_command_config(hcontext_directives,(void*)hcontext,mp,mp,cfname);
 
     /*config failed*/

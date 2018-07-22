@@ -17,6 +17,7 @@
 #include "ch_mpool.h"
 #include "ch_string.h"
 #include "ch_tcp_session.h"
+#include "ch_buffer.h"
 
 typedef struct ch_proto_session_store_t ch_proto_session_store_t;
 typedef struct ch_proto_body_store_t ch_proto_body_store_t;
@@ -34,6 +35,8 @@ struct ch_proto_session_store_t {
 	ch_pool_t *mp;
 
 	ch_shm_format_t *shm_fmt;
+	
+    ch_buffer_t g_buffer;
 
 	msgpack_packer pk;
     

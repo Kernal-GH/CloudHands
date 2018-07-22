@@ -8,6 +8,24 @@
  * Last Modified: 2018-07-13 11:35:37
  */
 
+static const char *cmd_smon_reqbody_dir(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1){
+
+	private_smon_context_t *mcontextt = (private_smon_context_t*)_dcfg;
+
+	mcontextt->req_body_dir = p1;
+
+	return NULL;
+}
+
+static const char *cmd_smon_resbody_dir(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1){
+
+	private_smon_context_t *mcontextt = (private_smon_context_t*)_dcfg;
+
+	mcontextt->res_body_dir = p1;
+
+	return NULL;
+}
+
 static const char *cmd_smon_mmap_file(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1){
 
 
@@ -21,19 +39,49 @@ static const char *cmd_smon_mmap_file(cmd_parms *cmd ch_unused, void *_dcfg, con
 	return NULL;
 }
 
-static const char *cmd_smon_mmap_file_size(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1){
+static const char *cmd_smon_body_dir_create_type(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1){
 
-    char *endptr;
-    private_smon_context_t *mcontext = (private_smon_context_t*)_dcfg;
+	int rc;
 
+	private_smon_context_t *mcontextt = (private_smon_context_t*)_dcfg;
 
-    mcontext->mmap_fsize = (size_t)strtoul(p1,&endptr,10);
+	rc = ch_fpath_create_type_get(p1);
+	if(rc == -1){
+	
+		return "Invalid smon header dir create type config item!";
 
+	}
+
+	mcontextt->create_body_dir_type = rc;
 	return NULL;
 }
 
-
 static const command_rec mcontext_directives[] = {
+    
+    CH_INIT_TAKE1(
+            "CHTCPAPPSmonReqBodyDir",
+            cmd_smon_reqbody_dir,
+            NULL,
+            0,
+            "set the store path of smon request body"
+            ),
+
+    CH_INIT_TAKE1(
+            "CHTCPAPPSmonResBodyDir",
+            cmd_smon_resbody_dir,
+            NULL,
+            0,
+            "set the store path of smon response body"
+            ),
+
+    CH_INIT_TAKE1(
+            "CHTCPAPPSmonBodyDirCreateType",
+            cmd_smon_body_dir_create_type,
+            NULL,
+            0,
+            "set the type created of smon body dir by time"
+            ),
+
 
 	CH_INIT_TAKE1(
             "CHTCPAPPSmonMMapFile",
@@ -43,22 +91,15 @@ static const command_rec mcontext_directives[] = {
             "set  session monitor mmap file path"
             ),
 
-	CH_INIT_TAKE1(
-            "CHTCPAPPSmonMMapFileSize",
-            cmd_smon_mmap_file_size,
-            NULL,
-            0,
-            "set  session monitor mmap file size"
-            ),
-
 };
 
 
 static void _smon_context_dump(private_smon_context_t *mcontext){
 
 	fprintf(stdout,"Dump Session Monitor Context Informations:\n");
+	fprintf(stdout,"session.monitor.reqBodyDir:%s\n",mcontext->req_body_dir);
+	fprintf(stdout,"session.monitor.resBodyDir:%s\n",mcontext->res_body_dir);
 	fprintf(stdout,"session.monitor.mmapFileName:%s\n",mcontext->mmap_fname);
-	fprintf(stdout,"session.monitor.mmapFileSize:%lu\n",(unsigned long)mcontext->mmap_fsize);
 
 }
 

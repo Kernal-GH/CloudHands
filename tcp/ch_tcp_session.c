@@ -17,7 +17,9 @@
 
 #include "ch_tcp_session.h"
 
-int ch_tcp_session_init(ch_tcp_session_t *tcp_session,ch_tcp_session_request_t *sreq,ch_tcp_app_t *app,ch_memory_t *mm){
+int ch_tcp_session_init(ch_tcp_session_t *tcp_session,ch_tcp_session_request_t *sreq,ch_tcp_app_t *app,
+        void *sentry,
+        ch_memory_t *mm){
 
     ch_tcp_session_endpoint_init(&tcp_session->endpoint_req,sreq->req_ip,sreq->req_port,sreq->req_sn_init,mm);
 
@@ -32,7 +34,7 @@ int ch_tcp_session_init(ch_tcp_session_t *tcp_session,ch_tcp_session_request_t *
 
     tcp_session->cur_ep = NULL;
     tcp_session->app = app;
-
+    tcp_session->sentry = sentry;
     return 0;
 }
 

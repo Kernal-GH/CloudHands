@@ -147,52 +147,59 @@ ch_tcp_app_t * ch_tcp_app_find_by_content(ch_tcp_app_pool_t *ta_pool,ch_packet_t
 
 }
 
-int ch_tcp_app_request_content_process(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,
+int ch_tcp_app_request_content_parse(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,
 	ch_tcp_session_t *tsession,void *data,size_t dlen){
 
-    if(app == NULL || app->request_content_process == NULL){
+    if(app == NULL || app->request_content_parse == NULL){
     
-        ch_log(CH_LOG_ERR,"No app process and request method to handle this data!");
-        return PARSE_RETURN_DISCARD;
+        ch_log(CH_LOG_ERR,"No app  and parse method to handle this data!");
+        return PARSE_BREAK;
     }
 
-    return app->request_content_process(app,pstore,tsession,data,dlen); 
+    return app->request_content_parse(app,pstore,tsession,data,dlen); 
 
 }
 
-int ch_tcp_app_response_content_process(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,
+int ch_tcp_app_response_content_parse(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,
 	 ch_tcp_session_t *tsession,void *data,size_t dlen){
 
-    if(app == NULL || app->response_content_process == NULL){
+    if(app == NULL || app->response_content_parse == NULL){
     
-        ch_log(CH_LOG_ERR,"No app process and response method to handle this data!");
-        return PARSE_RETURN_DISCARD;
+        ch_log(CH_LOG_ERR,"No app and response parse method to handle this data!");
+        return PARSE_BREAK;
     }
 
-    return app->response_content_process(app,pstore,tsession,data,dlen); 
+    return app->response_content_parse(app,pstore,tsession,data,dlen); 
 
 }
 
-void ch_tcp_app_content_flush(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,
-	 ch_tcp_session_t *tsession,void *data,size_t dlen){
+void* ch_tcp_app_session_entry_create(ch_tcp_app_t *app,ch_proto_session_store_t *pstore){
 
-    if(app == NULL || app->content_flush == NULL){
+    if(app == NULL || app->proto_session_entry_create == NULL){
     
-        ch_log(CH_LOG_ERR,"No app process and flush method to handle this data!");
-    }else{
-    
-		app->content_flush(app,pstore,tsession,data,dlen);
-	}
-}
+        ch_log(CH_LOG_ERR,"No app and session entry create method to handle this data!");
+        return NULL;
 
-void ch_tcp_app_content_close(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,
-	 ch_tcp_session_t *tsession,void *data,size_t dlen){
-
-    if(app == NULL || app->content_close == NULL){
-    
-        ch_log(CH_LOG_ERR,"No app process and close method to handle this data!");
     }else {
-		app->content_close(app,pstore,tsession,data,dlen); 
+
+		return app->proto_session_entry_create(app,pstore); 
+	}
+
+}
+
+
+void ch_tcp_app_session_entry_clean(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,
+	 ch_tcp_session_t *tsession){
+
+    if(tsession == NULL)
+        return;
+
+    if(app == NULL || app->proto_session_entry_clean == NULL){
+    
+        ch_log(CH_LOG_ERR,"No app and session entry clean method to handle this data!");
+    }else {
+
+		app->proto_session_entry_clean(app,pstore,tsession); 
 	}
 
 }
