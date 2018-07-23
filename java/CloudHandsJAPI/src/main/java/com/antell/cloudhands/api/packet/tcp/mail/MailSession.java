@@ -160,8 +160,11 @@ public class MailSession implements SourceEntry {
         public void toJson(XContentBuilder cb){
 
             try {
-                cb.field("name",name);
-                cb.field("path",path);
+                XContentBuilder obj = cb.startObject();
+                obj.field("name",name);
+                obj.field("path",path);
+                obj.endObject();
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -367,7 +370,7 @@ public class MailSession implements SourceEntry {
         Set<String> sets = new TreeSet<>(mailToList);
         sets.addAll(mailCCList);
 
-        cb.field("mailRcvList", sets);
+        cb.field("mailRcvList", sets.stream().map(e->MailAddrUtil.getMailAddrFromString(e)).collect(Collectors.toList()));
         cb.field("attachNum",attachNum);
 
         XContentBuilder attachCB = cb.startArray("mailAttach");
