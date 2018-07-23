@@ -158,6 +158,15 @@ public class MailSession implements SourceEntry {
             this.path = path;
         }
 
+        public void toJson(XContentBuilder cb){
+
+            try {
+                cb.field("name",name);
+                cb.field("path",path);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
         public String getName() {
             return name;
         }
@@ -349,9 +358,17 @@ public class MailSession implements SourceEntry {
         cb.field("from",MailAddrUtil.getMailAddrFromString(from));
         cb.field("contentTxtPath",contentTxtPath);
         cb.field("contentHtmlPath",contentHtmlPath);
+
+        cb.field("mailToNum",mailToNum);
         cb.field("mailTo",MailAddrUtil.toSimpleFromArray(mailToList));
+
+        cb.field("mailCCNum",mailCCNum);
         cb.field("mailCC",MailAddrUtil.toSimpleFromArray(mailCCList));
-        cb.field("mailAttach",maillAttachEntryList);
+
+        cb.field("attachNum",attachNum);
+        XContentBuilder attachCB = cb.startArray("mailAttach");
+        maillAttachEntryList.stream().forEach(attach->attach.toJson(attachCB));
+        attachCB.endArray();
 
         if(hasMatchSec()){
             XContentBuilder attkCB = cb.startObject("attack");
