@@ -11,8 +11,7 @@ import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.msgpack.core.MessageUnpacker;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -365,7 +364,12 @@ public class MailSession implements SourceEntry {
         cb.field("mailCCNum",mailCCNum);
         cb.field("mailCC",MailAddrUtil.toSimpleFromArray(mailCCList));
 
+        Set<String> sets = new TreeSet<>(mailToList);
+        sets.addAll(mailCCList);
+
+        cb.field("mailRcvList", sets);
         cb.field("attachNum",attachNum);
+
         XContentBuilder attachCB = cb.startArray("mailAttach");
         maillAttachEntryList.stream().forEach(attach->attach.toJson(attachCB));
         attachCB.endArray();
