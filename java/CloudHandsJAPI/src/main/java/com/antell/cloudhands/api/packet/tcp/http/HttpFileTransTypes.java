@@ -33,7 +33,7 @@ public final class HttpFileTransTypes {
        TransFileTypes.put("tar","application/x-tar");
        TransFileTypes.put("7z","application/x-7z-compressed7z");
 
-       TransFileTypes.put("txt","text/plain");
+      // TransFileTypes.put("txt","text/plain");
        TransFileTypes.put("rtf","text/rtf");
        TransFileTypes.put("rtfd","text/rtfd");
        TransFileTypes.put("py","text/x-python");

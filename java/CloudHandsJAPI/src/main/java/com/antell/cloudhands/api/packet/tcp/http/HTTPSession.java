@@ -213,6 +213,7 @@ public class HTTPSession implements SourceEntry{
         TextUtils.addText(sb,"uri",uri);
         TextUtils.addText(sb,"extName",extName);
         TextUtils.addText(sb,"host",host);
+        TextUtils.addText(sb,"referer",referer);
         TextUtils.addText(sb,"reqContentType",reqContentType);
         TextUtils.addText(sb,"resContentType",resContentType);
         TextUtils.addText(sb,"contentEncoding",contentEncoding);
@@ -243,17 +244,18 @@ public class HTTPSession implements SourceEntry{
         sessionEntry.dataToJson(seCB);
         seCB.endObject();
 
-        cb.field("method",method);
-        cb.field("uri",uri);
-        cb.field("extName",extName);
-        cb.field("host",host);
-        cb.field("reqContentType",reqContentType);
-        cb.field("resContentType",resContentType);
-        cb.field("contentEncoding",contentEncoding);
-        cb.field("version",version);
+        cb.field("method",TextUtils.getStrValue(method));
+        cb.field("uri",TextUtils.getStrValue(uri));
+        cb.field("extName",TextUtils.getStrValue(extName));
+        cb.field("host",TextUtils.getStrValue(host));
+        cb.field("referer",TextUtils.getStrValue(referer));
+        cb.field("reqContentType",TextUtils.getStrValue(reqContentType));
+        cb.field("resContentType",TextUtils.getStrValue(resContentType));
+        cb.field("contentEncoding",TextUtils.getStrValue(contentEncoding));
+        cb.field("version",TextUtils.getStrValue(version));
         cb.field("status",status);
-        cb.field("reqBodyPath",reqBodyPath);
-        cb.field("resBodyPath",resBodyPath);
+        cb.field("reqBodyPath",TextUtils.getStrValue(reqBodyPath));
+        cb.field("resBodyPath",TextUtils.getStrValue(resBodyPath));
         cb.field("reqHeaders",reqHeaders);
         cb.field("resHeaders",resHeaders);
 
