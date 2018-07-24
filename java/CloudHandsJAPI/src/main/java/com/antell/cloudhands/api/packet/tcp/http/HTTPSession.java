@@ -28,7 +28,7 @@ public class HTTPSession implements SourceEntry{
     private String version;
 
     private String host;
-
+    private String  referer;
     private String reqContentType;
     private String resContentType;
     private String contentEncoding;
@@ -53,7 +53,7 @@ public class HTTPSession implements SourceEntry{
         resHeaders = new ArrayList<>();
         secMatchResult = null;
         host = null;
-
+        referer = null;
         reqContentType = "";
         resContentType = "";
         contentEncoding = "";
@@ -134,6 +134,11 @@ public class HTTPSession implements SourceEntry{
                 if(isHeader(k,"Host"))
                     setHost(v);
             }
+            if(isReq&&TextUtils.isEmpty(referer)){
+                if(isHeader(k,"Referer"))
+                    setReferer(v);
+            }
+
             if(isReq&&TextUtils.isEmpty(reqContentType)){
 
                 if(isHeader(k,"Content-Type"))
@@ -372,5 +377,13 @@ public class HTTPSession implements SourceEntry{
 
     public String getObjectId() {
         return objectId;
+    }
+
+    public String getReferer() {
+        return referer;
+    }
+
+    public void setReferer(String referer) {
+        this.referer = referer;
     }
 }
