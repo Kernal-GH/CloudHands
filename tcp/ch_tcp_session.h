@@ -98,4 +98,15 @@ extern ch_tcp_session_endpoint_t * ch_tcp_session_endpoint_get(ch_tcp_session_t 
 
 extern ch_tcp_session_endpoint_t * ch_tcp_session_pair_endpoint_get(ch_tcp_session_t *tcp_session,ch_packet_tcp_t *tcp_pkt);
 
+static inline void ch_tcp_session_dump(ch_tcp_session_t *session,FILE *fp){
+
+	fprintf(fp,"Dump TCP Session:%lu\n",(unsigned long)session->session_id);
+	
+	fprintf(fp,"Dump TCP Request:\n");
+	ch_tcp_session_endpoint_dump(&session->endpoint_req,fp);
+
+	fprintf(fp,"Dump TCP Response:\n");
+	ch_tcp_session_endpoint_dump(&session->endpoint_res,fp);
+
+}
 #endif /*CH_ASSEMBLE_SESSION_TCP_H*/

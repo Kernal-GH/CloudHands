@@ -23,6 +23,7 @@ typedef struct ch_tcp_session_endpoint_t ch_tcp_session_endpoint_t;
 #include "ch_mpool.h"
 #include "ch_assemble_fragment.h"
 #include "ch_memory.h"
+#include "ch_net_util.h"
 
 struct ch_tcp_session_endpoint_t {
 
@@ -80,6 +81,21 @@ extern void ch_tcp_session_endpoint_fin(ch_tcp_session_endpoint_t *ep);
  * @offset,the offset to start 
  *return: if ok,return 0,otherwise return -1*/
 extern int ch_tcp_session_endpoint_do(ch_tcp_session_endpoint_t *ep,void *data,size_t dlen,size_t offset);
+
+static inline void ch_tcp_session_endpoint_dump(ch_tcp_session_endpoint_t *ep,FILE *fp){
+
+	char buf[64] = {0};
+
+	fprintf(fp,"ep.ip:%s\n",ch_ip_to_str(buf,63,ep->ip));
+	fprintf(fp,"ep.port:%lu\n",(unsigned long)ep->port);
+	fprintf(fp,"ep.seq:%lu\n",(unsigned long)ep->init_seq);
+	fprintf(fp,"ep.last.offset:%lu\n",(unsigned long)ep->last_offset);
+	fprintf(fp,"ep.last.ack:%lu\n",(unsigned long)ep->last_ack);
+	fprintf(fp,"ep.packets:%lu\n",(unsigned long)ep->packets);
+	fprintf(fp,"ep.bytes:%lu\n",(unsigned long)ep->bytes);
+
+	ch_assemble_fragment_dump(&ep->as_frag,fp);
+}
 
 #endif /*CH_TCP_SESSION_ENDPOINT_H*/
 

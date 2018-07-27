@@ -23,7 +23,7 @@
 
 #define PREFETCH_OFFSET 3
 
-static void _dump_pint(ch_packet_rxtask_t *prxtask){
+static void _dump_port(ch_packet_rxtask_t *prxtask,ch_port_t *port){
 
 	uint64_t cur_time = ch_get_current_timems()/1000;
 
@@ -31,7 +31,10 @@ static void _dump_pint(ch_packet_rxtask_t *prxtask){
 	
 		prxtask->last_dump_time = cur_time;
 
-		ch_process_interface_dump(prxtask->pdcontext->pint_tcp_context->pint,stdout);
+		//ch_process_interface_dump(prxtask->pdcontext->pint_tcp_context->pint,stdout);
+		//
+		ch_port_pool_stat_dump(port,stdout);
+
 	}
 
 
@@ -42,6 +45,9 @@ static void _pkt_handle(ch_packet_rxtask_t *prxtask,ch_port_queue_t *pq ch_unuse
 
 	int mbuf_need_copy = 0;
 	int rc;
+
+
+	//_dump_port(prxtask,pq->port);
 
 	//printf("Receive packet,task_id:%d,packet_len:%d,datalen:%d\,port:%d,queue:%d\n",prxtask->task.tsk_id,mbuf->pkt_len,mbuf->data_len,pq->port->port_id,pq->queue_id);
 

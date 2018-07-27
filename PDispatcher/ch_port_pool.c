@@ -398,4 +398,19 @@ int ch_port_pool_setup(ch_port_pool_t *ppool){
    return 0;
 }
 
+void ch_port_pool_stat_dump(ch_port_t *port,FILE *fp){
 
+	struct rte_eth_stats port_stat,*ps = &port_stat;
+
+	if(rte_eth_stats_get(port->port_id,ps))
+		return;
+
+	fprintf(fp,"ps.ipackets%lu\n",(unsigned long)ps->ipackets);
+	fprintf(fp,"ps.opackets%lu\n",(unsigned long)ps->opackets);
+	fprintf(fp,"ps.ibytes%lu\n",(unsigned long)ps->ibytes);
+	fprintf(fp,"ps.obytes%lu\n",(unsigned long)ps->obytes);
+	fprintf(fp,"ps.imissed%lu\n",(unsigned long)ps->imissed);
+	fprintf(fp,"ps.ierrors%lu\n",(unsigned long)ps->ierrors);
+	fprintf(fp,"ps.oerrors%lu\n",(unsigned long)ps->oerrors);
+	fprintf(fp,"ps.rx_nombuf%lu\n",(unsigned long)ps->rx_nombuf);
+}

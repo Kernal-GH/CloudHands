@@ -159,4 +159,6 @@ extern int ch_port_pool_setup(ch_port_pool_t *ppool);
 
 extern ch_port_queue_t * ch_port_pool_queue_bind(ch_port_pool_t *ppool,uint32_t socket);
 
+extern void ch_port_pool_stat_dump(ch_port_t *port,FILE *fp);
+
 #endif /*CH_PORT_POOL_H*/

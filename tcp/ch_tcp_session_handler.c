@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-02-05 11:06:43
- * Last Modified: 2018-07-12 19:16:57
+ * Last Modified: 2018-07-27 18:02:05
  */
 
 #include "ch_tcp_session_handler.h"
@@ -239,11 +239,12 @@ int ch_tcp_session_packet_handle(ch_tcp_session_handler_t *shandler,
             break;
         }
 
+
+
 		ch_tcp_session_endpoint_update(ep,tcp_pkt->payload_len);
 
         tcp_session->cur_ep = ep;
 
-#if 0
         /*fin packet*/
         if(is_tcp_fin_packet(tcp_pkt)){
             _process_fin_packet(shandler,tcp_session,tcp_pkt);
@@ -255,13 +256,20 @@ int ch_tcp_session_packet_handle(ch_tcp_session_handler_t *shandler,
             _process_rst_packet(shandler,tcp_session,tcp_pkt);
             break;
         }
-#endif
         /*data packet*/
         if(tcp_pkt->pdata){
-           _process_data_packet(shandler,tcp_session,ep,tcp_pkt); 
+           
+			_process_data_packet(shandler,tcp_session,ep,tcp_pkt); 
+			
+		   /*some packet has been discard,then close session*/
+			if((ep!=NULL)&&(ep->last_ack>ep->last_offset)){
+
+				/*close session*/
+				_tcp_session_close(shandler,tcp_session);
+				break;
+			}
         }
 
-#if 0
         /*fin ack packet!*/
         if(_is_fin1_ack(tcp_session,tcp_pkt)){
             _process_fin1_ack_packet(shandler,tcp_session,tcp_pkt);
@@ -272,7 +280,6 @@ int ch_tcp_session_packet_handle(ch_tcp_session_handler_t *shandler,
             _process_fin2_ack_packet(shandler,tcp_session,tcp_pkt);
             break;
         }
-#endif
 
     }while(0);
 
@@ -286,6 +293,7 @@ int ch_tcp_session_packet_handle(ch_tcp_session_handler_t *shandler,
 		ch_ptable_dump(shandler->spool->tcp_session_tbl,stdout);
 
 	}
+
 
 	/*ok*/
 	return 0;
