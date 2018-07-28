@@ -77,6 +77,9 @@ struct  ch_tcp_session_t {
 #define ch_tcp_session_dst_packets_get(tcp_session) ((tcp_session)->endpoint_res.packets)
 #define ch_tcp_session_dst_bytes_get(tcp_session) ((tcp_session)->endpoint_res.bytes)
 
+#define ch_tcp_session_reqtime_get(tcp_session)   ((tcp_session)->endpoint_req.time)
+#define ch_tcp_session_restime_get(tcp_session)   ((tcp_session)->endpoint_res.time)
+
 #define ch_tcp_session_stat_reset(tcp_session) do { \
 	(tcp_session)->endpoint_req.packets = 0;		\
 	(tcp_session)->endpoint_req.bytes = 0;			\

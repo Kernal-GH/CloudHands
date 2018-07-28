@@ -18,7 +18,7 @@ typedef struct ch_tcp_app_t ch_tcp_app_t;
 #include "ch_tables.h"
 #include "ch_tcp_app_context.h"
 #include "ch_packet_tcp.h"
-#include "ch_shm_format.h"
+#include "ch_proto_session_store.h"
 #include "ch_tcp_session.h"
 
 #define PARSE_RETURN_CONTINUE 0X01
@@ -37,19 +37,26 @@ struct ch_tcp_app_pool_t {
 
 struct ch_tcp_app_t {
 
+	uint32_t protocol_id;
+	uint8_t pkt_rcd_type;
+
 	void *context;
 
 	int (*is_accept_by_port)(ch_tcp_app_t *app,ch_packet_tcp_t *tcp_pkt);
 	
 	int (*is_accept_by_content)(ch_tcp_app_t *app,ch_packet_tcp_t *tcp_pkt,void *data,size_t dlen);
 
-	int (*request_content_process)(ch_tcp_app_t *app,ch_shm_format_t *fmt,ch_tcp_session_t *tsession,void *data,size_t dlen);
-	
-	int (*response_content_process)(ch_tcp_app_t *app,ch_shm_format_t *fmt,ch_tcp_session_t *tsession,void *data,size_t dlen);
+	void *(*proto_session_entry_create)(ch_tcp_app_t *app);
+	void  (*proto_session_entry_destroy)(ch_tcp_app_t *app,ch_tcp_session_t *tsession,void *sentry);
+	void (*proto_session_format)(msgpack_packer *pk,void *session);
 
-	void (*content_flush)(ch_tcp_app_t *app,ch_shm_format_t *fmt,ch_tcp_session_t *tsession,void *data,size_t dlen);
+	int (*request_content_process)(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,ch_tcp_session_t *tsession,void *data,size_t dlen);
 	
-	void (*content_close)(ch_tcp_app_t *app,ch_shm_format_t *fmt,ch_tcp_session_t *tsession,void *data,size_t dlen);
+	int (*response_content_process)(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,ch_tcp_session_t *tsession,void *data,size_t dlen);
+
+	void (*content_flush)(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,ch_tcp_session_t *tsession,void *data,size_t dlen);
+	
+	void (*content_close)(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,ch_tcp_session_t *tsession,void *data,size_t dlen);
 
 };
 
@@ -67,18 +74,19 @@ extern ch_tcp_app_t * ch_tcp_app_find_by_port(ch_tcp_app_pool_t *ta_pool,ch_pack
 
 extern ch_tcp_app_t * ch_tcp_app_find_by_content(ch_tcp_app_pool_t *ta_pool,ch_packet_tcp_t *tcp_pkt,void *data,size_t dlen);
 
-extern int ch_tcp_app_request_content_process(ch_tcp_app_t *app,ch_shm_format_t *fmt,
+
+extern int ch_tcp_app_request_content_process(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,
 	ch_tcp_session_t *tsession,void *data,size_t dlen);
 
 
-extern int ch_tcp_app_response_content_process(ch_tcp_app_t *app,ch_shm_format_t *fmt,
+extern int ch_tcp_app_response_content_process(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,
 	 ch_tcp_session_t *tsession,void *data,size_t dlen);
 
-extern void ch_tcp_app_content_flush(ch_tcp_app_t *app,ch_shm_format_t *fmt,
+extern void ch_tcp_app_content_flush(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,
 	 ch_tcp_session_t *tsession,void *data,size_t dlen);
 
 
-extern void ch_tcp_app_content_close(ch_tcp_app_t *app,ch_shm_format_t *fmt,
+extern void ch_tcp_app_content_close(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,
 	 ch_tcp_session_t *tsession,void *data,size_t dlen);
 
 

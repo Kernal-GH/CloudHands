@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-07-12 14:13:07
- * Last Modified: 2018-07-13 11:38:18
+ * Last Modified: 2018-07-28 14:41:33
  */
 
 #include "ch_tcp_app_pool.h"
@@ -147,7 +147,7 @@ ch_tcp_app_t * ch_tcp_app_find_by_content(ch_tcp_app_pool_t *ta_pool,ch_packet_t
 
 }
 
-int ch_tcp_app_request_content_process(ch_tcp_app_t *app,ch_shm_format_t *fmt,
+int ch_tcp_app_request_content_process(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,
 	ch_tcp_session_t *tsession,void *data,size_t dlen){
 
     if(app == NULL || app->request_content_process == NULL){
@@ -156,11 +156,11 @@ int ch_tcp_app_request_content_process(ch_tcp_app_t *app,ch_shm_format_t *fmt,
         return PARSE_RETURN_DISCARD;
     }
 
-    return app->request_content_process(app,fmt,tsession,data,dlen); 
+    return app->request_content_process(app,pstore,tsession,data,dlen); 
 
 }
 
-int ch_tcp_app_response_content_process(ch_tcp_app_t *app,ch_shm_format_t *fmt,
+int ch_tcp_app_response_content_process(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,
 	 ch_tcp_session_t *tsession,void *data,size_t dlen){
 
     if(app == NULL || app->response_content_process == NULL){
@@ -169,11 +169,11 @@ int ch_tcp_app_response_content_process(ch_tcp_app_t *app,ch_shm_format_t *fmt,
         return PARSE_RETURN_DISCARD;
     }
 
-    return app->response_content_process(app,fmt,tsession,data,dlen); 
+    return app->response_content_process(app,pstore,tsession,data,dlen); 
 
 }
 
-void ch_tcp_app_content_flush(ch_tcp_app_t *app,ch_shm_format_t *fmt,
+void ch_tcp_app_content_flush(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,
 	 ch_tcp_session_t *tsession,void *data,size_t dlen){
 
     if(app == NULL || app->content_flush == NULL){
@@ -181,18 +181,18 @@ void ch_tcp_app_content_flush(ch_tcp_app_t *app,ch_shm_format_t *fmt,
         ch_log(CH_LOG_ERR,"No app process and flush method to handle this data!");
     }else{
     
-		app->content_flush(app,fmt,tsession,data,dlen);
+		app->content_flush(app,pstore,tsession,data,dlen);
 	}
 }
 
-void ch_tcp_app_content_close(ch_tcp_app_t *app,ch_shm_format_t *fmt,
+void ch_tcp_app_content_close(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,
 	 ch_tcp_session_t *tsession,void *data,size_t dlen){
 
     if(app == NULL || app->content_close == NULL){
     
         ch_log(CH_LOG_ERR,"No app process and close method to handle this data!");
     }else {
-		app->content_close(app,fmt,tsession,data,dlen); 
+		app->content_close(app,pstore,tsession,data,dlen); 
 	}
 
 }
