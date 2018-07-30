@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-07-12 14:13:07
- * Last Modified: 2018-07-30 09:42:28
+ * Last Modified: 2018-07-30 17:05:07
  */
 
 #include "ch_tcp_app_pool.h"
@@ -126,7 +126,7 @@ ch_tcp_app_t * ch_tcp_app_find_by_content(ch_tcp_app_pool_t *ta_pool,ch_packet_t
 int ch_tcp_app_request_content_parse(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,
 	ch_tcp_session_t *tsession,void *data,size_t dlen){
 
-    if(app == NULL || app->request_content_parse == NULL){
+    if(app == NULL || app->request_content_parse == NULL||tsession->sentry == NULL){
     
         ch_log(CH_LOG_ERR,"No app  and parse method to handle this data!");
         return PARSE_BREAK;
@@ -139,7 +139,7 @@ int ch_tcp_app_request_content_parse(ch_tcp_app_t *app,ch_proto_session_store_t 
 int ch_tcp_app_response_content_parse(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,
 	 ch_tcp_session_t *tsession,void *data,size_t dlen){
 
-    if(app == NULL || app->response_content_parse == NULL){
+    if(app == NULL || app->response_content_parse == NULL||tsession->sentry == NULL){
     
         ch_log(CH_LOG_ERR,"No app and response parse method to handle this data!");
         return PARSE_BREAK;
@@ -167,7 +167,7 @@ void* ch_tcp_app_session_entry_create(ch_tcp_app_t *app,ch_proto_session_store_t
 void ch_tcp_app_session_entry_clean(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,
 	 ch_tcp_session_t *tsession){
 
-    if(tsession == NULL)
+    if(tsession == NULL||tsession->sentry == NULL)
         return;
 
     if(app == NULL || app->proto_session_entry_clean == NULL){
@@ -177,6 +177,8 @@ void ch_tcp_app_session_entry_clean(ch_tcp_app_t *app,ch_proto_session_store_t *
 
 		app->proto_session_entry_clean(app,pstore,tsession); 
 	}
+
+	tsession->sentry = NULL;
 
 }
 
