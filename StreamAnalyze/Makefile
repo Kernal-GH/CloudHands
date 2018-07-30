@@ -3,7 +3,8 @@ DPDK=/usr/local/dpdk/dpdk_src
 DPDK_FLAGS=$(shell cat ${DPDK}/include/cflags.txt)
 DPDK_LIB_FLAGS = $(shell cat ${DPDK}/lib/ldflags.txt)
 CFLAGS  = ${BUILD_CFLAGS}  -O0 -rdynamic -D_GNU_SOURCE -DUSE_DPDK ${DPDK_FLAGS} -pthread
-CFLAGS += -I../lib/common  -I../lib/shm -I../lib/thread -I../lib/ptables -I../packet -I../MProcess -I../tcp -I../tcp/app -I./statistic -I${DPDK}/include -include ${DPDK}/include/rte_config.h
+CFLAGS += -I../lib/common  -I../lib/shm -I../lib/thread -I../lib/ptables -I../packet -I../MProcess -I../tcp -I../tcp/app -I./statistic 
+CFLAGS += -I../lib/fstore -I../SessionMonitor -I${DPDK}/include -include ${DPDK}/include/rte_config.h
 
 LDFLAGS  = ${BUILD_LDFLAGS} ${DPDK_LIB_FLAGS} -lpthread
 

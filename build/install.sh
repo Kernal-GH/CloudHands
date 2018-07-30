@@ -5,7 +5,7 @@
 #        Author: csp001314@163.com
 #   Description: ---
 #        Create: 2016-11-03 20:09:47
-# Last Modified: 2018-07-30 11:07:07
+# Last Modified: 2018-07-30 16:13:17
 #
 
 [ `id -u` -ne 0 ] && {
@@ -63,6 +63,9 @@ comp_lib(){
 
 	cp -rf  CloudHands/tcp/app/http/*.o CloudHands/tcp/app/
 	cp -rf  CloudHands/tcp/app/mail/*.o CloudHands/tcp/app/
+	cp -rf  CloudHands/tcp/app/mail/smtp/*.o CloudHands/tcp/app/
+	cp -rf  CloudHands/tcp/app/mail/imap/*.o CloudHands/tcp/app/
+	cp -rf  CloudHands/tcp/app/mail/pop3/*.o CloudHands/tcp/app/
 	cp -rf  CloudHands/tcp/app/smon/*.o CloudHands/tcp/app/
 
 
