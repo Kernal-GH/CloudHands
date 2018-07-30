@@ -168,13 +168,10 @@ public final class Content {
                     nct.contains("htm")||
                     nct.contains("xml")||
                     nct.contains("json")||
-                    nct.contains("js")||
                     nct.contains("css")||
                     nct.contains("java")||
                     nct.contains("jsp")||
-                    nct.contains("py")||
-                    nct.contains("sh")||
-                    nct.contains("pl")){
+                    nct.contains("py")){
 
                 return true;
             }
