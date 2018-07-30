@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-03-22 11:45:40
- * Last Modified: 2018-06-22 18:50:09
+ * Last Modified: 2018-07-30 16:49:57
  */
 
 #include "ch_sa_tcp_session_request_handler.h"
@@ -192,7 +192,7 @@ _tcp_session_create(ch_sa_tcp_session_request_handler_t *req_handler,
 
     ch_tcp_session_t *tcp_session;
 	ch_tcp_session_pool_t *ts_pool = sa_tcp_session_pool_get(req_handler);
-    tcp_session = ch_tcp_session_pool_entry_create(ts_pool,sreq,NULL,tcp_pkt);
+    tcp_session = ch_tcp_session_pool_entry_create(ts_pool,sreq,NULL,NULL,tcp_pkt);
     
     if(tcp_session == NULL){
         ch_log(CH_LOG_ERR,"Create a tcp session failed,so drop this packet!");

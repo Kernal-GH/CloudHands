@@ -23,8 +23,7 @@ tcp_package=../tcp/ch_assemble_fragment.o \
 			../tcp/ch_tcp_session.o \
 			../tcp/ch_tcp_session_endpoint.o \
 			../tcp/ch_tcp_session_pool.o \
-			../tcp/ch_tcp_session_request_pool.o
-
+			../tcp/ch_tcp_session_request_pool.o 
 
 sa_package= SAMain
 
