@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-07-12 16:21:25
- * Last Modified: 2018-07-12 19:26:59
+ * Last Modified: 2018-07-30 10:50:41
  */
 
 #include "ch_mail.h"
@@ -14,6 +14,11 @@
 #include "ch_tcp_record.h"
 #include "ch_tcp_app_util.h"
 #include "ch_log.h"
+#include "ch_list.h"
+#include "ch_packet_record.h"
+#include "smtp_parser.h"
+#include "pop3_parser.h"
+#include "imap_parser.h"
 
 typedef struct private_mail_context_t private_mail_context_t;
 

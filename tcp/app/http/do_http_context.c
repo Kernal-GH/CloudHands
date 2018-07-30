@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-07-12 17:30:26
- * Last Modified: 2018-07-12 19:27:23
+ * Last Modified: 2018-07-30 09:58:51
  */
 
 static const char *cmd_http_reqbody_dir(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1){
@@ -40,7 +40,7 @@ static const char *cmd_http_body_dir_create_type(cmd_parms *cmd ch_unused, void 
 
 	}
 
-	hcontext->create_body_dir_type = rc;
+	hcontext->create_dir_type = rc;
 	return NULL;
 }
 

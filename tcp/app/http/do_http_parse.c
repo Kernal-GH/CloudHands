@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-05-16 15:50:50
- * Last Modified: 2018-06-23 11:29:47
+ * Last Modified: 2018-07-30 09:59:22
  */
 
 #define HAS_BODY(session,is_req) (is_req?((session)->headers_in.content_length_n>0||(session)->headers_in.chunked):\
@@ -266,7 +266,6 @@ do_http_request_parse(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,
 	ch_pp_data_input_t *din;
 	ch_pp_data_line_t tmp,*line=&tmp;
 
-	ch_http_parse_context_t *http_parse_context = (ch_http_parse_context_t*)sentry->pp_parser->parse_context;
 	ch_http_session_t *session = NULL;
 	ch_http_session_entry_t *hsentry = (ch_http_session_entry_t*)tsession->sentry;
 	

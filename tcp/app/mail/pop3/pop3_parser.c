@@ -5,7 +5,7 @@
  *        Author: g.goodian@gmail.com
  *   Description: ---
  *        Create: 2016-07-01 16:23:15
- * Last Modified: 2018-05-18 18:02:30
+ * Last Modified: 2018-07-30 10:55:46
  */
 
 #include "pop3_parser.h"
@@ -376,7 +376,7 @@ handle_server_data(ch_proto_session_store_t *pstore,ch_tcp_session_t *tsession,
 	return false;
 }
 
-static int pop3_parse(int dir,ch_tcp_app_t *app,ch_proto_session_store_t *pstore,ch_tcp_session_t *tsession,
+static int pop3_parse(int dir,ch_tcp_app_t *app ch_unused,ch_proto_session_store_t *pstore,ch_tcp_session_t *tsession,
         ch_mail_session_entry_t *msentry, uint8_t *input, uint32_t input_len)
 {
 

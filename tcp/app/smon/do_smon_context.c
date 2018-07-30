@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-07-12 17:30:26
- * Last Modified: 2018-07-13 11:35:37
+ * Last Modified: 2018-07-30 10:44:01
  */
 
 static const char *cmd_smon_reqbody_dir(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1){
@@ -52,7 +52,7 @@ static const char *cmd_smon_body_dir_create_type(cmd_parms *cmd ch_unused, void 
 
 	}
 
-	mcontextt->create_body_dir_type = rc;
+	mcontextt->create_dir_type = rc;
 	return NULL;
 }
 

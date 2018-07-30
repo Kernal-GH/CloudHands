@@ -5,13 +5,14 @@
  *        Author: g.goodian@gmail.com
  *   Description: ---
  *        Create: 2016-06-13 02:33:06
- * Last Modified: 2018-05-18 17:38:59
+ * Last Modified: 2018-07-30 10:53:59
  *************************************************************************/
 
 #include "smtp_parser.h"
 #include "ch_mail_session.h"
 #include "ch_mail_auth.h"
 #include "ch_log.h"
+#include "ch_tcp_app_pool.h"
 
 #define SMTP_COMMAND_BUFFER_STEPS 7
 
@@ -500,7 +501,7 @@ smtp_parse_command_rcptto(ch_mail_session_entry_t *msentry,
 }
 
 static int 
-smtp_process_request(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,ch_tcp_session_t *tsession,
+smtp_process_request(ch_tcp_app_t *app ch_unused,ch_proto_session_store_t *pstore,ch_tcp_session_t *tsession,
         ch_mail_session_entry_t *msentry, ch_mail_curr_line_t *cur_line)
 {
 	ch_mail_session_t *s = msentry->curr_session;
@@ -737,7 +738,6 @@ smtp_process_reply(ch_tcp_app_t *app ch_unused,ch_proto_session_store_t *pstore 
 }
 
 
-r
 static int smtp_parse(int direction,ch_tcp_app_t *app,ch_proto_session_store_t *pstore,ch_tcp_session_t *tsession,
         ch_mail_session_entry_t *msentry, uint8_t *input, uint32_t input_len)
 {

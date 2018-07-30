@@ -5,7 +5,7 @@
  *        Author: g.goodian@gmail.com
  *   Description: ---
  *        Create: 2016-07-05 19:00:12
- * Last Modified: 2018-05-18 17:54:02
+ * Last Modified: 2018-07-30 10:55:23
  */
 
 #include "ch_log.h"
@@ -177,7 +177,7 @@ imap_parse_command_login(ch_mail_session_entry_t *msentry,
 }
 
 static int 
-imap_process_request(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,ch_tcp_session_t *tsession,
+imap_process_request(ch_tcp_app_t *app ch_unused,ch_proto_session_store_t *pstore ch_unused,ch_tcp_session_t *tsession ch_unused,
         ch_mail_session_entry_t *msentry, ch_mail_curr_line_t *cur_line)
 {
 	ch_mail_session_t *s = msentry->curr_session;
@@ -391,7 +391,7 @@ imap_process_uid_fetch_data(ch_proto_session_store_t *pstore,ch_tcp_session_t *t
 }
 
 static int 
-imap_process_reply(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,ch_tcp_session_t *tsession,
+imap_process_reply(ch_tcp_app_t *app ch_unused,ch_proto_session_store_t *pstore,ch_tcp_session_t *tsession,
         ch_mail_session_entry_t *msentry,
 	ch_mail_curr_line_t *cur_line)
 {

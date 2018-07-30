@@ -5,7 +5,7 @@
 #        Author: csp001314@163.com 
 #   Description: ---
 #        Create: 2016-08-07 20:23:00
-# Last Modified: 2018-06-20 18:37:31
+# Last Modified: 2018-07-30 11:08:09
 #
 
 
@@ -220,9 +220,7 @@ setup_cloudhands(){
 	${RTE_SDK}/CloudHands/bin/${TCP_MAIN_NAME} --proc-type secondary ${TCP_CORE_BIND} ${TCP_CONFIG_FPATH} 1>/dev/null 2>&1 &
 	${RTE_SDK}/CloudHands/bin/${UDP_MAIN_NAME} --proc-type secondary ${UDP_CORE_BIND} ${UDP_CONFIG_FPATH} 1>/dev/null 2>&1 &
 	${RTE_SDK}/CloudHands/bin/${SA_MAIN_NAME}  --proc-type secondary ${SA_CORE_BIND} ${SA_CONFIG_FPATH} 1>/dev/null 2>&1 &
-	sleep 10
 
-	${RTE_SDK}/CloudHands/bin/${PP_MAIN_NAME}  ${PP_CONFIG_FPATH} ${PP_MAIN_SHM_FNAME} 1>/dev/null 2>&1 &
 }
 
 start_dpdk(){

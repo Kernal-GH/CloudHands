@@ -5,7 +5,7 @@
 #        Author: csp001314@163.com
 #   Description: ---
 #        Create: 2016-11-03 20:09:47
-# Last Modified: 2018-07-19 13:53:29
+# Last Modified: 2018-07-30 11:07:07
 #
 
 [ `id -u` -ne 0 ] && {
@@ -57,18 +57,15 @@ comp_lib(){
 	make -C CloudHands/packet
 	make -C CloudHands/MProcess
 	make -C CloudHands/tcp/app
+	make -C CloudHands/tcp/app/http
+	make -C CloudHands/tcp/app/mail
+	make -C CloudHands/tcp/app/smon
+
 	cp -rf  CloudHands/tcp/app/http/*.o CloudHands/tcp/app/
-	cp -rf  CloudHands/tcp/app/smtp/*.o CloudHands/tcp/app/
-	cp -rf  CloudHands/tcp/app/pop3/*.o CloudHands/tcp/app/
-	cp -rf  CloudHands/tcp/app/imap/*.o CloudHands/tcp/app/
-	cp -rf  CloudHands/tcp/app/telnet/*.o CloudHands/tcp/app/
-	cp -rf  CloudHands/tcp/app/ftp/*.o CloudHands/tcp/app/
+	cp -rf  CloudHands/tcp/app/mail/*.o CloudHands/tcp/app/
 	cp -rf  CloudHands/tcp/app/smon/*.o CloudHands/tcp/app/
 
 
-	make -C CloudHands/tcp/PParse/http
-	make -C CloudHands/tcp/PParse/mail
-	make -C CloudHands/tcp/PParse/smon
 	make -C CloudHands/udp/app
 	make -C CloudHands/udp/app/dns
 	make -C CloudHands/udp/app/smon
@@ -102,7 +99,6 @@ install_cloudhands(){
 
 	make -C CloudHands/PDispatcher
 	make -C CloudHands/tcp
-	make -C CloudHands/tcp/PParse
 	make -C CloudHands/udp
 	make -C CloudHands/StreamAnalyze
 	make -C CloudHands/StreamAnalyze/statistic -f MakefileDump
@@ -111,7 +107,6 @@ install_cloudhands(){
 	cp -rf CloudHands/conf $dpdk_install_prefix/CloudHands
 	cp -rf CloudHands/PDispatcher/PDispatcher $dpdk_install_prefix/CloudHands/bin
 	cp -rf CloudHands/tcp/TCPMain $dpdk_install_prefix/CloudHands/bin
-	cp -rf CloudHands/tcp/PParse/PPMain $dpdk_install_prefix/CloudHands/bin
 	cp -rf CloudHands/udp/UDPMain $dpdk_install_prefix/CloudHands/bin
 	cp -rf CloudHands/StreamAnalyze/SAMain $dpdk_install_prefix/CloudHands/bin
 	cp -rf CloudHands/StreamAnalyze/statistic/StatDump $dpdk_install_prefix/CloudHands/bin

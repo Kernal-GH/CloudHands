@@ -5,15 +5,19 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-07-12 16:21:25
- * Last Modified: 2018-07-12 19:26:59
+ * Last Modified: 2018-07-30 09:59:54
  */
 
 #include "ch_http.h"
 #include "ch_config.h"
 #include "ch_util.h"
-#include "ch_tcp_record.h"
 #include "ch_tcp_app_util.h"
 #include "ch_log.h"
+#include "ch_list.h"
+#include "ch_http_session.h"
+#include "ch_tcp_app_pool.h"
+#include "ch_http_session_entry.h"
+#include "ch_packet_record.h"
 
 typedef struct private_http_context_t private_http_context_t;
 
@@ -25,7 +29,7 @@ struct private_http_context_t {
 	const char *res_body_dir;
 
 
-	int create_body_dir_type;
+	int create_dir_type;
 
 	uint16_t http_ports[HTTP_PORTS_MAX];
 

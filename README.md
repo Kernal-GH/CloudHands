@@ -70,7 +70,6 @@
    ps -ef |grep TCPMain
    ps -ef |grep UDPMain
    ps -ef |grep SAMain
-   ps -ef |grep PPMain
    看看这几个进程是否起来，若都起来那么启动成功，若是不成功，则查看/opt/cloudhands/log 下面的对应日志
    
 3. 运行例子

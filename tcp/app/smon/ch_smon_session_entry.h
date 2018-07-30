@@ -13,7 +13,7 @@
 
 typedef struct ch_smon_session_entry_t ch_smon_session_entry_t;
 
-#include "ch_session_entry.h"
+#include "ch_mpool.h"
 
 
 struct ch_smon_session_entry_t {

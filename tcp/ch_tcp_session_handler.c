@@ -5,13 +5,14 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-02-05 11:06:43
- * Last Modified: 2018-07-27 18:02:05
+ * Last Modified: 2018-07-30 10:59:28
  */
 
 #include "ch_tcp_session_handler.h"
 #include "ch_log.h"
 #include "ch_string.h"
 #include "ch_tcp_record.h"
+#include "ch_tcp_app_pool.h"
 
 static inline const char * _get_name(ch_pool_t *mp,const char *prefix,uint32_t tsk_id){
 
@@ -171,7 +172,7 @@ static void _process_data_packet(ch_tcp_session_handler_t *shandler,
 
 		rc = _content_data_output(shandler,tcp_session,tcp_pkt->pdata,tcp_pkt->payload_len);
 
-        if(rc == PARSE_BEAK){
+        if(rc == PARSE_BREAK){
             _tcp_session_close(shandler,tcp_session); 
         }else{
             df = ch_assemble_fragment_pop(&ep->as_frag,ep->last_offset);
@@ -179,7 +180,7 @@ static void _process_data_packet(ch_tcp_session_handler_t *shandler,
 		
 				rc = _content_data_output(shandler,tcp_session,df->data,df->len);
         
-                if(rc == PARSE_BEAK){
+                if(rc == PARSE_BREAK){
                     _tcp_session_close(shandler,tcp_session);
 
                 }else {

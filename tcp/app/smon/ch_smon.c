@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-07-13 11:07:47
- * Last Modified: 2018-07-13 11:24:09
+ * Last Modified: 2018-07-30 10:44:24
  */
 
 #include "ch_smon.h"
@@ -15,6 +15,8 @@
 #include "ch_tcp_app_util.h"
 #include "ch_log.h"
 #include "ch_session_monitor.h"
+#include "ch_smon_session_entry.h"
+#include "ch_packet_record.h"
 
 typedef struct private_smon_context_t private_smon_context_t;
 
@@ -26,7 +28,7 @@ struct private_smon_context_t {
     const char *req_body_dir;
 	const char *res_body_dir;
 
-	int create_body_dir_type;
+	int create_dir_type;
 
 	const char *mmap_fname;
 

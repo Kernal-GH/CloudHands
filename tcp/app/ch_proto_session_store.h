@@ -11,6 +11,9 @@
 #ifndef CH_PROTO_SESSION_STORE_H
 #define CH_PROTO_SESSION_STORE_H
 
+typedef struct ch_proto_session_store_t ch_proto_session_store_t;
+typedef struct ch_proto_body_store_t ch_proto_body_store_t;
+
 #include <msgpack.h>
 #include "ch_shm_format.h"
 #include "ch_fpath.h"
@@ -19,8 +22,7 @@
 #include "ch_tcp_session.h"
 #include "ch_buffer.h"
 
-typedef struct ch_proto_session_store_t ch_proto_session_store_t;
-typedef struct ch_proto_body_store_t ch_proto_body_store_t;
+
 
 struct ch_proto_body_store_t {
 
@@ -47,7 +49,7 @@ struct ch_proto_session_store_t {
 };
 
 extern ch_proto_session_store_t *ch_proto_session_store_create(ch_pool_t *mp,uint32_t task_id,const char *shm_fname,
-	uint32_t shm_fsize,uint32_t fentry_size);
+	uint64_t shm_fsize,uint64_t fentry_size);
 
 extern void ch_proto_session_store_destroy(ch_proto_session_store_t *pstore);
 
@@ -81,11 +83,11 @@ static inline ch_proto_body_store_t * ch_proto_store_body_find_create(ch_proto_s
 	if(bstore->req_fpath == NULL && bstore->res_fpath == NULL){
 	
 		bstore->req_fpath = ch_fpath_create(pstore->mp,
-			(const char*)ch_psprintf(pstore->mp,"%s/%lu/",req_store_dir,pstore->task_id)
+			(const char*)ch_psprintf(pstore->mp,"%s/%lu/",req_store_dir,pstore->task_id),
 			create_dir_type,0,0);
 		
 		bstore->res_fpath = ch_fpath_create(pstore->mp,
-			(const char*)ch_psprintf(pstore->mp,"%s/%lu/",res_store_dir,pstore->task_id)
+			(const char*)ch_psprintf(pstore->mp,"%s/%lu/",res_store_dir,pstore->task_id),
 			create_dir_type,0,0);
 
 		if(bstore->req_fpath == NULL || bstore->res_fpath == NULL)

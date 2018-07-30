@@ -15,7 +15,6 @@ typedef struct ch_http_session_entry_t ch_http_session_entry_t;
 
 #include "ch_http_session.h"
 #include "ch_list.h"
-#include "ch_session_entry.h"
 
 struct ch_http_session_entry_t {
 

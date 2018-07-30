@@ -4,26 +4,24 @@
 ##########################################################
 
 include ../../../make.include
-
 DPDK=/usr/local/dpdk/dpdk_src
 DPDK_FLAGS=$(shell cat ${DPDK}/include/cflags.txt)
-DPDK_LIB_FLAGS = $(shell cat ${DPDK}/lib/ldflags.txt)
-CFLAGS  = ${BUILD_CFLAGS}  -O0 -rdynamic -D_GNU_SOURCE  ${DPDK_FLAGS} -pthread
-CFLAGS += -I../../../lib/common  -I../../../lib/ptables -I../../../lib/fstore -I../../../lib/shm
+CFLAGS  = ${BUILD_CFLAGS}  -O0 -rdynamic -D_GNU_SOURCE -DUSE_DPDK ${DPDK_FLAGS}
+CFLAGS += -I../../../lib/common -I../../../packet -I../../../lib/ptables -I../../../lib/shm -I../../../lib/fstore
 CFLAGS += -I./smtp -I./imap -I./pop3
-CFLAGS += -I../ -I.  -I${DPDK}/include -include ${DPDK}/include/rte_config.h
+CFLAGS += -I../ -I../../ -I. -I${DPDK}/include -include ${DPDK}/include/rte_config.h
+CFLAGS +=  -fPIC
 
-ch_mail_SOURCES = ch_mail_context.c \
-				  ch_mail_auth.c 	\
-				  ch_mail_file.c    \
-				  ch_mail_common.c 	\
-				  ch_mail_decode_mime.c \
-				  ch_mail_session_entry.c \
+ch_mail_SOURCES = ch_mail.c \
 				  ch_mail_session.c \
+				  ch_mail_auth.c \
+				  ch_mail_common.c \
+				  ch_mail_decode_mime.c \
+				  ch_mail_file.c \
+				  ch_mail_session_entry.c  \
 				  smtp/smtp_parser.c \
-				  imap/imap_parser.c \
 				  pop3/pop3_parser.c \
-				  ch_mail_parser.c
+				  imap/imap_parser.c
 
 ch_mail_OBJECTS = $(patsubst %.c,%.o,$(ch_mail_SOURCES))
 ch_mail_DEPENDS = $(patsubst %.c,%.d,$(ch_mail_SOURCES))

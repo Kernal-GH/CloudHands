@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-05-18 15:36:57
- * Last Modified: 2018-06-25 10:34:52
+ * Last Modified: 2018-07-30 10:51:43
  */
 
 static void *do_mail_session_entry_create(ch_tcp_app_t *app ,ch_proto_session_store_t *pstore){
@@ -14,7 +14,7 @@ static void *do_mail_session_entry_create(ch_tcp_app_t *app ,ch_proto_session_st
 
 	ch_mail_session_entry_t *msentry = NULL;
 
-    private_mail_context_t *mcontext = (private_mail_context_t*)app->content;
+    private_mail_context_t *mcontext = (private_mail_context_t*)app->context;
 
     ch_proto_body_store_t *bstore = ch_proto_store_body_find_create(pstore,
             mcontext->content_dir,

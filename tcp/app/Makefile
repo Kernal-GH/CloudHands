@@ -9,21 +9,15 @@ DPDK=/usr/local/dpdk/dpdk_src
 DPDK_FLAGS=$(shell cat ${DPDK}/include/cflags.txt)
 DPDK_LIB_FLAGS = $(shell cat ${DPDK}/lib/ldflags.txt)
 CFLAGS  = ${BUILD_CFLAGS}  -O0 -rdynamic -D_GNU_SOURCE  ${DPDK_FLAGS} -pthread
-CFLAGS += -I../../lib/common  -I../../lib/shm -I../../lib/ptables -I../../packet -I../../SessionMonitor
+CFLAGS += -I../../lib/common  -I../../lib/shm -I../../lib/ptables -I../../packet -I../../SessionMonitor -I../../lib/fstore
 
-CFLAGS += -I./http -I./smtp -I./imap -I./pop3 -I./telnet -I./ftp -I./smon
+CFLAGS += -I./http -I./mail -I./smon 
 
 CFLAGS += -I../ -I.  -I${DPDK}/include -include ${DPDK}/include/rte_config.h
 
 ch_tcp_app_SOURCES = ch_tcp_app_context.c \
 					 ch_tcp_app_pool.c \
-					 http/ch_http.c \
-					 smtp/ch_smtp.c \
-					 pop3/ch_pop3.c \
-					 imap/ch_imap.c \
-					 telnet/ch_telnet.c \
-					 ftp/ch_ftp.c \
-					 smon/ch_smon.c
+					 ch_proto_session_store.c
 
 ch_tcp_app_OBJECTS = $(patsubst %.c,%.o,$(ch_tcp_app_SOURCES))
 ch_tcp_app_DEPENDS = $(patsubst %.c,%.d,$(ch_tcp_app_SOURCES))

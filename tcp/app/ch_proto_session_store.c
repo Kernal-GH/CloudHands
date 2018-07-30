@@ -5,14 +5,15 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-07-28 14:47:12
- * Last Modified: 2018-07-28 15:16:25
+ * Last Modified: 2018-07-30 11:28:43
  */
 
 #include "ch_proto_session_store.h"
 #include "ch_log.h"
+#include "ch_packet_record.h"
 
 ch_proto_session_store_t *ch_proto_session_store_create(ch_pool_t *mp,uint32_t task_id,const char *shm_fname,
-	uint32_t shm_fsize,uint32_t fentry_size){
+	uint64_t shm_fsize,uint64_t fentry_size){
 
 	int i = 0;
 	ch_proto_session_store_t *pstore = (ch_proto_session_store_t*)ch_palloc(mp,sizeof(*pstore));
@@ -88,8 +89,8 @@ int ch_proto_session_store_write(ch_proto_session_store_t *pstore,ch_tcp_session
 	/*packer the session data into msgpack*/
 	app->proto_session_format(pk,session);
 
-    data = sstore->pk_buf.data;
-    dlen = sstore->pk_buf.size;
+    data = pstore->pk_buf.data;
+    dlen = pstore->pk_buf.size;
 
 
 	ch_packet_record_t pkt_rcd;
@@ -97,9 +98,9 @@ int ch_proto_session_store_write(ch_proto_session_store_t *pstore,ch_tcp_session
 	pkt_rcd.meta_data_size = 0;
 	pkt_rcd.time = ch_tcp_session_reqtime_get(tsession);
 
-	ch_packet_record_put(sstore->shm_fmt,&pkt_rcd,data,dlen);
+	ch_packet_record_put(pstore->shm_fmt,&pkt_rcd,data,dlen);
 
-    msgpack_sbuffer_clear(&sstore->pk_buf);
+    msgpack_sbuffer_clear(&pstore->pk_buf);
 
 	/*ok*/
 	return 0;

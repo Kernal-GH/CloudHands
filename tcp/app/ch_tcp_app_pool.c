@@ -5,17 +5,13 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-07-12 14:13:07
- * Last Modified: 2018-07-28 14:41:33
+ * Last Modified: 2018-07-30 09:42:28
  */
 
 #include "ch_tcp_app_pool.h"
 #include "ch_log.h"
 #include "ch_http.h"
-#include "ch_smtp.h"
-#include "ch_pop3.h"
-#include "ch_imap.h"
-#include "ch_telnet.h"
-#include "ch_ftp.h"
+#include "ch_mail.h"
 #include "ch_smon.h"
 
 #define process_register_retv(rc,proto) do { \
@@ -35,31 +31,11 @@ static int _register_all_apps(ch_tcp_app_pool_t *ta_pool,ch_tcp_app_context_t *t
 		process_register_retv(rc,"http");
 	}
 
-	if(tcontext->smtp_is_on){
-		rc = ch_smtp_init(ta_pool,tcontext->smtp_cfname);
-		process_register_retv(rc,"smtp");
+	if(tcontext->mail_is_on){
+		rc = ch_mail_init(ta_pool,tcontext->mail_cfname);
+		process_register_retv(rc,"mail");
 	}
 
-	if(tcontext->pop3_is_on){
-		rc = ch_pop3_init(ta_pool,tcontext->pop3_cfname);
-		process_register_retv(rc,"pop3");
-	}
-	
-	if(tcontext->imap_is_on){
-		rc = ch_imap_init(ta_pool,tcontext->imap_cfname);
-		process_register_retv(rc,"imap");
-	}
-
-	if(tcontext->telnet_is_on){
-		rc = ch_telnet_init(ta_pool,tcontext->telnet_cfname);
-		process_register_retv(rc,"telnet");
-	}
-
-	if(tcontext->ftp_is_on){
-		rc = ch_ftp_init(ta_pool,tcontext->ftp_cfname);
-		process_register_retv(rc,"ftp");
-	}
-	
 	if(tcontext->smon_is_on){
 		rc = ch_smon_init(ta_pool,tcontext->smon_cfname);
 		process_register_retv(rc,"smon");
