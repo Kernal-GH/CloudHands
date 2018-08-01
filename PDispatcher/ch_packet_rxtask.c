@@ -68,35 +68,31 @@ static void _pkt_handle(ch_packet_rxtask_t *prxtask,ch_port_queue_t *pq ch_unuse
 		return;
 	}
 
+	ch_packet_ref_count_set(pkt,1);
+
 	if(pkt->pkt_type == PKT_TYPE_TCP){
-		rc = ch_process_interface_put(prxtask->pdcontext->pint_tcp_context->pint,pkt);
-		if(rc == 0){
-
-			mbuf_need_copy = 1;
-		}
-	}else if(pkt->pkt_type == PKT_TYPE_UDP){
-		rc = ch_process_interface_put(prxtask->pdcontext->pint_udp_context->pint,pkt);
-		if(rc == 0){
-
-			mbuf_need_copy = 1;
-		}
-	}
-
-	if(mbuf_need_copy){
-	
-
-		pkt = ch_packet_clone(pkt,prxtask->pdcontext->ppool->sambuf_pool);
-		if(pkt == NULL){
 		
-			ch_log(CH_LOG_ERR,"Cannot clone packet!");
-			return;
+		ch_packet_ref_count_set(pkt,2);
+		
+		if(ch_process_interface_put(prxtask->pdcontext->pint_tcp_context->pint,pkt)){
+
+			/*error*/
+			ch_packet_free(pkt);
+		}
+
+	}else if(pkt->pkt_type == PKT_TYPE_UDP){
+		
+		ch_packet_ref_count_set(pkt,2);
+		
+		if(ch_process_interface_put(prxtask->pdcontext->pint_udp_context->pint,pkt)){	
+			/*error*/
+			ch_packet_free(pkt);
 		}
 	}
 
-	rc = ch_process_interface_put(prxtask->pdcontext->pint_sa_context->pint,pkt);
-	if(rc){
-	
-		rte_pktmbuf_free(pkt->mbuf);
+	if(ch_process_interface_put(prxtask->pdcontext->pint_sa_context->pint,pkt)){
+		/*error*/
+		ch_packet_free(pkt);
 	}
 
 	

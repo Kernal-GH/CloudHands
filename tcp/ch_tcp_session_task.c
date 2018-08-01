@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-02-02 11:30:21
- * Last Modified: 2018-04-04 17:11:26
+ * Last Modified: 2018-08-01 11:57:37
  */
 
 #include "ch_tcp_session_task.h"
@@ -29,7 +29,7 @@ static int _tcp_session_task_run(ch_task_t *task,void *priv_data ch_unused){
 
 		ch_tcp_session_request_packet_handle(tcp_task->sreq_handler,&tcp_pkt);
 
-		rte_pktmbuf_free(pkt->mbuf);
+		ch_packet_free(pkt);
 
 	}
 

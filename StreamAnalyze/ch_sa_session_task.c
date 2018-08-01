@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-03-30 11:49:48
- * Last Modified: 2018-06-06 16:20:20
+ * Last Modified: 2018-08-01 12:02:12
  */
 
 #include "ch_sa_session_task.h"
@@ -31,7 +31,7 @@ static int _sa_session_task_run(ch_task_t *task,void *priv_data ch_unused){
 	
 		ch_sa_packet_dp(sa_task,pkt);
 
-		rte_pktmbuf_free(pkt->mbuf);
+		ch_packet_free(pkt);
 
 	}
 

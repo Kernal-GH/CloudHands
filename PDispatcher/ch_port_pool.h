@@ -45,7 +45,7 @@ struct ch_port_pool_t {
    
    struct rte_mempool *pktmbuf_pool;
 
-   struct rte_mempool *sambuf_pool;
+   //struct rte_mempool *sambuf_pool;
 
    int port_n;
    int cur_port_index;

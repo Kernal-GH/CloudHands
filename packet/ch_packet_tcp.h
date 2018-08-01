@@ -11,6 +11,7 @@
 #ifndef CH_PACKET_TCP_H
 #define CH_PACKET_TCP_H
 
+#include "ch_net_util.h"
 #include "ch_packet.h"
 #include <rte_ip.h>
 #include <rte_tcp.h>
@@ -68,6 +69,26 @@ static inline int is_tcp_rst_packet(ch_packet_tcp_t *tcp_pkt){
     return tcp_pkt->tcp_flags&CH_TH_RST;
 }
 
+static inline const char * _get_packet_type_name(ch_packet_tcp_t *pkt){
+
+	if(is_tcp_syn_packet(pkt))
+		return "syn";
+
+	if(is_tcp_syn_ack_packet(pkt))
+		return "sys-ack";
+
+	if(is_tcp_fin_packet(pkt))
+		return "fin";
+	if(is_tcp_rst_packet(pkt))
+		return "reset";
+
+	if(pkt->payload_len>0)
+		return "data";
+
+	return "other";
+
+}
+
 static inline int ch_packet_tcp_init_from_pkt(ch_packet_tcp_t *tcp_pkt,ch_packet_t *pkt){
 
     uint16_t mbdlen;
@@ -86,6 +107,7 @@ static inline int ch_packet_tcp_init_from_pkt(ch_packet_tcp_t *tcp_pkt,ch_packet
 
 	if(th == NULL)
 		return -1;
+	tcp_pkt->pkt = pkt;
 
     tcp_pkt->src_ip = iph->src_addr; 
     tcp_pkt->dst_ip = iph->dst_addr;
@@ -110,6 +132,33 @@ static inline int ch_packet_tcp_init_from_pkt(ch_packet_tcp_t *tcp_pkt,ch_packet
 	return 0;
 }
 
+
+static inline void ch_packet_tcp_dump(ch_packet_tcp_t *pkt,FILE *fp){
+
+	char buf[64] = {0};
+
+	fprintf(fp,"Dump TCP Packet Informations:\n");
+	fprintf(fp,"tcp.packet.type:%s\n",_get_packet_type_name(pkt));
+	
+	fprintf(fp,"tcp.packet.srcIP:%s\n",ch_ip_to_str(buf,63,pkt->src_ip));
+	fprintf(fp,"tcp.packet.srcPort:%lu\n",(unsigned long)pkt->src_port);
+
+	fprintf(fp,"tcp.packet.dstIP:%s\n",ch_ip_to_str(buf,63,pkt->dst_ip));
+	fprintf(fp,"tcp.packet.dstPort:%lu\n",(unsigned long)pkt->dst_port);
+	
+	fprintf(fp,"tcp.packet.ipDataLen:%lu\n",(unsigned long)pkt->ip_dlen);
+	fprintf(fp,"tcp.packet.tcpFlags:%lu\n",(unsigned long)pkt->tcp_flags);
+	fprintf(fp,"tcp.packet.sentSeq:%lu\n",(unsigned long)pkt->sent_seq);
+
+	fprintf(fp,"tcp.packet.recvAck:%lu\n",(unsigned long)pkt->recv_ack);
+	fprintf(fp,"tcp.packet.tthLen:%lu\n",(unsigned long)pkt->tth_len);
+
+	fprintf(fp,"tcp.packet.payloadLen:%lu\n",(unsigned long)pkt->payload_len);
+	fprintf(fp,"tcp.packet.mbuf.nbSegs:%lu\n",(unsigned long)pkt->pkt->mbuf->nb_segs);
+	fprintf(fp,"tcp.packet.mbuf.pktLen:%lu\n",(unsigned long)pkt->pkt->mbuf->pkt_len);
+	fprintf(fp,"tcp.packet.mbuf.dataLen:%lu\n",(unsigned long)pkt->pkt->mbuf->data_len);
+
+} 
 
 extern void ch_packet_tcp_init(void);
 

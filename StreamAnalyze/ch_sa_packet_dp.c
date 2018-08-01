@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-04-08 11:20:32
- * Last Modified: 2018-06-06 12:05:41
+ * Last Modified: 2018-08-01 12:02:11
  */
 
 #include "ch_sa_packet_dp.h"
@@ -50,7 +50,7 @@ int ch_sa_packet_dp(ch_sa_session_task_t *sa_task,ch_packet_t *pkt){
 	}
 
 
-	ch_packet_free(pkt);
+	//ch_packet_free(pkt);
 
 	time = ch_get_current_timems()/1000;
 

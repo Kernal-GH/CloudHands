@@ -35,6 +35,8 @@ typedef struct ch_packet_parser_t ch_packet_parser_t;
 
 struct ch_packet_t {
 
+	uint32_t ref_count;
+
 	struct rte_mbuf *mbuf;
 
 	uint16_t pkt_type;
@@ -185,7 +187,15 @@ struct ch_packet_parser_t {
    CH_IPPROTO_MAX
  };
 
-#define ch_packet_free(pkt) rte_pktmbuf_free(pkt->mbuf)
+#define ch_packet_ref_count_update(pkt,c) ((pkt)->ref_count+=(c))
+#define ch_packet_ref_count_set(pkt,v) ((pkt)->ref_count = v)
+
+#define ch_packet_free(pkt) do {       \
+	ch_packet_ref_count_update(pkt,-1); \
+	if(pkt->ref_count == 0)             \
+		rte_pktmbuf_free(pkt->mbuf);    \
+}while(0)
+
 #define ch_packet_size(pkt) ((pkt)->mbuf->data_len)
 
 extern void ch_packet_init(void);

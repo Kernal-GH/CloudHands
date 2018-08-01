@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-03-30 11:49:48
- * Last Modified: 2018-05-11 11:39:08
+ * Last Modified: 2018-08-01 11:58:09
  */
 
 #include "ch_udp_session_task.h"
@@ -29,7 +29,7 @@ static int _udp_session_task_run(ch_task_t *task,void *priv_data ch_unused){
 	
 		ch_udp_session_packet_handle(udp_task->udp_session_handler,pkt);
 
-		rte_pktmbuf_free(pkt->mbuf);
+		ch_packet_free(pkt);
 
 	}
 

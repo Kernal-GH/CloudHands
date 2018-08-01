@@ -183,7 +183,8 @@ ch_port_pool_t * ch_port_pool_create(ch_pool_t *mp,const char *cfname,const char
        
 		return NULL;
     }
-   
+  
+#if 0
 	ppool->sambuf_pool = rte_pktmbuf_pool_create(sa_pool_name,
 												  pcontext->n_rx_mbuf,
 		                                          pcontext->rx_mbuf_cache_size,
@@ -196,6 +197,7 @@ ch_port_pool_t * ch_port_pool_create(ch_pool_t *mp,const char *cfname,const char
        
 		return NULL;
     }
+#endif
 
    /*create all ports*/
    for(port_id = 0;port_id<port_n;port_id++){

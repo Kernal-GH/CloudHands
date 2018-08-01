@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-01-31 19:04:21
- * Last Modified: 2018-05-11 16:54:34
+ * Last Modified: 2018-08-01 12:10:57
  */
 #include "ch_constants.h"
 #include "ch_process_interface.h"
@@ -96,8 +96,11 @@ static inline int _load_pkt_mempool(void){
 	 if(NULL == rte_mempool_lookup(PKT_POOL_NAME))
 		 return -1;
 
+#if 0
 	 if(NULL == rte_mempool_lookup(SA_POOL_NAME))
 		 return -1;
+
+#endif
 
 	 return 0;
 }
