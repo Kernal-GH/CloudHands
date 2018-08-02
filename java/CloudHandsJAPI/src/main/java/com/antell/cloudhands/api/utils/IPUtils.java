@@ -66,12 +66,23 @@ public class IPUtils {
 
     }
 
+
+    public static final boolean isInnerIPLE(long ip) {
+
+        return (ip>>24 == 0xa) || (ip>>16 == 0xc0a8) || (ip>>22 == 0x2b0)||(ip>>24==0x7f&&((ip&0x1)==1))||(ip == 0);
+    }
+
+    public static final boolean isInnerIPBE(long ip) {
+
+        return isInnerIPLE(reverse(ip));
+    }
+
+    public static final boolean isInnerIP(String ip){
+        return isInnerIPLE(ipv4LongLE(ip));
+    }
+
     public static void main(String[] args){
 
-        long aBE = ipv4LongBE("192.168.1.22");
-        long aLE = ipv4LongLE("192.168.1.22");
-
-        System.out.println(ipv4Str(aBE));
-        System.out.println(ipv4Str(aLE));
+        System.out.println(isInnerIPBE(ipv4LongBE("192.168.1.22")));
     }
 }

@@ -1,6 +1,8 @@
 package com.antell.cloudhands.api.packet.tcp.http;
 
 import com.antell.cloudhands.api.packet.SessionEntry;
+import com.antell.cloudhands.api.packet.security.AttackEvent;
+import com.antell.cloudhands.api.packet.security.MatchInfo;
 import com.antell.cloudhands.api.packet.security.SecMatchResult;
 import com.antell.cloudhands.api.packet.tcp.FileTranSession;
 import com.antell.cloudhands.api.packet.tcp.TCPSessionEntry;
@@ -89,23 +91,45 @@ public class HTTPSession implements SourceEntry{
         return fileTranSession;
     }
 
+
+    private boolean canGenerteEvent(){
+
+        if(!hasMatchSec())
+            return false;
+
+        return getSecMatchResult().getMainMatchInfo().getRuleLevel() == 1;
+    }
+
+    public boolean canGenerateFTrans(){
+
+       return  !TextUtils.isEmpty(resBodyPath)&&HttpFileTransTypes.isFileTrans(extName);
+    }
+
     @Override
     public List<SourceEntry> generate(){
 
-        if(TextUtils.isEmpty(resBodyPath)||!HttpFileTransTypes.isFileTrans(extName))
+        List<SourceEntry> results = new ArrayList<>();
+
+        if(!canGenerateFTrans()&&!canGenerteEvent())
             return null;
 
-        long fsize = 0;
+        if(canGenerateFTrans()) {
+            long fsize = 0;
 
-        try {
-            fsize =  Files.size(Paths.get(resBodyPath));
-        } catch (IOException e) {
-            return  null;
+            try {
+                fsize = Files.size(Paths.get(resBodyPath));
+                results.add(toFileTranSession(resBodyPath,fsize));
+            } catch (IOException e) {
+                //return null;
+            }
         }
 
+        if(canGenerteEvent()){
 
-        return Arrays.asList(toFileTranSession(resBodyPath,fsize));
+            results.add(new AttackEvent(this));
+        }
 
+        return results;
     }
 
     private final  static boolean isHeader(String k,String sk){

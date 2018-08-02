@@ -4,6 +4,7 @@ import com.antell.cloudhands.api.packet.ARPPacket;
 import com.antell.cloudhands.api.packet.ICMPPacket;
 import com.antell.cloudhands.api.packet.TCPSession;
 import com.antell.cloudhands.api.packet.UDPSession;
+import com.antell.cloudhands.api.packet.security.AttackEvent;
 import com.antell.cloudhands.api.packet.security.SecMatchResult;
 import com.antell.cloudhands.api.packet.smon.SMonSession;
 import com.antell.cloudhands.api.packet.tcp.FileTranSession;
@@ -85,6 +86,16 @@ public final class SourceEntryUtil {
     public static FileTranSession toFileTranSession(SourceEntry sourceEntry) {
 
         return (FileTranSession) sourceEntry;
+    }
+
+    public static boolean isAttackEvent(SourceEntry sourceEntry) {
+
+        return sourceEntry instanceof AttackEvent;
+    }
+
+    public static AttackEvent toAttackEvent(SourceEntry sourceEntry) {
+
+        return (AttackEvent) sourceEntry;
     }
 
     public static boolean isTCPSession(SourceEntry sourceEntry) {
@@ -183,6 +194,11 @@ public final class SourceEntryUtil {
             FileTranSession fileTranSession = toFileTranSession(sourceEntry);
             ipPairs.setSrcIP(fileTranSession.getSrcIP());
             ipPairs.setDstIP(fileTranSession.getDstIP());
+        }else if(isAttackEvent(sourceEntry)){
+
+            AttackEvent attackEvent = toAttackEvent(sourceEntry);
+            ipPairs.setSrcIP(attackEvent.getAssetIP());
+            ipPairs.setDstIP(attackEvent.getDstIP());
         }
     }
 
