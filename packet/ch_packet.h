@@ -16,6 +16,7 @@ typedef struct ch_packet_parser_t ch_packet_parser_t;
 
 #include "ch_list.h"
 #include <rte_mbuf.h>
+#include "ch_atomic.h"
 
 #define L2_INDEX 0
 #define L3_INDEX 1
@@ -34,8 +35,8 @@ typedef struct ch_packet_parser_t ch_packet_parser_t;
 #define PKT_TYPE_ARP 4
 
 struct ch_packet_t {
-
-	uint32_t ref_count;
+	
+	ch_atomic16_t ref_count;
 
 	struct rte_mbuf *mbuf;
 
@@ -187,14 +188,20 @@ struct ch_packet_parser_t {
    CH_IPPROTO_MAX
  };
 
-#define ch_packet_ref_count_update(pkt,c) ((pkt)->ref_count+=(c))
-#define ch_packet_ref_count_set(pkt,v) ((pkt)->ref_count = v)
+#define ch_packet_ref_count_set(pkt,v) rte_mbuf_refcnt_set(pkt->mbuf,v)
 
-#define ch_packet_free(pkt) do {       \
-	ch_packet_ref_count_update(pkt,-1); \
-	if(pkt->ref_count == 0)             \
-		rte_pktmbuf_free(pkt->mbuf);    \
+#if 0
+#define ch_packet_free(pkt) do {        \
+	struct rte_mbuf *fmbuf = pkt->mbuf; \
+	ch_atomic16_sub(&pkt->ref_count,1); \
+	if(ch_atomic16_read(&pkt->ref_count) <=0&&fmbuf){ \
+		pkt->mbuf = NULL; \
+		rte_pktmbuf_free(fmbuf);\
+	}\
 }while(0)
+#endif
+
+#define ch_packet_free(pkt) rte_pktmbuf_free(pkt->mbuf)
 
 #define ch_packet_size(pkt) ((pkt)->mbuf->data_len)
 

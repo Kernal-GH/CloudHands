@@ -71,7 +71,7 @@ static inline ch_sa_data_store_t *ch_sa_data_store_get(ch_sa_data_store_pool_t *
 	}
 
 	if(list_empty_careful(free_list)){		
-		dst = (ch_sa_data_store_t*)ch_palloc(dsp->mp,sizeof(*dst)+dsp->dsize+32);
+		dst = (ch_sa_data_store_t*)ch_pcalloc(dsp->mp,sizeof(*dst)+dsp->dsize+32);
 		if(dst) {
 			dst->ds_protect = DS_PROTECT_V;
 			dst->dstore_pool = dsp;																	
@@ -85,7 +85,7 @@ static inline ch_sa_data_store_t *ch_sa_data_store_get(ch_sa_data_store_pool_t *
 		
 		dst = list_first_entry(free_list,ch_sa_data_store_t,node);					
 		CH_SA_DATA_STORE_CHECK(dst);
-		
+		dst->pos = dst->start;
 		list_del_init(&dst->node);
 		dsp->free_n-=1;															
 		dsp->using_n+=1;															

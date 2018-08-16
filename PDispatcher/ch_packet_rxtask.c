@@ -31,12 +31,18 @@ static void _dump_port(ch_packet_rxtask_t *prxtask,ch_port_t *port){
 	
 		prxtask->last_dump_time = cur_time;
 
-		//ch_process_interface_dump(prxtask->pdcontext->pint_tcp_context->pint,stdout);
-		//
+		ch_process_interface_dump(prxtask->pdcontext->pint_tcp_context->pint,stdout);
+		ch_process_interface_dump(prxtask->pdcontext->pint_udp_context->pint,stdout);
+		ch_process_interface_dump(prxtask->pdcontext->pint_sa_context->pint,stdout);
+		
 		ch_port_pool_stat_dump(port,stdout);
 
-	}
+		fprintf(stdout,"Dump The Mempool info:--------------------\n");
 
+		rte_mempool_dump(stdout,port->ppool->pktmbuf_pool);
+
+		fflush(stdout);
+	}
 
 }
 
@@ -47,7 +53,6 @@ static void _pkt_handle(ch_packet_rxtask_t *prxtask,ch_port_queue_t *pq ch_unuse
 	int rc;
 
 
-	//_dump_port(prxtask,pq->port);
 
 	//printf("Receive packet,task_id:%d,packet_len:%d,datalen:%d\,port:%d,queue:%d\n",prxtask->task.tsk_id,mbuf->pkt_len,mbuf->data_len,pq->port->port_id,pq->queue_id);
 
@@ -68,7 +73,7 @@ static void _pkt_handle(ch_packet_rxtask_t *prxtask,ch_port_queue_t *pq ch_unuse
 		return;
 	}
 
-	ch_packet_ref_count_set(pkt,1);
+	//ch_packet_ref_count_set(pkt,1);
 
 	if(pkt->pkt_type == PKT_TYPE_TCP){
 		
@@ -108,6 +113,8 @@ static uint64_t _read_pkt_from_port_queue(ch_packet_rxtask_t *prxtask,ch_port_qu
 	ch_port_t *port = pq->port;
 
 	nb_rx = rte_eth_rx_burst(port->port_id,pq->queue_id,pkts_burst,port->ppool->pcontext->port_max_pkt_burst);
+	
+	//_dump_port(prxtask,pq->port);
 	
 	if(nb_rx == 0){
 		return 0;

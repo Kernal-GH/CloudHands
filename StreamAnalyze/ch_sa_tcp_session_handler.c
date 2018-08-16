@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-03-28 15:02:26
- * Last Modified: 2018-06-21 16:19:50
+ * Last Modified: 2018-08-16 09:51:28
  */
 
 #include "ch_sa_tcp_session_handler.h"
@@ -47,12 +47,12 @@ static void _tcp_session_out(ch_sa_tcp_session_handler_t *shandler,
 
 	if(req_dstore){
 		req_dsize = ch_sa_data_store_size(req_dstore);
-		req_data = req_dsize?req_dstore->pos:NULL;
+		req_data = req_dsize?req_dstore->start:NULL;
 	}
 
 	if(res_dstore){
 		res_dsize = ch_sa_data_store_size(res_dstore);
-		res_data = res_dsize?res_dstore->pos:NULL;
+		res_data = res_dsize?res_dstore->start:NULL;
 	}
 
 
@@ -395,7 +395,7 @@ int ch_sa_tcp_session_packet_handle(ch_sa_tcp_session_handler_t *shandler,
 	ch_packet_tcp_t *tcp_pkt,
 	int is_new_create ch_unused){
 
-	size_t c = 0;
+	//size_t c = 0;
 	ch_sa_session_entry_t *sa_entry;
 
     ch_tcp_session_endpoint_t *ep;
@@ -413,7 +413,6 @@ int ch_sa_tcp_session_packet_handle(ch_sa_tcp_session_handler_t *shandler,
 		sa_entry = ch_sa_session_tcp_entry_get(shandler,tcp_session);
 		_update_sa_entry(shandler,tcp_session,sa_entry,tcp_pkt->payload_len);
 
-#if 0
         /*fin packet*/
         if(is_tcp_fin_packet(tcp_pkt)){
             _process_fin_packet(shandler,tcp_session,tcp_pkt);
@@ -425,13 +424,11 @@ int ch_sa_tcp_session_packet_handle(ch_sa_tcp_session_handler_t *shandler,
             _process_rst_packet(shandler,tcp_session,tcp_pkt,sa_entry);
             break;
         }
-#endif 
         /*data packet*/
         if(tcp_pkt->pdata&&_need_process_payload(shandler,tcp_session,sa_entry,tcp_pkt)){
            _process_data_packet(shandler,tcp_session,ep,tcp_pkt,sa_entry); 
         }
 
-#if 0
         /*fin ack packet!*/
         if(_is_fin1_ack(tcp_session,tcp_pkt)){
             _process_fin1_ack_packet(shandler,tcp_session,tcp_pkt);
@@ -442,20 +439,21 @@ int ch_sa_tcp_session_packet_handle(ch_sa_tcp_session_handler_t *shandler,
             _process_fin2_ack_packet(shandler,tcp_session,tcp_pkt,sa_entry);
             break;
         }
-#endif
 
     }while(0);
 
 
-	c = ch_ptable_entries_timeout_free(shandler->tcp_session_pool->tcp_session_tbl,
-		NULL);
+	//c =
+	ch_ptable_entries_timeout_free(shandler->tcp_session_pool->tcp_session_tbl,NULL);
 
-
+#if 0
 	if(c){
 	
 		ch_ptable_dump(shandler->tcp_session_pool->tcp_session_tbl,stdout);
 
 	}
+
+#endif
 
 	/*ok*/
 	return 0;

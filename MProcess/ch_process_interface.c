@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-01-31 19:04:21
- * Last Modified: 2018-08-01 12:10:57
+ * Last Modified: 2018-08-15 10:06:24
  */
 #include "ch_constants.h"
 #include "ch_process_interface.h"
@@ -211,6 +211,9 @@ static void _dump_queue(ch_process_queue_t *queue,FILE *fp){
 	fprintf(fp,"The packets:%lu\n",(unsigned long)queue->packets);
 	fprintf(fp,"The ok packets:%lu\n",(unsigned long)queue->ok_packets);
 	fprintf(fp,"The error packets:%lu\n",(unsigned long)queue->error_packets);
+
+	fprintf(fp,"Dump The Ring Informations:-------------------------------------\n");
+	rte_ring_dump(fp,queue->ring);
 
 }
 

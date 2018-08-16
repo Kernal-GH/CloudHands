@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-04-13 15:50:28
- * Last Modified: 2018-06-21 16:21:46
+ * Last Modified: 2018-08-16 09:50:20
  */
 
 #include "ch_sa_udp_session_handler.h"
@@ -38,12 +38,12 @@ static void _udp_session_out(ch_sa_udp_session_handler_t *udp_handler,
 
 	if(req_dstore){
 		req_dsize = ch_sa_data_store_size(req_dstore);
-		req_data = req_dsize?req_dstore->pos:NULL;
+		req_data = req_dsize?req_dstore->start:NULL;
 	}
 
 	if(res_dstore){
 		res_dsize = ch_sa_data_store_size(res_dstore);
-		res_data = res_dsize?res_dstore->pos:NULL;
+		res_data = res_dsize?res_dstore->start:NULL;
 	}
 
 	size_t meta_data_size = CH_PACKET_RECORD_SESSION_UDP_META_SIZE(req_dsize,res_dsize);
