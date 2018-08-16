@@ -18,6 +18,7 @@ typedef struct ch_http_headers_out_t ch_http_headers_out_t;
 #include "ch_list.h"
 #include "ch_http_session_body.h"
 #include "ch_http_data_parse.h"
+#include "ch_proto_session_entry.h"
 
 #define CH_HTTP_MAX_URI_CHANGES           10
 
@@ -159,6 +160,8 @@ enum {
 };
 
 struct ch_http_session_t {
+
+	ch_proto_session_entry_t psEntry;
 
 	struct list_head				 node;
     ch_http_headers_in_t             headers_in;

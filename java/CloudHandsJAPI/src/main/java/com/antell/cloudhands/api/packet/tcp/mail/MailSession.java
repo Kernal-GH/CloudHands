@@ -11,6 +11,8 @@ import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.msgpack.core.MessageUnpacker;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -205,6 +207,12 @@ public class MailSession implements SourceEntry {
 
     private FileTranSession toFileTranSession(MaillAttachEntry entry){
 
+        long fsize = 0;
+        try {
+            fsize = Files.size(Paths.get(entry.getPath()));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         FileTranSession fileTranSession = new FileTranSession();
 
@@ -215,7 +223,7 @@ public class MailSession implements SourceEntry {
         fileTranSession.setDstIP(IPUtils.ipv4Str(sessionEntry.getResIP()));
         fileTranSession.setDstPort(sessionEntry.getResPort());
         fileTranSession.setTime(sessionEntry.getReqStartTime());
-        fileTranSession.setBytes(sessionEntry.getResBytes());
+        fileTranSession.setBytes(fsize);
         fileTranSession.setContentPath(entry.getPath());
         fileTranSession.setFname(entry.getName());
         fileTranSession.setExtName(getExtName(entry.getName()));

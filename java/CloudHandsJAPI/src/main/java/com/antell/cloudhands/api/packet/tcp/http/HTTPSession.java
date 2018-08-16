@@ -183,8 +183,26 @@ public class HTTPSession implements SourceEntry{
 
     }
 
+    private final static long getFsize(String path){
+
+        if(TextUtils.isEmpty(path))
+            return 0;
+
+        long size = 0;
+
+        try {
+            size = Files.size(Paths.get(path));
+        } catch (IOException e) {
+            size = 0;
+        }
+
+        return size;
+    }
 
     public void parse(MessageUnpacker unpacker) throws IOException {
+
+        long reqBSize = 0;
+        long resBSize = 0;
 
         int n = MessagePackUtil.parseMapHeader(unpacker,false);
         Preconditions.checkArgument(n==2||n==3,"Invalid http session messagePack:"+n);
@@ -204,6 +222,14 @@ public class HTTPSession implements SourceEntry{
         setStatus(MessagePackUtil.parseInt(unpacker));
         setReqBodyPath(MessagePackUtil.parseText(unpacker));
         setResBodyPath(MessagePackUtil.parseText(unpacker));
+
+        reqBSize = getFsize(reqBodyPath);
+        resBSize = getFsize(resBodyPath);
+        if(reqBSize>0)
+            ((TCPSessionEntry)sessionEntry).setReqPBytes(reqBSize);
+
+        if(resBSize>0)
+            ((TCPSessionEntry)sessionEntry).setResPBytes(resBSize);
 
         unpackHeaders(unpacker,true);
         unpackHeaders(unpacker,false);

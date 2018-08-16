@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-07-28 14:47:12
- * Last Modified: 2018-07-30 11:28:43
+ * Last Modified: 2018-08-16 17:17:29
  */
 
 #include "ch_proto_session_store.h"
@@ -57,7 +57,7 @@ void ch_proto_session_store_destroy(ch_proto_session_store_t *pstore){
 
 }
 
-int ch_proto_session_store_write(ch_proto_session_store_t *pstore,ch_tcp_session_t *tsession,void *session){
+int ch_proto_session_store_write(ch_proto_session_store_t *pstore,ch_tcp_session_t *tsession,ch_proto_session_entry_t *session){
 
 	void *data;
 	size_t dlen;
@@ -78,16 +78,16 @@ int ch_proto_session_store_write(ch_proto_session_store_t *pstore,ch_tcp_session
 	ch_msgpack_write_uint32(pk,"dstIP",ch_tcp_session_dstip_get(tsession));
 	ch_msgpack_write_uint16(pk,"srcPort",ch_tcp_session_srcport_get(tsession));
 	ch_msgpack_write_uint16(pk,"dstPort",ch_tcp_session_dstport_get(tsession));
-	ch_msgpack_write_uint64(pk,"reqPackets",ch_tcp_session_src_packets_get(tsession));
-	ch_msgpack_write_uint64(pk,"reqBytes",ch_tcp_session_src_bytes_get(tsession));
-	ch_msgpack_write_uint64(pk,"reqPBytes",ch_tcp_session_src_bytes_get(tsession));
+	ch_msgpack_write_uint64(pk,"reqPackets",session->reqPackets);
+	ch_msgpack_write_uint64(pk,"reqBytes",session->reqBytes);
+	ch_msgpack_write_uint64(pk,"reqPBytes",session->reqBytes);
 	
-	ch_msgpack_write_uint64(pk,"resPackets",ch_tcp_session_dst_packets_get(tsession));
-	ch_msgpack_write_uint64(pk,"resBytes",ch_tcp_session_dst_bytes_get(tsession));
-	ch_msgpack_write_uint64(pk,"resPBytes",ch_tcp_session_dst_bytes_get(tsession));
+	ch_msgpack_write_uint64(pk,"resPackets",session->resPackets);
+	ch_msgpack_write_uint64(pk,"resBytes",session->resBytes);
+	ch_msgpack_write_uint64(pk,"resPBytes",session->resBytes);
 
 	/*packer the session data into msgpack*/
-	app->proto_session_format(pk,session);
+	app->proto_session_format(pk,(void*)session);
 
     data = pstore->pk_buf.data;
     dlen = pstore->pk_buf.size;

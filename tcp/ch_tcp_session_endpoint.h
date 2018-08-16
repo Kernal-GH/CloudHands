@@ -43,17 +43,9 @@ struct ch_tcp_session_endpoint_t {
     uint16_t port;
 
 
-	uint64_t packets;
-	uint64_t bytes;
-
     void *priv_data;
 
 };
-
-#define ch_tcp_session_endpoint_update(ep,dlen) do { \
-	(ep)->packets+=1;								 \
-	(ep)->bytes+=(dlen);							 \
-}while(0) 
 
 static inline uint32_t ch_tcp_session_endpoint_offset_get(ch_tcp_session_endpoint_t *ep,uint32_t seq){
 
@@ -91,8 +83,6 @@ static inline void ch_tcp_session_endpoint_dump(ch_tcp_session_endpoint_t *ep,FI
 	fprintf(fp,"ep.seq:%lu\n",(unsigned long)ep->init_seq);
 	fprintf(fp,"ep.last.offset:%lu\n",(unsigned long)ep->last_offset);
 	fprintf(fp,"ep.last.ack:%lu\n",(unsigned long)ep->last_ack);
-	fprintf(fp,"ep.packets:%lu\n",(unsigned long)ep->packets);
-	fprintf(fp,"ep.bytes:%lu\n",(unsigned long)ep->bytes);
 
 	ch_assemble_fragment_dump(&ep->as_frag,fp);
 }

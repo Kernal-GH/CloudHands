@@ -20,7 +20,7 @@ public abstract class SessionEntry implements MsgPackDataInput,BinDataInput,ESIn
     private boolean isTimeout;
     private int timeoutTV;
     private long sessionID;
-    private int protocolID;
+    private long protocolID;
 
     private final SessionEndPoint req;
     private final SessionEndPoint res;
@@ -35,7 +35,7 @@ public abstract class SessionEntry implements MsgPackDataInput,BinDataInput,ESIn
     public XContentBuilder dataToJson(XContentBuilder cb) throws IOException {
 
         cb.field("sessionID",getSessionID());
-        cb.field("protocol", Constants.protoID2String[getProtocolID()]);
+        cb.field("protocol", Constants.protoID2String[(int)getProtocolID()]);
         cb.field("srcIP", IPUtils.ipv4Str(getReqIP()));
         cb.field("dstIP",IPUtils.ipv4Str(getResIP()));
         cb.field("srcPort",getReqPort());
@@ -62,7 +62,7 @@ public abstract class SessionEntry implements MsgPackDataInput,BinDataInput,ESIn
 
         sb.append("TCP.Session.Entry.info:\n\n");
 
-        TextUtils.addText(sb,"proto",Constants.protoID2String[getProtocolID()]);
+        TextUtils.addText(sb,"proto",Constants.protoID2String[(int)getProtocolID()]);
         TextUtils.addLong(sb,"sessionID",getSessionID());
         TextUtils.addText(sb,"srcIP", IPUtils.ipv4Str(getReqIP()));
         TextUtils.addText(sb,"dstIP", IPUtils.ipv4Str(getResIP()));
@@ -244,11 +244,11 @@ public abstract class SessionEntry implements MsgPackDataInput,BinDataInput,ESIn
         return res.getLastTime();
     }
 
-    public int getProtocolID() {
+    public long getProtocolID() {
         return protocolID;
     }
 
-    public void setProtocolID(int protocolID) {
+    public void setProtocolID(long protocolID) {
         this.protocolID = protocolID;
     }
 

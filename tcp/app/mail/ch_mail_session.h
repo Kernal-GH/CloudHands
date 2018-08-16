@@ -19,9 +19,12 @@ typedef struct ch_mail_session_t ch_mail_session_t;
 #include "ch_mail_decode_mime.h"
 #include "ch_mail_session_entry.h"
 #include "ch_tcp_app_pool.h"
+#include "ch_proto_session_entry.h"
 
 struct ch_mail_session_t {
-	
+
+	ch_proto_session_entry_t psEntry;
+
 	struct list_head anchor;
 
     int done;

@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-05-16 15:50:50
- * Last Modified: 2018-07-30 09:59:22
+ * Last Modified: 2018-08-16 17:26:34
  */
 
 #define HAS_BODY(session,is_req) (is_req?((session)->headers_in.content_length_n>0||(session)->headers_in.chunked):\
@@ -276,7 +276,9 @@ do_http_request_parse(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,
 		ch_log(CH_LOG_ERR,"No memory to allocate a new session,so drop this session!");
 		return PARSE_BREAK; 
 	}
-	
+
+	ch_proto_session_entry_update(&session->psEntry,dlen,1);
+
 	din = &hsentry->cur_req_din;
 
 	if(ch_pp_din_read_prefare(din,data,dlen)){
@@ -423,6 +425,8 @@ do_http_response_parse(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,
 		return PARSE_BREAK; 
 	}
 
+	ch_proto_session_entry_update(&session->psEntry,dlen,0);
+	
 	if(session->parse_phase>PARSE_PHASE_DONE){
 
 		ch_log(CH_LOG_ERR,"Invalid parse phase status!");

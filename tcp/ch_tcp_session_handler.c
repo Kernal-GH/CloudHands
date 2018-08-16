@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-02-05 11:06:43
- * Last Modified: 2018-07-30 10:59:28
+ * Last Modified: 2018-08-16 16:34:34
  */
 
 #include "ch_tcp_session_handler.h"
@@ -227,8 +227,6 @@ int ch_tcp_session_packet_handle(ch_tcp_session_handler_t *shandler,
         }
 
 
-
-		ch_tcp_session_endpoint_update(ep,tcp_pkt->payload_len);
 
         tcp_session->cur_ep = ep;
 

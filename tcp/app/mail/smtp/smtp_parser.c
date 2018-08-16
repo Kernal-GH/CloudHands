@@ -5,7 +5,7 @@
  *        Author: g.goodian@gmail.com
  *   Description: ---
  *        Create: 2016-06-13 02:33:06
- * Last Modified: 2018-07-30 10:53:59
+ * Last Modified: 2018-08-16 18:04:18
  *************************************************************************/
 
 #include "smtp_parser.h"
@@ -514,6 +514,7 @@ smtp_process_request(ch_tcp_app_t *app ch_unused,ch_proto_session_store_t *pstor
 		msentry->curr_session = s;
 		list_add_tail(&s->anchor, &msentry->session_list);
 	}
+
     /* there are 2 commands that can push it into this COMMAND_DATA mode -
      * STARTTLS and DATA */
     if (!(msentry->parser_state & SMTP_PARSER_STATE_COMMAND_DATA_MODE)) {
@@ -655,6 +656,7 @@ smtp_process_reply(ch_tcp_app_t *app ch_unused,ch_proto_session_store_t *pstore 
     uint64_t reply_code = 0;
 	smtp_state_t *state = (smtp_state_t *) msentry->priv_data;
 
+	
     /* the reply code has to contain at least 3 bytes, to hold the 3 digit
      * reply code */
     if (cur_line->len < 3) {

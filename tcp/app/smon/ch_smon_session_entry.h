@@ -14,9 +14,11 @@
 typedef struct ch_smon_session_entry_t ch_smon_session_entry_t;
 
 #include "ch_mpool.h"
-
+#include "ch_proto_session_entry.h"
 
 struct ch_smon_session_entry_t {
+
+	ch_proto_session_entry_t psEntry;
 
 	ch_pool_t *mp;
 

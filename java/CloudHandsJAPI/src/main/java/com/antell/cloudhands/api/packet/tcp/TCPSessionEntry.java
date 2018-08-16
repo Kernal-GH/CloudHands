@@ -48,7 +48,7 @@ public class TCPSessionEntry extends SessionEntry {
         int n = MessagePackUtil.parseMapHeader(unpacker,true);
         Preconditions.checkArgument(n==14,"Invalid msgpack packet of session entry:"+n);
 
-        setProtocolID(MessagePackUtil.parseInt(unpacker));
+        setProtocolID(MessagePackUtil.parseLong(unpacker));
         setSessionID(MessagePackUtil.parseLong(unpacker));
         setReqStartTime(MessagePackUtil.parseLong(unpacker));
         setResStartTime(MessagePackUtil.parseLong(unpacker));

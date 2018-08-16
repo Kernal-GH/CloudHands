@@ -5,7 +5,7 @@
  *        Author: g.goodian@gmail.com
  *   Description: ---
  *        Create: 2016-08-02 11:44:27
- * Last Modified: 2018-05-18 16:42:09
+ * Last Modified: 2018-08-16 17:35:17
  */
 
 #include "ch_mail_session.h"
@@ -14,6 +14,8 @@
 
 static inline void _mail_session_init(ch_mail_session_t *session)
 {
+	ch_proto_session_entry_init(&session->psEntry);
+
 	session->done = 0;
 
 	session->msg_head = NULL;

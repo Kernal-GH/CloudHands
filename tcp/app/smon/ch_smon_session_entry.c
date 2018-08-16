@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-07-13 13:16:29
- * Last Modified: 2018-07-17 16:53:55
+ * Last Modified: 2018-08-16 17:29:16
  */
 
 #include "ch_smon_session_entry.h"
@@ -13,6 +13,7 @@
 
 void ch_smon_session_entry_init(ch_smon_session_entry_t *smon_entry,ch_pool_t *mp){
 
+	ch_proto_session_entry_init(&smon_entry->psEntry);
 
 	smon_entry->mp = mp;
 	smon_entry->id = 0;

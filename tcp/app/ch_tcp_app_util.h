@@ -15,6 +15,7 @@
 #include "ch_tcp_session.h"
 #include "ch_tcp_app_pool.h"
 
+#if 0
 static inline void ch_tcp_record_init(ch_tcp_record_t *tcp_rcd,ch_tcp_session_t *tcp_session,
 	uint8_t packet_type,void *data,size_t dlen,uint32_t protocol_id,uint8_t direct){
 
@@ -43,6 +44,7 @@ static inline void ch_tcp_record_init(ch_tcp_record_t *tcp_rcd,ch_tcp_session_t 
 	tcp_rcd->res_bytes = ch_tcp_session_dst_bytes_get(tcp_session);
 	
 }
+#endif
 
 static inline void ch_dump_ports(uint16_t* ports,const char *pre,int port_n){
 
