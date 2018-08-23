@@ -9,6 +9,7 @@ import com.antell.cloudhands.api.packet.tcp.TCPSessionEntry;
 import com.antell.cloudhands.api.source.SourceEntry;
 import com.antell.cloudhands.api.utils.*;
 import com.google.common.base.Preconditions;
+import org.apache.http.protocol.HTTP;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.msgpack.core.MessageUnpacker;
 
@@ -45,7 +46,8 @@ public class HTTPSession implements SourceEntry{
 
     private SecMatchResult secMatchResult;
 
-
+    /*only used for 206 part content parser*/
+    private long lastTime;
 
     public HTTPSession(MessageUnpacker unpacker) throws IOException {
 
@@ -102,7 +104,16 @@ public class HTTPSession implements SourceEntry{
 
     public boolean canGenerateFTrans(){
 
-       return  !TextUtils.isEmpty(resBodyPath)&&HttpFileTransTypes.isFileTrans(extName);
+        if(TextUtils.isEmpty(resBodyPath))
+            return false;
+
+        if(status == 206)
+            return true;
+
+        if(getFsize(resBodyPath)>=1024*1024)
+            return true;
+
+       return  HttpFileTransTypes.isFileTrans(extName);
     }
 
     @Override
@@ -242,6 +253,8 @@ public class HTTPSession implements SourceEntry{
         }
 
         setExtName(Content.getExtName(resContentType,uri));
+        if(TextUtils.isEmpty(host))
+            host = IPUtils.ipv4Str(sessionEntry.getResIP());
 
     }
 
@@ -437,5 +450,41 @@ public class HTTPSession implements SourceEntry{
 
     public void setReferer(String referer) {
         this.referer = referer;
+    }
+
+    @Override
+    public int hashCode() {
+        return get206Key().hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+
+        HTTPSession s = (HTTPSession)obj;
+
+        if(s.getSessionEntry().getReqIP()!=sessionEntry.getReqIP())
+            return false;
+
+        if(!s.getHost().equalsIgnoreCase(host))
+            return false;
+
+        return s.getUri().equals(uri);
+    }
+
+    public String get206Key(){
+        StringBuffer sb = new StringBuffer();
+        sb.append(sessionEntry.getReqIP());
+        sb.append(host);
+        sb.append(uri);
+
+        return sb.toString();
+    }
+
+    public long getLastTime() {
+        return lastTime;
+    }
+
+    public void setLastTime(long lastTime) {
+        this.lastTime = lastTime;
     }
 }

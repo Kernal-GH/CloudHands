@@ -2,6 +2,8 @@ package com.antell.cloudhands.api.source;
 
 import com.antell.cloudhands.api.context.Context;
 
+import java.util.List;
+
 /**
  * Created by mala on 2018/6/18.
  */
@@ -16,6 +18,8 @@ public interface Source {
 
     /*put a entry to source*/
      void put(SourceEntry entry);
+
+     void put(List<SourceEntry> entries);
 
     /*Get a entry from source*/
     SourceEntry take();

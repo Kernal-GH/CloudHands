@@ -1,21 +1,33 @@
 package com.antell.cloudhands.api.packet;
 
 import com.antell.cloudhands.api.packet.smon.SMonSession;
+import com.antell.cloudhands.api.packet.tcp.http.BasicHTTPSessionParser;
+import com.antell.cloudhands.api.packet.tcp.http.BasicHttpPartContentParser;
 import com.antell.cloudhands.api.packet.tcp.http.HTTPSession;
+import com.antell.cloudhands.api.packet.tcp.http.HTTPSessionParser;
 import com.antell.cloudhands.api.packet.tcp.mail.MailSession;
 import com.antell.cloudhands.api.packet.udp.dns.DNSSession;
 import com.antell.cloudhands.api.source.SourceEntry;
 import com.antell.cloudhands.api.source.SourceEntryParser;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Created by dell on 2018/6/19.
  */
 public class PacketSourceEntryParser implements SourceEntryParser {
 
+    private final HTTPSessionParser httpSessionParser;
+
+    public PacketSourceEntryParser(){
+
+        httpSessionParser = new BasicHTTPSessionParser(new BasicHttpPartContentParser());
+    }
+
     @Override
-    public SourceEntry parse(PacketRecord packetRecord) throws IOException {
+    public List<SourceEntry> parse(PacketRecord packetRecord) throws IOException {
 
         SourceEntry entry = null;
         int type = packetRecord.getType();
@@ -43,6 +55,8 @@ public class PacketSourceEntryParser implements SourceEntryParser {
                 break;
 
             case PacketRecord.HTTP:
+                return  httpSessionParser.parse(packetRecord.getMessageUnpacker());
+
             case PacketRecord.SECRESHTTP:
                 entry = new HTTPSession(packetRecord.getMessageUnpacker());
                 break;
@@ -65,7 +79,7 @@ public class PacketSourceEntryParser implements SourceEntryParser {
                 break;
         }
 
-        return entry;
+        return Arrays.asList(entry);
     }
 
 

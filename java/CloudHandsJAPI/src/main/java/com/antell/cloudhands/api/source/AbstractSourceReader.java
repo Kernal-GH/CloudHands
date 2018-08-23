@@ -2,8 +2,11 @@ package com.antell.cloudhands.api.source;
 
 import com.antell.cloudhands.api.packet.PacketRecord;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * Created by dell on 2018/6/19.
@@ -64,10 +67,14 @@ public abstract class AbstractSourceReader implements SourceReader {
                 /*parse it */
                     try {
 
-                        SourceEntry sourceEntry = parser.parse(packetRecord);
-                        if (filter == null || filter.isAccept(sourceEntry)) {
-                            source.put(sourceEntry);
+                        List<SourceEntry> sourceEntry = parser.parse(packetRecord);
+                        if(sourceEntry!=null&&!sourceEntry.isEmpty()){
+
+                            List<SourceEntry> res = sourceEntry.stream().filter(e->e!=null&&filter.isAccept(e)).collect(Collectors.toList());
                         }
+                        //if (filter == null || filter.isAccept(sourceEntry)) {
+                            source.put(sourceEntry);
+                        //}
 
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -84,7 +91,5 @@ public abstract class AbstractSourceReader implements SourceReader {
         }
 
     }
-
-    ;
 
 }

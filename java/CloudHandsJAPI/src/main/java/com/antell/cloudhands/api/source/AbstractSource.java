@@ -53,6 +53,14 @@ public abstract class AbstractSource implements Source {
     }
 
     @Override
+    public synchronized void put(List<SourceEntry> entries) {
+
+        entries.forEach(e->put(e));
+
+    }
+
+
+    @Override
     public synchronized SourceEntry take() {
 
         if(sourceEntries.isEmpty())
