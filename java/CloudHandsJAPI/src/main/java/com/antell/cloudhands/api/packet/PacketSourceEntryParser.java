@@ -55,11 +55,8 @@ public class PacketSourceEntryParser implements SourceEntryParser {
                 break;
 
             case PacketRecord.HTTP:
-                return  httpSessionParser.parse(packetRecord.getMessageUnpacker());
-
             case PacketRecord.SECRESHTTP:
-                entry = new HTTPSession(packetRecord.getMessageUnpacker());
-                break;
+                return  httpSessionParser.parse(packetRecord.getMessageUnpacker());
 
             case PacketRecord.MAIL:
             case PacketRecord.SECRESMAIL:

@@ -25,7 +25,7 @@ public class BasicHTTPSessionParser implements HTTPSessionParser{
 
             HTTPSession httpSession = new HTTPSession(unpacker);
 
-            if(httpSession.getStatus() == 206){
+            if(httpSession.isPartContent()){
                 pres = partContentParser.parse(httpSession);
             }else{
                 res.add(httpSession);
@@ -37,6 +37,7 @@ public class BasicHTTPSessionParser implements HTTPSessionParser{
 
         } catch (IOException e) {
 
+            e.printStackTrace();
         }
 
         return res;

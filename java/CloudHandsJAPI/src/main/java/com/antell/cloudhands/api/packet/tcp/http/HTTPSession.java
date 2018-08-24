@@ -48,6 +48,8 @@ public class HTTPSession implements SourceEntry{
 
     /*only used for 206 part content parser*/
     private long lastTime;
+    private String contentRange;
+
 
     public HTTPSession(MessageUnpacker unpacker) throws IOException {
 
@@ -61,7 +63,7 @@ public class HTTPSession implements SourceEntry{
         reqContentType = "";
         resContentType = "";
         contentEncoding = "";
-
+        contentRange = "";
         parse(unpacker);
     }
 
@@ -102,12 +104,17 @@ public class HTTPSession implements SourceEntry{
         return getSecMatchResult().getMainMatchInfo().getRuleLevel() == 1;
     }
 
+    public boolean isPartContent(){
+
+        return status == 206&&!TextUtils.isEmpty(contentRange);
+    }
+
     public boolean canGenerateFTrans(){
 
         if(TextUtils.isEmpty(resBodyPath))
             return false;
 
-        if(status == 206)
+        if(isPartContent())
             return true;
 
         if(getFsize(resBodyPath)>=1024*1024)
@@ -189,7 +196,10 @@ public class HTTPSession implements SourceEntry{
                     setContentEncoding(v);
             }
 
-
+            if(!isReq&&TextUtils.isEmpty(contentRange)){
+                if(isHeader(k,"Content-Range"))
+                    setContentRange(v);
+            }
         }
 
     }
@@ -486,5 +496,13 @@ public class HTTPSession implements SourceEntry{
 
     public void setLastTime(long lastTime) {
         this.lastTime = lastTime;
+    }
+
+    public String getContentRange() {
+        return contentRange;
+    }
+
+    public void setContentRange(String contentRange) {
+        this.contentRange = contentRange;
     }
 }

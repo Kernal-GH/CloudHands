@@ -71,10 +71,8 @@ public abstract class AbstractSourceReader implements SourceReader {
                         if(sourceEntry!=null&&!sourceEntry.isEmpty()){
 
                             List<SourceEntry> res = sourceEntry.stream().filter(e->e!=null&&filter.isAccept(e)).collect(Collectors.toList());
+                            source.put(res);
                         }
-                        //if (filter == null || filter.isAccept(sourceEntry)) {
-                            source.put(sourceEntry);
-                        //}
 
                     } catch (Exception e) {
                         e.printStackTrace();
