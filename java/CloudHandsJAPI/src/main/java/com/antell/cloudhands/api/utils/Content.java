@@ -287,4 +287,10 @@ public final class Content {
     }
 
 
+
+    public static void main(String[] args) throws IOException {
+
+        System.out.println(Files.probeContentType(Paths.get("C:\\Users\\dell\\Desktop\\test\\aaa")));
+    }
+
 }
