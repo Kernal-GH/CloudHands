@@ -31,7 +31,7 @@ jni_package = libCloudHandsJNI.so
 .PHONY: all clean install
 
 all:
-	gcc ${CFLAGS} ${jni_SOURCES} -o ${jni_package} ${LDLIBS}
+	gcc ${CFLAGS} ${jni_SOURCES} -o ${jni_package} ${LDLIBS} -lclamav
 
 clean:
 	rm -rf ${jni_package}

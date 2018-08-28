@@ -8,7 +8,7 @@ public class ClamAVScan {
 
     public int init(){
 
-        return init(null,ClamAVConstants.CL_DB_STDOPT);
+        return init("",ClamAVConstants.CL_DB_STDOPT);
     }
 
     public String scanFile(String fname){
@@ -21,6 +21,6 @@ public class ClamAVScan {
     public native String scanFile(String filename, int scanOpt);
 
     static {
-        System.loadLibrary("ClamAVScan");
+        System.loadLibrary("CloudHandsJNI");
     }
 }

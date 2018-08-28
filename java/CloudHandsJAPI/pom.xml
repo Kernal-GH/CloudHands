@@ -58,10 +58,16 @@
             <artifactId>geoip2</artifactId>
             <version>2.9.0</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.kafka/kafka-clients -->
         <dependency>
-            <groupId>org.jetbrains</groupId>
-            <artifactId>annotations</artifactId>
-            <version>15.0</version>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-clients</artifactId>
+            <version>2.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka_2.11</artifactId>
+            <version>0.10.0.1</version>
         </dependency>
     </dependencies>
 
@@ -88,7 +94,7 @@
                         <configuration>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>com.antell.cloudhands.api.statistic.TestStatDataReader</mainClass>
+                                    <mainClass>com.antell.cloudhands.api.packet.security.clamav.TestClamAVScan</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>

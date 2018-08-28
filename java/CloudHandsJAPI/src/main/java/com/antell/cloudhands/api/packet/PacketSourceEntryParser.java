@@ -5,7 +5,9 @@ import com.antell.cloudhands.api.packet.tcp.http.BasicHTTPSessionParser;
 import com.antell.cloudhands.api.packet.tcp.http.BasicHttpPartContentParser;
 import com.antell.cloudhands.api.packet.tcp.http.HTTPSession;
 import com.antell.cloudhands.api.packet.tcp.http.HTTPSessionParser;
+import com.antell.cloudhands.api.packet.tcp.mail.BasicMailSessionParser;
 import com.antell.cloudhands.api.packet.tcp.mail.MailSession;
+import com.antell.cloudhands.api.packet.tcp.mail.MailSessionParser;
 import com.antell.cloudhands.api.packet.udp.dns.DNSSession;
 import com.antell.cloudhands.api.source.SourceEntry;
 import com.antell.cloudhands.api.source.SourceEntryParser;
@@ -20,10 +22,12 @@ import java.util.List;
 public class PacketSourceEntryParser implements SourceEntryParser {
 
     private final HTTPSessionParser httpSessionParser;
+    private final MailSessionParser mailSessionParser;
 
     public PacketSourceEntryParser(){
 
         httpSessionParser = new BasicHTTPSessionParser(new BasicHttpPartContentParser());
+        mailSessionParser = new BasicMailSessionParser();
     }
 
     @Override
@@ -60,8 +64,7 @@ public class PacketSourceEntryParser implements SourceEntryParser {
 
             case PacketRecord.MAIL:
             case PacketRecord.SECRESMAIL:
-                entry = new MailSession(packetRecord.getMessageUnpacker());
-                break;
+                return mailSessionParser.parse(packetRecord.getMessageUnpacker());
 
             case PacketRecord.TCPSMON:
                 entry = new SMonSession(packetRecord.getMessageUnpacker());

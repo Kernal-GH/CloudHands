@@ -21,6 +21,7 @@ public class BasicHTTPSessionParser implements HTTPSessionParser{
         List<SourceEntry> res = new ArrayList<>();
         List<SourceEntry> pres = null;
 
+
         try {
 
             HTTPSession httpSession = new HTTPSession(unpacker);
@@ -38,6 +39,18 @@ public class BasicHTTPSessionParser implements HTTPSessionParser{
         } catch (IOException e) {
 
             e.printStackTrace();
+        }
+
+        if(res!=null&&!res.isEmpty()){
+
+            List<SourceEntry> gres = new ArrayList<>();
+            res.forEach(e->{
+                List<SourceEntry> ge = e.generate();
+                if(ge!=null&&!ge.isEmpty()){
+                    gres.addAll(ge);
+                }
+            });
+            res.addAll(gres);
         }
 
         return res;
