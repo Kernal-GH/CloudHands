@@ -23,7 +23,8 @@ jni_SOURCES = ../../lib/common/ch_file_open.c \
 		  ../../SessionMonitor/ch_session_monitor.c \
 		  ch_stat_pool_reader.c \
 		  ch_packet_record_reader.c \
-		  ch_session_monitor_cmd.c 
+		  ch_session_monitor_cmd.c \
+		  ch_ClamAVScan.c
 
 jni_package = libCloudHandsJNI.so
 
