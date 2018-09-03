@@ -21,7 +21,7 @@ struct ch_wb_list_iter_t {
 
 	ch_wb_list_t *wb_list;
 
-	void *next(ch_wb_list_iter_t *iter);
+	void *(*next)(ch_wb_list_iter_t *iter);
 
 };
 
@@ -47,7 +47,7 @@ struct ch_wb_list_t {
 
 };
 
-extern int ch_wb_list_init(const char *mmap_fname,size_t msize,
+extern int ch_wb_list_init(ch_wb_list_t *wb_list,const char *mmap_fname,size_t msize,
 	int is_on,
 	int is_black_list,
 	int (*load)(ch_wb_list_t *wb_list),
