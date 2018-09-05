@@ -1,0 +1,36 @@
+include ../make.include
+CFLAGS  = ${BUILD_CFLAGS}  -O0 -rdynamic -D_GNU_SOURCE
+CFLAGS += -I../lib/common
+
+WBIPCmd_package= WBListIPCmd
+
+WBIPCmd_SOURCES = ch_wb_memory.c \
+				  ch_wb_list.c \
+				  ch_wb_list_ip.c \
+				  ../lib/common/ch_net_util.c \
+				  WBListIPCmd.c 
+
+WBIPCmd_OBJECTS =$(patsubst %.c,%.o,$(WBIPCmd_SOURCES))
+WBIPCmd_DEPENDS =$(patsubst %.c,%.d,$(WBIPCmd_SOURCES))
+WBIPCmd_ASMFILE =$(patsubst %.c,%.s,$(WBIPCmd_SOURCES))
+
+quiet_cmd_dpdk = LINK   $@ 
+	cmd_WBIPCmd = ${CC} ${CFLAGS} -o $@ $(WBIPCmd_OBJECTS)  \
+					$(common_package) \
+					$(LDFLAGS)
+
+.PHONY: all clean
+
+all: $(WBIPCmd_package)
+
+$(WBIPCmd_package): $(WBIPCmd_OBJECTS) 
+	$(call cmd,WBIPCmd)
+-include $(WBIPCmd_DEPENDS)
+
+$(common_package):
+	$(call,make)
+
+clean:
+	@rm -rf $(WBIPCmd_OBJECTS) $(WBIPCmd_DEPENDS) $(WBIPCmd_ASMFILE) $(WBIPCmd_package)
+
+

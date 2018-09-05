@@ -1,0 +1,36 @@
+include ../make.include
+CFLAGS  = ${BUILD_CFLAGS}  -O0 -rdynamic -D_GNU_SOURCE
+CFLAGS += -I../lib/common
+
+WBStrCmd_package= WBListStrCmd
+
+WBStrCmd_SOURCES = ch_wb_memory.c \
+				  ch_wb_list.c \
+				  ch_wb_list_str.c \
+				  ../lib/common/ch_net_util.c \
+				  WBListStrCmd.c 
+
+WBStrCmd_OBJECTS =$(patsubst %.c,%.o,$(WBStrCmd_SOURCES))
+WBStrCmd_DEPENDS =$(patsubst %.c,%.d,$(WBStrCmd_SOURCES))
+WBStrCmd_ASMFILE =$(patsubst %.c,%.s,$(WBStrCmd_SOURCES))
+
+quiet_cmd_dpdk = LINK   $@ 
+	cmd_WBStrCmd = ${CC} ${CFLAGS} -o $@ $(WBStrCmd_OBJECTS)  \
+					$(common_package) \
+					$(LDFLAGS)
+
+.PHONY: all clean
+
+all: $(WBStrCmd_package)
+
+$(WBStrCmd_package): $(WBStrCmd_OBJECTS) 
+	$(call cmd,WBStrCmd)
+-include $(WBStrCmd_DEPENDS)
+
+$(common_package):
+	$(call,make)
+
+clean:
+	@rm -rf $(WBStrCmd_OBJECTS) $(WBStrCmd_DEPENDS) $(WBStrCmd_ASMFILE) $(WBStrCmd_package)
+
+

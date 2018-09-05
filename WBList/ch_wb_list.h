@@ -100,7 +100,7 @@ extern int ch_wb_list_init(ch_wb_list_t *wb_list,const char *mmap_fname,size_t m
 
 extern void ch_wb_list_fin(ch_wb_list_t *wb_list);
 
-extern int ch_wb_list_add(ch_wb_list_t *wb_list,void *value);
+extern uint64_t ch_wb_list_add(ch_wb_list_t *wb_list,void *value);
 
 extern void ch_wb_list_del(ch_wb_list_t *wb_list,uint64_t id);
 

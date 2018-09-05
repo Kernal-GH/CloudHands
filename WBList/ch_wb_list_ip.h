@@ -20,8 +20,10 @@ typedef struct ch_wb_list_ip_match_value_t ch_wb_list_ip_match_value_t;
 #pragma pack(push,1)
 struct ch_wb_list_ip_entry_t {
 	ch_wb_list_entry_t entry;
+	uint32_t netmask;
 	uint32_t ip_start;
 	uint32_t ip_end;
+
 	uint16_t port_start;
 	uint16_t port_end;
 };
@@ -29,6 +31,7 @@ struct ch_wb_list_ip_entry_t {
 
 struct ch_wb_list_ip_add_value_t {
 
+	uint32_t netmask;
 	uint32_t ip_start;
 	uint32_t ip_end;
 	uint16_t port_start;

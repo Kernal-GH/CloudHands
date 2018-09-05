@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-09-05 15:19:58
- * Last Modified: 2018-09-05 15:39:59
+ * Last Modified: 2018-09-05 17:02:06
  */
 
 #include "ch_wb_list_str.h"
@@ -31,6 +31,10 @@ static int list_str_add(ch_wb_list_t *wb_list,ch_wb_list_entry_t *entry,void *va
 
 static void list_str_entry_copy(ch_wb_list_t *wb_list,ch_wb_list_entry_t *d_entry,ch_wb_list_entry_t *s_entry){
 
+
+	/*unused*/
+	wb_list = wb_list;
+
 	ch_wb_list_str_entry_t *d_str_entry = (ch_wb_list_str_entry_t*)d_entry;
 	ch_wb_list_str_entry_t *s_str_entry = (ch_wb_list_str_entry_t*)s_entry;
 
@@ -39,6 +43,9 @@ static void list_str_entry_copy(ch_wb_list_t *wb_list,ch_wb_list_entry_t *d_entr
 }
 
 static int list_str_is_match(ch_wb_list_t *wb_list,ch_wb_list_entry_t *entry,void *match_value){
+
+	/*unused*/
+	wb_list = wb_list;
 
 	ch_wb_list_str_entry_t *str_entry =  (ch_wb_list_str_entry_t*)entry;
 	const char *mv = (const char *)match_value;
@@ -50,6 +57,9 @@ static int list_str_is_match(ch_wb_list_t *wb_list,ch_wb_list_entry_t *entry,voi
 }
 
 static void list_str_dump(ch_wb_list_t *wb_list,ch_wb_list_entry_t *entry,FILE *out){
+
+	/*unused*/
+	wb_list = wb_list;
 
 	ch_wb_list_str_entry_t *str_entry = (ch_wb_list_str_entry_t*)entry;
 
