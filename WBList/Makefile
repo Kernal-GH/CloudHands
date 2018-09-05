@@ -7,7 +7,8 @@ include ../make.include
 CFLAGS += -I../lib/common
 
 ch_wbm_SOURCES = ch_wb_memory.c \
-				 ch_wb_list.c
+				 ch_wb_list.c \
+				 ch_wb_list_ip.c
 
 ch_wbm_OBJECTS = $(patsubst %.c,%.o,$(ch_wbm_SOURCES))
 ch_wbm_DEPENDS = $(patsubst %.c,%.d,$(ch_wbm_SOURCES))
