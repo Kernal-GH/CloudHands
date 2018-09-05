@@ -41,14 +41,6 @@ struct ch_wb_list_ip_match_value_t {
 	uint16_t port;
 };
 
-#define ch_wb_list_ip_entry_init(entry) do { \
-	entry->ip_start = 0; \
-	entry->ip_end = 0; \
-	entry->port_start = 0; \
-	entry->port_end = 0; \
-}while(0)
-
-
 extern int ch_wb_list_ip_init(ch_wb_list_t *wb_list,const char *mmap_fname,size_t msize);
 
 #endif /*CH_WB_LIST_IP_H*/
