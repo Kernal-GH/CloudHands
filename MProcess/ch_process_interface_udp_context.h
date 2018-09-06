@@ -16,12 +16,17 @@ typedef struct ch_process_interface_udp_context_t ch_process_interface_udp_conte
 #include "ch_mpool.h"
 #include "ch_process_interface.h"
 #include "ch_session_monitor.h"
+#include "ch_wb_list.h"
+#include "ch_wb_list_ip.h"
 
 #define MAX_PORT_ARRAY_SIZE 1024
 
 struct ch_process_interface_udp_context_t {
 
 	ch_pool_t *mp;
+	
+	ch_wb_list_t *ip_white_list;
+	ch_wb_list_t *ip_black_list;
 
 	ch_process_interface_t *pint;
 	ch_session_monitor_t monitor;

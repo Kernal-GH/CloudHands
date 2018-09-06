@@ -3,7 +3,8 @@ DPDK=/usr/local/dpdk/dpdk_src
 DPDK_FLAGS=$(shell cat ${DPDK}/include/cflags.txt)
 DPDK_LIB_FLAGS = $(shell cat ${DPDK}/lib/ldflags.txt)
 CFLAGS  = ${BUILD_CFLAGS}  -O0 -rdynamic -D_GNU_SOURCE -DUSE_DPDK ${DPDK_FLAGS} -pthread
-CFLAGS += -I../lib/common  -I../lib/shm -I../lib/thread -I../lib/ptables -I../packet -I../MProcess  -I../SessionMonitor -I${DPDK}/include -include ${DPDK}/include/rte_config.h
+CFLAGS += -I../lib/common  -I../lib/shm -I../lib/thread -I../lib/ptables -I../packet -I../MProcess  -I../SessionMonitor -I../WBList 
+CFLAGS += -I${DPDK}/include -include ${DPDK}/include/rte_config.h
 
 LDFLAGS  = ${BUILD_LDFLAGS} ${DPDK_LIB_FLAGS} -lpthread
 
@@ -15,6 +16,7 @@ ptables_package = ../lib/ptables/*.o
 pkt_package = ../packet/*.o
 mprocess_package = ../MProcess/*.o
 smon_package = ../SessionMonitor/*.o
+wblist_package = ../WBList/*.o
 
 pdis_package= PDispatcher
 
@@ -32,7 +34,7 @@ pdis_ASMFILE =$(patsubst %.c,%.s,$(pdis_SOURCES))
 quiet_cmd_dpdk = LINK   $@ 
 	cmd_pdis = ${CC} ${CFLAGS} -o $@ $(pdis_OBJECTS)  \
 				   $(common_package) $(cpool_package) $(shm_package) $(ptables_package)\
-				   $(pkt_package) $(mprocess_package) $(smon_package)\
+				   $(pkt_package) $(mprocess_package) $(smon_package) $(wblist_package)\
 				   $(LDFLAGS)
 
 .PHONY: all clean
@@ -62,6 +64,9 @@ $(mprocess_package):
 	$(call,make)
 
 $(smon_package):
+	$(call,make)
+
+$(wblist_package):
 	$(call,make)
 
 clean:

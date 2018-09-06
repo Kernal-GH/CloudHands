@@ -29,6 +29,8 @@ typedef struct ch_pdispatcher_context_t ch_pdispatcher_context_t;
 #include "ch_process_interface_tcp_context.h"
 #include "ch_process_interface_sa_context.h"
 #include "ch_process_interface_udp_context.h"
+#include "ch_wb_list.h"
+#include "ch_wb_list_ip.h"
 
 #define LOG_NAME_DEFAULT "/tmp/pdispatcher.log"
 #define LOG_LEVEL_DEFAULT CH_LOG_NOTICE
@@ -46,6 +48,9 @@ struct ch_pdispatcher_context_t {
    ch_port_pool_t *ppool;
 
    ch_packet_rxtask_pool_t *rxtask_pool;
+
+   ch_wb_list_t ip_white_list;
+   ch_wb_list_t ip_black_list;
 
    ch_process_interface_tcp_context_t *pint_tcp_context;
    
@@ -75,6 +80,15 @@ struct ch_pdispatcher_context_t {
 
    /*Config process interface udp config file path*/
    const char *pint_udp_cfname;
+
+   /*config ip white list */
+   const char *ip_wlist_mmap_fname;
+   size_t ip_wlist_msize;
+
+   /*config ip black list */
+   const char *ip_blist_mmap_fname;
+   size_t ip_blist_msize;
+
 };
 
 

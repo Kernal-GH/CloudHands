@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-02-06 11:16:43
- * Last Modified: 2018-07-17 09:43:30
+ * Last Modified: 2018-09-06 20:30:32
  */
 
 #include "ch_process_interface_udp_context.h"
@@ -163,6 +163,7 @@ static inline void dump_pint_udp_context(ch_process_interface_udp_context_t *pin
 
 static int _udp_filter(ch_packet_t *pkt,void *priv_data){
 
+	ch_wb_list_ip_match_value_t t1,*s_match=&t1,t2,*d_match=&t2;
 	ch_packet_udp_t udp_pkt;
 	
 	ch_process_interface_udp_context_t *pint_context = (ch_process_interface_udp_context_t*)priv_data;
@@ -173,6 +174,14 @@ static int _udp_filter(ch_packet_t *pkt,void *priv_data){
 	}
 
 	if(-1 == ch_packet_udp_init_from_pkt(&udp_pkt,pkt))
+		return 1;
+
+	s_match->ip = udp_pkt.src_ip;
+	s_match->port = udp_pkt.src_port;
+	d_match->ip = udp_pkt.dst_ip;
+	d_match->port = udp_pkt.dst_port;
+
+	if(!ch_wb_list_is_accept(pint_context->ip_white_list,pint_context->ip_black_list,(void*)s_match,(void*)d_match))
 		return 1;
 
 	if(ch_ports_equal(pint_context->accept_ports,MAX_PORT_ARRAY_SIZE,

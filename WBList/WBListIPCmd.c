@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-09-05 15:41:37
- * Last Modified: 2018-09-05 18:41:10
+ * Last Modified: 2018-09-06 19:04:15
  */
 
 
@@ -22,7 +22,8 @@ static void print_usage(void) {
 				   "D\n"
 				   "a <ip_start> <ip_end> <netmask> <port_start> <port_end>\n"
 				   "d <id>\n"
-				   "m <ip> <port>\n";
+				   "m <ip> <port>\n"
+				   "e <value>\n";
 
 	printf("%s",usage);
 
@@ -146,6 +147,25 @@ static int _parse_rum_cmd(ch_wb_list_t *wb_list,int argc,char **argv){
 			ch_wb_list_del(wb_list,id);
 
 			rc = id;
+		}
+
+		break;
+	
+	case 'e':
+		if(argc!=1){
+		
+			printf("Invalid enable/disable wblist cmd args!\n");
+			print_usage();
+			rc = -1;
+		}else{
+        
+			int vv = (int)to_long(argv[1]);
+        
+			printf("Start to enable/disable wblist:%d\n",vv);
+
+			ch_wb_list_is_on_set(wb_list,vv);
+
+			rc = 0;
 		}
 
 		break;

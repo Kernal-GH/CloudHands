@@ -44,6 +44,12 @@ static void do_pdcontext_init(ch_pdispatcher_context_t *pdcontext){
 	
 	pdcontext->pint_udp_cfname = PINT_UDP_CFNAME_DEFAULT;
 
+	pdcontext->ip_wlist_mmap_fname = NULL;
+	pdcontext->ip_wlist_msize = 65536;
+	
+	pdcontext->ip_blist_mmap_fname = NULL;
+	pdcontext->ip_blist_msize = 65536;
+
 }
 
 static const char *cmd_log(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1,const char *p2){
@@ -143,6 +149,34 @@ static const char *cmd_pint_sa_cfname(cmd_parms *cmd ch_unused, void *_dcfg, con
     return NULL;
 }
 
+static const char *cmd_ip_white_list(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1,const char *p2){
+
+    char *endptr;
+
+    ch_pdispatcher_context_t *pdcontext = (ch_pdispatcher_context_t*)_dcfg;
+    
+	pdcontext->ip_wlist_mmap_fname = p1;
+
+	pdcontext->ip_wlist_msize = (size_t)strtoul(p2,&endptr,10);
+
+
+    return NULL;
+}
+
+static const char *cmd_ip_black_list(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1,const char *p2){
+
+    char *endptr;
+
+    ch_pdispatcher_context_t *pdcontext = (ch_pdispatcher_context_t*)_dcfg;
+    
+	pdcontext->ip_blist_mmap_fname = p1;
+
+	pdcontext->ip_blist_msize = (size_t)strtoul(p2,&endptr,10);
+
+
+    return NULL;
+}
+
 static const command_rec pdcontext_directives[] ={
     
     CH_INIT_TAKE2(
@@ -201,6 +235,21 @@ static const command_rec pdcontext_directives[] ={
             "set process interface udp context  config file path"
             ),
 
+    CH_INIT_TAKE2(
+            "CHIPWList",
+            cmd_ip_white_list,
+            NULL,
+            0,
+            "set ip white list path and size"
+            ),
+
+    CH_INIT_TAKE2(
+            "CHIPBList",
+            cmd_ip_black_list,
+            NULL,
+            0,
+            "set ip black list path and size"
+            ),
 };
 
 ch_pdispatcher_context_t * ch_pdispatcher_context_create(ch_pool_t *mp,const char *cfname){
@@ -263,6 +312,20 @@ static int _check_cores_ports(ch_core_pool_t *cpool,ch_port_pool_t *ppool){
 
 int ch_pdispatcher_context_start(ch_pdispatcher_context_t *pdcontext){
 
+	if(ch_wb_list_ip_init(&pdcontext->ip_white_list,pdcontext->ip_wlist_mmap_fname,pdcontext->ip_wlist_msize))
+	{
+	
+		ch_log(CH_LOG_ERR,"Cannot load ip white list!");
+		return -1;
+	}
+	
+	if(ch_wb_list_ip_init(&pdcontext->ip_black_list,pdcontext->ip_blist_mmap_fname,pdcontext->ip_blist_msize))
+	{
+	
+		ch_log(CH_LOG_ERR,"Cannot load ip black list!");
+		return -1;
+	}
+
 	pdcontext->pint_tcp_context = ch_process_interface_tcp_context_create(pdcontext->mp,
 		pdcontext->pint_tcp_cfname,1); 
 
@@ -272,6 +335,9 @@ int ch_pdispatcher_context_start(ch_pdispatcher_context_t *pdcontext){
 		return -1;
 	}
 	
+	pdcontext->pint_tcp_context->ip_white_list = &pdcontext->ip_white_list;
+	pdcontext->pint_tcp_context->ip_black_list = &pdcontext->ip_black_list;
+
 	pdcontext->pint_sa_context = ch_process_interface_sa_context_create(pdcontext->mp,
 		pdcontext->pint_sa_cfname,1); 
 
@@ -289,6 +355,9 @@ int ch_pdispatcher_context_start(ch_pdispatcher_context_t *pdcontext){
 		ch_log(CH_LOG_ERR,"Create process udp interface context failed!");
 		return -1;
 	}
+	
+	pdcontext->pint_udp_context->ip_white_list = &pdcontext->ip_white_list;
+	pdcontext->pint_udp_context->ip_black_list = &pdcontext->ip_black_list;
 
 	/*create cpu core pool*/
 	pdcontext->cpool = ch_core_pool_create(pdcontext->mp,NULL);

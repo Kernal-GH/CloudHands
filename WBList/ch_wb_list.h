@@ -52,6 +52,38 @@ struct ch_wb_list_t {
 
 };
 
+#define ch_wb_list_empty(wb_list) (wb_list->header->free_entry_pos == 0)
+
+static inline ch_wb_list_t * ch_wb_list_should_match_list(ch_wb_list_t *w_list,ch_wb_list_t *b_list,int *is_white){
+
+	/*only enable a list*/
+	if(w_list->header->is_on==b_list->header->is_on)
+		return NULL;
+
+	if(w_list->header->is_on){
+		if(ch_wb_list_empty(w_list))
+			return NULL;
+
+		*is_white = 1;
+
+		return w_list;
+
+	}else if(b_list->header->is_on){
+	
+		if(ch_wb_list_empty(b_list))
+			return NULL;
+
+		*is_white = 0;
+		return b_list;
+
+	}else{
+	
+		/**/
+		return NULL;
+	}
+
+}
+
 static inline uint64_t ch_wb_list_alloc_id(ch_wb_list_t *wb_list){
 
 	uint64_t id = wb_list->header->next_id;
@@ -86,7 +118,6 @@ static inline void *ch_wb_list_entry_next(ch_wb_list_t *wb_list,void *entry){
 	return next_entry>=free_entry?NULL:next_entry;
 }
 
-#define ch_wb_list_empty(wb_list) (wb_list->header->free_entry_pos == 0)
 
 #define ch_wb_list_for_each_entry(wb_list,entry,type) \
 	for(entry = (type*)ch_wb_list_entry_first(wb_list); \
@@ -110,5 +141,20 @@ extern void ch_wb_list_del(ch_wb_list_t *wb_list,uint64_t id);
 extern int ch_wb_list_is_match(ch_wb_list_t *wb_list,void *match_value);
 
 extern void ch_wb_list_dump(ch_wb_list_t *wb_list,FILE *out);
+
+static inline int ch_wb_list_is_accept(ch_wb_list_t *w_list,ch_wb_list_t *b_list,
+	void *s_match,void*d_match){
+
+	int is_white;
+
+	ch_wb_list_t *m_list = ch_wb_list_should_match_list(w_list,b_list,&is_white);
+
+	if(m_list == NULL)
+		return 1;
+
+	int is_match = ch_wb_list_is_match(m_list,s_match)||ch_wb_list_is_match(m_list,d_match);
+
+	return is_white?is_match:!is_match;
+}
 
 #endif /*CH_WB_LIST_H*/

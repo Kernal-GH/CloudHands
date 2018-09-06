@@ -5,7 +5,7 @@
 #        Author: csp001314@163.com
 #   Description: ---
 #        Create: 2016-11-03 20:09:47
-# Last Modified: 2018-07-30 16:13:17
+# Last Modified: 2018-09-06 20:43:16
 #
 
 [ `id -u` -ne 0 ] && {
@@ -76,6 +76,7 @@ comp_lib(){
 	cp -rc  CloudHands/udp/app/smon/*.o CloudHands/udp/app/
 	make -C CloudHands/StreamAnalyze/statistic
 	make -C CloudHands/SessionMonitor
+	make -C CloudHands/WBList
 
 }
 
@@ -106,6 +107,8 @@ install_cloudhands(){
 	make -C CloudHands/StreamAnalyze
 	make -C CloudHands/StreamAnalyze/statistic -f MakefileDump
 	make -C CloudHands/SessionMonitor -f MakefileCmd
+	make -C CloudHands/WBList -f MakefileIPCmd
+	make -C CloudHands/WBList -f MakefileStrCmd
 
 	cp -rf CloudHands/conf $dpdk_install_prefix/CloudHands
 	cp -rf CloudHands/PDispatcher/PDispatcher $dpdk_install_prefix/CloudHands/bin
@@ -115,6 +118,8 @@ install_cloudhands(){
 	cp -rf CloudHands/StreamAnalyze/statistic/StatDump $dpdk_install_prefix/CloudHands/bin
 	cp -rf CloudHands/bin/* $dpdk_install_prefix/CloudHands/bin
 	cp -rf CloudHands/SessionMonitor/SMonCmd $dpdk_install_prefix/CloudHands/bin
+	cp -rf CloudHands/WBList/WBListIPCmd $dpdk_install_prefix/CloudHands/bin
+	cp -rf CloudHands/WBList/WBListStrCmd $dpdk_install_prefix/CloudHands/bin
 
 }
 
