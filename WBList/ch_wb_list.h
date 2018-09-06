@@ -20,6 +20,7 @@ typedef struct ch_wb_list_entry_t ch_wb_list_entry_t;
 #pragma pack(push,1)
 struct ch_wb_list_header_t {
 
+	int is_on;
 	uint32_t entries_num;
 	uint32_t free_entry_pos;
 
@@ -91,6 +92,8 @@ static inline void *ch_wb_list_entry_next(ch_wb_list_t *wb_list,void *entry){
 	for(entry = (type*)ch_wb_list_entry_first(wb_list); \
 		entry!=NULL; \
 		entry = (type*)ch_wb_list_entry_next(wb_list,(void*)entry))
+
+#define ch_wb_list_is_on_set(wb_list,v) ((wb_list)->header->is_on = v) 
 
 extern int ch_wb_list_init(ch_wb_list_t *wb_list,const char *mmap_fname,size_t msize,uint32_t entry_size,
 	int (*add)(ch_wb_list_t *wb_list,ch_wb_list_entry_t *entry,void *value),

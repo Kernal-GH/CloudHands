@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-09-03 18:16:04
- * Last Modified: 2018-09-05 18:03:58
+ * Last Modified: 2018-09-06 18:07:17
  */
 
 #include <fcntl.h>
@@ -36,7 +36,8 @@ int ch_wb_list_init(ch_wb_list_t *wb_list,const char *mmap_fname,size_t msize,ui
 	wb_list->header->entries_num = (wb_list->wbm.end-wb_list->wbm.pos)/entry_size;
 
 	if(!existed){
-	
+
+		wb_list->header->is_on = 0;
 		wb_list->header->free_entry_pos = 0;
 
 		wb_list->header->entry_size = entry_size;
@@ -129,7 +130,7 @@ int ch_wb_list_is_match(ch_wb_list_t *wb_list,void *match_value){
 
 	ch_wb_list_entry_t *entry;
 
-	if(ch_wb_list_empty(wb_list))
+	if(ch_wb_list_empty(wb_list)||wb_list->header->is_on==0)
 		return 0;
 
 	ch_wb_list_for_each_entry(wb_list,entry,ch_wb_list_entry_t){
@@ -145,6 +146,7 @@ void ch_wb_list_dump(ch_wb_list_t *wb_list,FILE *out){
 
 	ch_wb_list_entry_t *entry;
 	fprintf(out,"Dump The White&Black List Informations:\n");
+	fprintf(out,"WBList is on:%s\n",wb_list->header->is_on?"on":"off");
 	fprintf(out,"Entries Number:%lu\n",(unsigned long)wb_list->header->entries_num);
 	fprintf(out,"Current Free Entry Pos:%lu\n",(unsigned long)wb_list->header->free_entry_pos);
 	fprintf(out,"Entry Size:%lu\n",(unsigned long)wb_list->header->entry_size);
