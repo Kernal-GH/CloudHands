@@ -5,6 +5,12 @@ public class StrValue {
     private long id;
     private String value;
 
+    public StrValue(long id,String value){
+
+        this.id = id;
+        this.value = value;
+
+    }
 
     public long getId() {
         return id;

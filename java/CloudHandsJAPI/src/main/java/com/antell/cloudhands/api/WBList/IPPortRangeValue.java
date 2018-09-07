@@ -9,6 +9,16 @@ public class IPPortRangeValue {
     private int portStart;
     private int portEnd;
 
+    public IPPortRangeValue(long id,long ipStart,long ipEnd,long netmask,int portStart,int portEnd){
+
+        this.id = id;
+        this.ipStart = ipStart;
+        this.ipEnd = ipEnd;
+        this.netmask = netmask;
+        this.portStart = portStart;
+        this.portEnd = portEnd;
+
+    }
     public long getIpStart() {
         return ipStart;
     }

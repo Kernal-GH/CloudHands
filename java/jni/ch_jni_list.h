@@ -59,7 +59,7 @@ static inline int ch_jni_list_init(ch_jni_list_t *jlist,
 
 static inline void ch_jni_list_addObj(ch_jni_list_t *jlist,JNIEnv *env,jobject obj){
 	
-	(*env)->CallBooleanMethod(env,jlist->list_obj,jlist->list_add,obj);
+	(*env)->CallObjectMethod(env,jlist->list_obj,jlist->list_add,obj);
 
 }
 
