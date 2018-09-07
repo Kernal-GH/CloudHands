@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-09-06 16:08:04
- * Last Modified: 2018-09-06 18:27:28
+ * Last Modified: 2018-09-07 16:14:31
  */
 
 #include "ch_WBListCmd.h"
@@ -144,6 +144,7 @@ static inline void addIPEntry(ch_jni_list_t *jlist,JNIEnv *jenv,ch_wb_list_ip_en
 		   ip_entry->entry.id,
 		   ip_entry->ip_start,
 		   ip_entry->ip_end,
+		   ip_entry->netmask,
 		   ip_entry->port_start,
 		   ip_entry->port_end);
 
