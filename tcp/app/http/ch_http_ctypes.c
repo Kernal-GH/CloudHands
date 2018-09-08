@@ -12,6 +12,15 @@
 #include <string.h>
 #include "ch_http_ctypes.h"
 
+typedef struct ch_http_ctype_t ch_http_ctype_t;
+
+struct ch_http_ctype_t {
+
+	const char *ctype;
+	const char *ext_name;
+};
+
+
 static ch_http_ctype_t ctypes[] = {
 	
 	{"application/envoy","evy"},
@@ -260,3 +269,53 @@ int ch_http_ctype_is_match(const char *ctype,const char *ext_name){
 	return 0;
 }
 
+int ch_http_extNames_get(const char *ctype,char **extNames,int n){
+
+	int i = 0,c=0,is_match=0;
+	ch_http_ctype_t *ct;
+
+	if(is_empty(ctype))
+		return 0;
+
+	while(1){
+	
+		ct = &ctypes[i++];
+		if(is_end(ct))
+			break;
+        
+        if(c>=n)
+            break;
+
+		/**/
+		if(is_contains(ctype,ct->ctype)){
+        
+            extNames[c]=(char*)(ct->ext_name);
+            is_match = 1;
+            c++;
+        }else{
+        
+            if(is_match)
+                break;
+        }
+	}
+
+	return c;
+
+}
+
+int main(int argc,char **argv)
+{
+
+    const char *ctype = argv[1];
+    char* extNames[10];
+    int n = ch_http_extNames_get(ctype,extNames,10);
+
+    if(n){
+    
+        int i;
+        for(i=0;i<n;i++){
+        
+            printf("%s\n",extNames[i]);
+        }
+    }
+}
