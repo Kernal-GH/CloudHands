@@ -395,6 +395,11 @@ deal_with_path:
         }
         if (s != uri) {
             uptr->path = ch_pstrmemdup(p, uri, s - uri);
+            
+            char *pp = strchr(uptr->path,'.');
+            if(pp){
+                uptr->ext_name = pp+1;
+            }
         }
         if (*s == 0) {
             return 0;
@@ -539,3 +544,10 @@ deal_with_host:
     goto deal_with_host;
 }
 
+int main(int argc,char **argv){
+
+    const char *aa = "https://hm.baidu.com/hm.gif?cc=0&ck=1&cl=24-bit&ds=1920x1080&vl=693&cn&lo=0&lt=1536400582&rnd=355106415&si=e9e114d958ea263de46e080563e254c4&su=http://news.baidu.com/ent&v=1.2.34&lv=2";
+    ch_pool_t *mp = ch_pool_create(1024);
+    ch_uri_t uri;
+    ch_uri_parse(mp,aa,&uri);
+}

@@ -77,6 +77,9 @@ struct ch_uri_t {
     char *port_str;
     /** the request path (or NULL if only scheme://host was given) */
     char *path;
+    
+    char *ext_name;
+
     /** Everything after a '?' in the path, if present */
     char *query;
     /** Trailing "#fragment" string, if present */
