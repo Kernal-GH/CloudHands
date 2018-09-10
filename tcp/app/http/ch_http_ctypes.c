@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-09-07 17:06:11
- * Last Modified: 2018-09-07 17:49:11
+ * Last Modified: 2018-09-10 11:58:59
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -301,21 +301,4 @@ int ch_http_extNames_get(const char *ctype,char **extNames,int n){
 
 	return c;
 
-}
-
-int main(int argc,char **argv)
-{
-
-    const char *ctype = argv[1];
-    char* extNames[10];
-    int n = ch_http_extNames_get(ctype,extNames,10);
-
-    if(n){
-    
-        int i;
-        for(i=0;i<n;i++){
-        
-            printf("%s\n",extNames[i]);
-        }
-    }
 }

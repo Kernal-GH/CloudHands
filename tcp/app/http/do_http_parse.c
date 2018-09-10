@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-05-16 15:50:50
- * Last Modified: 2018-08-16 17:26:34
+ * Last Modified: 2018-09-10 11:25:36
  */
 
 #define HAS_BODY(session,is_req) (is_req?((session)->headers_in.content_length_n>0||(session)->headers_in.chunked):\
@@ -265,7 +265,6 @@ do_http_request_parse(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,
 	int rc = PARSE_CONTINUE;
 	ch_pp_data_input_t *din;
 	ch_pp_data_line_t tmp,*line=&tmp;
-
 	ch_http_session_t *session = NULL;
 	ch_http_session_entry_t *hsentry = (ch_http_session_entry_t*)tsession->sentry;
 	
@@ -331,6 +330,9 @@ do_http_request_parse(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,
 				goto out;
 			}
 
+			/*check extName black list from uri*/
+
+
 			break;
 
 		case PARSE_PHASE_REQ_HEADER:
@@ -391,14 +393,20 @@ out:
 	return rc;
 }
 
-static void _http_session_store(ch_proto_session_store_t *pstore,
+static void _http_session_store(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,
         ch_tcp_session_t *tsession,ch_http_session_entry_t *hsentry,ch_http_session_t *session){
 
-	ch_http_sentry_session_remove(hsentry,session);
+	private_http_context_t *hcontext = (private_http_context_t*)app->context;
+	if(ch_http_session_is_accept(&hcontext->host_white_list,&hcontext->host_black_list,
+			&hcontext->extName_black_list,session)){
+		ch_http_sentry_session_remove(hsentry,session);
+		if(ch_proto_session_store_write(pstore,tsession,(void*)session)){
+			ch_log(CH_LOG_ERR,"Write http session failed!");
+		}
+	}else{
 	
-	if(ch_proto_session_store_write(pstore,tsession,(void*)session)){
-	
-		ch_log(CH_LOG_ERR,"Write http session failed!");
+		ch_http_sentry_session_discard(hsentry,session);
+		ch_log(CH_LOG_DEBUG,"Discard a http session!");
 
 	}
 
@@ -449,7 +457,7 @@ do_http_response_parse(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,
 		case PARSE_PHASE_DONE:
 		
 			/*has a new http respones,should output current session,and get a new session,then continue to parse */	
-			_http_session_store(pstore,tsession,hsentry,session);
+			_http_session_store(app,pstore,tsession,hsentry,session);
 			session = ch_http_sentry_session_get(hsentry,0);
 			if(session == NULL){
 				/* no request??? */
@@ -525,7 +533,7 @@ do_http_response_parse(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,
 	if(session->parse_phase==PARSE_PHASE_DONE){
 	
 		/*should store session*/
-		_http_session_store(pstore,tsession,hsentry,session);
+		_http_session_store(app,pstore,tsession,hsentry,session);
 
 		if(!is_http_session_keepalive(session)){
 		

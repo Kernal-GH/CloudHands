@@ -8,6 +8,7 @@ DPDK=/usr/local/dpdk/dpdk_src
 DPDK_FLAGS=$(shell cat ${DPDK}/include/cflags.txt)
 CFLAGS  = ${BUILD_CFLAGS}  -O0 -rdynamic -D_GNU_SOURCE -DUSE_DPDK ${DPDK_FLAGS}
 CFLAGS += -I../../../lib/common -I../../../packet -I../../../lib/ptables -I../../../lib/shm -I../../../lib/fstore
+CFLAGS += -I../../../WBList/
 CFLAGS += -I../ -I../../ -I${DPDK}/include -include ${DPDK}/include/rte_config.h
 CFLAGS +=  -fPIC
 
@@ -15,7 +16,8 @@ ch_http_SOURCES = ch_http.c \
 				  ch_http_data_parse.c \
 				  ch_http_session.c \
 				  ch_http_session_body.c \
-				  ch_http_session_entry.c 
+				  ch_http_session_entry.c  \
+				  ch_http_ctypes.c
 
 ch_http_OBJECTS = $(patsubst %.c,%.o,$(ch_http_SOURCES))
 ch_http_DEPENDS = $(patsubst %.c,%.d,$(ch_http_SOURCES))

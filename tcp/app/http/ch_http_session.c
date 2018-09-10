@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@163.com
  *   Description: ---
  *        Create: 2016-07-21 23:58:20
- * Last Modified: 2018-08-16 17:20:15
+ * Last Modified: 2018-09-10 11:26:56
  */
 
 #include "ch_log.h"
@@ -67,7 +67,6 @@ ch_http_session_t * ch_http_session_create(ch_pool_t *mp){
 	session->in_headers_n = 0;
 	session->out_headers_n = 0;
 	session->status_code = 0;
-
 
 	return session;
 }

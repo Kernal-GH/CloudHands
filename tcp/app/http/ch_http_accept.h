@@ -16,6 +16,7 @@
 #include "ch_mpool.h"
 #include "ch_uri.h"
 #include "ch_http_ctypes.h"
+#include "ch_http_session.h"
 
 #define IS_EMPTY_STR(str) (str == NULL||strlen(str)==0)
 
@@ -77,6 +78,21 @@ static inline int ch_host_is_accept(ch_wb_list_t *w_list,ch_wb_list_t *b_list,co
 
 	return is_white?is_match:!is_match;
 
+}
+
+static inline int ch_http_session_is_accept(ch_wb_list_t *host_wlist,ch_wb_list_t *host_blist,ch_wb_list_t *ext_blist,
+	ch_http_session_t *session){
+
+	if(!ch_extName_is_accept_from_uri(ext_blist,session->mp,(const char*)session->uri))
+		return 0;
+	
+	if(!ch_host_is_accept(host_wlist,host_blist,(const char*)session->host))
+		return 0;
+
+	if(session->headers_out.content_type&&!ch_extName_is_accept_from_ctype(ext_blist,(const char*)session->headers_out.content_type->val))
+		return 0;
+
+	return 1;
 }
 
 #endif /*CH_HTTP_ACCEPT_H*/
