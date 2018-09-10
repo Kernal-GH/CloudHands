@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-05-17 17:41:03
- * Last Modified: 2018-09-10 11:40:56
+ * Last Modified: 2018-09-10 14:35:13
  */
 
 
@@ -56,10 +56,10 @@ static void do_http_session_entry_clean(ch_tcp_app_t *app,ch_proto_session_store
 
 		if(!is_accept){
 			
-			if(session->req_body->fname)
+			if(session->req_body&&session->req_body->fname)
 				unlink(session->req_body->fname);
 			
-			if(session->res_body->fname)
+			if(session->res_body&&session->res_body->fname)
 				unlink(session->res_body->fname);
 
 		}
