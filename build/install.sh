@@ -5,7 +5,7 @@
 #        Author: csp001314@163.com
 #   Description: ---
 #        Create: 2016-11-03 20:09:47
-# Last Modified: 2018-09-10 11:42:23
+# Last Modified: 2018-09-10 12:14:25
 #
 
 [ `id -u` -ne 0 ] && {
@@ -18,7 +18,7 @@ self_path=$(cd $(dirname "$0"); pwd)
 
 . $self_path/dpdk.sh
 
-dpdk_install_prefix=/usr/local/dpdk/test11
+dpdk_install_prefix=/usr/local/dpdk/
 
 if [ ! -d ${dpdk_install_prefix} ]; then
 
