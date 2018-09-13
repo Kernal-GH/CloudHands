@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-04-13 13:32:56
- * Last Modified: 2018-05-11 12:02:14
+ * Last Modified: 2018-09-13 17:00:06
  */
 
 #include "ch_udp_session_pool.h"
@@ -92,3 +92,21 @@ ch_udp_session_pool_t *ch_udp_session_pool_create(ch_udp_work_t *udp_work,
 
 	
 }
+
+ch_udp_session_t *
+ch_udp_session_pool_entry_create(ch_udp_session_pool_t *udp_pool,ch_packet_udp_t *udp_pkt,ch_udp_app_session_t *app_session,
+	uint64_t session_id){
+
+
+	ch_udp_session_t *udp_session = (ch_udp_session_t*)ch_ptable_entry_create(udp_pool->udp_session_tbl,(void*)udp_pkt);
+	if(udp_session)
+	{
+
+		ch_udp_session_init(udp_session,udp_pkt,app_session,session_id);
+
+	}
+
+	return udp_session;
+
+}
+

@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2017-12-28 12:01:39
- * Last Modified: 2017-12-28 18:18:31
+ * Last Modified: 2018-09-13 12:00:24
  */
 
 #include "ch_entry_pool.h"
@@ -20,12 +20,6 @@ ch_entry_pool_t * ch_entry_pool_create(ch_pool_t *mp,
 
 	ch_entry_pool_t *ep;
 
-	if(entry_size<sizeof(ch_ptable_entry_t))
-	{
-	
-		ch_log(CH_LOG_ERR,"Invalid entry size:%lu",(unsigned long)entry_size);
-		return NULL;
-	}
 
 	ep = (ch_entry_pool_t*)ch_pcalloc(mp,sizeof(*ep));
 	ep->type = type;
@@ -87,7 +81,7 @@ void ch_entry_pool_destroy(ch_entry_pool_t *ep){
 
 }
 
-ch_ptable_entry_t * ch_entry_pool_alloc(ch_entry_pool_t *ep){
+void * ch_entry_pool_alloc(ch_entry_pool_t *ep){
 
 	void *entry = NULL;
 
@@ -110,22 +104,22 @@ ch_ptable_entry_t * ch_entry_pool_alloc(ch_entry_pool_t *ep){
 		return NULL;
 	}
 
-	return (ch_ptable_entry_t*)entry;
+	return entry;
 }
 
 
-void ch_entry_pool_free(ch_entry_pool_t *ep,ch_ptable_entry_t *pentry) {
+void ch_entry_pool_free(ch_entry_pool_t *ep,void *pentry) {
 
 	switch(ep->type){
 	
 	case FROM_OBJ_POOL:
-		ch_object_pool_put(ep->sys_mp,(void*)pentry);
+		ch_object_pool_put(ep->sys_mp,pentry);
 
 		break;
 
 	case FROM_DPDK_POOL:
 
-		rte_mempool_put(ep->dpdk_mp,(void*)pentry);
+		rte_mempool_put(ep->dpdk_mp,pentry);
 
 		break;
 

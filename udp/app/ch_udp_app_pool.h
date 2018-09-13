@@ -18,6 +18,7 @@ typedef struct ch_udp_app_session_t ch_udp_app_session_t;
 #include "ch_mpool.h"
 #include "ch_tables.h"
 #include "ch_udp_session.h"
+#include "ch_udp_session_request_pool.h"
 #include "ch_data_output.h"
 #include "ch_packet_udp.h"
 #include "ch_udp_app_context.h"
@@ -31,6 +32,11 @@ typedef struct ch_udp_app_session_t ch_udp_app_session_t;
 #define UDP_APP_DNS 1
 #define UDP_APP_TFTP 2
 #define UDP_APP_SMON 3
+
+/*UDP Session Request process results*/
+#define PROCESS_REQ_SESSION_DONE 0
+#define PROCESS_REQ_SESSION_CONTINUE 1
+#define PROCESS_REQ_SESSION_ERROR -1
 
 struct ch_udp_app_pool_t {
 
@@ -55,10 +61,14 @@ struct ch_udp_app_session_t {
 struct ch_udp_app_t {
 
 	void *context;
+	
 
 	uint8_t type;
 	
 	ch_udp_app_session_t * (*app_session_create)(ch_udp_app_t *app,ch_packet_udp_t *pkt_udp);
+	
+	int (*process_request_session)(ch_udp_app_session_t *app_session,ch_packet_udp_t *pkt_udp);
+	int (*request_session_equal)(ch_udp_app_session_t *app_session,ch_packet_udp_t *pkt_udp);
 
 	int (*is_request)(ch_udp_app_session_t *app_session,ch_packet_udp_t *pkt_udp);
 
@@ -84,6 +94,11 @@ static inline void ch_udp_app_register(ch_udp_app_pool_t *app_pool,ch_udp_app_t 
 extern ch_udp_app_pool_t * ch_udp_app_pool_create(ch_pool_t *mp,const char *cfname);
 
 extern ch_udp_app_session_t * ch_udp_app_session_create(ch_udp_app_pool_t *app_pool, ch_packet_udp_t *pkt_udp);
+
+extern int ch_udp_app_session_request_equal(ch_udp_session_request_t *req_session,ch_udp_app_session_t *app_session,ch_packet_udp_t *pkt_udp);
+
+extern int  ch_udp_app_session_request_process(ch_udp_session_request_t *req_session,ch_udp_app_session_t *app_session,
+	ch_packet_udp_t *pkt_udp);
 
 extern int  ch_udp_app_session_packet_process(ch_udp_app_session_t *app_session,ch_packet_udp_t *pkt_udp);
 

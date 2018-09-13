@@ -16,7 +16,6 @@ typedef struct ch_entry_pool_t ch_entry_pool_t;
 #include "ch_object_pool.h"
 #include "ch_mpool.h"
 #include <rte_mempool.h>
-#include "ch_ptable.h"
 
 enum {
 
@@ -48,9 +47,9 @@ extern ch_entry_pool_t * ch_entry_pool_create(ch_pool_t *mp,
 
 extern void ch_entry_pool_destroy(ch_entry_pool_t *ep);
 
-extern ch_ptable_entry_t * ch_entry_pool_alloc(ch_entry_pool_t *ep);
+extern void * ch_entry_pool_alloc(ch_entry_pool_t *ep);
 
-extern void ch_entry_pool_free(ch_entry_pool_t *ep,ch_ptable_entry_t *pentry);
+extern void ch_entry_pool_free(ch_entry_pool_t *ep,void *pentry);
 
 extern void ch_entry_pool_dump(ch_entry_pool_t *ep,FILE *fp);
 

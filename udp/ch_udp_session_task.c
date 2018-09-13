@@ -5,13 +5,14 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-03-30 11:49:48
- * Last Modified: 2018-08-01 11:58:09
+ * Last Modified: 2018-09-13 16:04:38
  */
 
 #include "ch_udp_session_task.h"
 #include "ch_log.h"
 #include "ch_packet_record.h"
 #include "ch_udp_session_handler.h"
+#include "ch_udp_session_request_handler.h"
 
 static inline const char * _get_name(ch_pool_t *mp,const char *prefix,uint32_t tsk_id){
 
@@ -27,11 +28,13 @@ static int _udp_session_task_run(ch_task_t *task,void *priv_data ch_unused){
 
 	if(pkt){
 	
-		ch_udp_session_packet_handle(udp_task->udp_session_handler,pkt);
+		ch_udp_session_request_packet_handle(udp_task->udp_session_req_handler,pkt);
 
 		ch_packet_free(pkt);
 
 	}
+
+	ch_udp_session_task_handlers_timeout_free(udp_task);
 
 	return TASK_RETURN_OK;
 }
@@ -76,6 +79,14 @@ ch_udp_session_task_t * ch_udp_session_task_create(ch_udp_work_t *udp_work,uint3
 	if(udp_session_task->udp_session_handler == NULL){
 	
 		ch_log(CH_LOG_ERR,"Cannot create udp session handler for this udp session task:%d",(int)task_id);
+
+		return NULL;
+	}
+	
+	udp_session_task->udp_session_req_handler = ch_udp_session_request_handler_create(udp_work,udp_session_task);
+	if(udp_session_task->udp_session_req_handler == NULL){
+	
+		ch_log(CH_LOG_ERR,"Cannot create udp session request handler for this udp session task:%d",(int)task_id);
 
 		return NULL;
 	}

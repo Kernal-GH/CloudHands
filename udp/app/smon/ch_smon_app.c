@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-07-16 14:16:33
- * Last Modified: 2018-07-16 19:34:02
+ * Last Modified: 2018-09-13 17:19:21
  */
 
 #include "ch_smon_app.h"
@@ -198,6 +198,8 @@ static ch_udp_app_t smon_app = {
 	.context = NULL,
 	.type = PKT_RECORD_TYPE_UDP_SMON, 
 	.app_session_create = _smon_app_session_create,
+	.process_request_session = NULL,
+	.request_session_equal = NULL,
 	.is_request = _smon_is_request,
 	.req_pkt_process = _smon_req_pkt_process,
 	.res_pkt_process = _smon_res_pkt_process,

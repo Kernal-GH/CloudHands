@@ -30,7 +30,9 @@ udp_SOURCES = UDPMain.c \
 			 ch_udp_session_pool.c \
 			 ch_udp_session_task.c \
 			 ch_udp_session_task_pool.c \
-			 ch_udp_work.c
+			 ch_udp_work.c \
+			 ch_udp_session_request_pool.c \
+			 ch_udp_session_request_handler.c
 
 udp_OBJECTS =$(patsubst %.c,%.o,$(udp_SOURCES))
 udp_DEPENDS =$(patsubst %.c,%.d,$(udp_SOURCES))

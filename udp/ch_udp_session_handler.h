@@ -14,6 +14,7 @@
 typedef struct ch_udp_session_handler_t ch_udp_session_handler_t;
 
 #include "ch_udp_session_pool.h"
+#include "ch_udp_session.h"
 #include "ch_udp_session_task.h"
 #include "ch_udp_work.h"
 
@@ -33,7 +34,8 @@ extern ch_udp_session_handler_t *
 ch_udp_session_handler_create(ch_udp_work_t *udp_work,ch_udp_session_task_t *session_task);
 
 extern int
-ch_udp_session_packet_handle(ch_udp_session_handler_t *udp_handler,ch_packet_t *pkt);
+ch_udp_session_packet_handle(ch_udp_session_handler_t *udp_handler,
+	ch_udp_session_t *udp_session,ch_packet_udp_t *pkt_udp,int is_new_created);
 
 
 #endif /*CH_UDP_SESSION_HANDLER_H*/

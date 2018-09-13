@@ -5,17 +5,14 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-04-13 15:50:28
- * Last Modified: 2018-07-16 17:40:09
+ * Last Modified: 2018-09-13 17:05:40
  */
 
 #include "ch_udp_session_handler.h"
 #include "ch_packet_udp.h"
 #include "ch_log.h"
-#include "ch_atomic.h"
 #include "ch_udp_session.h"
 #include "ch_packet_record.h"
-
-static ch_atomic64_t cur_session_id,*cur_session_id_ptr=&cur_session_id;
 
 static void _udp_session_out(ch_udp_session_handler_t *udp_handler,
 	ch_udp_session_t *udp_session,
@@ -84,9 +81,6 @@ ch_udp_session_handler_create(ch_udp_work_t *udp_work,ch_udp_session_task_t *ses
 		return NULL;
 	}
 
-	
-	ch_atomic64_init(cur_session_id_ptr);
-
 	return udp_handler;
 }
 
@@ -110,52 +104,20 @@ static void _udp_app_pkt_handle(ch_udp_session_handler_t *udp_session_handler,
 	ch_udp_session_pool_entry_free(udp_session_handler->udp_pool,udp_session);
 }
 
-int ch_udp_session_packet_handle(ch_udp_session_handler_t *udp_handler,ch_packet_t *pkt){
+int ch_udp_session_packet_handle(ch_udp_session_handler_t *udp_handler,ch_udp_session_t *udp_session,
+	ch_packet_udp_t *pkt_udp,int is_new_created){
 
-	uint64_t sid;
-	size_t c;
-
-	ch_packet_udp_t udp_tmp,*pkt_udp = &udp_tmp;
-	ch_udp_session_t *udp_session = NULL;
 	ch_udp_session_endpoint_t *ep = NULL;
-	ch_udp_app_pool_t *app_pool = udp_handler->udp_work->app_pool;
-	ch_udp_app_session_t *app_session;
 
-	if(ch_packet_udp_init_from_pkt(pkt_udp,pkt)){
-	
-		/*invalid udp packets*/
-		return -1;
-	}
-
-	udp_session = ch_udp_session_pool_entry_find(udp_handler->udp_pool,pkt_udp);
-	
-	if(udp_session == NULL){
-
-		app_session = ch_udp_app_session_create(app_pool,pkt_udp);
-		if(app_session == NULL)
-			return -1;
-
-		/*create a new udp session*/
-		sid = ch_atomic64_add_return(cur_session_id_ptr,1)%ULONG_MAX;
-
-		udp_session = ch_udp_session_pool_entry_create(udp_handler->udp_pool,pkt_udp,app_session,sid);
-
-		if(udp_session == NULL){
-		
-			ch_log(CH_LOG_ERR,"Create a new udp session failed!");
-			return -1;
-		}
-
+	if(is_new_created){
 		ep = &udp_session->endpoint_req;
 	}else{
-
-		app_session = udp_session->app_session;
 		ep = ch_udp_session_endpoint_get(udp_session,pkt_udp); 
 	}
 
-	if(ep == NULL || app_session == NULL){
+	if(ep == NULL){
 	
-		ch_log(CH_LOG_ERR,"Cannot Get UDP Session endpoint or udp app!");
+		ch_log(CH_LOG_ERR,"Cannot Get UDP Session endpoint!");
 		return -1;
 	}
 
@@ -163,14 +125,6 @@ int ch_udp_session_packet_handle(ch_udp_session_handler_t *udp_handler,ch_packet
 	
 	_udp_app_pkt_handle(udp_handler,udp_session,pkt_udp);
 
-	
-	c = ch_ptable_entries_timeout_free(udp_handler->udp_pool->udp_session_tbl,
-		NULL);
-
-	if(c){
-	
-		ch_ptable_dump(udp_handler->udp_pool->udp_session_tbl,stdout);
-	}
 	/*ok*/
 	return 0;
 }

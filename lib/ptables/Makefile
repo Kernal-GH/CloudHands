@@ -13,7 +13,8 @@ CFLAGS += -I../common  -I${DPDK}/include -include ${DPDK}/include/rte_config.h
 ch_ptable_SOURCES = ch_ptable.c \
 					ch_entry_pool.c \
 					ch_memory.c \
-					ch_memory_cache.c
+					ch_memory_cache.c \
+					ch_plist.c
 
 ch_ptable_OBJECTS = $(patsubst %.c,%.o,$(ch_ptable_SOURCES))
 ch_ptable_DEPENDS = $(patsubst %.c,%.d,$(ch_ptable_SOURCES))

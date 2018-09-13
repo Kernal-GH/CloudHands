@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-05-08 15:49:46
- * Last Modified: 2018-07-16 17:32:28
+ * Last Modified: 2018-09-13 17:17:50
  */
 
 #include "ch_udp_app_pool.h"
@@ -37,7 +37,6 @@ static int _register_all_apps(ch_udp_app_pool_t *upool,ch_udp_app_context_t *uco
 
     return 0;
 }
-
 
 ch_udp_app_pool_t * ch_udp_app_pool_create(ch_pool_t *mp,const char *cfname){
 
@@ -89,6 +88,17 @@ ch_udp_app_session_t* ch_udp_app_session_create(ch_udp_app_pool_t *app_pool,ch_p
 	return NULL;
 }
 
+int  ch_udp_app_session_request_process(ch_udp_session_request_t *req_session ch_unused,ch_udp_app_session_t *app_session,
+	ch_packet_udp_t *pkt_udp){
+
+	return app_session->app->process_request_session(app_session,pkt_udp);
+}
+
+int  ch_udp_app_session_request_equal(ch_udp_session_request_t *req_session ch_unused,ch_udp_app_session_t *app_session,
+	ch_packet_udp_t *pkt_udp){
+
+	return app_session->app->request_session_equal(app_session,pkt_udp);
+}
 
 int  ch_udp_app_session_packet_process(ch_udp_app_session_t *app_session,ch_packet_udp_t *pkt_udp){
 

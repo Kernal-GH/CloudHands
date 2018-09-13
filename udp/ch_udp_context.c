@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-05-08 10:42:39
- * Last Modified: 2018-07-16 12:23:41
+ * Last Modified: 2018-09-13 16:53:58
  */
 
 #include "ch_udp_context.h"
@@ -33,6 +33,10 @@ static void do_udp_context_init(ch_udp_context_t *udp_context){
     udp_context->udp_session_tbl_size = 65536;
     udp_context->udp_session_cache_limits = 1024;
     udp_context->udp_session_timeout = 3*60;
+
+	udp_context->udp_session_request_pool_type = FROM_OBJ_POOL;
+    udp_context->udp_session_request_limits = 10000000; 
+    udp_context->udp_session_request_timeout = 3*60;
 }
 
 static const char *cmd_udp_log(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1,const char *p2){
@@ -238,6 +242,52 @@ static const char *cmd_udp_session_timeout(cmd_parms *cmd ch_unused, void *_dcfg
     return NULL;
 }
 
+static const char *cmd_session_request_pool_type(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1){
+
+
+    ch_udp_context_t *context = (ch_udp_context_t*)_dcfg;
+
+	if(strcasecmp(p1,"dpdk_pool")==0){
+
+		context->udp_session_request_pool_type = FROM_DPDK_POOL;
+	}else{
+	
+		context->udp_session_request_pool_type = FROM_OBJ_POOL;
+	}
+
+    return NULL;
+}
+
+static const char *cmd_udp_session_request_timeout(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1){
+
+    char *endptr;
+
+    ch_udp_context_t *context = (ch_udp_context_t*)_dcfg;
+
+    context->udp_session_request_timeout = (uint64_t)strtoul(p1,&endptr,10);
+    
+    if(context->udp_session_request_timeout <=0){
+        return "invalid udp  session request timeout config value";
+    }
+
+    return NULL;
+}
+
+static const char *cmd_udp_session_request_limits(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1){
+
+    char *endptr;
+
+    ch_udp_context_t *context = (ch_udp_context_t*)_dcfg;
+
+    context->udp_session_request_limits = (size_t)strtoul(p1,&endptr,10);
+    
+    if(context->udp_session_request_limits <=0){
+        return "invalid udp session request number limits config value";
+    }
+
+    return NULL;
+}
+
 static const command_rec udp_context_directives[] = {
     
 	CH_INIT_TAKE2(
@@ -355,6 +405,30 @@ static const command_rec udp_context_directives[] = {
             "set udp session timeout config item"
             ),
     
+	CH_INIT_TAKE1(
+            "CHUDPUDPSessionRequestPoolType",
+            cmd_session_request_pool_type,
+            NULL,
+            0,
+            "set udp session request pool type(dpdk_pool or obj_pool) config item"
+            ),
+    
+	CH_INIT_TAKE1(
+            "CHUDPUDPSessionRequestTimeout",
+            cmd_udp_session_request_timeout,
+            NULL,
+            0,
+            "set udp session request timeout config item"
+            ),
+    
+	CH_INIT_TAKE1(
+            "CHUDPUDPSessionRequestLimits",
+            cmd_udp_session_request_limits,
+            NULL,
+            0,
+            "set udp session request limits config item"
+            ),
+
 };
 
 static inline void dump_udp_context(ch_udp_context_t *udp_context){
@@ -373,6 +447,11 @@ static inline void dump_udp_context(ch_udp_context_t *udp_context){
     fprintf(stdout,"udp session table size:%lu\n",(unsigned long)udp_context->udp_session_tbl_size);
     fprintf(stdout,"udp session table cache limits:%lu\n",(unsigned long)udp_context->udp_session_cache_limits);
     fprintf(stdout,"udp session timeout:%lu\n",(unsigned long)udp_context->udp_session_timeout);
+	fprintf(stdout,"udp session request pool type:%s\n",udp_context->udp_session_request_pool_type==FROM_DPDK_POOL?"dpdk_pool":"obj_pool");
+
+    fprintf(stdout,"udp session request timeout:%lu\n",(unsigned long)udp_context->udp_session_request_timeout);
+    
+	fprintf(stdout,"udp session request limits:%lu\n",(unsigned long)udp_context->udp_session_request_limits);
 }
 
 ch_udp_context_t * ch_udp_context_create(ch_pool_t *mp,const char *cfname){

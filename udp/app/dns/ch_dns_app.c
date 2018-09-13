@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-05-08 16:27:57
- * Last Modified: 2018-07-16 19:10:03
+ * Last Modified: 2018-09-13 17:18:52
  */
 
 #include "ch_dns_app.h"
@@ -47,7 +47,6 @@ static ch_udp_app_session_t * _dns_app_session_create(ch_udp_app_t *app,ch_packe
 	return app_session;
 
 }
-
 
 static int _dns_is_request(ch_udp_app_session_t *app_session ch_unused,ch_packet_udp_t *pkt_udp){
 
@@ -155,8 +154,10 @@ static void _dns_session_fin(ch_udp_app_session_t *app_session){
 
 static ch_udp_app_t dns_app = {
 	.context = NULL,
-	.type = PKT_RECORD_TYPE_UDP_DNS, 
+	.type = PKT_RECORD_TYPE_UDP_DNS,
 	.app_session_create = _dns_app_session_create,
+	.process_request_session = NULL,
+	.request_session_equal = NULL,
 	.is_request = _dns_is_request,
 	.req_pkt_process = _dns_req_pkt_process,
 	.res_pkt_process = _dns_res_pkt_process,

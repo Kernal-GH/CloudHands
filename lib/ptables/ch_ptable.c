@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@163.com
  *   Description: ---
  *        Create: 2016-10-20 22:32:06
- * Last Modified: 2018-03-22 16:56:30
+ * Last Modified: 2018-09-13 11:55:06
  */
 
 #include "ch_log.h"
@@ -91,7 +91,7 @@ ch_ptable_t * ch_ptable_create(ch_pool_t *mp,int pool_type,
         return NULL;
     }
 	
-	tbl->ep = ch_entry_pool_create(mp,pool_type,entry_size+priv_data_size,n_entries_limit,n_entries_limit);
+	tbl->ep = ch_entry_pool_create(mp,pool_type,entry_size+priv_data_size,n_entries_limit,n_caches_limits);
 	if(tbl->ep == NULL){
 	
 		ch_log(CH_LOG_ERR,"Cannot create entry pool for ptable!");
@@ -239,17 +239,17 @@ void _entries_timeout_free(ch_ptable_t *tbl){
 }
 
 
-static inline struct list_head* _ptable_header_get(ch_ptable_t *tbl,void *key){
+static inline struct list_head* _ptable_header_get(ch_ptable_t *tbl,void *key,void *priv_data){
 
-    size_t hash = tbl->entry_hash(key,tbl->priv_data);
+    size_t hash = tbl->entry_hash(key,priv_data);
 
     return entry_header(tbl,hash&tbl->tbl_mask);
 }
 
 static inline void _ptable_insert(ch_ptable_t *tbl,ch_ptable_entry_t *tbl_entry,
-        void *key){
+        void *key,void *priv_data){
 
-    struct list_head *h = _ptable_header_get(tbl,key);
+    struct list_head *h = _ptable_header_get(tbl,key,priv_data);
 
     /*insert into header*/
     list_add(&tbl_entry->entry,h);
@@ -275,14 +275,14 @@ static inline void _ptable_caches_insert(ch_ptable_t *tbl,ch_ptable_entry_t *tbl
 }
 
 static void _ptable_entry_init(ch_ptable_t *tbl,ch_ptable_entry_t *tbl_entry,
-        void *key){
+        void *key,void *priv_data){
 
    
     _entry_last_time_update(tbl_entry);
 
     tbl->last_entry = tbl_entry;
 
-    _ptable_insert(tbl,tbl_entry,key);
+    _ptable_insert(tbl,tbl_entry,key,priv_data);
     _ptable_caches_insert(tbl,tbl_entry);
 }
 
@@ -310,7 +310,37 @@ ch_ptable_entry_t * ch_ptable_entry_create(ch_ptable_t *tbl,void *key){
         }
     }
 	
-	_ptable_entry_init(tbl,tbl_entry,key);
+	_ptable_entry_init(tbl,tbl_entry,key,tbl->priv_data);
+
+
+    return tbl_entry;
+}
+
+ch_ptable_entry_t * ch_ptable_entry_create_with_data(ch_ptable_t *tbl,void *key,void *priv_data){
+
+    ch_ptable_entry_t *tbl_entry = NULL;
+
+	tbl_entry = ch_entry_pool_alloc(tbl->ep);
+
+    if(tbl_entry == NULL){
+    
+        ch_log(CH_LOG_WARN,
+			"Cannot alloc new table entry ,try to free some timeout entries and try again --------------");
+
+        _entries_timeout_free(tbl);
+	
+		tbl_entry = ch_entry_pool_alloc(tbl->ep);
+
+        if(tbl_entry == NULL){
+       
+            tbl->tbl_stats.fail_num +=1;
+            ch_log(CH_LOG_ERR,"The number of entries allocated has been overflow,no entries timeout are freed!");
+    
+            return NULL;
+        }
+    }
+	
+	_ptable_entry_init(tbl,tbl_entry,key,priv_data);
 
 
     return tbl_entry;
@@ -364,7 +394,8 @@ static ch_ptable_entry_t * _ptable_entry_find_from_caches(ch_ptable_t *tbl,void 
 
 static inline ch_ptable_entry_t * _ptable_entry_find(ch_ptable_t *tbl,void *key){
 
-    struct list_head *h = _ptable_header_get(tbl,key); 
+    struct list_head *h = _ptable_header_get(tbl,key,tbl->priv_data);
+
     ch_ptable_entry_t *tbl_entry = NULL;
     int found = 0;
 

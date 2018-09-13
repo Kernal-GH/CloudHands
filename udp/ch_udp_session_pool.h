@@ -33,22 +33,10 @@ extern ch_udp_session_pool_t *ch_udp_session_pool_create(ch_udp_work_t *work,
 	void (*entry_timeout_cb)(ch_ptable_entry_t *entry,uint64_t tv,void *priv_data),
 	void *priv_data);
 
-static inline ch_udp_session_t *
+extern ch_udp_session_t *
 ch_udp_session_pool_entry_create(ch_udp_session_pool_t *udp_pool,ch_packet_udp_t *udp_pkt,ch_udp_app_session_t *app_session,
-	uint64_t session_id){
+	uint64_t session_id);
 
-
-	ch_udp_session_t *udp_session = (ch_udp_session_t*)ch_ptable_entry_create(udp_pool->udp_session_tbl,(void*)udp_pkt);
-	if(udp_session)
-	{
-
-		ch_udp_session_init(udp_session,udp_pkt,app_session,session_id);
-
-	}
-
-	return udp_session;
-
-}
 
 #define ch_udp_session_pool_destroy(udp_pool) ch_pool_destroy(udp_pool->mp)
 

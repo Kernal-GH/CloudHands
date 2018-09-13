@@ -84,6 +84,9 @@ extern ch_ptable_t * ch_ptable_create(ch_pool_t *mp,int pool_type,
 extern ch_ptable_entry_t * ch_ptable_entry_create(ch_ptable_t *tbl,void *key);
 
 
+extern ch_ptable_entry_t * ch_ptable_entry_create_with_data(ch_ptable_t *tbl,void *key,void *priv_data);
+
+
 extern void  ch_ptable_entry_free(ch_ptable_t *tbl,ch_ptable_entry_t *entry);
 
 
