@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-09-13 11:21:10
- * Last Modified: 2018-09-13 14:27:39
+ * Last Modified: 2018-09-14 17:37:36
  */
 
 #include "ch_plist.h"
@@ -124,7 +124,7 @@ ch_plist_entry_t * ch_plist_entry_create(ch_plist_t *plist){
     }
 
 	ENTRY_LAST_TIME_UPDATE(plist_entry);
-	list_add(&plist->entries,&plist_entry->node);
+	list_add(&plist_entry->node,&plist->entries);
 	plist->entry_num += 1;
 	plist->last_entry = plist_entry;
 
@@ -161,7 +161,7 @@ ch_plist_entry_t * ch_plist_entry_find(ch_plist_t *plist,void *key){
 	
 		ENTRY_LAST_TIME_UPDATE(plist_entry);
 		list_del(&plist_entry->node);
-		list_add(&plist->entries,&plist_entry->node);
+		list_add(&plist_entry->node,&plist->entries);
 		plist->last_entry = plist_entry;
 	}
 
