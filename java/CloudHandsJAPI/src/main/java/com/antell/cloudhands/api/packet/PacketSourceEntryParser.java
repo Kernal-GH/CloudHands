@@ -9,6 +9,7 @@ import com.antell.cloudhands.api.packet.tcp.mail.BasicMailSessionParser;
 import com.antell.cloudhands.api.packet.tcp.mail.MailSession;
 import com.antell.cloudhands.api.packet.tcp.mail.MailSessionParser;
 import com.antell.cloudhands.api.packet.udp.dns.DNSSession;
+import com.antell.cloudhands.api.packet.udp.tftp.TFTPSession;
 import com.antell.cloudhands.api.source.SourceEntry;
 import com.antell.cloudhands.api.source.SourceEntryParser;
 
@@ -24,7 +25,7 @@ public class PacketSourceEntryParser implements SourceEntryParser {
     private final HTTPSessionParser httpSessionParser;
     private final MailSessionParser mailSessionParser;
 
-    public PacketSourceEntryParser(){
+    public PacketSourceEntryParser() {
 
         httpSessionParser = new BasicHTTPSessionParser(new BasicHttpPartContentParser());
         mailSessionParser = new BasicMailSessionParser();
@@ -36,14 +37,14 @@ public class PacketSourceEntryParser implements SourceEntryParser {
         SourceEntry entry = null;
         int type = packetRecord.getType();
 
-        switch (type){
+        switch (type) {
 
             case PacketRecord.ARP:
-                entry = new ARPPacket(packetRecord.getDataInput(),packetRecord.getTime());
+                entry = new ARPPacket(packetRecord.getDataInput(), packetRecord.getTime());
                 break;
 
             case PacketRecord.ICMP:
-                entry = new ICMPPacket(packetRecord.getDataInput(),packetRecord.getTime());
+                entry = new ICMPPacket(packetRecord.getDataInput(), packetRecord.getTime());
                 break;
 
             case PacketRecord.TCP:
@@ -58,9 +59,13 @@ public class PacketSourceEntryParser implements SourceEntryParser {
                 entry = new DNSSession(packetRecord.getDataInput());
                 break;
 
+            case PacketRecord.TFTP:
+                entry = new TFTPSession(packetRecord.getDataInput());
+                break;
+
             case PacketRecord.HTTP:
             case PacketRecord.SECRESHTTP:
-                return  httpSessionParser.parse(packetRecord.getMessageUnpacker());
+                return httpSessionParser.parse(packetRecord.getMessageUnpacker());
 
             case PacketRecord.MAIL:
             case PacketRecord.SECRESMAIL:

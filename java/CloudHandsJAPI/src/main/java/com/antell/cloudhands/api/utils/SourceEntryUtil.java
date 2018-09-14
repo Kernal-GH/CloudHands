@@ -12,6 +12,7 @@ import com.antell.cloudhands.api.packet.tcp.FileTranSession;
 import com.antell.cloudhands.api.packet.tcp.http.HTTPSession;
 import com.antell.cloudhands.api.packet.tcp.mail.MailSession;
 import com.antell.cloudhands.api.packet.udp.dns.DNSSession;
+import com.antell.cloudhands.api.packet.udp.tftp.TFTPSession;
 import com.antell.cloudhands.api.source.SourceEntry;
 
 /**
@@ -141,6 +142,15 @@ public final class SourceEntryUtil {
         return (DNSSession) sourceEntry;
     }
 
+    public static boolean isTFTPSession(SourceEntry sourceEntry) {
+        return sourceEntry instanceof TFTPSession;
+    }
+
+    public static TFTPSession toTFTPSession(SourceEntry sourceEntry) {
+        return (TFTPSession) sourceEntry;
+    }
+
+
     public static boolean isArpPacket(SourceEntry sourceEntry) {
 
         return sourceEntry instanceof ARPPacket;
@@ -188,6 +198,11 @@ public final class SourceEntryUtil {
             DNSSession dnsSession = toDNSSession(sourceEntry);
             ipPairs.setSrcIP(IPUtils.ipv4Str(dnsSession.getSessionEntry().getReqIP()));
             ipPairs.setDstIP(IPUtils.ipv4Str(dnsSession.getSessionEntry().getResIP()));
+        } else if (isTFTPSession(sourceEntry)) {
+            TFTPSession tftpSession = toTFTPSession(sourceEntry);
+            ipPairs.setSrcIP(IPUtils.ipv4Str(tftpSession.getSessionEntry().getReqIP()));
+            ipPairs.setDstIP(IPUtils.ipv4Str(tftpSession.getSessionEntry().getResIP()));
+
         } else if (isHttpSession(sourceEntry)) {
 
             HTTPSession httpSession = toHttpSession(sourceEntry);
