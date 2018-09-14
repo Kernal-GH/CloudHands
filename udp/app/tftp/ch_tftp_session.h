@@ -14,6 +14,7 @@
 typedef struct ch_tftp_session_t ch_tftp_session_t;
 
 #include "ch_log.h"
+#include "ch_udp_app_pool.h"
 
 struct ch_tftp_session_t {
 
@@ -29,7 +30,7 @@ struct ch_tftp_session_t {
 	int is_read;
 	int is_error;
 
-	uint16_t lask_block;
+	uint16_t last_block;
 
 	const char *fname;
 	const char *mode;
@@ -48,7 +49,7 @@ static inline void ch_tftp_session_dump(ch_tftp_session_t *tftp_session,FILE *fp
 	fprintf(fp,"tftp.session:\n");
 	fprintf(fp,"tftp.session.action:%s\n",tftp_session->is_read?"read":"write");
 	fprintf(fp,"tftp.session.isError:%s\n",tftp_session->is_error?"true":"false");
-	fprintf(fp,"tftp.session.lastBlock:%lu\n",(unsigned long)tftp_session->lask_block);
+	fprintf(fp,"tftp.session.lastBlock:%lu\n",(unsigned long)tftp_session->last_block);
 	fprintf(fp,"tftp.session.fname:%s\n",tftp_session->fname==NULL?"":tftp_session->fname);
 	fprintf(fp,"tftp.session.mode:%s\n",tftp_session->mode==NULL?"":tftp_session->mode);
 	fprintf(fp,"tftp.session.errmsg:%s\n",tftp_session->errmsg==NULL?"":tftp_session->errmsg);

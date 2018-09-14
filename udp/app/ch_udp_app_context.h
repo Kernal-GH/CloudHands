@@ -19,9 +19,12 @@ struct ch_udp_app_context_t {
 
 
 	int dns_is_on;
+	int tftp_is_on;
 	int smon_is_on;
 
 	const char *dns_cfname;
+	const char *tftp_cfname;
+
 	const char *smon_cfname;
 };
 

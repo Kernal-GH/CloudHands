@@ -5,7 +5,7 @@
 #        Author: csp001314@163.com
 #   Description: ---
 #        Create: 2016-11-03 20:09:47
-# Last Modified: 2018-09-10 12:14:25
+# Last Modified: 2018-09-14 15:26:48
 #
 
 [ `id -u` -ne 0 ] && {
@@ -71,8 +71,10 @@ comp_lib(){
 
 	make -C CloudHands/udp/app
 	make -C CloudHands/udp/app/dns
+	make -C CloudHands/udp/app/tftp	
 	make -C CloudHands/udp/app/smon
 	cp -rc  CloudHands/udp/app/dns/*.o CloudHands/udp/app/
+	cp -rc  CloudHands/udp/app/tftp/*.o CloudHands/udp/app/
 	cp -rc  CloudHands/udp/app/smon/*.o CloudHands/udp/app/
 	make -C CloudHands/StreamAnalyze/statistic
 	make -C CloudHands/SessionMonitor

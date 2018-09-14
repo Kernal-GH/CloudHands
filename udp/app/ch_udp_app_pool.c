@@ -5,13 +5,14 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-05-08 15:49:46
- * Last Modified: 2018-09-13 17:17:50
+ * Last Modified: 2018-09-14 15:11:01
  */
 
 #include "ch_udp_app_pool.h"
 #include "ch_log.h"
 #include "ch_net_util.h"
 #include "ch_dns_app.h"
+#include "ch_tftp_app.h"
 #include "ch_smon_app.h"
 
 #define process_register_retv(rc,proto) do { \
@@ -28,6 +29,11 @@ static int _register_all_apps(ch_udp_app_pool_t *upool,ch_udp_app_context_t *uco
 	if(ucontext->dns_is_on){
 		rc = ch_dns_app_init(upool,ucontext->dns_cfname);
 		process_register_retv(rc,"dns");
+	}
+	
+	if(ucontext->tftp_is_on){
+		rc = ch_tftp_app_init(upool,ucontext->tftp_cfname);
+		process_register_retv(rc,"tftp");
 	}
 
 	if(ucontext->smon_is_on){

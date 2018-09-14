@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-07-12 14:25:48
- * Last Modified: 2018-07-16 11:54:19
+ * Last Modified: 2018-09-14 15:09:33
  */
 
 #include "ch_udp_app_context.h"
@@ -16,9 +16,11 @@ static void _udp_app_context_init(ch_udp_app_context_t *ucontext){
 
 
 	ucontext->dns_is_on = 0;
+	ucontext->tftp_is_on = 0;
 	ucontext->smon_is_on = 0;
 
 	ucontext->dns_cfname = "/usr/local/dpdk/CloudHands/conf/udp/app/dns.conf";
+	ucontext->tftp_cfname = "/usr/local/dpdk/CloudHands/conf/udp/app/tftp.conf";
 	ucontext->smon_cfname = "/usr/local/dpdk/CloudHands/conf/udp/app/smon.conf";
 }
 
@@ -36,6 +38,15 @@ static const char *cmd_dns(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1
     ch_udp_app_context_t *ucontext = (ch_udp_app_context_t*)_dcfg;
 
 	_cfg_set(ucontext->dns_is_on,ucontext->dns_cfname,p1,p2);
+
+	return NULL;
+}
+
+static const char *cmd_tftp(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1,const char *p2){
+
+    ch_udp_app_context_t *ucontext = (ch_udp_app_context_t*)_dcfg;
+
+	_cfg_set(ucontext->tftp_is_on,ucontext->tftp_cfname,p1,p2);
 
 	return NULL;
 }
@@ -59,6 +70,13 @@ static const command_rec ucontext_directives[] = {
             "set udp app dns <on/off> <dns conf file path>"
             ),
     
+    CH_INIT_TAKE2(
+            "CHUDPAPPTFtp",
+            cmd_tftp,
+            NULL,
+            0,
+            "set udp app tftp <on/off> <tftp conf file path>"
+            ),
 
     CH_INIT_TAKE2(
             "CHUDPAPPSmon",
@@ -80,6 +98,7 @@ static void _udp_app_context_dump(ch_udp_app_context_t *ucontext) {
 	fprintf(stdout,"Dump UDP APP Context ----------------------------\n");
 	
 	_cfg_dump("dns",ucontext->dns_is_on,ucontext->dns_cfname);
+	_cfg_dump("tftp",ucontext->tftp_is_on,ucontext->tftp_cfname);
 	_cfg_dump("smon",ucontext->smon_is_on,ucontext->smon_cfname);
 
 }
