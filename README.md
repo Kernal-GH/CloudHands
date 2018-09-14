@@ -90,6 +90,7 @@ cd /usr/local/dpdk/CloudHands/bin
 ### 基于UDP的协议还原
 ```
 1. DNS
+2. tftp
 
 ```
 ### 流量分析相关的元数据
