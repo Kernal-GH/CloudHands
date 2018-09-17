@@ -3,13 +3,12 @@ package com.antell.cloudhands.api.packet;
 import com.antell.cloudhands.api.packet.smon.SMonSession;
 import com.antell.cloudhands.api.packet.tcp.http.BasicHTTPSessionParser;
 import com.antell.cloudhands.api.packet.tcp.http.BasicHttpPartContentParser;
-import com.antell.cloudhands.api.packet.tcp.http.HTTPSession;
 import com.antell.cloudhands.api.packet.tcp.http.HTTPSessionParser;
 import com.antell.cloudhands.api.packet.tcp.mail.BasicMailSessionParser;
-import com.antell.cloudhands.api.packet.tcp.mail.MailSession;
 import com.antell.cloudhands.api.packet.tcp.mail.MailSessionParser;
 import com.antell.cloudhands.api.packet.udp.dns.DNSSession;
-import com.antell.cloudhands.api.packet.udp.tftp.TFTPSession;
+import com.antell.cloudhands.api.packet.udp.tftp.BasicTFTPSessionParser;
+import com.antell.cloudhands.api.packet.udp.tftp.TFTPSessionParser;
 import com.antell.cloudhands.api.source.SourceEntry;
 import com.antell.cloudhands.api.source.SourceEntryParser;
 
@@ -24,11 +23,14 @@ public class PacketSourceEntryParser implements SourceEntryParser {
 
     private final HTTPSessionParser httpSessionParser;
     private final MailSessionParser mailSessionParser;
+    private final TFTPSessionParser tftpSessionParser;
 
     public PacketSourceEntryParser() {
 
         httpSessionParser = new BasicHTTPSessionParser(new BasicHttpPartContentParser());
         mailSessionParser = new BasicMailSessionParser();
+        tftpSessionParser = new BasicTFTPSessionParser();
+
     }
 
     @Override
@@ -60,8 +62,7 @@ public class PacketSourceEntryParser implements SourceEntryParser {
                 break;
 
             case PacketRecord.TFTP:
-                entry = new TFTPSession(packetRecord.getDataInput());
-                break;
+                return tftpSessionParser.parse(packetRecord.getDataInput());
 
             case PacketRecord.HTTP:
             case PacketRecord.SECRESHTTP:

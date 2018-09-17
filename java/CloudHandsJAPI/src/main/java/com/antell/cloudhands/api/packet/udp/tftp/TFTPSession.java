@@ -32,6 +32,22 @@ public class TFTPSession implements SourceEntry {
         sessionEntry = new UDPSessionEntry();
         sessionEntry.read(in);
 
+        long reqIP = sessionEntry.getReqIP();
+        sessionEntry.setReqIP(sessionEntry.getResIP());
+        sessionEntry.setResIP(reqIP);
+
+        int reqPort = sessionEntry.getReqPort();
+        sessionEntry.setReqPort(sessionEntry.getResPort());
+        sessionEntry.setResPort(reqPort);
+
+        long reqBytes = sessionEntry.getReqBytes();
+        sessionEntry.setReqBytes(sessionEntry.getResBytes());
+        sessionEntry.setResBytes(reqBytes);
+
+        long reqPackets = sessionEntry.getReqPackets();
+        sessionEntry.setReqPackets(sessionEntry.getResPackets());
+        sessionEntry.setResPackets(reqPackets);
+
         setIsRead(in.readUnsignedByte());
         setIsError(in.readUnsignedByte());
         setFname(Text.readString(in, 2));
