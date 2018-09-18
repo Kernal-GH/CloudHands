@@ -4,6 +4,7 @@ import com.antell.cloudhands.api.packet.SessionEntry;
 import com.antell.cloudhands.api.packet.tcp.FileTranSession;
 import com.antell.cloudhands.api.packet.udp.UDPSessionEntry;
 import com.antell.cloudhands.api.source.SourceEntry;
+import com.antell.cloudhands.api.utils.Content;
 import com.antell.cloudhands.api.utils.IPUtils;
 import com.antell.cloudhands.api.utils.Text;
 import com.antell.cloudhands.api.utils.TextUtils;
@@ -106,17 +107,6 @@ public class TFTPSession implements SourceEntry {
             return false;
         }
     }
-    private final static String getExtName(String fileName){
-
-        if(TextUtils.isEmpty(fileName))
-            return "data";
-
-        int index = fileName.lastIndexOf(".");
-        if(index<0)
-            return "data";
-
-        return fileName.substring(index+1);
-    }
 
     private FileTranSession toFileTranSession(long fsize) {
 
@@ -132,7 +122,7 @@ public class TFTPSession implements SourceEntry {
         fileTranSession.setBytes(fsize);
         fileTranSession.setContentPath(fpath);
         fileTranSession.setFname(fname);
-        fileTranSession.setExtName(getExtName(fname));
+        fileTranSession.setExtName(Content.getExtName(fname));
 
         return fileTranSession;
     }

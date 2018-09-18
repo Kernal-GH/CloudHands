@@ -35,6 +35,7 @@ public class HTTPSession implements SourceEntry{
     private String reqContentType;
     private String resContentType;
     private String contentEncoding;
+    private String contentDisposition;
 
     private int status;
 
@@ -49,7 +50,7 @@ public class HTTPSession implements SourceEntry{
     /*only used for 206 part content parser*/
     private long lastTime;
     private String contentRange;
-
+    private String filename;
 
     public HTTPSession(MessageUnpacker unpacker) throws IOException {
 
@@ -64,6 +65,7 @@ public class HTTPSession implements SourceEntry{
         resContentType = "";
         contentEncoding = "";
         contentRange = "";
+        contentDisposition = "";
         parse(unpacker);
     }
 
@@ -88,8 +90,10 @@ public class HTTPSession implements SourceEntry{
         fileTranSession.setDstPort(sessionEntry.getResPort());
         fileTranSession.setTime(sessionEntry.getReqStartTime());
         fileTranSession.setContentPath(path);
-        fileTranSession.setFname(getFileName(path));
+
+        fileTranSession.setFname(filename);
         fileTranSession.setExtName(extName);
+
         fileTranSession.setBytes(fsize);
 
         return fileTranSession;
@@ -113,6 +117,9 @@ public class HTTPSession implements SourceEntry{
 
         if(TextUtils.isEmpty(resBodyPath))
             return false;
+
+        if(!TextUtils.isEmpty(contentDisposition)&&contentDisposition.contains("filename"))
+            return true;
 
         if(isPartContent())
             return true;
@@ -200,6 +207,10 @@ public class HTTPSession implements SourceEntry{
                 if(isHeader(k,"Content-Range"))
                     setContentRange(v);
             }
+            if(!isReq&&TextUtils.isEmpty(contentDisposition)){
+                if(isHeader(k,"Content-Disposition"))
+                    setContentDisposition(v);
+            }
         }
 
     }
@@ -262,10 +273,31 @@ public class HTTPSession implements SourceEntry{
 
         }
 
-        setExtName(Content.getExtName(resContentType,uri));
         if(TextUtils.isEmpty(host))
             host = IPUtils.ipv4Str(sessionEntry.getResIP());
 
+        setFileInfo();
+    }
+
+    private void setFileInfo(){
+
+        String fname = null;
+        if(!TextUtils.isEmpty(contentDisposition)){
+            fname = Content.getFileName(contentDisposition);
+        }
+
+        if(TextUtils.isEmpty(fname)){
+
+            fname = Content.getFileName(resContentType,uri,resBodyPath);
+        }
+        if(TextUtils.isEmpty(fname)){
+            setFilename("unknown_file");
+            setExtName("data");
+        }else{
+
+            setFilename(fname);
+            setExtName(Content.getExtName(fname));
+        }
     }
 
     private boolean hasMatchSec(){
@@ -504,5 +536,22 @@ public class HTTPSession implements SourceEntry{
 
     public void setContentRange(String contentRange) {
         this.contentRange = contentRange;
+    }
+
+    public String getContentDisposition() {
+        return contentDisposition;
+    }
+
+    public void setContentDisposition(String contentDisposition) {
+        this.contentDisposition = contentDisposition;
+    }
+
+
+    public String getFilename() {
+        return filename;
+    }
+
+    public void setFilename(String filename) {
+        this.filename = filename;
     }
 }

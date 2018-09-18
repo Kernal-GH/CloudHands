@@ -19,7 +19,6 @@ public final class Content {
 
         contentType2ExtNames.put("application/postscript","ai");
         contentType2ExtNames.put("application/postscript","eps");
-        contentType2ExtNames.put("application/octet-stream","exe");
         contentType2ExtNames.put("application/vnd.ms-word","doc");
         contentType2ExtNames.put("application/vnd.ms-excel","xls");
         contentType2ExtNames.put("application/vnd.ms-powerpoint","ppt");
@@ -147,7 +146,19 @@ public final class Content {
         return "data";
     }
 
-    public static String getFileName(String contentType,String uri,String path){
+    public static final String getExtName(String fileName){
+
+        if(TextUtils.isEmpty(fileName))
+            return "data";
+
+        int index = fileName.lastIndexOf(".");
+        if(index<0)
+            return "data";
+
+        return fileName.substring(index+1);
+    }
+
+    public static final String getFileName(String contentType,String uri,String path){
 
         if(!TextUtils.isEmpty(uri)){
 
@@ -162,7 +173,18 @@ public final class Content {
         return extName == null?fName:fName+"."+extName;
     }
 
-    private static boolean isText(String nct){
+    public static final String getFileName(String contentDisposition){
+
+        try {
+
+            return contentDisposition.split(";")[1].split("=")[1].replaceAll("\"","");
+        }catch (Exception e){
+            return null;
+        }
+
+    }
+
+    private static final boolean isText(String nct){
 
              if(nct.contains("text")||
                     nct.contains("htm")||
@@ -179,7 +201,7 @@ public final class Content {
             return false;
     }
 
-    public static boolean isBaseText(String contentType,String uri,String path) throws IOException {
+    public static final boolean isBaseText(String contentType,String uri,String path) throws IOException {
 
         if (!TextUtils.isEmpty(contentType)) {
 
@@ -196,7 +218,7 @@ public final class Content {
         return false;
     }
 
-    public static boolean isBaseText(String contentType,String path) throws IOException {
+    public static final boolean isBaseText(String contentType,String path) throws IOException {
 
         if(isBaseText(contentType,null,path))
             return true;
@@ -284,13 +306,6 @@ public final class Content {
         } catch (IOException e) {
             return "Sorry,read body failed!";
         }
-    }
-
-
-
-    public static void main(String[] args) throws IOException {
-
-        System.out.println(Files.probeContentType(Paths.get("C:\\Users\\dell\\Desktop\\test\\aaa")));
     }
 
 }
