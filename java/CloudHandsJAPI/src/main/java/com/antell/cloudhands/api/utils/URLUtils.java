@@ -291,7 +291,7 @@ public final class URLUtils {
             return "";
 
         int end = getPathEndPos(uri);
-        if (end == 0||end>=uri.length())
+        if (end == 0||end>uri.length())
             return "";
 
         return uri.substring(0, end);
