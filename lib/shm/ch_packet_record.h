@@ -35,6 +35,7 @@ typedef struct ch_packet_record_t ch_packet_record_t;
 #define PKT_RECORD_TYPE_TCP_SMON 13
 #define PKT_RECORD_TYPE_MREQ_HTTP 14
 #define PKT_RECORD_TYPE_MREQ_MAIL 15
+#define PKT_RECORD_TYPE_TCP_FTP_DATA 16
 
 struct ch_packet_record_t {
 
