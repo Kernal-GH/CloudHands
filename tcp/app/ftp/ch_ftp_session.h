@@ -13,8 +13,6 @@
 
 typedef struct ch_ftp_cmd_t ch_ftp_cmd_t;
 typedef struct ch_ftp_ans_t ch_ftp_ans_t;
-
-typedef struct ch_ftp_session_data_t ch_ftp_session_data_t;
 typedef struct ch_ftp_session_t ch_ftp_session_t;
 
 #define PASV_MODE 1
@@ -28,6 +26,30 @@ typedef struct ch_ftp_session_t ch_ftp_session_t;
 #define CMD_RETR "RETR"
 #define CMD_STORE "STORE"
 #define CMD_LIST "LIST"
+#define CMD_PORT "PORT"
+#define CMD_ACCT "ACCT"
+#define CMD_CDUP "CDUP"
+#define CMD_SMNT "SMNT"
+#define CMD_QUIT "QUIT"
+#define CMD_REIN "REIN"
+#define CMD_TYPE  "TYPE"
+#define CMD_STRU "STRU"
+#define CMD_MODE  "MODE"
+#define CMD_APPE  "APPE"
+#define CMD_ALLO  "ALLO"
+#define CMD_REST  "RESET"
+#define CMD_RNFR  "RNFR"
+#define CMD_RNTO  "RNTO"
+#define CMD_ABOR  "ABOR"
+#define CMD_DELE  "DELE"
+#define CMD_RMD   "RMD"
+#define CMD_MKD   "MKD"
+#define CMD_NLIST "NLIST"
+#define CMD_SITE  "SITE"
+#define CMD_SYST  "SYST"
+#define CMD_STAT  "STAT"
+#define CMD_HELP  "HELP"
+#define CMD_NOOP  "NOOP"
 
 #define FTP_DATACONN          150
 
@@ -106,6 +128,8 @@ struct ch_ftp_cmd_t {
 
 	struct list_head node;
 	struct list_head ans_list;
+	ch_ftp_data_connection_t *ftp_dcon;
+
 	const char *cmd;
 	const char *args;
 };
@@ -114,6 +138,7 @@ struct ch_ftp_cmd_t {
 struct ch_ftp_ans_t {
 
 	struct list_head node;
+	ch_ftp_cmd_t *cmd;
 	uint16_t code;
 	const char *phrase;
 };
@@ -121,10 +146,8 @@ struct ch_ftp_ans_t {
 struct ch_ftp_session_t {
 
 	struct list_head cmd_list;
-	ch_ftp_cmd_t *cur_cmd;
 
-	struct list_head dsession_list;
-	ch_ftp_session_data_t *cur_dsession;
+	ch_ftp_cmd_t *cur_cmd;
 
 	ch_pool_t *mp;
 
@@ -133,48 +156,15 @@ struct ch_ftp_session_t {
 
 };
 
-struct ch_ftp_session_data_t {
-
-	struct list_head node;
-
-	int is_ok;
-
-	int mode;
-	const char *path;
-	const char *name; 
-
-	uint32_t src_ip;
-	uint32_t dst_ip;
-	uint16_t src_port;
-	uint16_t dst_port;
-
-	uint64_t size;
-	uint64_t rx_size;
-
-	const char *fstore_path;
-	FILE *fstore_fp;
-
-};
-
 extern ch_ftp_session_t * ch_ftp_session_create(ch_pool_t *mp);
 
-extern void ch_ftp_session_destroy(ch_ftp_session_t *ftp_session);
+extern ch_ftp_cmd_t* ch_ftp_session_cmd_add(ch_ftp_session_t *ftp_session,ch_str_t *cmd,ch_str_t *args);
 
-extern void ch_ftp_session_cmd_add(ch_ftp_session_t *ftp_session,ch_str_t *cmd,ch_str_t *args);
-
-extern void ch_ftp_session_ans_add(ch_ftp_session_t *ftp_session,ch_str_t *code,ch_str_t *phrase);
-
-extern ch_ftp_session_data_t * ch_ftp_session_data_find(ch_ftp_session_t *ftp_session,
-	uint32_t src_ip,
-	uint32_t dst_ip,
-	uint16_t src_port,
-	uint16_t dst_port);
-
-extern ch_ftp_session_data_t * ch_ftp_session_data_create(ch_ftp_session_t *ftp_session,ch_ftp_cmd_t *cmd);
-
-extern int ch_ftp_session_data_append(ch_ftp_session_t *ftp_session,ch_ftp_session_data_t *ftp_dsession,void *data,size_t dlen);
+extern ch_ftp_ans_t* ch_ftp_session_ans_add(ch_ftp_session_t *ftp_session,ch_str_t *code,ch_str_t *phrase);
 
 #define IS_CMD(ftp_cmd,cmd_name) (memcmp(cmd_name,ftp_cmd->cmd,strlen(cmd_name))==0)
+
+#define IS_CMD_STR(cmd_str,cmd_name) (memcmp(cmd_name,cmd_str->data,cmd_str->len)==0)
 
 static inline ch_ftp_cmd_t * ch_ftp_session_find_last_cmd(ch_ftp_session_t *ftp_session,const char *cmd){
 
