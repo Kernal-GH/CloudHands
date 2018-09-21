@@ -56,6 +56,49 @@ static inline void _line_str_parse(ch_pp_data_line_t *line,ch_str_t *first,ch_st
 	
 } 
 
+static void _ip_port_get(const char *str,uint32_t *ip,uint16_t *port) {
+
+    int i = 0;
+    uint16_t intv;
+    uint32_t ip_v = 0;
+    uint16_t port_v1 = 0;
+    uint16_t port_v2 = 0;
+    *ip = 0;
+    *port = 0;
+
+    char str_cp[64] = {0};
+    
+    snprintf(str_cp,63,"%s",str);
+
+    char *temp = strtok(str_cp,",");
+
+    while(temp){
+    
+        if(i>=6)
+            break;
+
+        intv = atoi(temp);
+
+        if(i<4){
+
+            ip_v += intv<<(8*i);
+        }else if(i==4){
+        
+            port_v1 = intv;
+        }else if(i == 5){
+        
+            port_v2 = intv;
+        }
+
+        temp = strtok(NULL,",");
+        i++;
+    }
+
+    *ip = ip_v;
+    *port = (port_v1<<8)+port_v2;
+
+}
+
 static void _process_port_cmd(ch_tcp_app_t *app,ch_tcp_session_t *tsession,ch_ftp_session_entry_t *ftp_session_entry,
 	ch_str_t *cmd,ch_str_t *cmd_args){
 
