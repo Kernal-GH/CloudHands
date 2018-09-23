@@ -12,7 +12,8 @@
 #include "ch_log.h"
 
 void ch_ftp_data_session_entry_init(ch_ftp_data_session_entry_t *ftp_data_entry,ch_pool_t *mp,
-	const char *ftp_path,const char *ftp_fname){
+	ch_ftp_data_connection_t *ftp_dcon,
+    const char *ftp_path,const char *ftp_fname){
 
 	ch_proto_session_entry_init(&smon_entry->psEntry);
 
@@ -21,6 +22,10 @@ void ch_ftp_data_session_entry_init(ch_ftp_data_session_entry_t *ftp_data_entry,
 	ftp_data_entry->ftp_fname = ftp_fname;
 	ftp_data_entry->fstore_path = NULL;
 	ftp_data_entry->fstore_fp = NULL;
+
+    ftp_data_entry->ftp_dcon = ftp_dcon;
+    ftp_dcon->data_session_entry = ftp_data_entry;
+
 
 }
 
@@ -53,5 +58,12 @@ void ch_ftp_data_session_entry_fin(ch_ftp_data_session_entry_t *ftp_data_entry){
 		fclose(ftp_data_entry->fstore_fp);
 		ftp_data_entry->fstore_fp = NULL;
 	}
+}
+
+void ch_ftp_data_session_entry_fin_output(ch_proto_session_store_t *pstore,ch_tcp_session_t *tsession,ch_ftp_data_session_entry_t *ftp_data_entry){
+
+    ch_proto_session_store_write(pstore,tsession,ftp_data_entry);
+    ch_ftp_data_session_entry_fin(ftp_data_entry);
+
 }
 

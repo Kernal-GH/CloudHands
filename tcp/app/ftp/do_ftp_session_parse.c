@@ -120,17 +120,6 @@ static void _ip_port_get(const char *str,uint32_t *ip,uint16_t *port,int is_pasv
 
 }
 
-static void _process_port_cmd(ch_tcp_app_t *app,ch_tcp_session_t *tsession,ch_ftp_session_entry_t *ftp_session_entry,
-	ch_str_t *cmd,ch_str_t *cmd_args){
-
-
-}
-
-static void _process_pasv_ans(ch_tcp_app_t *app,ch_tcp_session_t *tsession,ch_ftp_session_entry_t *ftp_session_entry,
-	ch_str_t *ans,ch_str_t *ans_args){
-
-
-}
 
 static int do_ftp_session_request_parse(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,
 	ch_tcp_session_t *tsession,void *data,size_t dlen) {
@@ -143,10 +132,9 @@ static int do_ftp_session_request_parse(ch_tcp_app_t *app,ch_proto_session_store
 	ch_ftp_session_entry_t *ftp_session_entry = (ch_ftp_session_entry_t*)tsession->sentry;
 	ch_proto_session_entry_update(&ftp_session_entry->psEntry,dlen,1);
 
-	ch_pp_data_input_t *din;
+	ch_pp_data_input_t *din = &ftp_session_entry->data_input_req;
 	ch_pp_data_line_t tmp,*line=&tmp;
 
-	din = &ftp_session_entry->data_input;
 
 	if(ch_pp_din_read_prefare(din,data,dlen)){
 	
@@ -183,7 +171,69 @@ static int do_ftp_session_request_parse(ch_tcp_app_t *app,ch_proto_session_store
 	return PARSE_CONTINUE;
 }
 
-static int do_ftp_session_response_parse() {
+static void _process_ftp_ans(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,
+        ch_tcp_session_t *tsession,ch_ftp_session_entry_t *ftp_session_entry,ch_ftp_cmd_t *ftp_cmd,
+        ch_ftp_ans_t *ftp_ans) {
+
+
+}
+
+static int 
+do_ftp_session_response_parse(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,
+        ch_tcp_session_t *tsession,void *data,size_t dlen) {
+
+	int rc;
+
+    ch_ftp_cmd_t *ftp_cmd = NULL;
+    ch_ftp_ans_t *ftp_ans = NULL;
+
+	ch_str_t code_tmp,*code = &code_tmp;
+	ch_str_t phrase_tmp,*phrase = &phrase_tmp;
+
+	ch_ftp_session_entry_t *ftp_session_entry = (ch_ftp_session_entry_t*)tsession->sentry;
+	ch_proto_session_entry_update(&ftp_session_entry->psEntry,dlen,0);
+
+	ch_pp_data_input_t *din = &ftp_session_entry->data_input_res;
+	ch_pp_data_line_t tmp,*line=&tmp;
+
+
+	if(ch_pp_din_read_prefare(din,data,dlen)){
+	
+		ch_log(CH_LOG_ERR,"Cannot init data input to parse ftp response!");
+		return PARSE_BREAK;
+	}
+
+    while(ch_pp_din_has_data(din,0)){
+
+        /*Try to read a line from data input*/
+        if(ch_pp_data_input_line_read(din,line)==0){
+            
+            /*process cmd line*/
+            _line_str_parse(line,code,phrase);
+
+            if(code->len>0&&code->data!=NULL){
+
+                ftp_ans = ch_ftp_session_ans_add(ftp_session_entry->ftp_session,code,phrase);
+                if(ftp_ans&&ftp_ans->cmd){
+                
+                    _process_ftp_ans(app,pstore,tsession,ftp_session_entry,ftp_ans->cmd,ftp_ans);
+                }
+            }
+        }else{
+            /*cannot read a line ,maybe need more data*/
+            break;
+        }
+
+    }
+
+
+	if(ch_pp_din_read_end(din)){
+	
+		ch_log(CH_LOG_ERR,"Cannot complete data input end for parse ftp request!");
+		return PARSE_BREAK;
+	}
+
+	return PARSE_CONTINUE;
 
 }
 

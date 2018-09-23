@@ -20,7 +20,8 @@ struct ch_ftp_session_entry_t {
 
 	ch_proto_session_entry_t psEntry;
 	
-	ch_pp_data_input_t data_input;
+	ch_pp_data_input_t data_input_req;
+	ch_pp_data_input_t data_input_res;
 
 	ch_pool_t *mp;
 

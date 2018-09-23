@@ -66,20 +66,24 @@ static ch_tcp_app_t * _ftp_data_app_create(ch_pool_t *mp){
 
 }
 
-ch_ftp_data_connection_t * ch_ftp_data_connection_create(ch_pool_t *mp,uint32_t task_id,ch_ftp_session_t *ftp_session,
+ch_ftp_data_connection_t * ch_ftp_data_connection_create(uint32_t task_id,ch_ftp_session_t *ftp_session,
 	uint32_t src_ip,uint32_t dst_ip,uint32_t dst_port){
 
 	TASK_ID_CHECK(task_id,1,NULL);
 	struct list_head *h = LIST_HEAD_GET(task_id);
+    ch_pool_t *mp;
+
+    mp = ch_pool_create(1024);
+
+    if(mp == NULL){
+    
+        ch_log(CH_LOG_ERR,"Cannot Create a memmory pool for ftp data connection!");
+        return NULL;
+    }
 
 	ch_ftp_data_connection_t *fd_conn = (ch_ftp_data_connection_t*)ch_pcalloc(mp,sizeof(*fd_conn));
-	if(fd_conn == NULL)
-	{
-	
-		ch_log(CH_LOG_ERR,"Have no memory to create ftp data connection!");
-		return NULL;
-	}
 
+    fd_conn->mp = mp;
 	fd_conn->ftp_data_app = _ftp_data_app_create(mp);
 	fd_conn->ftp_data_app->context = (void*)fd_conn;
 	fd_conn->src_ip = src_ip;
@@ -88,6 +92,8 @@ ch_ftp_data_connection_t * ch_ftp_data_connection_create(ch_pool_t *mp,uint32_t 
 
 	fd_conn->ftp_session = ftp_session;
 	fd_conn->header = &(ftp_conn_pool->dcon_header_arr[task_id]);
+
+    fd_conn->data_session_entry = NULL;
 
 	list_add(&fd_conn->node,h);
 
@@ -110,10 +116,28 @@ ch_ftp_data_connection_t * ch_ftp_data_connection_find(uint32_t task_id,ch_packe
 	return fd_conn;
 }
 
-void ch_ftp_data_connection_remove(uint32_t task_id,ch_ftp_data_connection_t *fd_conn){
+void ch_ftp_data_connection_fin(uint32_t task_id,ch_ftp_data_connection_t *fd_conn){
 
 	TASK_ID_CHECK(task_id,0,NULL);
 
 	list_del(&fd_conn->node);
+    ch_pool_destroy(fd_conn->mp);
+
+}
+
+void ch_ftp_data_connection_fin_output(uint32_t task_id,ch_proto_session_store_t *pstore,ch_tcp_session_t *tsession,
+        ch_ftp_data_connection_t *fd_conn){
+
+	TASK_ID_CHECK(task_id,0,NULL);
+
+    if(fd_conn->data_session_entry){
+    
+    
+        ch_ftp_data_session_entry_fin_output(pstore,tsession,fd_conn->data_session_entry);
+
+    }
+
+    ch_ftp_data_connection_fin(task_id,fd_conn);
+
 }
 

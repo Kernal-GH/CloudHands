@@ -20,6 +20,7 @@ void ch_ftp_session_entry_init(ch_ftp_session_entry_t *ftp_entry,ch_pool_t *mp,
 
 	ftp_entry->ftp_session = ftp_session;
 
-	ch_pp_din_init(&ftp_entry->data_input,g_buffer,mp); 
+	ch_pp_din_init(&ftp_entry->data_input_req,g_buffer,mp); 
+	ch_pp_din_init(&ftp_entry->data_input_res,g_buffer,mp); 
 
 }
