@@ -8,6 +8,7 @@
  * Last Modified: 2018-09-21 11:40:46
  */
 
+#include <string.h>
 #include "ch_ftp.h"
 #include "ch_config.h"
 #include "ch_log.h"

@@ -56,7 +56,7 @@ static inline void _line_str_parse(ch_pp_data_line_t *line,ch_str_t *first,ch_st
 	
 } 
 
-static void _ip_port_get(const char *str,uint32_t *ip,uint16_t *port) {
+static void _ip_port_get(const char *str,uint32_t *ip,uint16_t *port,int is_pasv) {
 
     int i = 0;
     uint16_t intv;
@@ -67,8 +67,29 @@ static void _ip_port_get(const char *str,uint32_t *ip,uint16_t *port) {
     *port = 0;
 
     char str_cp[64] = {0};
-    
-    snprintf(str_cp,63,"%s",str);
+
+    size_t str_len = strlen(str);
+
+    if(is_pasv){
+
+        /*skip no digit char*/
+        while(!isdigit(*str)&&(*str)!='\0'){
+            str++;
+            str_len--;
+        };
+        
+        /*skip tail no digit char*/
+        size_t nlen = strlen(str);
+        const char *nstr = str+nlen-1;
+        while(nstr>str&&!isdigit(*nstr)){
+        
+            nstr--;
+            str_len--;
+        }
+
+    }
+
+    memcpy(str_cp,str,str_len<=63?str_len:63);
 
     char *temp = strtok(str_cp,",");
 
