@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-09-21 10:21:28
- * Last Modified: 2018-09-25 16:56:42
+ * Last Modified: 2018-09-25 19:39:21
  */
 
 #define FTP_DATA_NEED_CREATE_FILE_BODY(session) ((session)->fstore_fp == NULL)
@@ -17,6 +17,10 @@ static inline int _do_content_process(ch_tcp_app_t *app,ch_tcp_session_t *tsessi
 	ch_fpath_t *fpath = ch_ftp_fstore_path_get_from_app(app);
 
 	ch_ftp_data_session_entry_t *ftp_data_entry = (ch_ftp_data_session_entry_t*)tsession->sentry;
+	if(ftp_data_entry->ftp_dcon->tsession == NULL){
+	
+		ftp_data_entry->ftp_dcon->tsession = tsession;
+	}
 
 	ch_proto_session_entry_update(&ftp_data_entry->psEntry,dlen,is_req);
 

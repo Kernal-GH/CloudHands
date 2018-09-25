@@ -47,6 +47,8 @@ struct ch_ftp_data_connection_t {
 
 	ch_ftp_data_connection_list_head_t *header;
 
+	ch_tcp_session_t *tsession;
+
 	ch_tcp_app_t *ftp_data_app;
 
 	ch_ftp_session_t *ftp_session;

@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-09-20 11:32:35
- * Last Modified: 2018-09-25 16:54:40
+ * Last Modified: 2018-09-25 19:42:57
  */
 
 #include "ch_ftp_data_connection_pool.h"
@@ -92,6 +92,7 @@ ch_ftp_data_connection_t * ch_ftp_data_connection_create(uint32_t task_id,ch_ftp
 	fd_conn->header = &(ftp_conn_pool->dcon_header_arr[task_id]);
 
     fd_conn->data_session_entry = NULL;
+	fd_conn->tsession = NULL;
 
 	list_add(&fd_conn->node,h);
 
@@ -113,7 +114,7 @@ ch_ftp_data_connection_t * ch_ftp_data_connection_find(uint32_t task_id,ch_packe
 			return fd_conn;
 	}
 
-	return fd_conn;
+	return NULL;
 }
 
 void ch_ftp_data_connection_fin(uint32_t task_id,ch_ftp_data_connection_t *fd_conn){
@@ -126,16 +127,16 @@ void ch_ftp_data_connection_fin(uint32_t task_id,ch_ftp_data_connection_t *fd_co
 
 }
 
-void ch_ftp_data_connection_fin_output(uint32_t task_id,ch_proto_session_store_t *pstore,ch_tcp_session_t *tsession,
+void ch_ftp_data_connection_fin_output(uint32_t task_id,ch_proto_session_store_t *pstore,ch_tcp_session_t *tsession ch_unused,
         ch_ftp_data_connection_t *fd_conn){
 
 	if(task_id>= MAX_THREAD_NUM)
 		return;
 
-    if(fd_conn->data_session_entry){
+    if(fd_conn->data_session_entry&&fd_conn->tsession){
     
     
-        ch_ftp_data_session_entry_fin_output(pstore,tsession,fd_conn->data_session_entry);
+        ch_ftp_data_session_entry_fin_output(pstore,fd_conn->tsession,fd_conn->data_session_entry);
 
     }
 
