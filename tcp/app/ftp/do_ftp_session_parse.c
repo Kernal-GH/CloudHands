@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-09-21 12:12:44
- * Last Modified: 2018-09-21 16:34:21
+ * Last Modified: 2018-09-25 13:44:38
  */
 
 static inline void _line_str_parse(ch_pp_data_line_t *line,ch_str_t *first,ch_str_t *second) {
@@ -155,10 +155,6 @@ static int do_ftp_session_request_parse(ch_tcp_app_t *app,ch_proto_session_store
 		
 			ch_ftp_session_cmd_add(ftp_session_entry->ftp_session,cmd,cmd_args);
 
-			if(IS_CMD_STR(cmd,CMD_PORT)){
-
-				_process_port_cmd(app,tsession,ftp_session_entry,cmd,cmd_args);
-			}
 		}
 	}
 
@@ -171,11 +167,114 @@ static int do_ftp_session_request_parse(ch_tcp_app_t *app,ch_proto_session_store
 	return PARSE_CONTINUE;
 }
 
+#define STRV_IS_EMPTY(v) ((v)==NULL||strlen(v)==0)
+
+static void _process_ftp_data_connection(ch_proto_session_store_t *pstore,
+	ch_tcp_session_t *tsession,ch_ftp_session_entry_t *ftp_session_entry,ch_ftp_cmd_t *ftp_cmd,
+	 ch_ftp_ans_t *ftp_ans,int is_pasv){
+
+
+	uint32_t t_dip;
+	uint32_t t_sip;
+
+	uint32_t dst_ip;
+	uint32_t dst_port;
+	uint32_t src_ip;
+
+	ch_ftp_data_connection_t *ftp_dcon;
+	
+	t_dip = ch_tcp_session_dstip_get(tsession);
+	t_sip = ch_tcp_session_srcip_get(tsession);
+
+	if(STRV_IS_EMPTY(ftp_ans->phrase))
+		return;
+
+	if(ftp_cmd->ftp_dcon){
+	
+		ch_log(CH_LOG_ERR,"This FTP Cmd:%s,has been create a ftp data connection!",ftp_cmd->cmd);
+		return;
+	}
+
+	if(is_pasv&&ftp_ans->code!=FTP_PASVOK){
+
+		ch_log(CH_LOG_ERR,"ignore this failed pasv cmd process:%lu,%s",(unsigned long)ftp_ans->code,ftp_ans->phrase);
+		return;
+	}
+
+	if(is_pasv == 0&&ftp_ans->code!=FTP_PORTOK){
+	
+		ch_log(CH_LOG_ERR,"ignore this failed port cmd process:%lu,%s",(unsigned long)ftp_ans->code,ftp_ans->phrase);
+		return;
+	}
+
+	_ip_port_get(ftp_ans->phrase,&dst_ip,&dst_port,is_pasv);
+	if((dst_ip == 0||(dst_ip!=t_sip&&dst_ip!=t_dip))||dst_port == 0){
+	
+		ch_log(CH_LOG_ERR,"ignore this ftp cmd:%s,invalid ip&port:%s",ftp_cmd->cmd,ftp_ans->phrase);
+		return;
+	}
+	
+	src_ip = dst_ip == t_sip?t_dip:t_sip;
+
+	/*create a ftp data connection*/
+	ftp_dcon = ch_ftp_data_connection_create(pstore->task_id,ftp_session_entry->ftp_session,
+		src_ip,dst_ip,dst_port);
+
+	if(ftp_dcon == NULL){
+	
+		ch_log(CH_LOG_ERR,"Cannot create a ftp data connection for ftp_cmd:%s %s,ftp_ans:%d %s",
+			ftp_cmd->cmd,ftp_cmd->cmd_args,(int)ftp_ans->code,ftp_ans->phrase);
+
+	}
+
+	ftp_cmd->ftp_dcon = ftp_dcon;
+
+}
+
+static void _process_ftp_data_rw_ok(ch_proto_session_store_t *pstore,
+	ch_tcp_session_t *tsession,ch_ftp_session_entry_t *ftp_session_entry){
+
+
+	ch_ftp_cmd_t *ftp_cmd;
+
+	ftp_cmd = ch_ftp_session_find_last_cmd(ftp_session_entry->ftp_session,CMD_PASV);
+	if(ftp_cmd == NULL){
+	
+		ftp_cmd = ch_ftp_session_find_last_cmd(ftp_session_entry->ftp_session,CMD_PORT);
+	}
+	
+	if(ftp_cmd == NULL){
+	
+		ch_log(CH_LOG_ERR,"No pasv/port ftp cmd has been found!");
+		return;
+	}
+
+	if(ftp_cmd->ftp_dcon){
+	
+		/**/
+		ch_ftp_data_connection_fin_output(pstore->task_id,pstore,tsession,ftp_cmd->ftp_dcon);
+
+	}
+
+}
+
 static void _process_ftp_ans(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,
         ch_tcp_session_t *tsession,ch_ftp_session_entry_t *ftp_session_entry,ch_ftp_cmd_t *ftp_cmd,
         ch_ftp_ans_t *ftp_ans) {
 
 
+	if(IS_CMD(ftp_cmd,CMD_PASV)){
+		
+		_process_ftp_data_connection(pstore,tsession,ftp_session_entry,ftp_cmd,ftp_ans,1);
+
+	}else if(IS_CMD(ftp_cmd,CMD_PORT)){
+
+		_process_ftp_data_connection(pstore,tsession,ftp_session_entry,ftp_cmd,ftp_ans,0);
+	}else if(ftp_ans->code == FTP_TRANSFEROK){
+		
+		_process_ftp_data_rw_ok(pstore,tsession,ftp_session_entry);
+
+	}
 }
 
 static int 
