@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-07-13 11:07:47
- * Last Modified: 2018-07-30 10:44:24
+ * Last Modified: 2018-09-25 16:06:13
  */
 
 #include "ch_smon.h"
@@ -42,20 +42,23 @@ static  private_smon_context_t tmp_context,*g_mcontext = &tmp_context;
 #include "do_smon_format.c"
 #include "do_smon_parse.c"
 
-static int is_accept_by_port_for_smon(ch_tcp_app_t *app,ch_packet_tcp_t *tcp_pkt){
+static ch_tcp_app_t* find_by_port_for_smon(ch_tcp_app_t *app,ch_proto_session_store_t *pstore ch_unused,ch_packet_tcp_t *tcp_pkt){
 
 	private_smon_context_t *mcontext = (private_smon_context_t*)app->context;
 
 	ch_session_monitor_item_t *item = ch_session_monitor_item_find(&mcontext->monitor,
 		tcp_pkt->src_ip,tcp_pkt->dst_ip,tcp_pkt->src_port,tcp_pkt->dst_port);
 
-	return item!=NULL;
+	if(item!=NULL)
+		return app;
+
+	return NULL;
 }
 
-static int is_accept_by_content_for_smon(ch_tcp_app_t *app ch_unused,ch_packet_tcp_t *tcp_pkt ch_unused,
+static ch_tcp_app_t* find_by_content_for_smon(ch_tcp_app_t *app ch_unused,ch_proto_session_store_t *pstore ch_unused,ch_packet_tcp_t *tcp_pkt ch_unused,
 	void *data ch_unused,size_t dlen ch_unused){
 
-    return 1;
+    return NULL;
 }
 
 
@@ -63,8 +66,8 @@ static ch_tcp_app_t smon_app = {
     .protocol_id = PROTOCOL_SMON,
     .pkt_rcd_type =PKT_RECORD_TYPE_TCP_SMON,
     .context = NULL,
-	.is_accept_by_port = is_accept_by_port_for_smon,
-	.is_accept_by_content = is_accept_by_content_for_smon,
+	.find_by_port = find_by_port_for_smon,
+	.find_by_content = find_by_content_for_smon,
     .proto_session_entry_create = do_smon_session_entry_create,
     .proto_session_entry_clean = do_smon_session_entry_clean,
     .proto_session_format = do_smon_session_format,

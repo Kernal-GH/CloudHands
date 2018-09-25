@@ -16,9 +16,9 @@ typedef struct ch_ftp_data_connection_list_head_t ch_ftp_data_connection_list_he
 
 typedef struct ch_ftp_data_connection_t ch_ftp_data_connection_t;
 
-#include "ch_packet_tcp.h"
 #include "ch_list.h"
 #include "ch_ftp_session.h"
+#include "ch_tcp_app_pool.h"
 #include "ch_ftp_data_session_entry.h"
 
 #define MAX_THREAD_NUM 256

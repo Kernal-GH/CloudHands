@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-09-21 12:12:44
- * Last Modified: 2018-09-25 13:44:38
+ * Last Modified: 2018-09-25 17:00:43
  */
 
 static inline void _line_str_parse(ch_pp_data_line_t *line,ch_str_t *first,ch_str_t *second) {
@@ -13,7 +13,6 @@ static inline void _line_str_parse(ch_pp_data_line_t *line,ch_str_t *first,ch_st
 	unsigned char *start = line->line;
 	unsigned char *end = line->line+line->len;
 	unsigned char *p;
-	size_t i = 0;
 	first->len = 0;
 	first->data = NULL;
 
@@ -121,10 +120,8 @@ static void _ip_port_get(const char *str,uint32_t *ip,uint16_t *port,int is_pasv
 }
 
 
-static int do_ftp_session_request_parse(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,
+static int do_ftp_session_request_parse(ch_tcp_app_t *app ch_unused,ch_proto_session_store_t *pstore ch_unused,
 	ch_tcp_session_t *tsession,void *data,size_t dlen) {
-
-	int rc;
 
 	ch_str_t cmd_tmp,*cmd = &cmd_tmp;
 	ch_str_t cmd_args_tmp,*cmd_args = &cmd_args_tmp;
@@ -178,7 +175,7 @@ static void _process_ftp_data_connection(ch_proto_session_store_t *pstore,
 	uint32_t t_sip;
 
 	uint32_t dst_ip;
-	uint32_t dst_port;
+	uint16_t dst_port;
 	uint32_t src_ip;
 
 	ch_ftp_data_connection_t *ftp_dcon;
@@ -223,7 +220,7 @@ static void _process_ftp_data_connection(ch_proto_session_store_t *pstore,
 	if(ftp_dcon == NULL){
 	
 		ch_log(CH_LOG_ERR,"Cannot create a ftp data connection for ftp_cmd:%s %s,ftp_ans:%d %s",
-			ftp_cmd->cmd,ftp_cmd->cmd_args,(int)ftp_ans->code,ftp_ans->phrase);
+			ftp_cmd->cmd,ftp_cmd->args,(int)ftp_ans->code,ftp_ans->phrase);
 
 	}
 
@@ -253,12 +250,14 @@ static void _process_ftp_data_rw_ok(ch_proto_session_store_t *pstore,
 	
 		/**/
 		ch_ftp_data_connection_fin_output(pstore->task_id,pstore,tsession,ftp_cmd->ftp_dcon);
+		/*reset*/
+		ftp_cmd->ftp_dcon = NULL;
 
 	}
 
 }
 
-static void _process_ftp_ans(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,
+static void _process_ftp_ans(ch_proto_session_store_t *pstore,
         ch_tcp_session_t *tsession,ch_ftp_session_entry_t *ftp_session_entry,ch_ftp_cmd_t *ftp_cmd,
         ch_ftp_ans_t *ftp_ans) {
 
@@ -278,12 +277,10 @@ static void _process_ftp_ans(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,
 }
 
 static int 
-do_ftp_session_response_parse(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,
+do_ftp_session_response_parse(ch_tcp_app_t *app ch_unused,ch_proto_session_store_t *pstore,
         ch_tcp_session_t *tsession,void *data,size_t dlen) {
 
-	int rc;
 
-    ch_ftp_cmd_t *ftp_cmd = NULL;
     ch_ftp_ans_t *ftp_ans = NULL;
 
 	ch_str_t code_tmp,*code = &code_tmp;
@@ -315,7 +312,7 @@ do_ftp_session_response_parse(ch_tcp_app_t *app,ch_proto_session_store_t *pstore
                 ftp_ans = ch_ftp_session_ans_add(ftp_session_entry->ftp_session,code,phrase);
                 if(ftp_ans&&ftp_ans->cmd){
                 
-                    _process_ftp_ans(app,pstore,tsession,ftp_session_entry,ftp_ans->cmd,ftp_ans);
+                    _process_ftp_ans(pstore,tsession,ftp_session_entry,ftp_ans->cmd,ftp_ans);
                 }
             }
         }else{

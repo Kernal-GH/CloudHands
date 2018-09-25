@@ -19,10 +19,12 @@ struct ch_tcp_app_context_t {
 
     int http_is_on;
     int mail_is_on;
+    int ftp_is_on;
 	int smon_is_on;
 
 	const char *http_cfname;
 	const char *mail_cfname;
+	const char *ftp_cfname;
 	const char *smon_cfname;
 
 };

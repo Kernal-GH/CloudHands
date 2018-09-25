@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-07-12 14:25:48
- * Last Modified: 2018-07-30 09:38:59
+ * Last Modified: 2018-09-25 17:07:03
  */
 
 #include "ch_tcp_app_context.h"
@@ -17,10 +17,13 @@ static void _tcp_app_context_init(ch_tcp_app_context_t *tcontext){
 
 	tcontext->http_is_on = 0;
 	tcontext->mail_is_on = 0;
+	tcontext->ftp_is_on = 0;
 	tcontext->smon_is_on = 0;
+
 
 	tcontext->http_cfname = "/usr/local/dpdk/CloudHands/conf/tcp/app/http.conf";
 	tcontext->mail_cfname = "/usr/local/dpdk/CloudHands/conf/tcp/app/mail.conf";
+	tcontext->ftp_cfname = "/usr/local/dpdk/CloudHands/conf/tcp/app/ftp.conf";
 	tcontext->smon_cfname = "/usr/local/dpdk/CloudHands/conf/tcp/app/smon.conf";
 
 
@@ -52,6 +55,15 @@ static const char *cmd_mail(cmd_parms *cmd ch_unused, void *_dcfg, const char *p
 	return NULL;
 }
 
+static const char *cmd_ftp(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1,const char *p2){
+
+    ch_tcp_app_context_t *tcontext = (ch_tcp_app_context_t*)_dcfg;
+
+	_cfg_set(tcontext->ftp_is_on,tcontext->ftp_cfname,p1,p2);
+
+	return NULL;
+}
+
 static const char *cmd_smon(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1,const char *p2){
 
     ch_tcp_app_context_t *tcontext = (ch_tcp_app_context_t*)_dcfg;
@@ -79,6 +91,14 @@ static const command_rec tcontext_directives[] = {
             "set tcp app mail <on/off> <smtp conf file path>"
             ),
     
+	CH_INIT_TAKE2(
+            "CHTCPAPPFtp",
+            cmd_ftp,
+            NULL,
+            0,
+            "set tcp app ftp <on/off> <ftp conf file path>"
+            ),
+    
 
     CH_INIT_TAKE2(
             "CHTCPAPPSmon",
@@ -101,6 +121,7 @@ static void _tcp_app_context_dump(ch_tcp_app_context_t *tcontext) {
 	
 	_cfg_dump("http",tcontext->http_is_on,tcontext->http_cfname);
 	_cfg_dump("mail",tcontext->mail_is_on,tcontext->mail_cfname);
+	_cfg_dump("ftp",tcontext->ftp_is_on,tcontext->ftp_cfname);
 	_cfg_dump("smon",tcontext->smon_is_on,tcontext->smon_cfname);
 
 }

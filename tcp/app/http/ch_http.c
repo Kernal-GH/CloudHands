@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-07-12 16:21:25
- * Last Modified: 2018-09-10 10:03:56
+ * Last Modified: 2018-09-25 16:00:33
  */
 
 #include "ch_http.h"
@@ -62,19 +62,20 @@ static  private_http_context_t tmp_context,*g_hcontext = &tmp_context;
 #include "do_http_format.c"
 #include "do_http_parse.c"
 
-static int is_accept_by_port_for_http(ch_tcp_app_t *app,ch_packet_tcp_t *tcp_pkt){
+static ch_tcp_app_t * find_by_port_for_http(ch_tcp_app_t *app,ch_proto_session_store_t *pstore ch_unused,ch_packet_tcp_t *tcp_pkt){
 
 	private_http_context_t *hcontext = (private_http_context_t*)app->context;
 
+	if(ch_ports_equal(hcontext->http_ports,HTTP_PORTS_MAX,tcp_pkt->src_port,tcp_pkt->dst_port))
+		return app;
 
-    return ch_ports_equal(hcontext->http_ports,HTTP_PORTS_MAX,tcp_pkt->src_port,tcp_pkt->dst_port);
-
+	return NULL;
 }
 
-static int is_accept_by_content_for_http(ch_tcp_app_t *app ch_unused,ch_packet_tcp_t *tcp_pkt ch_unused,
+static ch_tcp_app_t* find_by_content_for_http(ch_tcp_app_t *app ch_unused,ch_proto_session_store_t *pstre ch_unused,ch_packet_tcp_t *tcp_pkt ch_unused,
 	void *data ch_unused,size_t dlen ch_unused){
 
-    return 1;
+    return NULL;
 }
 
 
@@ -82,8 +83,8 @@ static ch_tcp_app_t http_app = {
     .protocol_id = PROTOCOL_HTTP ,
     .pkt_rcd_type = PKT_RECORD_TYPE_TCP_HTTP,
     .context = NULL,
-	.is_accept_by_port = is_accept_by_port_for_http,
-	.is_accept_by_content = is_accept_by_content_for_http,
+	.find_by_port = find_by_port_for_http,
+	.find_by_content = find_by_content_for_http,
     .proto_session_entry_create = do_http_session_entry_create,
     .proto_session_entry_clean = do_http_session_entry_clean,
     .proto_session_format = do_http_session_format,

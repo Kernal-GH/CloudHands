@@ -42,9 +42,9 @@ struct ch_tcp_app_t {
 
 	void *context;
 
-	int (*is_accept_by_port)(ch_tcp_app_t *app,ch_packet_tcp_t *tcp_pkt);
+	ch_tcp_app_t* (*find_by_port)(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,ch_packet_tcp_t *tcp_pkt);
 	
-	int (*is_accept_by_content)(ch_tcp_app_t *app,ch_packet_tcp_t *tcp_pkt,void *data,size_t dlen);
+	ch_tcp_app_t* (*find_by_content)(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,ch_packet_tcp_t *tcp_pkt,void *data,size_t dlen);
 
 	void *(*proto_session_entry_create)(ch_tcp_app_t *app,ch_proto_session_store_t *pstore);
 	void  (*proto_session_entry_clean)(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,ch_tcp_session_t *tsession);
@@ -66,9 +66,9 @@ static inline void ch_tcp_app_register(ch_tcp_app_pool_t *ta_pool,ch_tcp_app_t *
 extern ch_tcp_app_pool_t * ch_tcp_app_pool_create(ch_pool_t *mp,const char *cfname);
 
 
-extern ch_tcp_app_t * ch_tcp_app_find_by_port(ch_tcp_app_pool_t *ta_pool,ch_packet_tcp_t *tcp_pkt);
+extern ch_tcp_app_t * ch_tcp_app_find_by_port(ch_tcp_app_pool_t *ta_pool,ch_proto_session_store_t *pstore,ch_packet_tcp_t *tcp_pkt);
 
-extern ch_tcp_app_t * ch_tcp_app_find_by_content(ch_tcp_app_pool_t *ta_pool,ch_packet_tcp_t *tcp_pkt,void *data,size_t dlen);
+extern ch_tcp_app_t * ch_tcp_app_find_by_content(ch_tcp_app_pool_t *ta_pool,ch_proto_session_store_t *pstore,ch_packet_tcp_t *tcp_pkt,void *data,size_t dlen);
 
 
 extern int ch_tcp_app_request_content_parse(ch_tcp_app_t *app,ch_proto_session_store_t *pstore,

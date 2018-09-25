@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-09-21 10:21:28
- * Last Modified: 2018-09-21 11:10:29
+ * Last Modified: 2018-09-25 16:56:42
  */
 
 #define FTP_DATA_NEED_CREATE_FILE_BODY(session) ((session)->fstore_fp == NULL)
@@ -50,8 +50,12 @@ static int do_ftp_data_session_request_parse(ch_tcp_app_t *app,ch_proto_session_
 
 	if(data!=NULL&&dlen>0){
 	
-		_do_content_process(app,tsession,data,dlen,1);
+		if(_do_content_process(app,tsession,data,dlen,1))
+			return PARSE_BREAK;
 	}
+
+	return PARSE_CONTINUE;
+
 } 
 
 static int do_ftp_data_session_response_parse(ch_tcp_app_t *app,ch_proto_session_store_t *pstore ch_unused,
@@ -59,8 +63,10 @@ static int do_ftp_data_session_response_parse(ch_tcp_app_t *app,ch_proto_session
 
 	if(data!=NULL&&dlen>0){
 	
-		_do_content_process(app,tsession,data,dlen,0);
+		if(_do_content_process(app,tsession,data,dlen,0))
+			return PARSE_BREAK;
 	}
 
+	return PARSE_CONTINUE;
 }
 

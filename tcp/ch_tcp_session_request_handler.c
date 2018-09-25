@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-02-02 11:44:08
- * Last Modified: 2018-07-30 16:49:20
+ * Last Modified: 2018-09-25 15:55:51
  */
 
 #include "ch_tcp_session_request_handler.h"
@@ -248,7 +248,7 @@ int ch_tcp_session_request_packet_handle(ch_tcp_session_request_handler_t *req_h
 
 
 	do{
-		app = ch_tcp_app_find_by_port(req_handler->tcp_work->ta_pool,tcp_pkt); 
+		app = ch_tcp_app_find_by_port(req_handler->tcp_work->ta_pool,req_handler->session_task->shandler->pstore,tcp_pkt); 
 
 		if(app == NULL){
 			/*no application handles this packet!,skip it!*/

@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-09-20 16:34:56
- * Last Modified: 2018-09-20 16:49:22
+ * Last Modified: 2018-09-25 16:49:31
  */
 
 #include "ch_ftp_data_session_entry.h"
@@ -15,7 +15,7 @@ void ch_ftp_data_session_entry_init(ch_ftp_data_session_entry_t *ftp_data_entry,
 	ch_ftp_data_connection_t *ftp_dcon,
     const char *ftp_path,const char *ftp_fname){
 
-	ch_proto_session_entry_init(&smon_entry->psEntry);
+	ch_proto_session_entry_init(&ftp_data_entry->psEntry);
 
 	ftp_data_entry->mp = mp;
 	ftp_data_entry->ftp_path = ftp_path;
@@ -38,7 +38,7 @@ int  ch_ftp_data_session_entry_fpath_init(ch_ftp_data_session_entry_t *ftp_data_
 		return -1;
 	}
 
-	ftp_data_entry->fstore_path = ch_pstrdup(smon_entry->mp,fpath);
+	ftp_data_entry->fstore_path = ch_pstrdup(ftp_data_entry->mp,fpath);
 	ftp_data_entry->fstore_fp = fp;
 
 	return 0;
@@ -62,7 +62,7 @@ void ch_ftp_data_session_entry_fin(ch_ftp_data_session_entry_t *ftp_data_entry){
 
 void ch_ftp_data_session_entry_fin_output(ch_proto_session_store_t *pstore,ch_tcp_session_t *tsession,ch_ftp_data_session_entry_t *ftp_data_entry){
 
-    ch_proto_session_store_write(pstore,tsession,ftp_data_entry);
+    ch_proto_session_store_write(pstore,tsession,(void*)ftp_data_entry);
     ch_ftp_data_session_entry_fin(ftp_data_entry);
 
 }

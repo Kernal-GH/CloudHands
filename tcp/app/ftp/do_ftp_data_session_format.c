@@ -5,13 +5,13 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-09-21 11:11:37
- * Last Modified: 2018-09-21 11:19:14
+ * Last Modified: 2018-09-25 13:50:22
  */
 
 
 #define FTP_DATA_STR_VALUE(v) ((v)==NULL?"":v)
 
-void do_ftp_data_session_format(msgpack_packer *pk,void *session_in){
+static void do_ftp_data_session_format(msgpack_packer *pk,void *session_in){
 
 
 	ch_ftp_data_session_entry_t *session = (ch_ftp_data_session_entry_t*)session_in;

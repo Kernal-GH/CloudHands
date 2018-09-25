@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-07-12 14:13:07
- * Last Modified: 2018-07-30 17:05:07
+ * Last Modified: 2018-09-25 17:04:01
  */
 
 #include "ch_tcp_app_pool.h"
@@ -13,6 +13,7 @@
 #include "ch_http.h"
 #include "ch_mail.h"
 #include "ch_smon.h"
+#include "ch_ftp.h"
 
 #define process_register_retv(rc,proto) do { \
 	if(rc){\
@@ -34,6 +35,11 @@ static int _register_all_apps(ch_tcp_app_pool_t *ta_pool,ch_tcp_app_context_t *t
 	if(tcontext->mail_is_on){
 		rc = ch_mail_init(ta_pool,tcontext->mail_cfname);
 		process_register_retv(rc,"mail");
+	}
+	
+	if(tcontext->ftp_is_on){
+		rc = ch_ftp_init(ta_pool,tcontext->ftp_cfname);
+		process_register_retv(rc,"ftp");
 	}
 
 	if(tcontext->smon_is_on){
@@ -69,11 +75,10 @@ ch_tcp_app_pool_t * ch_tcp_app_pool_create(ch_pool_t *mp,const char *cfname){
 }
 
 
-ch_tcp_app_t * ch_tcp_app_find_by_port(ch_tcp_app_pool_t *ta_pool,ch_packet_tcp_t *tcp_pkt){
+ch_tcp_app_t * ch_tcp_app_find_by_port(ch_tcp_app_pool_t *ta_pool,ch_proto_session_store_t *pstore,ch_packet_tcp_t *tcp_pkt){
 
-    ch_tcp_app_t **apps,*app;
+    ch_tcp_app_t **apps,*app,*ret_app;
     int i;
-	int rc;
 
     apps = (ch_tcp_app_t **)ta_pool->apps->elts;
 
@@ -81,12 +86,12 @@ ch_tcp_app_t * ch_tcp_app_find_by_port(ch_tcp_app_pool_t *ta_pool,ch_packet_tcp_
         
         app = apps[i];
 
-        if(app->is_accept_by_port){
+        if(app->find_by_port){
             
-            rc = app->is_accept_by_port(app,tcp_pkt);
+             ret_app = app->find_by_port(app,pstore,tcp_pkt);
 
-            if(rc){
-                return app;
+            if(ret_app){
+                return ret_app;
             }
         }
     }
@@ -96,11 +101,10 @@ ch_tcp_app_t * ch_tcp_app_find_by_port(ch_tcp_app_pool_t *ta_pool,ch_packet_tcp_
 
 }
 
-ch_tcp_app_t * ch_tcp_app_find_by_content(ch_tcp_app_pool_t *ta_pool,ch_packet_tcp_t *tcp_pkt,void *data,size_t dlen){
+ch_tcp_app_t * ch_tcp_app_find_by_content(ch_tcp_app_pool_t *ta_pool,ch_proto_session_store_t *pstore,ch_packet_tcp_t *tcp_pkt,void *data,size_t dlen){
 
-    ch_tcp_app_t **apps,*app;
+    ch_tcp_app_t **apps,*app,*ret_app;
     int i;
-	int rc;
 
     apps = (ch_tcp_app_t **)ta_pool->apps->elts;
 
@@ -108,12 +112,12 @@ ch_tcp_app_t * ch_tcp_app_find_by_content(ch_tcp_app_pool_t *ta_pool,ch_packet_t
         
         app = apps[i];
 
-        if(app->is_accept_by_content){
+        if(app->find_by_content){
             
-            rc = app->is_accept_by_content(app,tcp_pkt,data,dlen);
+            ret_app = app->find_by_content(app,pstore,tcp_pkt,data,dlen);
 
-            if(rc){
-                return app;
+            if(ret_app){
+                return ret_app;
             }
         }
     }

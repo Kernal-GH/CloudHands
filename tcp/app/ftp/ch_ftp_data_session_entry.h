@@ -13,6 +13,10 @@
 
 typedef struct ch_ftp_data_session_entry_t ch_ftp_data_session_entry_t;
 
+#include "ch_ftp_data_connection_pool.h"
+#include "ch_proto_session_entry.h"
+#include "ch_proto_session_store.h"
+
 struct ch_ftp_data_session_entry_t {
 
 	ch_proto_session_entry_t psEntry;

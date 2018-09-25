@@ -15,6 +15,11 @@ typedef struct ch_ftp_cmd_t ch_ftp_cmd_t;
 typedef struct ch_ftp_ans_t ch_ftp_ans_t;
 typedef struct ch_ftp_session_t ch_ftp_session_t;
 
+#include "ch_list.h"
+#include "ch_mpool.h"
+#include "ch_ftp_data_connection_pool.h"
+#include "ch_string.h"
+
 #define PASV_MODE 1
 #define PORT_MODE 2
 
@@ -128,7 +133,10 @@ struct ch_ftp_cmd_t {
 
 	struct list_head node;
 	struct list_head ans_list;
+
 	ch_ftp_data_connection_t *ftp_dcon;
+
+	size_t ans_n;
 
 	const char *cmd;
 	const char *args;
@@ -150,6 +158,8 @@ struct ch_ftp_session_t {
 	ch_ftp_cmd_t *cur_cmd;
 
 	ch_pool_t *mp;
+
+	size_t cmd_n;
 
 	const char *user;
 	const char *passwd;
@@ -183,11 +193,11 @@ static inline ch_ftp_cmd_t * ch_ftp_session_find_last_cmd(ch_ftp_session_t *ftp_
 #define STR_IS_EMPTY(v) ((v)==NULL||strlen(v)==0)
 #endif
 
-#define FIRST_ANS_ENTRY(ftp_cmd,entry) do { \
+#define FIRST_ANS_ENTRY(ftp_cmd,entry_ans) do { \
 	if(list_empty(&ftp_cmd->ans_list)) \
-		entry = NULL; \
+		entry_ans = NULL; \
 	else \
-		entry = list_first_entry(entry,ch_ftp_ans_t,node); \
+		entry_ans = list_first_entry(&ftp_cmd->ans_list,ch_ftp_ans_t,node); \
 }while(0)
 
 static inline void ch_ftp_session_fpath_name_set(ch_ftp_session_t *ftp_session,const char **fpath,const char **fname){

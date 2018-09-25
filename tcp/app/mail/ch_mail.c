@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-07-12 16:21:25
- * Last Modified: 2018-07-30 10:50:41
+ * Last Modified: 2018-09-25 16:03:38
  */
 
 #include "ch_mail.h"
@@ -45,7 +45,7 @@ static  private_mail_context_t tmp_context,*g_mcontext = &tmp_context;
 #include "do_mail_parse.c"
 
 
-static int is_accept_by_port_for_mail(ch_tcp_app_t *app,ch_packet_tcp_t *tcp_pkt){
+static ch_tcp_app_t * find_by_port_for_mail(ch_tcp_app_t *app,ch_proto_session_store_t *pstore ch_unused,ch_packet_tcp_t *tcp_pkt){
 
 	private_mail_context_t *mcontext = (private_mail_context_t*)app->context;
 
@@ -65,18 +65,22 @@ static int is_accept_by_port_for_mail(ch_tcp_app_t *app,ch_packet_tcp_t *tcp_pkt
             break;
 
         default:
-            return 0;
+            return NULL;
 
     }
 
-    return ch_ports_equal(ports,MAIL_PORTS_MAX,tcp_pkt->src_port,tcp_pkt->dst_port);
+    if(ch_ports_equal(ports,MAIL_PORTS_MAX,tcp_pkt->src_port,tcp_pkt->dst_port))
+		return app;
 
+	return NULL;
 }
 
-static int is_accept_by_content_for_mail(ch_tcp_app_t *app ch_unused,ch_packet_tcp_t *tcp_pkt ch_unused,
+static ch_tcp_app_t * find_by_content_for_mail(ch_tcp_app_t *app ch_unused,ch_proto_session_store_t *pstore ch_unused,ch_packet_tcp_t *tcp_pkt ch_unused,
 	void *data ch_unused,size_t dlen ch_unused){
 
-    return 1;
+
+    return NULL;
+
 }
 
 static void _mail_proto_register(ch_tcp_app_pool_t *ta_pool,private_mail_context_t *mcontext,uint32_t proto_id){
@@ -86,8 +90,8 @@ static void _mail_proto_register(ch_tcp_app_pool_t *ta_pool,private_mail_context
 	mail_app->protocol_id = proto_id;
 	mail_app->pkt_rcd_type = PKT_RECORD_TYPE_TCP_MAIL;
 	mail_app->context = (void*)mcontext;
-    mail_app->is_accept_by_port = is_accept_by_port_for_mail,
-    mail_app->is_accept_by_content = is_accept_by_content_for_mail,
+    mail_app->find_by_port = find_by_port_for_mail,
+    mail_app->find_by_content = find_by_content_for_mail,
 	mail_app->proto_session_entry_create = do_mail_session_entry_create;
 	mail_app->request_content_parse = do_mail_request_parse;
 	mail_app->response_content_parse = do_mail_response_parse;

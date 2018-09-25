@@ -5,11 +5,11 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-09-21 16:34:34
- * Last Modified: 2018-09-21 18:43:42
+ * Last Modified: 2018-09-25 16:46:28
  */
 
 #include "ch_ftp_session.h"
-
+#include "ch_log.h"
 
 ch_ftp_session_t * ch_ftp_session_create(ch_pool_t *mp) {
 
@@ -28,7 +28,7 @@ ch_ftp_session_t * ch_ftp_session_create(ch_pool_t *mp) {
 	ftp_session->mp = mp;
 	ftp_session->user = NULL;
 	ftp_session->passwd = NULL;
-
+	ftp_session->cmd_n = 0;
 
 	return ftp_session;
 }
@@ -50,11 +50,11 @@ ch_ftp_cmd_t* ch_ftp_session_cmd_add(ch_ftp_session_t *ftp_session,ch_str_t *cmd
 		cmd_args = (const char*)ch_pstrndup(ftp_session->mp,(const char*)args_str->data,args_str->len);
 	}
 
-	if(ftp_session->user == NULL&&IS_CMD_STR(cmd,CMD_USER)){
+	if(ftp_session->user == NULL&&IS_CMD_STR(cmd_str,CMD_USER)){
 		
 		ftp_session->user = cmd_args;
 
-	}else if(ftp_session->passwd == NULL &&IS_CMD_STR(cmd,CMD_PASS)){
+	}else if(ftp_session->passwd == NULL &&IS_CMD_STR(cmd_str,CMD_PASS)){
 	
 		ftp_session->passwd = cmd_args;
 	}
@@ -65,7 +65,9 @@ ch_ftp_cmd_t* ch_ftp_session_cmd_add(ch_ftp_session_t *ftp_session,ch_str_t *cmd
 	ftp_cmd->cmd = cmd;
 	ftp_cmd->args = cmd_args;
 	ftp_cmd->ftp_dcon = NULL;
-	
+	ftp_cmd->ans_n = 0;
+	ftp_session->cmd_n++;
+
 	INIT_LIST_HEAD(&ftp_cmd->ans_list);
 
 	list_add(&ftp_cmd->node,&ftp_session->cmd_list);
@@ -126,6 +128,7 @@ ch_ftp_ans_t* ch_ftp_session_ans_add(ch_ftp_session_t *ftp_session,ch_str_t *cod
 	ftp_ans->cmd = ftp_cmd;
 	ftp_ans->code = code;
 	ftp_ans->phrase = phrase;
+	ftp_cmd->ans_n++;
 
 	list_add_tail(&ftp_ans->node,&ftp_cmd->ans_list);
 

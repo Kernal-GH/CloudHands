@@ -13,6 +13,8 @@
 
 #include "ch_ftp_session.h"
 #include "ch_mpool.h"
+#include "ch_pp_data_input.h"
+#include "ch_proto_session_entry.h"
 
 typedef struct ch_ftp_session_entry_t ch_ftp_session_entry_t;
 
