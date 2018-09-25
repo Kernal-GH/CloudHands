@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-02-06 11:16:43
- * Last Modified: 2018-09-06 20:28:53
+ * Last Modified: 2018-09-25 17:16:17
  */
 
 #include "ch_process_interface_tcp_context.h"
@@ -209,7 +209,8 @@ static int _tcp_filter(ch_packet_t *pkt,void *priv_data){
 
 	if(!ch_wb_list_is_accept(pint_context->ip_white_list,pint_context->ip_black_list,(void*)s_match,(void*)d_match))
 		return 1;
-	
+
+#if 0
 	if(ch_ports_equal(pint_context->accept_ports,MAX_PORT_ARRAY_SIZE,
 			tcp_pkt.src_port,tcp_pkt.dst_port))
 		return 0;
@@ -217,7 +218,9 @@ static int _tcp_filter(ch_packet_t *pkt,void *priv_data){
 	if(ch_session_monitor_item_find(&pint_context->monitor,0,0,tcp_pkt.src_port,tcp_pkt.dst_port)!=NULL)
 		return 0;
 
-	return 1;
+#endif 
+
+	return 0;
 }
 
 static uint32_t _tcp_hash(ch_packet_t *pkt,void *priv_data){
