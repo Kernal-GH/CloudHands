@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-02-05 11:06:43
- * Last Modified: 2018-08-16 16:34:34
+ * Last Modified: 2018-09-26 14:16:29
  */
 
 #include "ch_tcp_session_handler.h"
@@ -230,17 +230,6 @@ int ch_tcp_session_packet_handle(ch_tcp_session_handler_t *shandler,
 
         tcp_session->cur_ep = ep;
 
-        /*fin packet*/
-        if(is_tcp_fin_packet(tcp_pkt)){
-            _process_fin_packet(shandler,tcp_session,tcp_pkt);
-            break;
-        }
-
-        /*rest packet*/
-        if(is_tcp_rst_packet(tcp_pkt)){
-            _process_rst_packet(shandler,tcp_session,tcp_pkt);
-            break;
-        }
         /*data packet*/
         if(tcp_pkt->pdata){
            
@@ -254,16 +243,18 @@ int ch_tcp_session_packet_handle(ch_tcp_session_handler_t *shandler,
 				break;
 			}
         }
-
-        /*fin ack packet!*/
-        if(_is_fin1_ack(tcp_session,tcp_pkt)){
+        
+		/*fin packet*/
+        if(is_tcp_fin_packet(tcp_pkt)){
+            _process_fin_packet(shandler,tcp_session,tcp_pkt);
+        }else if(is_tcp_rst_packet(tcp_pkt)){
+			/*reset packet*/
+            _process_rst_packet(shandler,tcp_session,tcp_pkt);
+        }else if(_is_fin1_ack(tcp_session,tcp_pkt)){
+			/*fin ack packet!*/
             _process_fin1_ack_packet(shandler,tcp_session,tcp_pkt);
-            break;
-        }
-
-        if(_is_fin2_ack(tcp_session,tcp_pkt)){
+        }else if (_is_fin2_ack(tcp_session,tcp_pkt)){
             _process_fin2_ack_packet(shandler,tcp_session,tcp_pkt);
-            break;
         }
 
     }while(0);

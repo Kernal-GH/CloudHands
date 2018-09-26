@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-09-20 11:32:35
- * Last Modified: 2018-09-25 19:42:57
+ * Last Modified: 2018-09-26 19:29:46
  */
 
 #include "ch_ftp_data_connection_pool.h"
@@ -132,15 +132,23 @@ void ch_ftp_data_connection_fin_output(uint32_t task_id,ch_proto_session_store_t
 
 	if(task_id>= MAX_THREAD_NUM)
 		return;
+	
+	ch_tcp_session_t *ntsession = fd_conn->tsession;
 
-    if(fd_conn->data_session_entry&&fd_conn->tsession){
+    if(fd_conn->data_session_entry&&ntsession&&ntsession->sentry){
     
     
         ch_ftp_data_session_entry_fin_output(pstore,fd_conn->tsession,fd_conn->data_session_entry);
+		
+		/*free tcp session*/
+		ch_tcp_session_pool_entry_free(ntsession->ts_pool,ntsession);
+		
+		ch_ftp_data_connection_fin(task_id,fd_conn);
+		
+		ntsession->sentry = NULL;
 
     }
 
-    ch_ftp_data_connection_fin(task_id,fd_conn);
 
 }
 

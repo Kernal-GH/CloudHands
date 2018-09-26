@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-09-21 12:12:44
- * Last Modified: 2018-09-25 17:00:43
+ * Last Modified: 2018-09-26 19:29:47
  */
 
 static inline void _line_str_parse(ch_pp_data_line_t *line,ch_str_t *first,ch_str_t *second) {
@@ -257,10 +257,11 @@ static void _process_ftp_data_rw_ok(ch_proto_session_store_t *pstore,
 
 }
 
-static void _process_ftp_ans(ch_proto_session_store_t *pstore,
+static int _process_ftp_ans(ch_proto_session_store_t *pstore,
         ch_tcp_session_t *tsession,ch_ftp_session_entry_t *ftp_session_entry,ch_ftp_cmd_t *ftp_cmd,
         ch_ftp_ans_t *ftp_ans) {
 
+	int rc = PARSE_CONTINUE;
 
 	if(IS_CMD(ftp_cmd,CMD_PASV)){
 		
@@ -274,12 +275,16 @@ static void _process_ftp_ans(ch_proto_session_store_t *pstore,
 		_process_ftp_data_rw_ok(pstore,tsession,ftp_session_entry);
 
 	}
+
+	return rc;
 }
 
 static int 
 do_ftp_session_response_parse(ch_tcp_app_t *app ch_unused,ch_proto_session_store_t *pstore,
         ch_tcp_session_t *tsession,void *data,size_t dlen) {
 
+
+	int rc = PARSE_CONTINUE;
 
     ch_ftp_ans_t *ftp_ans = NULL;
 
@@ -312,7 +317,7 @@ do_ftp_session_response_parse(ch_tcp_app_t *app ch_unused,ch_proto_session_store
                 ftp_ans = ch_ftp_session_ans_add(ftp_session_entry->ftp_session,code,phrase);
                 if(ftp_ans&&ftp_ans->cmd){
                 
-                    _process_ftp_ans(pstore,tsession,ftp_session_entry,ftp_ans->cmd,ftp_ans);
+                   rc =  _process_ftp_ans(pstore,tsession,ftp_session_entry,ftp_ans->cmd,ftp_ans);
                 }
             }
         }else{
@@ -329,7 +334,7 @@ do_ftp_session_response_parse(ch_tcp_app_t *app ch_unused,ch_proto_session_store
 		return PARSE_BREAK;
 	}
 
-	return PARSE_CONTINUE;
+	return rc;
 
 }
 

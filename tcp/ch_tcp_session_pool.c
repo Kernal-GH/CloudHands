@@ -140,6 +140,8 @@ ch_tcp_session_pool_entry_create(ch_tcp_session_pool_t *tspt,ch_tcp_session_requ
 			ch_log(CH_LOG_ERR,"create tcp session failed!");
 			break;
 		}
+		
+		tcp_session->ts_pool =tspt;
 
 		if(ch_tcp_session_init(tcp_session,sreq,app,sentry,tspt->mm)){
 

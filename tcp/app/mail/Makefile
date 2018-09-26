@@ -8,7 +8,7 @@ DPDK=/usr/local/dpdk/dpdk_src
 DPDK_FLAGS=$(shell cat ${DPDK}/include/cflags.txt)
 CFLAGS  = ${BUILD_CFLAGS}  -O0 -rdynamic -D_GNU_SOURCE -DUSE_DPDK ${DPDK_FLAGS}
 CFLAGS += -I../../../lib/common -I../../../packet -I../../../lib/ptables -I../../../lib/shm -I../../../lib/fstore
-CFLAGS += -I./smtp -I./imap -I./pop3
+CFLAGS += -I./smtp -I./imap -I./pop3 -I../../../MProcess -I../../../lib/thread -I../../../SessionMonitor -I../../../WBList
 CFLAGS += -I../ -I../../ -I. -I${DPDK}/include -include ${DPDK}/include/rte_config.h
 CFLAGS +=  -fPIC
 

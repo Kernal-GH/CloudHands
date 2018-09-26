@@ -29,6 +29,7 @@ typedef struct ch_tcp_session_t ch_tcp_session_t;
 #include "ch_memory.h"
 #include "ch_packet_tcp.h"
 #include "ch_tcp_app_pool.h"
+#include "ch_tcp_session_pool.h"
 
 enum {
     SESSION_STATE_INIT=0,
@@ -52,6 +53,8 @@ struct  ch_tcp_session_t {
     ch_tcp_session_endpoint_t endpoint_req;
     
     ch_tcp_session_endpoint_t endpoint_res;
+
+	ch_tcp_session_pool_t *ts_pool;
 
     ch_tcp_app_t *app;
     void *sentry;

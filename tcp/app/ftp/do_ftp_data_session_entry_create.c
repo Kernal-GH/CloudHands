@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-09-20 16:52:47
- * Last Modified: 2018-09-25 19:40:05
+ * Last Modified: 2018-09-26 19:28:34
  */
 
 
@@ -42,7 +42,7 @@ static void *do_ftp_data_session_entry_create(ch_tcp_app_t *app,ch_proto_session
 
 }
 
-#define FTP_DATA_SESSION_ENTRY_CAN_STORE(entry) ((entry)->fstore_path!=NULL&&strlen((entry)->fstore_path)!=0)
+#define FTP_DATA_SESSION_ENTRY_CAN_STORE(entry) ((entry!=NULL)&&((entry)->fstore_path!=NULL)&&(strlen((entry)->fstore_path)!=0))
 
 static void do_ftp_data_session_entry_clean(ch_tcp_app_t *app ch_unused,ch_proto_session_store_t *pstore,ch_tcp_session_t *tsession) {
 

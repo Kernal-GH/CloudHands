@@ -8,9 +8,9 @@ include ../../make.include
 DPDK=/usr/local/dpdk/dpdk_src
 DPDK_FLAGS=$(shell cat ${DPDK}/include/cflags.txt)
 DPDK_LIB_FLAGS = $(shell cat ${DPDK}/lib/ldflags.txt)
-CFLAGS  = ${BUILD_CFLAGS}  -O0 -rdynamic -D_GNU_SOURCE  ${DPDK_FLAGS} -pthread
+CFLAGS  = ${BUILD_CFLAGS}  -O0 -rdynamic -D_GNU_SOURCE -DUSE_DPDK ${DPDK_FLAGS} -pthread
 CFLAGS += -I../../lib/common  -I../../lib/shm -I../../lib/ptables -I../../packet -I../../SessionMonitor -I../../lib/fstore
-
+CFLAGS += -I../../lib/thread -I../../MProcess -I../../WBList
 CFLAGS += -I./http -I./mail -I./ftp -I./smon 
 
 CFLAGS += -I../ -I.  -I${DPDK}/include -include ${DPDK}/include/rte_config.h

@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-09-21 11:53:13
- * Last Modified: 2018-09-25 16:47:19
+ * Last Modified: 2018-09-26 19:59:19
  */
 
 static void *do_ftp_session_entry_create(ch_tcp_app_t *app ch_unused,ch_proto_session_store_t *pstore){
@@ -41,12 +41,13 @@ static void do_ftp_session_entry_clean(ch_tcp_app_t *app ch_unused,ch_proto_sess
 	
 	ch_ftp_session_entry_t *entry = (ch_ftp_session_entry_t*)tsession->sentry;
 	ch_ftp_session_t *ftp_session = entry->ftp_session;
-	ch_ftp_cmd_t *ftp_cmd;
+	//ch_ftp_cmd_t *ftp_cmd;
 
 	if(ftp_session&&ftp_session->cmd_n>0){
 	
 		ch_proto_session_store_write(pstore,tsession,(void*)entry);
 
+#if 0
 		if(ftp_session->cmd_n){
 		
 			list_for_each_entry(ftp_cmd,&ftp_session->cmd_list,node){
@@ -58,6 +59,8 @@ static void do_ftp_session_entry_clean(ch_tcp_app_t *app ch_unused,ch_proto_sess
 				}
 			}
 		}
+#endif
+
 	}
 
 	ch_pool_destroy(entry->mp);

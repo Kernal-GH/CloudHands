@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-09-19 10:03:29
- * Last Modified: 2018-09-25 16:29:05
+ * Last Modified: 2018-09-26 11:41:05
  */
 
 #include <string.h>
@@ -17,6 +17,7 @@
 #include "ch_ftp_session_entry.h"
 #include "ch_ftp_data_connection_pool.h"
 #include "ch_tcp_app_util.h"
+#include "ch_task.h"
 
 typedef struct private_ftp_context_t private_ftp_context_t;
 #define FTP_PORTS_MAX 64
