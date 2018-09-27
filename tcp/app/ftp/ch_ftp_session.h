@@ -29,7 +29,7 @@ typedef struct ch_ftp_session_t ch_ftp_session_t;
 #define CMD_CMD "CMD"
 #define CMD_PASV "PASV"
 #define CMD_RETR "RETR"
-#define CMD_STORE "STORE"
+#define CMD_STOR "STOR"
 #define CMD_LIST "LIST"
 #define CMD_PORT "PORT"
 #define CMD_ACCT "ACCT"
@@ -210,7 +210,7 @@ static inline void ch_ftp_session_fpath_name_set(ch_ftp_session_t *ftp_session,c
 
 	list_for_each_entry(ftp_cmd,&ftp_session->cmd_list,node){
 
-		if(IS_CMD(ftp_cmd,CMD_RETR)||IS_CMD(ftp_cmd,CMD_STORE)){
+		if(IS_CMD(ftp_cmd,CMD_RETR)||IS_CMD(ftp_cmd,CMD_STOR)){
 
 			*fname = ftp_cmd->args;
 			break;
