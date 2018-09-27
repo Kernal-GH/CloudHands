@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-06-07 10:32:27
- * Last Modified: 2018-09-27 17:24:28
+ * Last Modified: 2018-09-27 17:29:37
  */
 
 
@@ -21,7 +21,7 @@ static void print_usage(void) {
 	const char* usage = "Usage:StatDump <mmapFileName> <cmdName> <cmdArgs>\n"
 				   "cmdName and cmdArgs as :\n"
 				   "d <tv>\n"
-				   "c <mmsize> <stat time range up> <stat time interval>\n";
+				   "c <stat time range up> <stat time interval>\n";
 
 
 	printf("%s",usage);
