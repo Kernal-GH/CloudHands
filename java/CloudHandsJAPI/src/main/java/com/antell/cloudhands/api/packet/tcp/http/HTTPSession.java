@@ -2,21 +2,23 @@ package com.antell.cloudhands.api.packet.tcp.http;
 
 import com.antell.cloudhands.api.packet.SessionEntry;
 import com.antell.cloudhands.api.packet.security.AttackEvent;
-import com.antell.cloudhands.api.packet.security.MatchInfo;
 import com.antell.cloudhands.api.packet.security.SecMatchResult;
 import com.antell.cloudhands.api.packet.tcp.FileTranSession;
 import com.antell.cloudhands.api.packet.tcp.TCPSessionEntry;
 import com.antell.cloudhands.api.source.SourceEntry;
-import com.antell.cloudhands.api.utils.*;
+import com.antell.cloudhands.api.utils.Content;
+import com.antell.cloudhands.api.utils.IPUtils;
+import com.antell.cloudhands.api.utils.MessagePackUtil;
+import com.antell.cloudhands.api.utils.TextUtils;
 import com.google.common.base.Preconditions;
-import org.apache.http.protocol.HTTP;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.msgpack.core.MessageUnpacker;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by dell on 2018/6/11.
@@ -124,7 +126,7 @@ public class HTTPSession implements SourceEntry{
         if(isPartContent())
             return true;
 
-        if(getFsize(resBodyPath)>=1024*1024)
+        if(Content.getFsize(resBodyPath)>=1024*1024)
             return true;
 
        return  HttpFileTransTypes.isFileTrans(extName);
@@ -215,22 +217,6 @@ public class HTTPSession implements SourceEntry{
 
     }
 
-    private final static long getFsize(String path){
-
-        if(TextUtils.isEmpty(path))
-            return 0;
-
-        long size = 0;
-
-        try {
-            size = Files.size(Paths.get(path));
-        } catch (IOException e) {
-            size = 0;
-        }
-
-        return size;
-    }
-
     public void parse(MessageUnpacker unpacker) throws IOException {
 
         long reqBSize = 0;
@@ -255,8 +241,8 @@ public class HTTPSession implements SourceEntry{
         setReqBodyPath(MessagePackUtil.parseText(unpacker));
         setResBodyPath(MessagePackUtil.parseText(unpacker));
 
-        reqBSize = getFsize(reqBodyPath);
-        resBSize = getFsize(resBodyPath);
+        reqBSize = Content.getFsize(reqBodyPath);
+        resBSize = Content.getFsize(resBodyPath);
         if(reqBSize>0)
             ((TCPSessionEntry)sessionEntry).setReqPBytes(reqBSize);
 
@@ -349,6 +335,7 @@ public class HTTPSession implements SourceEntry{
         sessionEntry.dataToJson(seCB);
         seCB.endObject();
 
+        cb.field("objectId",objectId);
         cb.field("method",TextUtils.getStrValue(method));
         cb.field("uri",TextUtils.getStrValue(uri));
         cb.field("extName",TextUtils.getStrValue(extName));
@@ -554,5 +541,5 @@ public class HTTPSession implements SourceEntry{
     public void setFilename(String filename) {
         this.filename = filename;
     }
-    
+
 }

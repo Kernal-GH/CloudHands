@@ -83,6 +83,6 @@ public class IPUtils {
 
     public static void main(String[] args){
 
-        System.out.println(isInnerIPBE(ipv4LongBE("192.168.1.22")));
+        System.out.println(ipv4Str(100772032l));
     }
 }

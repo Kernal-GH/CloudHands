@@ -9,6 +9,8 @@ import com.antell.cloudhands.api.packet.security.SecMatchResult;
 import com.antell.cloudhands.api.packet.security.clamav.FileContentSecResult;
 import com.antell.cloudhands.api.packet.smon.SMonSession;
 import com.antell.cloudhands.api.packet.tcp.FileTranSession;
+import com.antell.cloudhands.api.packet.tcp.ftp.FTPDataSession;
+import com.antell.cloudhands.api.packet.tcp.ftp.FTPSession;
 import com.antell.cloudhands.api.packet.tcp.http.HTTPSession;
 import com.antell.cloudhands.api.packet.tcp.mail.MailSession;
 import com.antell.cloudhands.api.packet.udp.dns.DNSSession;
@@ -44,6 +46,26 @@ public final class SourceEntryUtil {
             return false;
 
         return secMatchResult.getMatchCount() > 0;
+    }
+
+    public static boolean isFTPSession(SourceEntry sourceEntry){
+
+        return sourceEntry instanceof FTPSession;
+    }
+
+    public static FTPSession toFTPSession(SourceEntry sourceEntry){
+
+        return (FTPSession)sourceEntry;
+    }
+
+    public static boolean isFTPDataSession(SourceEntry sourceEntry){
+
+        return sourceEntry instanceof FTPDataSession;
+    }
+
+    public static FTPDataSession toFTPDataSession(SourceEntry sourceEntry){
+
+        return (FTPDataSession)sourceEntry;
     }
 
     public static boolean isMailSession(SourceEntry sourceEntry) {
@@ -212,6 +234,18 @@ public final class SourceEntryUtil {
             MailSession mailSession = toMailSession(sourceEntry);
             ipPairs.setSrcIP(IPUtils.ipv4Str(mailSession.getSessionEntry().getReqIP()));
             ipPairs.setDstIP(IPUtils.ipv4Str(mailSession.getSessionEntry().getResIP()));
+        } else if (isFTPSession(sourceEntry)) {
+
+            FTPSession ftpSession = toFTPSession(sourceEntry);
+            ipPairs.setSrcIP(IPUtils.ipv4Str(ftpSession.getSessionEntry().getReqIP()));
+            ipPairs.setDstIP(IPUtils.ipv4Str(ftpSession.getSessionEntry().getResIP()));
+
+        }else if (isFTPDataSession(sourceEntry)) {
+
+            FTPDataSession ftpDataSession = toFTPDataSession(sourceEntry);
+            ipPairs.setSrcIP(IPUtils.ipv4Str(ftpDataSession.getSessionEntry().getReqIP()));
+            ipPairs.setDstIP(IPUtils.ipv4Str(ftpDataSession.getSessionEntry().getResIP()));
+
         } else if (isSmonSession(sourceEntry)) {
 
             SMonSession sMonSession = toSmonSession(sourceEntry);

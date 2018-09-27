@@ -308,4 +308,19 @@ public final class Content {
         }
     }
 
+    public final static long getFsize(String path){
+
+        if(TextUtils.isEmpty(path))
+            return 0;
+
+        long size = 0;
+
+        try {
+            size = Files.size(Paths.get(path));
+        } catch (IOException e) {
+            size = 0;
+        }
+
+        return size;
+    }
 }

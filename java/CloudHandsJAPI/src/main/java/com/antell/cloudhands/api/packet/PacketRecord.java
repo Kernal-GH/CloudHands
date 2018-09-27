@@ -30,6 +30,7 @@ public class PacketRecord {
 
     public final static int SECRESHTTP = 14;
     public final static int SECRESMAIL = 15;
+    public final static int FTPDATA = 16;
 
     /*64K*/
     public final static int DATA_SIZE_MIN = 65536;

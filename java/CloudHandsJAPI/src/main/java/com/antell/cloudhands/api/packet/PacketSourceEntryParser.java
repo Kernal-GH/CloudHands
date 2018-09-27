@@ -1,10 +1,11 @@
 package com.antell.cloudhands.api.packet;
 
 import com.antell.cloudhands.api.packet.smon.SMonSession;
-import com.antell.cloudhands.api.packet.tcp.http.BasicHTTPSessionParser;
+import com.antell.cloudhands.api.packet.tcp.SessionParser;
+import com.antell.cloudhands.api.packet.tcp.ftp.FTPDataSessionParser;
+import com.antell.cloudhands.api.packet.tcp.ftp.FTPSession;
 import com.antell.cloudhands.api.packet.tcp.http.BasicHttpPartContentParser;
 import com.antell.cloudhands.api.packet.tcp.http.HTTPSessionParser;
-import com.antell.cloudhands.api.packet.tcp.mail.BasicMailSessionParser;
 import com.antell.cloudhands.api.packet.tcp.mail.MailSessionParser;
 import com.antell.cloudhands.api.packet.udp.dns.DNSSession;
 import com.antell.cloudhands.api.packet.udp.tftp.BasicTFTPSessionParser;
@@ -21,14 +22,18 @@ import java.util.List;
  */
 public class PacketSourceEntryParser implements SourceEntryParser {
 
-    private final HTTPSessionParser httpSessionParser;
-    private final MailSessionParser mailSessionParser;
+    private final SessionParser httpSessionParser;
+    private final SessionParser mailSessionParser;
+    private final SessionParser ftpDataSessionParser;
+
     private final TFTPSessionParser tftpSessionParser;
 
     public PacketSourceEntryParser() {
 
-        httpSessionParser = new BasicHTTPSessionParser(new BasicHttpPartContentParser());
-        mailSessionParser = new BasicMailSessionParser();
+        httpSessionParser = new HTTPSessionParser(new BasicHttpPartContentParser());
+        mailSessionParser = new MailSessionParser();
+        ftpDataSessionParser = new FTPDataSessionParser();
+
         tftpSessionParser = new BasicTFTPSessionParser();
 
     }
@@ -67,6 +72,13 @@ public class PacketSourceEntryParser implements SourceEntryParser {
             case PacketRecord.HTTP:
             case PacketRecord.SECRESHTTP:
                 return httpSessionParser.parse(packetRecord.getMessageUnpacker());
+
+            case PacketRecord.FTP:
+                entry = new FTPSession(packetRecord.getMessageUnpacker());
+                break;
+
+            case PacketRecord.FTPDATA:
+                return ftpDataSessionParser.parse(packetRecord.getMessageUnpacker());
 
             case PacketRecord.MAIL:
             case PacketRecord.SECRESMAIL:
