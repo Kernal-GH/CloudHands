@@ -36,8 +36,13 @@ struct ch_proto_session_store_t {
 
 	ch_pool_t *mp;
 
-	ch_shm_format_t *shm_fmt;
-	
+	ch_shm_format_t *other_shm_fmt;
+
+	ch_shm_format_t *http_shm_fmt;
+
+	uint64_t shm_last_time;
+	uint64_t shm_flush_timeout;
+
     ch_buffer_t g_buffer;
 
 	msgpack_packer pk;
@@ -49,7 +54,8 @@ struct ch_proto_session_store_t {
 };
 
 extern ch_proto_session_store_t *ch_proto_session_store_create(ch_pool_t *mp,uint32_t task_id,const char *shm_fname,
-	uint64_t shm_fsize,uint64_t fentry_size);
+	uint64_t shm_fsize,uint64_t fentry_size,uint64_t shm_flush_timeout);
+
 
 extern void ch_proto_session_store_destroy(ch_proto_session_store_t *pstore);
 

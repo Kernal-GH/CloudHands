@@ -31,6 +31,8 @@ struct ch_tcp_context_t {
 
 	const char *mmap_file_dir;
 
+	uint64_t shm_flush_timeout;
+
 	uint16_t tasks_n;
 
 	int tcp_session_request_pool_type;

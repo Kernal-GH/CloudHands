@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-02-05 11:06:43
- * Last Modified: 2018-09-26 14:16:29
+ * Last Modified: 2018-09-27 11:06:54
  */
 
 #include "ch_tcp_session_handler.h"
@@ -82,7 +82,8 @@ ch_tcp_session_handler_create(ch_tcp_work_t *tcp_work,ch_tcp_session_task_t *ses
 	shandler->pstore = ch_proto_session_store_create(tcp_work->mp,session_task->task.tsk_id,
             _get_name(tcp_context->mp,tcp_context->mmap_file_dir,session_task->task.tsk_id),
             tcp_context->shm_size,
-            tcp_context->entry_size);
+            tcp_context->entry_size,
+			tcp_context->shm_flush_timeout);
 	
     if(shandler->pstore == NULL){
 	

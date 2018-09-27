@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-01-30 12:19:59
- * Last Modified: 2018-07-12 18:56:47
+ * Last Modified: 2018-09-27 11:12:04
  */
 
 #include "ch_config.h"
@@ -21,6 +21,8 @@ static void do_tcp_context_init(ch_tcp_context_t *tcp_context){
 	tcp_context->entry_size = 16*1024*1024UL;
 	tcp_context->shm_size = 4*1024*1024*1024UL;
     tcp_context->mmap_file_dir = NULL;
+	tcp_context->shm_flush_timeout = 3*60;
+
 	tcp_context->key = NULL;
 	tcp_context->proj_id = 0;
 	tcp_context->tasks_n = 1;
@@ -303,6 +305,21 @@ static const char *cmd_shm_size(cmd_parms *cmd ch_unused, void *_dcfg, const cha
     return NULL;
 }
 
+static const char *cmd_shm_flush_timeout(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1){
+
+    char *endptr;
+
+    ch_tcp_context_t *context = (ch_tcp_context_t*)_dcfg;
+
+    context->shm_flush_timeout = (uint64_t)strtoul(p1,&endptr,10);
+    
+    if(context->shm_flush_timeout <=0){
+        return "invalid share memory flush timeout config value";
+    }
+
+    return NULL;
+}
+
 static const char *cmd_process_interface_cfname(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1){
 
 
@@ -476,6 +493,15 @@ static const command_rec tcp_context_directives[] = {
             0,
             "set tcp share memory size config item"
             ),
+    
+	CH_INIT_TAKE1(
+            "CHTCPSHMFlushTimeout",
+            cmd_shm_flush_timeout,
+            NULL,
+            0,
+            "set tcp share memory flush timeout config item"
+            ),
+
 
     CH_INIT_TAKE1(
             "CHTCPPintCFName",
@@ -507,6 +533,7 @@ static inline void dump_tcp_context(ch_tcp_context_t *tcp_context){
     fprintf(stdout,"Dump tcp  context-------------------------------------------\n");
     fprintf(stdout,"share memory size  :%lu\n",(unsigned long)tcp_context->shm_size);
     fprintf(stdout,"share memory entry size:%lu\n",(unsigned long)tcp_context->entry_size);
+    fprintf(stdout,"share memory flush timeout:%lu\n",(unsigned long)tcp_context->shm_flush_timeout);
     fprintf(stdout,"share memory key:%s\n",tcp_context->key==NULL?"":tcp_context->key);
     fprintf(stdout,"share memory projID:%d\n",tcp_context->proj_id);
     fprintf(stdout,"mmap file dir:%s\n",tcp_context->mmap_file_dir == NULL?"":tcp_context->mmap_file_dir);
