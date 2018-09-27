@@ -5,7 +5,7 @@
  *        Author: shajf,csp001314@gmail.com
  *   Description: ---
  *        Create: 2018-07-28 14:47:12
- * Last Modified: 2018-09-27 11:04:49
+ * Last Modified: 2018-09-27 11:34:08
  */
 
 #include "ch_proto_session_store.h"
@@ -13,7 +13,7 @@
 #include "ch_packet_record.h"
 #include "ch_util.h"
 
-#define HTTP_SHM_NAME(mp,prefix) ch_psprintf(mp,"http_%s",prefix)
+#define HTTP_SHM_NAME(mp,prefix) ch_psprintf(mp,"%s_http",prefix)
 
 ch_proto_session_store_t *ch_proto_session_store_create(ch_pool_t *mp,uint32_t task_id,const char *shm_fname,
 	uint64_t shm_fsize,uint64_t fentry_size,uint64_t shm_flush_timeout){
