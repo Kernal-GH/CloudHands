@@ -1,0 +1,7 @@
+#!/bin/bash
+
+source /etc/profile
+JKAFKA_DRIVER_CLASS="com.antell.CloudHandsJAPI.kafka.KafkaSinkMain"
+export LD_LIBRARY_PATH=/usr/local/dpdk/CloudHands/lib
+
+java -jar CloudHandsJAPIKafka-1.0.jar /usr/local/dpdk/CloudHands/KafkaSink/kafka.properties 

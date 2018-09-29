@@ -62,6 +62,14 @@ public class PacketRecord {
 
     }
 
+    public byte[] getData(){
+
+        byte[] data = new byte[dataSize];
+        dataBuffer.get(data);
+
+        return data;
+    }
+
     public MessageUnpacker getMessageUnpacker(){
 
         byte[] data = new byte[dataSize];

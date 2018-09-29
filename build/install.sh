@@ -5,7 +5,7 @@
 #        Author: csp001314@163.com
 #   Description: ---
 #        Create: 2016-11-03 20:09:47
-# Last Modified: 2018-09-25 17:10:30
+# Last Modified: 2018-09-29 14:41:18
 #
 
 [ `id -u` -ne 0 ] && {
@@ -94,6 +94,10 @@ prepare_dir(){
          mkdir -p $dpdk_install_prefix/CloudHands/sample
     fi
 	
+	if [ ! -d $dpdk_install_prefix/CloudHands/KafkaSink ];then
+         mkdir -p $dpdk_install_prefix/CloudHands/KafkaSink
+    fi
+	
     if [ ! -d $dpdk_install_prefix/CloudHands/lib ];then
          mkdir -p $dpdk_install_prefix/CloudHands/lib
     fi
@@ -143,6 +147,14 @@ install_sample(){
 	cp -rf CloudHands/sample/java/CloudHandsJAPISample/conf/* $dpdk_install_prefix/CloudHands/sample
 }
 
+install_kafkaSink(){
+
+	mvn package -f CloudHands/java/CloudHandsJAPIKafka/pom.xml
+	cp -rf CloudHands/java/CloudHandsJAPIKafka/target/CloudHandsJAPIKafka-1.0.jar $dpdk_install_prefix/CloudHands/KafkaSink
+	cp -rf CloudHands/java/CloudHandsJAPIKafka/bin/*  $dpdk_install_prefix/CloudHands/KafkaSink
+	cp -rf CloudHands/java/CloudHandsJAPIKafka/conf/* $dpdk_install_prefix/CloudHands/KafkaSink
+}
+
 install_all(){
 
 	source /etc/profile
@@ -150,6 +162,7 @@ install_all(){
 	comp_lib
 	install_cloudhands
     install_java_api
+	install_kafkaSink
 	install_sample
 }
 
