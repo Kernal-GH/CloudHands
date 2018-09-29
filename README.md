@@ -78,15 +78,17 @@
 
 4.查看流量统计信息
 cd /usr/local/dpdk/CloudHands/bin
-./StatDump /opt/cloudhands/data/store/sa_stat.data 10
+./StatDump /opt/cloudhands/data/store/sa_stat.data d 10
 除了总流量，总包数外，对tcp,udp,icmp等协议做了统计，统计时间间隔为5分钟，每一个统计值（包数，字节数）
 ```
 ### 基于TCP的协议还原
 ```
 1. HTTP
-2. MAIL（smtp,pop3,imap）
-3. FTP
-4. TELNET
+2. SMTP
+3. POP3
+4. IMAP
+5. FTP
+6. TELNET
 
 ```
 ### 基于UDP的协议还原
