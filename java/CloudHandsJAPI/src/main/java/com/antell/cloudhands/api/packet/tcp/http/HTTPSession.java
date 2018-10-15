@@ -109,8 +109,9 @@ public class HTTPSession implements SourceEntry{
             return false;
 
         MatchInfo matchInfo = getSecMatchResult().getMainMatchInfo();
+        String type = matchInfo.getRuleType();
 
-        return matchInfo.getRuleType().equalsIgnoreCase("");
+        return type.equalsIgnoreCase("BACKDOOR")||type.equalsIgnoreCase("WEB_ATTACK/WEBSHELL");
     }
 
     public boolean isPartContent(){
