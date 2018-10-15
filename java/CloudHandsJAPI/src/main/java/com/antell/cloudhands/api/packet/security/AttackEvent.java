@@ -117,7 +117,7 @@ public class AttackEvent implements SourceEntry{
             setDstIP(dstIP);
         }
 
-        setEventType(fileSec.getVirusType());
+        setEventType("FileSec/Malware");
         setEngineName("FileContentCheckEngine");
         setEngineID(0);
         setLevel(1);
