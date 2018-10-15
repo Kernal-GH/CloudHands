@@ -2,6 +2,7 @@ package com.antell.cloudhands.api.packet.tcp.http;
 
 import com.antell.cloudhands.api.packet.SessionEntry;
 import com.antell.cloudhands.api.packet.security.AttackEvent;
+import com.antell.cloudhands.api.packet.security.MatchInfo;
 import com.antell.cloudhands.api.packet.security.SecMatchResult;
 import com.antell.cloudhands.api.packet.tcp.FileTranSession;
 import com.antell.cloudhands.api.packet.tcp.TCPSessionEntry;
@@ -107,7 +108,9 @@ public class HTTPSession implements SourceEntry{
         if(!hasMatchSec())
             return false;
 
-        return getSecMatchResult().getMainMatchInfo().getRuleLevel() == 1;
+        MatchInfo matchInfo = getSecMatchResult().getMainMatchInfo();
+
+        return matchInfo.getRuleType().equalsIgnoreCase("");
     }
 
     public boolean isPartContent(){

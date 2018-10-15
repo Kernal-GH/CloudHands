@@ -12,6 +12,7 @@ import com.antell.cloudhands.api.source.SourceEntry;
 
 import java.io.IOException;
 
+
 public class KafkaPacketDataParser {
 
     public static final SourceEntry parse(PacketRecord packetRecord) throws IOException {

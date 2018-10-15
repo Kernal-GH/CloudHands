@@ -9,10 +9,13 @@ import java.io.IOException;
 
 public class FileContentSecResult implements SourceEntry {
 
+    private final String objectId;
     private final FileTranSession fileTranSession;
+
     private final String virusType;
 
     public FileContentSecResult(FileTranSession fileTranSession, String virusType) {
+        this.objectId = TextUtils.getUUID();
         this.fileTranSession = fileTranSession;
         this.virusType = virusType;
     }
@@ -43,8 +46,13 @@ public class FileContentSecResult implements SourceEntry {
     public XContentBuilder dataToJson(XContentBuilder cb) throws IOException {
 
         fileTranSession.dataToJson(cb);
+        cb.field("objectId",objectId);
         cb.field("virusType",virusType);
 
         return cb;
+    }
+
+    public String getObjectId() {
+        return objectId;
     }
 }

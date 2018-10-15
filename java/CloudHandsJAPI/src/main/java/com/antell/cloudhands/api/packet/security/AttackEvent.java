@@ -1,5 +1,7 @@
 package com.antell.cloudhands.api.packet.security;
 
+import com.antell.cloudhands.api.packet.security.clamav.FileContentSecResult;
+import com.antell.cloudhands.api.packet.tcp.FileTranSession;
 import com.antell.cloudhands.api.packet.tcp.http.HTTPSession;
 import com.antell.cloudhands.api.source.SourceEntry;
 import com.antell.cloudhands.api.utils.DateUtils;
@@ -95,7 +97,32 @@ public class AttackEvent implements SourceEntry{
         setLevel(matchInfo.getRuleLevel());
     }
 
+    public AttackEvent(FileContentSecResult fileSec){
 
+        FileTranSession fileTranSession = fileSec.getFileTranSession();
+
+        setParentObjectID(fileSec.getObjectId());
+        setProto(fileTranSession.getProto());
+        setStartTime(fileTranSession.getTime());
+        setEndTime(fileTranSession.getTime());
+
+        String srcIP = fileTranSession.getSrcIP();
+        String dstIP = fileTranSession.getDstIP();
+
+        if(IPUtils.isInnerIPBE(IPUtils.ipv4LongBE(dstIP))){
+            setAssetIP(dstIP);
+            setDstIP(srcIP);
+        }else{
+            setAssetIP(srcIP);
+            setDstIP(dstIP);
+        }
+
+        setEventType(fileSec.getVirusType());
+        setEngineName("FileContentCheckEngine");
+        setEngineID(0);
+        setLevel(1);
+
+    }
 
     public String getParentObjectID() {
         return parentObjectID;
