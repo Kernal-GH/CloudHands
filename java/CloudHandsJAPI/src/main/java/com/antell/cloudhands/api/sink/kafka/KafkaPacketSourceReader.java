@@ -79,7 +79,7 @@ public class KafkaPacketSourceReader implements SourceReader {
                 if (packetRecord != null) {
 
                     try {
-                        kafkaClient.send(packetRecord.getData());
+                        kafkaClient.send(packetRecord.getDataWithTypeLen());
                     } catch (Exception e) {
                         e.printStackTrace();
                     } finally {

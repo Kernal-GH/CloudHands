@@ -1,8 +1,10 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
 import com.antell.cloudhands.api.packet.SessionEntry;
+import com.antell.cloudhands.api.packet.security.AttackEvent;
 import com.antell.cloudhands.api.packet.udp.UDPSessionEntry;
 import com.antell.cloudhands.api.source.SourceEntry;
+import com.antell.cloudhands.api.utils.TextUtils;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 
 import java.io.DataInput;
@@ -13,11 +15,17 @@ import java.io.IOException;
  */
 public class DNSSession  implements SourceEntry {
 
+    private final String objectId;
+    private AttackEvent event;
+
     private SessionEntry sessionEntry;
     private DNSRequst dnsRequst;
     private DNSResponse dnsResponse;
 
     public DNSSession(DataInput in) throws IOException {
+
+        this.objectId = TextUtils.getUUID();
+        event = null;
         sessionEntry = new UDPSessionEntry();
         dnsRequst = null;
         dnsResponse = null;
@@ -41,8 +49,45 @@ public class DNSSession  implements SourceEntry {
     }
 
     @Override
+    public String getObjectId(){
+
+        return objectId;
+    }
+
+    @Override
+    public AttackEvent getEvent() {
+        return event;
+    }
+
+    @Override
+    public void setEvent(AttackEvent event) {
+        this.event = event;
+    }
+
+    @Override
+    public String getProto(){
+
+        return "dns";
+    }
+
+    public long getSrcIPI(){
+
+        return sessionEntry.getReqIP();
+    }
+
+    public long getDstIPI(){
+        return sessionEntry.getResIP();
+    }
+
+    public long getTime(){
+
+        return sessionEntry.getReqStartTime();
+    }
+
+    @Override
     public XContentBuilder dataToJson(XContentBuilder cb) throws IOException {
 
+        cb.field("objectId",objectId);
         XContentBuilder seCB = cb.startObject("sessionEntry");
         sessionEntry.dataToJson(seCB);
         seCB.endObject();
@@ -94,4 +139,6 @@ public class DNSSession  implements SourceEntry {
     public SessionEntry getSessionEntry() {
         return sessionEntry;
     }
+
+
 }

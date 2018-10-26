@@ -1,7 +1,6 @@
 package com.antell.cloudhands.api.packet.security;
 
 import com.antell.cloudhands.api.packet.security.clamav.FileContentSecResult;
-import com.antell.cloudhands.api.packet.tcp.FileTranSession;
 import com.antell.cloudhands.api.packet.tcp.http.HTTPSession;
 import com.antell.cloudhands.api.source.SourceEntry;
 import com.antell.cloudhands.api.utils.DateUtils;
@@ -14,7 +13,7 @@ import java.io.IOException;
 /**
  * Created by dell on 2018/8/1.
  */
-public class AttackEvent implements SourceEntry{
+public class AttackEvent implements SourceEntry {
 
     private String parentObjectID;
     private String proto;
@@ -32,23 +31,23 @@ public class AttackEvent implements SourceEntry{
 
         StringBuffer sb = new StringBuffer();
 
-        TextUtils.addText(sb,"parentObjectID",parentObjectID);
-        TextUtils.addText(sb,"proto",proto);
-        TextUtils.addLong(sb,"startTime",startTime);
-        TextUtils.addLong(sb,"endTime",endTime);
-        TextUtils.addText(sb,"timeDate", DateUtils.format(startTime));
-        TextUtils.addText(sb,"assetIP",assetIP);
-        TextUtils.addText(sb,"dstIP",dstIP);
-        TextUtils.addText(sb,"eventType",eventType);
-        TextUtils.addText(sb,"engineName",engineName);
-        TextUtils.addLong(sb,"engineID",engineID);
-        TextUtils.addLong(sb,"level",level);
+        TextUtils.addText(sb, "parentObjectID", parentObjectID);
+        TextUtils.addText(sb, "proto", proto);
+        TextUtils.addLong(sb, "startTime", startTime);
+        TextUtils.addLong(sb, "endTime", endTime);
+        TextUtils.addText(sb, "timeDate", DateUtils.format(startTime));
+        TextUtils.addText(sb, "assetIP", assetIP);
+        TextUtils.addText(sb, "dstIP", dstIP);
+        TextUtils.addText(sb, "eventType", eventType);
+        TextUtils.addText(sb, "engineName", engineName);
+        TextUtils.addLong(sb, "engineID", engineID);
+        TextUtils.addLong(sb, "level", level);
 
         return sb.toString();
     }
 
     @Override
-    public String toString(){
+    public String toString() {
 
         return dataToString();
     }
@@ -56,71 +55,92 @@ public class AttackEvent implements SourceEntry{
     @Override
     public XContentBuilder dataToJson(XContentBuilder cb) throws IOException {
 
-        cb.field("parentObjectID",parentObjectID);
-        cb.field("proto",proto);
-        cb.field("startTime",startTime);
-        cb.field("endTime",endTime);
+        cb.field("parentObjectID", parentObjectID);
+        cb.field("proto", proto);
+        cb.field("startTime", startTime);
+        cb.field("endTime", endTime);
         cb.field("timeDate", DateUtils.format(startTime));
-        cb.field("assetIP",assetIP);
-        cb.field("dstIP",dstIP);
-        cb.field("eventType",eventType);
-        cb.field("engineName",engineName);
-        cb.field("engineID",engineID);
-        cb.field("level",level);
+        cb.field("assetIP", assetIP);
+        cb.field("dstIP", dstIP);
+        cb.field("eventType", eventType);
+        cb.field("engineName", engineName);
+        cb.field("engineID", engineID);
+        cb.field("level", level);
 
         return cb;
     }
 
-    public AttackEvent(HTTPSession httpSession){
+    public AttackEvent(HTTPSession httpSession) {
 
-        MatchInfo matchInfo = httpSession.getSecMatchResult().getMainMatchInfo();
+        this("WebRuleEngine",
+                httpSession.getObjectId(),
+                httpSession.getSessionEntry().getReqStartTime(),
+                httpSession.getSessionEntry().getResLastTime(),
+                httpSession.getSessionEntry().getReqIP(),
+                httpSession.getSessionEntry().getResIP(),
+                "http",
+                httpSession.getSecMatchResult().getMainMatchInfo().getRuleType(),
+                httpSession.getSecMatchResult().getMainMatchInfo().getRuleLevel());
 
-        setParentObjectID(httpSession.getObjectId());
-        setProto("http");
-        setStartTime(httpSession.getSessionEntry().getReqStartTime());
-        setEndTime(httpSession.getSessionEntry().getResStartTime());
-
-        long srcIP = httpSession.getSessionEntry().getReqIP();
-        long dstIP = httpSession.getSessionEntry().getResIP();
-
-        if(IPUtils.isInnerIPBE(dstIP)){
-            setAssetIP(IPUtils.ipv4Str(dstIP));
-            setDstIP(IPUtils.ipv4Str(srcIP));
-        }else{
-            setAssetIP(IPUtils.ipv4Str(srcIP));
-            setDstIP(IPUtils.ipv4Str(dstIP));
-        }
-
-        setEventType(matchInfo.getRuleType());
-        setEngineName("WebRuleEngine");
-        setEngineID(matchInfo.getRuleID());
-        setLevel(matchInfo.getRuleLevel());
     }
 
-    public AttackEvent(FileContentSecResult fileSec){
+    public AttackEvent(FileContentSecResult fileSec) {
 
-        FileTranSession fileTranSession = fileSec.getFileTranSession();
+        this("FileContentCheckEngine",
+                fileSec.getObjectId(),
+                fileSec.getFileTranSession().getTime(),
+                fileSec.getFileTranSession().getTime(),
+                IPUtils.ipv4LongBE(fileSec.getFileTranSession().getSrcIP()),
+                IPUtils.ipv4LongBE(fileSec.getFileTranSession().getDstIP()),
+                fileSec.getFileTranSession().getProto(),
+                "FileSec/Malware",1);
+    }
 
-        setParentObjectID(fileSec.getObjectId());
-        setProto(fileTranSession.getProto());
-        setStartTime(fileTranSession.getTime());
-        setEndTime(fileTranSession.getTime());
+    public AttackEvent(SourceEntry sourceEntry,String engineName,String eventType){
 
-        String srcIP = fileTranSession.getSrcIP();
-        String dstIP = fileTranSession.getDstIP();
+        this(
+                engineName,
+                sourceEntry.getObjectId(),
+                sourceEntry.getTime(),
+                sourceEntry.getTime(),
+                sourceEntry.getSrcIPI(),
+                sourceEntry.getDstIPI(),
+                sourceEntry.getProto(),
+                eventType,
+                1);
 
-        if(IPUtils.isInnerIPBE(IPUtils.ipv4LongBE(dstIP))){
-            setAssetIP(dstIP);
-            setDstIP(srcIP);
-        }else{
-            setAssetIP(srcIP);
-            setDstIP(dstIP);
+    }
+
+    public AttackEvent(String engineName,
+                       String pid,
+                       long startTime,
+                       long endTime,
+                       long srcIP,
+                       long dstIP,
+                       String proto,
+                       String eventType,
+                       long ruleLevel) {
+
+        setParentObjectID(pid);
+        setProto(proto);
+        setStartTime(startTime);
+        setEndTime(endTime);
+
+        String ssrcIP = IPUtils.ipv4Str(srcIP);
+        String sdstIP = IPUtils.ipv4Str(dstIP);
+
+        if (IPUtils.isInnerIPBE(dstIP)) {
+            setAssetIP(sdstIP);
+            setDstIP(ssrcIP);
+        } else {
+            setAssetIP(ssrcIP);
+            setDstIP(sdstIP);
         }
 
-        setEventType("FileSec/Malware");
-        setEngineName("FileContentCheckEngine");
+        setEventType(eventType);
+        setEngineName(engineName);
         setEngineID(0);
-        setLevel(1);
+        setLevel(ruleLevel);
 
     }
 

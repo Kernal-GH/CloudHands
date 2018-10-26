@@ -1,8 +1,10 @@
 package com.antell.cloudhands.api.packet;
 
+import com.antell.cloudhands.api.packet.security.AttackEvent;
 import com.antell.cloudhands.api.source.SourceEntry;
 import com.antell.cloudhands.api.utils.DateUtils;
 import com.antell.cloudhands.api.utils.IPUtils;
+import com.antell.cloudhands.api.utils.Text;
 import com.antell.cloudhands.api.utils.TextUtils;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.msgpack.core.MessageUnpacker;
@@ -17,6 +19,8 @@ public class TCPSession extends SessionEntry implements SourceEntry{
 
     private int phaseState;
 
+    private final String objectId;
+    private AttackEvent event;
 
     public int getPhaseState() {
         return phaseState;
@@ -27,7 +31,8 @@ public class TCPSession extends SessionEntry implements SourceEntry{
     }
 
     public TCPSession(DataInput input) throws IOException {
-
+        this.objectId = TextUtils.getUUID();
+        event = null;
         setTimeout(input.readUnsignedByte()!=0);
         setTimeoutTV(input.readUnsignedShort());
         setPhaseState(input.readUnsignedShort());
@@ -54,10 +59,47 @@ public class TCPSession extends SessionEntry implements SourceEntry{
     }
 
 
+    @Override
+    public String getObjectId(){
+
+        return objectId;
+    }
+
+    @Override
+    public void setEvent(AttackEvent event){
+
+        this.event = event;
+    }
+
+    @Override
+    public AttackEvent getEvent(){
+
+        return event;
+    }
+
+    public String getProto(){
+
+        return "tcp";
+    }
+
+    public long getSrcIPI(){
+
+        return getReqIP();
+    }
+
+    public long getDstIPI(){
+        return getResIP();
+    }
+
+    public long getTime(){
+
+        return getReqStartTime();
+    }
 
     @Override
     public XContentBuilder dataToJson(XContentBuilder cb) throws IOException {
 
+        cb.field("objectId",objectId);
         cb.field("proto","tcp");
         cb.field("srcIP", IPUtils.ipv4Str(getReqIP()));
         cb.field("dstIP",IPUtils.ipv4Str(getResIP()));

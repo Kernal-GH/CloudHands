@@ -26,7 +26,10 @@ import java.util.List;
  */
 public class HTTPSession implements SourceEntry{
 
+
     private final String objectId;
+    private AttackEvent event;
+
     private SessionEntry sessionEntry;
     private String method;
     private String uri;
@@ -57,6 +60,7 @@ public class HTTPSession implements SourceEntry{
 
     public HTTPSession(MessageUnpacker unpacker) throws IOException {
 
+        event = null;
         objectId = TextUtils.getUUID();
         sessionEntry = new TCPSessionEntry();
         reqHeaders = new ArrayList<>();
@@ -544,6 +548,34 @@ public class HTTPSession implements SourceEntry{
 
     public void setFilename(String filename) {
         this.filename = filename;
+    }
+
+    @Override
+    public AttackEvent getEvent() {
+        return event;
+    }
+
+    @Override
+    public void setEvent(AttackEvent event) {
+        this.event = event;
+    }
+    public String getProto(){
+
+        return "http";
+    }
+
+    public long getSrcIPI(){
+
+        return sessionEntry.getReqIP();
+    }
+
+    public long getDstIPI(){
+        return sessionEntry.getResIP();
+    }
+
+    public long getTime(){
+
+        return sessionEntry.getReqStartTime();
     }
 
 }
