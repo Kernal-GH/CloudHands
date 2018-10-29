@@ -1,6 +1,6 @@
 package com.antell.cloudhands.api.packet.tcp;
 
-import com.antell.cloudhands.api.source.SourceEntry;
+import com.antell.cloudhands.api.source.AbstractSourceEntry;
 import com.antell.cloudhands.api.utils.DateUtils;
 import com.antell.cloudhands.api.utils.TextUtils;
 import org.elasticsearch.common.xcontent.XContentBuilder;
@@ -10,7 +10,7 @@ import java.io.IOException;
 /**
  * Created by dell on 2018/7/20.
  */
-public class FileTranSession implements SourceEntry {
+public class FileTranSession extends AbstractSourceEntry {
 
     private String proto;
     private String parentObjectId;

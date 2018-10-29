@@ -1,5 +1,6 @@
 package com.antell.cloudhands.api.packet;
 
+import com.antell.cloudhands.api.source.AbstractSourceEntry;
 import com.antell.cloudhands.api.source.SourceEntry;
 import com.antell.cloudhands.api.utils.DateUtils;
 import com.antell.cloudhands.api.utils.IPUtils;
@@ -12,7 +13,7 @@ import java.io.IOException;
 /**
  * Created by dell on 2018/4/16.
  */
-public class ICMPPacket implements SourceEntry {
+public class ICMPPacket extends AbstractSourceEntry {
 
     private long time;
     private int type;

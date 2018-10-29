@@ -4,6 +4,7 @@ import com.antell.cloudhands.api.packet.SessionEntry;
 import com.antell.cloudhands.api.packet.security.SecMatchResult;
 import com.antell.cloudhands.api.packet.tcp.FileTranSession;
 import com.antell.cloudhands.api.packet.tcp.TCPSessionEntry;
+import com.antell.cloudhands.api.source.AbstractSourceEntry;
 import com.antell.cloudhands.api.source.SourceEntry;
 import com.antell.cloudhands.api.utils.*;
 import com.google.common.base.Preconditions;
@@ -19,9 +20,8 @@ import java.util.stream.Collectors;
 /**
  * Created by dell on 2018/6/11.
  */
-public class MailSession implements SourceEntry {
+public class MailSession extends AbstractSourceEntry {
 
-    private final String objectId;
     private SessionEntry sessionEntry;
 
     private String userName;
@@ -40,8 +40,6 @@ public class MailSession implements SourceEntry {
     private SecMatchResult secMatchResult;
 
     public MailSession(MessageUnpacker unpacker) throws IOException {
-
-        this.objectId = TextUtils.getUUID();
 
         this.sessionEntry = new TCPSessionEntry();
         this.maillAttachEntryList = new ArrayList<>();
@@ -144,9 +142,6 @@ public class MailSession implements SourceEntry {
         this.secMatchResult = secMatchResult;
     }
 
-    public String getObjectId() {
-        return objectId;
-    }
 
     private class MaillAttachEntry{
 
@@ -217,7 +212,7 @@ public class MailSession implements SourceEntry {
         FileTranSession fileTranSession = new FileTranSession();
 
         fileTranSession.setProto("mail");
-        fileTranSession.setParentObjectId(objectId);
+        fileTranSession.setParentObjectId(getObjectId());
         fileTranSession.setSrcIP(IPUtils.ipv4Str(sessionEntry.getReqIP()));
         fileTranSession.setSrcPort(sessionEntry.getReqPort());
         fileTranSession.setDstIP(IPUtils.ipv4Str(sessionEntry.getResIP()));
@@ -361,7 +356,7 @@ public class MailSession implements SourceEntry {
         sessionEntry.dataToJson(seCB);
         seCB.endObject();
 
-        cb.field("objectId",objectId);
+        cb.field("objectId",getObjectId());
         cb.field("userName",userName);
         cb.field("passwd",passwd);
         cb.field("subject", Text.decode(subject==null?"".getBytes():subject.getBytes()));

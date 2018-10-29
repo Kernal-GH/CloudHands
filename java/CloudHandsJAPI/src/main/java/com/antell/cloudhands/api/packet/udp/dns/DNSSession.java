@@ -3,6 +3,7 @@ package com.antell.cloudhands.api.packet.udp.dns;
 import com.antell.cloudhands.api.packet.SessionEntry;
 import com.antell.cloudhands.api.packet.security.AttackEvent;
 import com.antell.cloudhands.api.packet.udp.UDPSessionEntry;
+import com.antell.cloudhands.api.source.AbstractSourceEntry;
 import com.antell.cloudhands.api.source.SourceEntry;
 import com.antell.cloudhands.api.utils.TextUtils;
 import org.elasticsearch.common.xcontent.XContentBuilder;
@@ -13,9 +14,8 @@ import java.io.IOException;
 /**
  * Created by dell on 2018/6/11.
  */
-public class DNSSession  implements SourceEntry {
+public class DNSSession  extends AbstractSourceEntry {
 
-    private final String objectId;
     private AttackEvent event;
 
     private SessionEntry sessionEntry;
@@ -24,7 +24,6 @@ public class DNSSession  implements SourceEntry {
 
     public DNSSession(DataInput in) throws IOException {
 
-        this.objectId = TextUtils.getUUID();
         event = null;
         sessionEntry = new UDPSessionEntry();
         dnsRequst = null;
@@ -48,11 +47,6 @@ public class DNSSession  implements SourceEntry {
 
     }
 
-    @Override
-    public String getObjectId(){
-
-        return objectId;
-    }
 
     @Override
     public AttackEvent getEvent() {
@@ -87,7 +81,7 @@ public class DNSSession  implements SourceEntry {
     @Override
     public XContentBuilder dataToJson(XContentBuilder cb) throws IOException {
 
-        cb.field("objectId",objectId);
+        cb.field("objectId",getObjectId());
         XContentBuilder seCB = cb.startObject("sessionEntry");
         sessionEntry.dataToJson(seCB);
         seCB.endObject();

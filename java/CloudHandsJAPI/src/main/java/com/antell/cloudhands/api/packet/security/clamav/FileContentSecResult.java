@@ -1,21 +1,21 @@
 package com.antell.cloudhands.api.packet.security.clamav;
 
 import com.antell.cloudhands.api.packet.tcp.FileTranSession;
+import com.antell.cloudhands.api.source.AbstractSourceEntry;
 import com.antell.cloudhands.api.source.SourceEntry;
 import com.antell.cloudhands.api.utils.TextUtils;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 
 import java.io.IOException;
 
-public class FileContentSecResult implements SourceEntry {
+public class FileContentSecResult extends AbstractSourceEntry {
 
-    private final String objectId;
     private final FileTranSession fileTranSession;
 
     private final String virusType;
 
     public FileContentSecResult(FileTranSession fileTranSession, String virusType) {
-        this.objectId = TextUtils.getUUID();
+
         this.fileTranSession = fileTranSession;
         this.virusType = virusType;
     }
@@ -46,13 +46,10 @@ public class FileContentSecResult implements SourceEntry {
     public XContentBuilder dataToJson(XContentBuilder cb) throws IOException {
 
         fileTranSession.dataToJson(cb);
-        cb.field("objectId",objectId);
+        cb.field("objectId",getObjectId());
         cb.field("virusType",virusType);
 
         return cb;
     }
 
-    public String getObjectId() {
-        return objectId;
-    }
 }

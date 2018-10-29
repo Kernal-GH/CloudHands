@@ -2,6 +2,7 @@ package com.antell.cloudhands.api.packet.tcp.ftp;
 
 import com.antell.cloudhands.api.packet.SessionEntry;
 import com.antell.cloudhands.api.packet.tcp.TCPSessionEntry;
+import com.antell.cloudhands.api.source.AbstractSourceEntry;
 import com.antell.cloudhands.api.source.SourceEntry;
 import com.antell.cloudhands.api.utils.MessagePackUtil;
 import com.antell.cloudhands.api.utils.TextUtils;
@@ -13,7 +14,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FTPSession implements SourceEntry {
+public class FTPSession extends AbstractSourceEntry {
 
     private SessionEntry sessionEntry;
     private String user;

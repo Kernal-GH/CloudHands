@@ -3,6 +3,7 @@ package com.antell.cloudhands.api.packet.udp.tftp;
 import com.antell.cloudhands.api.packet.SessionEntry;
 import com.antell.cloudhands.api.packet.tcp.FileTranSession;
 import com.antell.cloudhands.api.packet.udp.UDPSessionEntry;
+import com.antell.cloudhands.api.source.AbstractSourceEntry;
 import com.antell.cloudhands.api.source.SourceEntry;
 import com.antell.cloudhands.api.utils.Content;
 import com.antell.cloudhands.api.utils.IPUtils;
@@ -17,8 +18,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TFTPSession implements SourceEntry {
-    private final String objectId;
+public class TFTPSession extends AbstractSourceEntry {
     private SessionEntry sessionEntry;
     private int isRead;
     private int isError;
@@ -29,7 +29,6 @@ public class TFTPSession implements SourceEntry {
 
     public TFTPSession(DataInput in) throws IOException {
 
-        objectId = TextUtils.getUUID();
         sessionEntry = new UDPSessionEntry();
         sessionEntry.read(in);
 
@@ -85,7 +84,7 @@ public class TFTPSession implements SourceEntry {
         XContentBuilder seCB = cb.startObject("sessionEntry");
         sessionEntry.dataToJson(seCB);
         seCB.endObject();
-        cb.field("objectId",objectId);
+        cb.field("objectId",getObjectId());
         cb.field("isRead", isRead);
         cb.field("isError", isError);
         cb.field("fname", TextUtils.getStrValue(fname));
@@ -113,7 +112,7 @@ public class TFTPSession implements SourceEntry {
         FileTranSession fileTranSession = new FileTranSession();
 
         fileTranSession.setProto("tftp");
-        fileTranSession.setParentObjectId(objectId);
+        fileTranSession.setParentObjectId(getObjectId());
         fileTranSession.setSrcIP(IPUtils.ipv4Str(sessionEntry.getReqIP()));
         fileTranSession.setSrcPort(sessionEntry.getReqPort());
         fileTranSession.setDstIP(IPUtils.ipv4Str(sessionEntry.getResIP()));

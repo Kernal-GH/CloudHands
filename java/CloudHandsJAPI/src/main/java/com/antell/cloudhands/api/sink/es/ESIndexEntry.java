@@ -16,4 +16,6 @@ public interface ESIndexEntry {
 
     ESIndexDB getIndexDB();
 
+    String getId();
+
 }

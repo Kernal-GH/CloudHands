@@ -3,6 +3,7 @@ package com.antell.cloudhands.api.packet.tcp.ftp;
 import com.antell.cloudhands.api.packet.SessionEntry;
 import com.antell.cloudhands.api.packet.tcp.FileTranSession;
 import com.antell.cloudhands.api.packet.tcp.TCPSessionEntry;
+import com.antell.cloudhands.api.source.AbstractSourceEntry;
 import com.antell.cloudhands.api.source.SourceEntry;
 import com.antell.cloudhands.api.utils.Content;
 import com.antell.cloudhands.api.utils.IPUtils;
@@ -16,9 +17,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FTPDataSession implements SourceEntry {
+public class FTPDataSession extends AbstractSourceEntry {
 
-    private final String objectId;
     private SessionEntry sessionEntry;
 
     private String fdir;
@@ -27,7 +27,6 @@ public class FTPDataSession implements SourceEntry {
 
     public FTPDataSession(MessageUnpacker unpacker) throws IOException {
 
-        objectId = TextUtils.getUUID();
         sessionEntry = new TCPSessionEntry();
         fdir = "";
         fname = "";
@@ -77,7 +76,7 @@ public class FTPDataSession implements SourceEntry {
         sessionEntry.dataToJson(seCB);
         seCB.endObject();
 
-        cb.field("objectId",objectId);
+        cb.field("objectId",getObjectId());
         cb.field("fdir",TextUtils.getStrValue(fdir));
         cb.field("fname",TextUtils.getStrValue(fname));
         cb.field("path",TextUtils.getStrValue(path));
@@ -91,7 +90,7 @@ public class FTPDataSession implements SourceEntry {
 
         fileTranSession.setProto("ftp");
 
-        fileTranSession.setParentObjectId(objectId);
+        fileTranSession.setParentObjectId(getObjectId());
         fileTranSession.setSrcIP(IPUtils.ipv4Str(sessionEntry.getReqIP()));
         fileTranSession.setSrcPort(sessionEntry.getReqPort());
         fileTranSession.setDstIP(IPUtils.ipv4Str(sessionEntry.getResIP()));
@@ -122,10 +121,6 @@ public class FTPDataSession implements SourceEntry {
         results.add(toFileTranSession());
 
         return results;
-    }
-
-    public String getObjectId() {
-        return objectId;
     }
 
     public SessionEntry getSessionEntry() {

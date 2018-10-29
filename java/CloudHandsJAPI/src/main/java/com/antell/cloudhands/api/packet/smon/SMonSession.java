@@ -3,6 +3,7 @@ package com.antell.cloudhands.api.packet.smon;
 import com.antell.cloudhands.api.packet.SessionEntry;
 import com.antell.cloudhands.api.packet.tcp.TCPSessionEntry;
 import com.antell.cloudhands.api.packet.udp.UDPSessionEntry;
+import com.antell.cloudhands.api.source.AbstractSourceEntry;
 import com.antell.cloudhands.api.source.SourceEntry;
 import com.antell.cloudhands.api.utils.MessagePackUtil;
 import com.antell.cloudhands.api.utils.Text;
@@ -17,7 +18,7 @@ import java.io.IOException;
 /**
  * Created by dell on 2018/7/17.
  */
-public class SMonSession implements SourceEntry {
+public class SMonSession extends AbstractSourceEntry {
 
     private final SessionEntry sessionEntry;
 

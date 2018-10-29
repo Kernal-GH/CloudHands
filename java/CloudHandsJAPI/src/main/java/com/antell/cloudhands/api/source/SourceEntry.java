@@ -23,10 +23,7 @@ public interface SourceEntry extends DataDump,ESIndexable {
         return null;
     }
 
-    default String getObjectId(){
-
-        return null;
-    }
+    String getObjectId();
 
     default String getProto(){
 

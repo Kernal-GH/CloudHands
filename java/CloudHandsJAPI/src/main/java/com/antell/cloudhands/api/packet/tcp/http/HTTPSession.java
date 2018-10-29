@@ -6,6 +6,7 @@ import com.antell.cloudhands.api.packet.security.MatchInfo;
 import com.antell.cloudhands.api.packet.security.SecMatchResult;
 import com.antell.cloudhands.api.packet.tcp.FileTranSession;
 import com.antell.cloudhands.api.packet.tcp.TCPSessionEntry;
+import com.antell.cloudhands.api.source.AbstractSourceEntry;
 import com.antell.cloudhands.api.source.SourceEntry;
 import com.antell.cloudhands.api.utils.Content;
 import com.antell.cloudhands.api.utils.IPUtils;
@@ -24,10 +25,9 @@ import java.util.List;
 /**
  * Created by dell on 2018/6/11.
  */
-public class HTTPSession implements SourceEntry{
+public class HTTPSession extends AbstractSourceEntry {
 
 
-    private final String objectId;
     private AttackEvent event;
 
     private SessionEntry sessionEntry;
@@ -61,7 +61,6 @@ public class HTTPSession implements SourceEntry{
     public HTTPSession(MessageUnpacker unpacker) throws IOException {
 
         event = null;
-        objectId = TextUtils.getUUID();
         sessionEntry = new TCPSessionEntry();
         reqHeaders = new ArrayList<>();
         resHeaders = new ArrayList<>();
@@ -90,7 +89,7 @@ public class HTTPSession implements SourceEntry{
         FileTranSession fileTranSession = new FileTranSession();
 
         fileTranSession.setProto("http");
-        fileTranSession.setParentObjectId(objectId);
+        fileTranSession.setParentObjectId(getObjectId());
         fileTranSession.setSrcIP(IPUtils.ipv4Str(sessionEntry.getReqIP()));
         fileTranSession.setSrcPort(sessionEntry.getReqPort());
         fileTranSession.setDstIP(IPUtils.ipv4Str(sessionEntry.getResIP()));
@@ -343,7 +342,7 @@ public class HTTPSession implements SourceEntry{
         sessionEntry.dataToJson(seCB);
         seCB.endObject();
 
-        cb.field("objectId",objectId);
+        cb.field("objectId",getObjectId());
         cb.field("method",TextUtils.getStrValue(method));
         cb.field("uri",TextUtils.getStrValue(uri));
         cb.field("extName",TextUtils.getStrValue(extName));
@@ -475,10 +474,6 @@ public class HTTPSession implements SourceEntry{
 
     public void setContentEncoding(String contentEncoding) {
         this.contentEncoding = contentEncoding;
-    }
-
-    public String getObjectId() {
-        return objectId;
     }
 
     public String getReferer() {

@@ -2,6 +2,7 @@ package com.antell.cloudhands.api.packet.security;
 
 import com.antell.cloudhands.api.packet.security.clamav.FileContentSecResult;
 import com.antell.cloudhands.api.packet.tcp.http.HTTPSession;
+import com.antell.cloudhands.api.source.AbstractSourceEntry;
 import com.antell.cloudhands.api.source.SourceEntry;
 import com.antell.cloudhands.api.utils.DateUtils;
 import com.antell.cloudhands.api.utils.IPUtils;
@@ -13,7 +14,7 @@ import java.io.IOException;
 /**
  * Created by dell on 2018/8/1.
  */
-public class AttackEvent implements SourceEntry {
+public class AttackEvent extends AbstractSourceEntry {
 
     private String parentObjectID;
     private String proto;

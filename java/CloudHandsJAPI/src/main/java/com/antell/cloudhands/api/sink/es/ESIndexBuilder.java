@@ -50,7 +50,7 @@ public class ESIndexBuilder {
         String id = TextUtils.getUUID();
 
         XContentBuilder content = indexEntry.toJson();
-        content.field("id",id);
+        content.field("id",indexEntry.getId());
 
         content.endObject();
 
