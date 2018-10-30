@@ -5,7 +5,7 @@
 #        Author: csp001314@163.com
 #   Description: ---
 #        Create: 2016-11-03 20:09:47
-# Last Modified: 2018-09-29 14:41:18
+# Last Modified: 2018-10-29 18:56:07
 #
 
 [ `id -u` -ne 0 ] && {
@@ -39,10 +39,11 @@ install_dpdk(){
     cp -rf * /usr/src/dpdk
 
     make -C /usr/src/dpdk install T=x86_64-native-linuxapp-gcc
-    
     cp -rf /usr/src/dpdk/x86_64-native-linuxapp-gcc/* $dpdk_install_prefix
     cp -rf /usr/src/dpdk/usertools $dpdk_install_prefix
     ln -s /usr/src/dpdk/x86_64-native-linuxapp-gcc /usr/local/dpdk/dpdk_src
+
+	export RTE_TARGET=/usr/local/dpdk/dpdk_src
 
     cd ../../
 }
