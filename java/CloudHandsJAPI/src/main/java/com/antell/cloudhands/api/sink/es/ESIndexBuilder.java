@@ -47,10 +47,10 @@ public class ESIndexBuilder {
         String docType = indexEntry.getIndexDB().getDocType();
         String mappingJson = indexEntry.getIndexDB().getMapping();
 
-        String id = TextUtils.getUUID();
+        String id = indexEntry.getId();
 
         XContentBuilder content = indexEntry.toJson();
-        content.field("id",indexEntry.getId());
+        content.field("id",id);
 
         content.endObject();
 

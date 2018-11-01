@@ -15,6 +15,7 @@ typedef struct ch_mysql_response_t ch_mysql_response_t;
 
 struct ch_mysql_response_t {
 
+	uint8_t response_code;
 
 };
 
