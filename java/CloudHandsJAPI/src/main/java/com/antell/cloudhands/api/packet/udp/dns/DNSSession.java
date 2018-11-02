@@ -29,7 +29,7 @@ public class DNSSession  extends AbstractSourceEntry {
         dnsRequst = null;
         dnsResponse = null;
         sessionEntry.read(in);
-
+        sessionEntry.setProtocol("DNS");
         boolean hasReq = in.readUnsignedByte()==1;
         boolean hasRes = in.readUnsignedByte()==1;
 

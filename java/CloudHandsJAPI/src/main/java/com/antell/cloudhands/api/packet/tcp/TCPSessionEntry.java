@@ -1,6 +1,7 @@
 package com.antell.cloudhands.api.packet.tcp;
 
 import com.antell.cloudhands.api.packet.SessionEntry;
+import com.antell.cloudhands.api.utils.Constants;
 import com.antell.cloudhands.api.utils.MessagePackUtil;
 import com.antell.cloudhands.api.utils.TextUtils;
 import com.google.common.base.Preconditions;
@@ -49,6 +50,7 @@ public class TCPSessionEntry extends SessionEntry {
         Preconditions.checkArgument(n==14,"Invalid msgpack packet of session entry:"+n);
 
         setProtocolID(MessagePackUtil.parseLong(unpacker));
+        setProtocol(Constants.protoID2String[(int)getProtocolID()]);
         setSessionID(MessagePackUtil.parseLong(unpacker));
         setReqStartTime(MessagePackUtil.parseLong(unpacker));
         setResStartTime(MessagePackUtil.parseLong(unpacker));

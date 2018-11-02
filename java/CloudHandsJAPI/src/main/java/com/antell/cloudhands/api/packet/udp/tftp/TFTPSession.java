@@ -5,10 +5,7 @@ import com.antell.cloudhands.api.packet.tcp.FileTranSession;
 import com.antell.cloudhands.api.packet.udp.UDPSessionEntry;
 import com.antell.cloudhands.api.source.AbstractSourceEntry;
 import com.antell.cloudhands.api.source.SourceEntry;
-import com.antell.cloudhands.api.utils.Content;
-import com.antell.cloudhands.api.utils.IPUtils;
-import com.antell.cloudhands.api.utils.Text;
-import com.antell.cloudhands.api.utils.TextUtils;
+import com.antell.cloudhands.api.utils.*;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 
 import java.io.DataInput;
@@ -31,7 +28,7 @@ public class TFTPSession extends AbstractSourceEntry {
 
         sessionEntry = new UDPSessionEntry();
         sessionEntry.read(in);
-
+        sessionEntry.setProtocol("TFTP");
         long reqIP = sessionEntry.getReqIP();
         sessionEntry.setReqIP(sessionEntry.getResIP());
         sessionEntry.setResIP(reqIP);
