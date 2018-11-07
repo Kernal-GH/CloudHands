@@ -13,7 +13,7 @@ public class TestClamAVScan {
             System.exit(-1);
         }
 
-        if(scan.init() == -1){
+        if(scan.init("") == -1){
             System.out.println("Cannot init ClamAV engine!");
             System.exit(-1);
         }

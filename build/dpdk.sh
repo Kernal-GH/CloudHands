@@ -8,7 +8,7 @@
 # Last Modified: 2018-06-20 15:26:15
 #
 
-dpdk_ver=17.05.2
+#dpdk_ver=17.05.2
 #dpdk_ver=17.08.2
-#dpdk_ver=18.02.1
+dpdk_ver=18.02.1
 

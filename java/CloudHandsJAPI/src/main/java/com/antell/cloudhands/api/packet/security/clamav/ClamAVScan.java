@@ -6,9 +6,9 @@ package com.antell.cloudhands.api.packet.security.clamav;
 public class ClamAVScan {
 
 
-    public int init(){
+    public int init(String dbDir){
 
-        return init("",ClamAVConstants.CL_DB_STDOPT);
+        return init(dbDir, ClamAVConstants.CL_DB_STDOPT);
     }
 
     public String scanFile(String fname){
