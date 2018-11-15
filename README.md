@@ -3,6 +3,8 @@
 利用DPDK捕获流量，流量一般从交换机镜像一个端口并连接到设备工作网口。从捕获的流量进行重组，统计等操作。
 并对TCP，UDP等为基础的上层应用协议进行还原为进一步的安全分析提供必要的数据。 
 
+
+此项目已经迁移到：bitbucket上去了
 ```
 
 ### 依赖软件
@@ -89,12 +91,16 @@ cd /usr/local/dpdk/CloudHands/bin
 4. IMAP
 5. FTP
 6. TELNET
+7. mysql
+8. redis
+9. mongodb
 
 ```
 ### 基于UDP的协议还原
 ```
 1. DNS
 2. tftp
+3. snmp
 
 ```
 ### 流量分析相关的元数据
