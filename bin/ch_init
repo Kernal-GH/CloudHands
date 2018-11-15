@@ -1,0 +1,49 @@
+#!/bin/bash
+# chkconfig: - 85 15
+# processname: ch_init 
+#
+### BEGIN INIT INFO
+# Provides: kk 
+# Required-Start: $local_fs $remote_fs $network
+# Required-Stop: $local_fs $remote_fs $network
+# Default-Start: 2 3 4 5
+# Default-Stop: 0 1 6
+# Short-Description: start and stop ch_init 
+### END INIT INFO
+
+#
+# Source function library.
+#
+if [ -f /etc/rc.d/init.d/functions ]; then
+	. /etc/rc.d/init.d/functions
+fi
+
+PROG_PREFIX=/usr/local/dpdk/CloudHands/bin
+
+# See how we were called.
+case "$1" in
+	start)
+		$PROG_PREFIX/ch_setup.sh start
+		;;
+
+	stop)
+		$PROG_PREFIX/ch_setup.sh stop
+		;;
+
+	restart)
+		$PROG_PREFIX/ch_setup.sh stop
+		$PROG_PREFIX/ch_setup.sh start
+		;;
+
+	start_dpdk)
+		$PROG_PREFIX/ch_setup.sh start_dpdk
+		;;
+
+	stop_dpdk)
+		$PROG_PREFIX/ch_setup.sh stop_dpdk
+		;;
+	*)
+		echo "Usage: $prog {start|stop|restart|start_dpdk|stop_dpdk}"
+esac
+
+

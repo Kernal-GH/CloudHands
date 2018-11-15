@@ -1,0 +1,6 @@
+#!/bin/bash
+
+JSAMPLE_DRIVER_CLASS="com.antell.cloudhands.api.sample.Simple"
+export LD_LIBRARY_PATH=/usr/local/dpdk/CloudHands/lib
+
+java -jar CloudHandsJAPISample-1.0.0.jar /usr/local/dpdk/CloudHands/sample/jsample.properties 
