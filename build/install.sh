@@ -55,6 +55,7 @@ comp_lib(){
 	make -C CloudHands/lib/shm
 	make -C CloudHands/lib/thread
 	make -C CloudHands/lib/fstore
+	make -C CloudHands/lib/lua
 	make -C CloudHands/packet
 	make -C CloudHands/MProcess
 	make -C CloudHands/tcp/app
@@ -74,7 +75,7 @@ comp_lib(){
 
 	make -C CloudHands/udp/app
 	make -C CloudHands/udp/app/dns
-	make -C CloudHands/udp/app/tftp	
+	make -C CloudHands/udp/app/tftp
 	make -C CloudHands/udp/app/smon
 	cp -rc  CloudHands/udp/app/dns/*.o CloudHands/udp/app/
 	cp -rc  CloudHands/udp/app/tftp/*.o CloudHands/udp/app/
@@ -94,20 +95,25 @@ prepare_dir(){
 	if [ ! -d $dpdk_install_prefix/CloudHands/sample ];then
          mkdir -p $dpdk_install_prefix/CloudHands/sample
     fi
-	
+
 	if [ ! -d $dpdk_install_prefix/CloudHands/KafkaSink ];then
          mkdir -p $dpdk_install_prefix/CloudHands/KafkaSink
     fi
-	
+
     if [ ! -d $dpdk_install_prefix/CloudHands/lib ];then
          mkdir -p $dpdk_install_prefix/CloudHands/lib
     fi
+
+    if [ ! -d $dpdk_install_prefix/CloudHands/lua ];then
+         mkdir -p $dpdk_install_prefix/CloudHands/lua
+    fi
 }
+
 
 install_cloudhands(){
 
 	echo "install cloudhands-----------------------------"
-     
+
 	prepare_dir
 
 	make -C CloudHands/PDispatcher
@@ -129,6 +135,11 @@ install_cloudhands(){
 	cp -rf CloudHands/SessionMonitor/SMonCmd $dpdk_install_prefix/CloudHands/bin
 	cp -rf CloudHands/WBList/WBListIPCmd $dpdk_install_prefix/CloudHands/bin
 	cp -rf CloudHands/WBList/WBListStrCmd $dpdk_install_prefix/CloudHands/bin
+
+    echo "install lua script"
+    cp -rf CloudHands/lib/lua/base/* $dpdk_install_prefix/CloudHands/lua
+    cp -rf CloudHands/lib/lua/statistic/* $dpdk_install_prefix/CloudHands/lua
+    cp -rf CloudHands/StreamAnalyze/lua/* $dpdk_install_prefix/CloudHands/lua
 
 }
 

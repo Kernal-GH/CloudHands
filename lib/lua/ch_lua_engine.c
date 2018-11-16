@@ -311,7 +311,9 @@ ch_lua_engine_t * ch_lua_engine_create(ch_pool_t *mp,const char *lua_path,
         const char *lua_run_fun,
         const char *lua_fin_fun,
         int is_cache,
-        const char *lua_fname){
+        const char *lua_fname,
+        const char *data_key,
+        void *data){
 
 
     ch_lua_engine_t *lua_engine = (ch_lua_engine_t*)ch_palloc(mp,sizeof(*lua_engine));
@@ -344,6 +346,11 @@ ch_lua_engine_t * ch_lua_engine_create(ch_pool_t *mp,const char *lua_path,
         ch_log(CH_LOG_ERR,"load lua script error!");
         return NULL;
 
+    }
+    
+    if(data_key){
+
+        ch_lua_engine_udata_set(lua_engine,data_key,data);
     }
 
     if(lua_script_init(lua_engine)){

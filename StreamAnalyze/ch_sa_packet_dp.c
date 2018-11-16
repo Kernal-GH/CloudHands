@@ -20,23 +20,26 @@ int ch_sa_packet_dp(ch_sa_session_task_t *sa_task,ch_packet_t *pkt){
 	uint64_t pkt_size = ch_packet_size(pkt);
 	uint64_t time;
 	int stat_pkt_type = STAT_OTHER;
+    
 
 	switch(pkt->pkt_type){
 	
 		case PKT_TYPE_TCP:
 			stat_pkt_type = STAT_TCP;
 			ch_sa_tcp_session_request_packet_handle(sa_task->tcp_req_handler,pkt);
+
 			break;
 
 		case PKT_TYPE_UDP:
 			stat_pkt_type = STAT_UDP;
 			ch_sa_udp_session_packet_handle(sa_task->udp_handler,pkt);
-			break;
+            break;
 
 		case PKT_TYPE_ARP:
 
 			stat_pkt_type = STAT_ARP;
 			ch_sa_arp_handle(sa_task,pkt);
+
 			break;
 
 		case PKT_TYPE_ICMP:
@@ -45,6 +48,7 @@ int ch_sa_packet_dp(ch_sa_session_task_t *sa_task,ch_packet_t *pkt){
 			ch_sa_icmp_handle(sa_task,pkt);
 			break;
 		default:
+
 			break;
 
 	}

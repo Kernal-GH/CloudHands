@@ -53,7 +53,9 @@ extern ch_lua_engine_t * ch_lua_engine_create(ch_pool_t *mp,const char *lua_path
         const char *lua_run_fun,
         const char *lua_fin_fun,
         int is_cache,
-        const char *lua_fname);
+        const char *lua_fname,
+        const char *data_key,
+        void *data);
 
 
 extern int ch_lua_engine_run(ch_lua_engine_t *engine,const char *idata_key,void *idata,

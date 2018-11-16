@@ -136,6 +136,27 @@ ch_sa_session_task_t * ch_sa_session_task_create(ch_sa_work_t *sa_work,uint32_t 
 		return NULL;
 	}
 
+    sa_session_task->lua_engine = NULL;
+
+    if(sa_context->lua_fname){
+        
+        sa_session_task->lua_engine = ch_lua_engine_create(sa_work->mp,
+                sa_context->lua_path,"",
+                "sa_stat_init",
+                "sa_stat_run",
+                "sa_stat_fin",
+                0,
+                sa_context->lua_fname,
+                "__sa_stat_shm_fmt",
+                sa_session_task->shm_fmt); 
+        
+        if(sa_session_task->lua_engine == NULL){
+        
+            ch_log(CH_LOG_ERR,"Create lua engine failed for SA!");
+            return NULL;
+        }
+
+    }
 
 	return sa_session_task;
 }

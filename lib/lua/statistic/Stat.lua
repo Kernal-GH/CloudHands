@@ -9,17 +9,17 @@ local function update_stat(stat_value,is_req,pkts,bytes)
         stat_value.req_packets = stat_value.req_packets+pkts
         stat_value.req_bytes = stat_value.req_bytes + bytes;
         if stat_value.req_start_time == 0 then
-            stat_value.req_start_time = time
+            stat_value.req_start_time = t
         end
-        stat_value.req_last_time = time
+        stat_value.req_last_time = t
 
     else
         stat_value.res_packets = stat_value.res_packets+pkts
         stat_value.res_bytes = stat_value.res_bytes + bytes;
         if stat_value.res_start_time == 0 then
-            stat_value.res_start_time = time
+            stat_value.res_start_time = t
         end
-        stat_value.res_last_time = time
+        stat_value.res_last_time = t
     end
 
 end
@@ -53,7 +53,7 @@ local Stat = class {
 
         local tm = time.current_time_millis()
         local count = 0
-        for k,v in self.stat_table do
+        for k,v in pairs(self.stat_table) do
             if isTimeout(tm,v,self.stat_tv) then
 
                 print(self.stv_pool:vtostring(v))

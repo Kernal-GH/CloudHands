@@ -50,6 +50,9 @@ static void do_sa_context_init(ch_sa_context_t *sa_context){
 
 	sa_context->dstore_limits = 100000;
 
+    sa_context->lua_path = NULL;
+    sa_context->lua_fname = NULL;
+
 }
 
 static const char *cmd_sa_log(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1,const char *p2){
@@ -338,6 +341,27 @@ static const char *cmd_sa_dstore_limits(cmd_parms *cmd ch_unused, void *_dcfg, c
     return NULL;
 }
 
+static const char *cmd_sa_lua_path(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1){
+
+    char *endptr;
+
+    ch_sa_context_t *context = (ch_sa_context_t*)_dcfg;
+
+    context->lua_path = p1;
+    
+    return NULL;
+}
+
+static const char *cmd_sa_lua_fname(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1){
+
+    char *endptr;
+
+    ch_sa_context_t *context = (ch_sa_context_t*)_dcfg;
+
+    context->lua_fname = p1;
+    
+    return NULL;
+}
 
 static const command_rec sa_context_directives[] = {
     
@@ -518,6 +542,23 @@ static const command_rec sa_context_directives[] = {
             0,
             "set the data store limits can been allocated!"
             ),
+	
+    CH_INIT_TAKE1(
+            "CHSALuaPath",
+            cmd_sa_lua_path,
+            NULL,
+            0,
+            "set the sa lua path"
+            ),
+
+    CH_INIT_TAKE1(
+            "CHSALuaFName",
+            cmd_sa_lua_fname,
+            NULL,
+            0,
+            "set the sa lua fname"
+            ),
+
 };
 
 static inline void dump_sa_context(ch_sa_context_t *sa_context){
@@ -547,6 +588,9 @@ static inline void dump_sa_context(ch_sa_context_t *sa_context){
     fprintf(stdout,"statistic time up:%lu\n",(unsigned long)sa_context->stat_time_up);
     fprintf(stdout,"statistic time tv:%lu\n",(unsigned long)sa_context->stat_time_tv);
     fprintf(stdout,"data store limits:%lu\n",(unsigned long)sa_context->dstore_limits);
+    fprintf(stdout,"sa lua path:%s\n",sa_context->lua_path);
+    fprintf(stdout,"sa lua fname:%s\n",sa_context->lua_fname);
+
 }
 
 ch_sa_context_t * ch_sa_context_create(ch_pool_t *mp,const char *cfname){
