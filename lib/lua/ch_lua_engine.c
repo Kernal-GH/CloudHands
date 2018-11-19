@@ -18,6 +18,7 @@
 
 #include "ch_lua_engine.h"
 #include "ch_log.h"
+#include "ch_util.h"
 
 typedef struct {
     
@@ -309,11 +310,13 @@ ch_lua_engine_t * ch_lua_engine_create(ch_pool_t *mp,const char *lua_path,
         const char *lua_cpath,
         const char *lua_init_fun,
         const char *lua_run_fun,
+        const char *lua_timeout_fun,
         const char *lua_fin_fun,
         int is_cache,
         const char *lua_fname,
         const char *data_key,
-        void *data){
+        void *data,
+        uint64_t timeout){
 
 
     ch_lua_engine_t *lua_engine = (ch_lua_engine_t*)ch_palloc(mp,sizeof(*lua_engine));
@@ -323,6 +326,7 @@ ch_lua_engine_t * ch_lua_engine_create(ch_pool_t *mp,const char *lua_path,
     lua_engine->lua_cpath = lua_cpath;
     lua_engine->lua_init_fun = lua_init_fun;
     lua_engine->lua_run_fun = lua_run_fun;
+    lua_engine->lua_timeout_fun = lua_timeout_fun;
     lua_engine->lua_fin_fun = lua_fin_fun;
 
     lua_engine->is_cache = is_cache;
@@ -360,6 +364,9 @@ ch_lua_engine_t * ch_lua_engine_create(ch_pool_t *mp,const char *lua_path,
         return NULL;
     }
 
+    
+    lua_engine->timeout = timeout;
+    lua_engine->last_time = ch_get_current_timems()/1000;
 
     return lua_engine;
 }
@@ -367,6 +374,9 @@ ch_lua_engine_t * ch_lua_engine_create(ch_pool_t *mp,const char *lua_path,
 int ch_lua_engine_run(ch_lua_engine_t *lua_engine,const char *idata_key,void *idata,
         const char *odata_key,void *odata){
 
+    /*nothing to do*/
+    if(lua_engine->lua_run_fun == NULL)
+        return 0;
 
     if(idata){
 
@@ -378,9 +388,7 @@ int ch_lua_engine_run(ch_lua_engine_t *lua_engine,const char *idata_key,void *id
         ch_lua_engine_udata_set(lua_engine,odata_key,odata);
     }
 
-    /*nothing to do*/
-    if(lua_engine->lua_run_fun == NULL)
-        return 0;
+
 
     /*push run entry function into stack top*/
     lua_getglobal(lua_engine->lua_state,lua_engine->lua_run_fun);
@@ -388,6 +396,46 @@ int ch_lua_engine_run(ch_lua_engine_t *lua_engine,const char *idata_key,void *id
     if(ch_lua_call(lua_engine->lua_state,0,0,0)!=0){
         
         ch_log(CH_LOG_ERR,"Run lua script:%s,run fun:%s failed!",lua_engine->lua_fname,lua_engine->lua_run_fun);
+        return -1;
+    }
+
+    return 0;
+}
+
+int ch_lua_engine_timeout(ch_lua_engine_t *lua_engine,const char *idata_key,void *idata,
+        const char *odata_key,void *odata){
+
+    uint64_t cur_time;
+
+    /*nothing to do*/
+    if(lua_engine->lua_timeout_fun == NULL)
+        return 0;
+
+    cur_time = ch_get_current_timems()/1000;
+
+    if(cur_time-lua_engine->last_time<lua_engine->timeout){
+
+        return 0;
+    }
+
+    lua_engine->last_time = cur_time;
+
+    if(idata){
+
+        ch_lua_engine_udata_set(lua_engine,idata_key,idata);
+    }
+    
+    if(odata){
+
+        ch_lua_engine_udata_set(lua_engine,odata_key,odata);
+    }
+
+    /*push run entry function into stack top*/
+    lua_getglobal(lua_engine->lua_state,lua_engine->lua_timeout_fun);
+    
+    if(ch_lua_call(lua_engine->lua_state,0,0,0)!=0){
+        
+        ch_log(CH_LOG_ERR,"Run lua script:%s,timeout fun:%s failed!",lua_engine->lua_fname,lua_engine->lua_timeout_fun);
         return -1;
     }
 

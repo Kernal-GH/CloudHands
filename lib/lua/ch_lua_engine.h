@@ -37,6 +37,7 @@ struct ch_lua_engine_t {
 
     const char *lua_init_fun;
     const char *lua_run_fun;
+    const char *lua_timeout_fun;
     const char *lua_fin_fun;
 
     int is_cache;
@@ -45,20 +46,29 @@ struct ch_lua_engine_t {
 
     ch_array_header_t *chunk_parts;
 
+    uint64_t timeout;
+    uint64_t last_time;
+
 };
 
 extern ch_lua_engine_t * ch_lua_engine_create(ch_pool_t *mp,const char *lua_path,
         const char *lua_cpath,
         const char *lua_init_fun,
         const char *lua_run_fun,
+        const char *lua_timeout_fun,
         const char *lua_fin_fun,
         int is_cache,
         const char *lua_fname,
         const char *data_key,
-        void *data);
+        void *data,
+        uint64_t timeout);
 
 
 extern int ch_lua_engine_run(ch_lua_engine_t *engine,const char *idata_key,void *idata,
+        const char *odata_key,void *odata);
+
+
+extern int ch_lua_engine_timeout(ch_lua_engine_t *engine,const char *idata_key,void *idata,
         const char *odata_key,void *odata);
 
 

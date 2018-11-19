@@ -136,6 +136,7 @@ ch_sa_session_task_t * ch_sa_session_task_create(ch_sa_work_t *sa_work,uint32_t 
 		return NULL;
 	}
 
+#if 0
     sa_session_task->lua_engine = NULL;
 
     if(sa_context->lua_fname){
@@ -157,6 +158,7 @@ ch_sa_session_task_t * ch_sa_session_task_create(ch_sa_work_t *sa_work,uint32_t 
         }
 
     }
+#endif
 
 	return sa_session_task;
 }
