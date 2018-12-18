@@ -94,6 +94,7 @@ cd /usr/local/dpdk/CloudHands/bin
 7. mysql
 8. redis
 9. mongodb
+10. ssh
 
 ```
 ### 基于UDP的协议还原
