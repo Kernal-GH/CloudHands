@@ -1,0 +1,1 @@
+/usr/local/dpdk/CloudHands/sample/jsample run --conf /usr/local/dpdk/CloudHands/sample  /usr/local/dpdk/CloudHands/sample/jsample.properties

@@ -1,0 +1,30 @@
+#
+IS_NUNA=0
+HUGE_PAGES=4096
+INTERFACE=0000:82:00.1
+DRIVER=igb
+
+#main application cpu core binded,if no same more cpu cores
+#then can be bind into same cpu cores
+PDIS_CORE_BIND=-l0,1
+TCP_CORE_BIND=-l2,3
+UDP_CORE_BIND=-l4,5
+SA_CORE_BIND=-l6,7
+
+DATA_STORE_DIR=/opt/data/cloudhands/store
+DATA_SHM_DIR=/opt/data/cloudhands/shm/
+LOG_STORE_DIR=/opt/cloudhands/log
+
+#config files information
+CH_CONFIG_DIR=/usr/local/dpdk/CloudHands/conf
+PDIS_CONFIG_FPATH=$CH_CONFIG_DIR/pdispatcher.conf
+TCP_CONFIG_FPATH=$CH_CONFIG_DIR/tcp/TCPMain.conf
+UDP_CONFIG_FPATH=$CH_CONFIG_DIR/udp/UDPMain.conf
+SA_CONFIG_FPATH=$CH_CONFIG_DIR/sa/SAMain.conf
+
+#main application names
+PDIS_MAIN_NAME=PDispatcher
+TCP_MAIN_NAME=TCPMain
+UDP_MAIN_NAME=UDPMain
+SA_MAIN_NAME=SAMain
+

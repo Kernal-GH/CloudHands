@@ -1,0 +1,43 @@
+include ../make.include
+DPDK=/usr/local/dpdk/dpdk_src
+DPDK_FLAGS=$(shell cat ${DPDK}/include/cflags.txt)
+DPDK_LIB_FLAGS = $(shell cat ${DPDK}/lib/ldflags.txt)
+CFLAGS  = ${BUILD_CFLAGS}  -O0 -rdynamic -D_GNU_SOURCE -DUSE_DPDK ${DPDK_FLAGS} -pthread
+CFLAGS += -I../lib/common   -I${DPDK}/include -include ${DPDK}/include/rte_config.h
+
+LDFLAGS  = ${BUILD_LDFLAGS} ${DPDK_LIB_FLAGS}
+
+
+common_package = ../lib/common/*.o
+
+stat_dump_package= StatDump
+
+stat_dump_SOURCES = ch_stat_mpool.c \
+				  ch_stat_pool.c \
+				  ch_stat_obj.c \
+				  StatDump.c
+
+stat_dump_OBJECTS =$(patsubst %.c,%.o,$(stat_dump_SOURCES))
+stat_dump_DEPENDS =$(patsubst %.c,%.d,$(stat_dump_SOURCES))
+stat_dump_ASMFILE =$(patsubst %.c,%.s,$(stat_dump_SOURCES))
+
+quiet_cmd_dpdk = LINK   $@ 
+	cmd_stat_dump = ${CC} ${CFLAGS} -o $@ $(stat_dump_OBJECTS)  \
+					$(common_package) \
+					$(LDFLAGS)
+
+.PHONY: all clean
+
+all: $(stat_dump_package)
+
+$(stat_dump_package): $(stat_dump_OBJECTS) 
+	$(call cmd,stat_dump)
+-include $(stat_dump_DEPENDS)
+
+$(common_package):
+	$(call,make)
+
+clean:
+	@rm -rf $(stat_dump_OBJECTS) $(stat_dump_DEPENDS) $(stat_dump_ASMFILE) $(stat_dump_package)
+
+
