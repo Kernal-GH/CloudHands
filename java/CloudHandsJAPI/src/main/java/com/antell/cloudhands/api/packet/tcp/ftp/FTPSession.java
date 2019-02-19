@@ -20,6 +20,8 @@ public class FTPSession extends AbstractSourceEntry {
     private SessionEntry sessionEntry;
     private String user;
     private String passwd;
+    private int loginCode;
+
     private List<FTPCmd> cmdList;
     private AttackEvent event;
 
@@ -28,9 +30,13 @@ public class FTPSession extends AbstractSourceEntry {
         this.sessionEntry = new TCPSessionEntry();
         this.user = "";
         this.passwd = "";
+        this.loginCode = 0;
+
         this.cmdList = new ArrayList<>();
         event = null;
         parse(unpacker);
+
+        setLoginCode(0);
     }
 
     private void parse(MessageUnpacker unpacker) throws IOException {
@@ -86,6 +92,29 @@ public class FTPSession extends AbstractSourceEntry {
 
     public void setCmdList(List<FTPCmd> cmdList) {
         this.cmdList = cmdList;
+    }
+
+    public int getLoginCode() {
+        return loginCode;
+    }
+
+    public void setLoginCode(int loginCode) {
+
+        for(FTPCmd cmd:cmdList){
+
+            if(cmd.getCmd().equalsIgnoreCase("PASS")){
+
+                List<FTPAns> ansList = cmd.getAnsList();
+
+                if(ansList!=null&&ansList.size()>0){
+
+                    FTPAns ans = ansList.get(0);
+                    this.loginCode = ans.getCode();
+                }
+
+                break;
+            }
+        }
     }
 
     private class FTPCmd {
@@ -247,6 +276,7 @@ public class FTPSession extends AbstractSourceEntry {
         sb.append(sessionEntry.dataToString());
         TextUtils.addText(sb,"user",user);
         TextUtils.addText(sb,"passwd",passwd);
+        TextUtils.addInt(sb,"loginCode",loginCode);
         TextUtils.addText(sb,"cmdList","\n");
         cmdList.forEach(cmd->sb.append(cmd.toString()));
 
@@ -268,6 +298,7 @@ public class FTPSession extends AbstractSourceEntry {
 
         cb.field("user",TextUtils.getStrValue(user));
         cb.field("passwd",TextUtils.getStrValue(passwd));
+        cb.field("loginCode",loginCode);
 
         XContentBuilder cbb = cb.startArray("cmdList");
 
