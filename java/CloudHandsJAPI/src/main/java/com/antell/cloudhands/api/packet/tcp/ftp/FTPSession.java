@@ -21,7 +21,7 @@ public class FTPSession extends AbstractSourceEntry {
     private String user;
     private String passwd;
     private int loginCode;
-
+    private String statBruteForce;
     private List<FTPCmd> cmdList;
     private AttackEvent event;
 
@@ -31,7 +31,7 @@ public class FTPSession extends AbstractSourceEntry {
         this.user = "";
         this.passwd = "";
         this.loginCode = 0;
-
+        this.statBruteForce = "";
         this.cmdList = new ArrayList<>();
         event = null;
         parse(unpacker);
@@ -52,6 +52,9 @@ public class FTPSession extends AbstractSourceEntry {
 
         user = MessagePackUtil.parseText(unpacker);
         passwd = MessagePackUtil.parseText(unpacker);
+
+        setStatBruteForce();
+
         n = MessagePackUtil.parseArrayHeader(unpacker,true);
 
         for(int i = 0;i<n;i++){
@@ -115,6 +118,22 @@ public class FTPSession extends AbstractSourceEntry {
                 break;
             }
         }
+    }
+
+    public String getStatBruteForce() {
+        return statBruteForce;
+    }
+
+    public void setStatBruteForce() {
+
+        StringBuffer sb = new StringBuffer();
+        sb.append(sessionEntry.getReqIP());
+        sb.append("|");
+        sb.append(sessionEntry.getResIP());
+        sb.append("|");
+        sb.append(user);
+        
+        this.statBruteForce = sb.toString();
     }
 
     private class FTPCmd {
@@ -277,6 +296,7 @@ public class FTPSession extends AbstractSourceEntry {
         TextUtils.addText(sb,"user",user);
         TextUtils.addText(sb,"passwd",passwd);
         TextUtils.addInt(sb,"loginCode",loginCode);
+        TextUtils.addText(sb,"statBruteForce",statBruteForce);
         TextUtils.addText(sb,"cmdList","\n");
         cmdList.forEach(cmd->sb.append(cmd.toString()));
 
@@ -299,7 +319,7 @@ public class FTPSession extends AbstractSourceEntry {
         cb.field("user",TextUtils.getStrValue(user));
         cb.field("passwd",TextUtils.getStrValue(passwd));
         cb.field("loginCode",loginCode);
-
+        cb.field("statBruteForce",statBruteForce);
         XContentBuilder cbb = cb.startArray("cmdList");
 
         cmdList.forEach(cmd-> {

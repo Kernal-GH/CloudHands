@@ -38,6 +38,11 @@ typedef struct ch_packet_record_t ch_packet_record_t;
 #define PKT_RECORD_TYPE_TCP_FTP_DATA 16
 #define PKT_RECORD_TYPE_TCP_SSH 17
 
+/*Define some stat record types*/
+#define PKT_RECORD_TYPE_STAT_FTP 18
+#define PKT_RECORD_TYPE_STAT_SSH 19
+#define PKT_RECORD_TYPE_STAT_TELNET 20
+
 struct ch_packet_record_t {
 
 	ch_shm_record_t shm_rcd;
