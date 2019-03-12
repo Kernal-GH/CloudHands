@@ -16,6 +16,7 @@ public class SSHSession extends AbstractSourceEntry {
     private SessionEntry sessionEntry;
     private SSHData clientData;
     private SSHData serverData;
+    private String statBruteForce;
 
     public SSHSession(MessageUnpacker unpacker) throws IOException {
 
@@ -38,6 +39,7 @@ public class SSHSession extends AbstractSourceEntry {
         setClientData(new SSHData(unpacker));
         setServerData(new SSHData(unpacker));
 
+        setStatBruteForce();
     }
 
     public SessionEntry getSessionEntry() {
@@ -54,6 +56,8 @@ public class SSHSession extends AbstractSourceEntry {
         TextUtils.addText(sb,"ServerData","\n");
         serverData.dataToString(sb);
 
+        TextUtils.addText(sb,"statBruteForce",statBruteForce);
+
         return sb.toString();
     }
 
@@ -69,6 +73,7 @@ public class SSHSession extends AbstractSourceEntry {
         sessionEntry.dataToJson(seCB);
         seCB.endObject();
 
+        cb.field("statBruteForce",statBruteForce);
         clientData.dataToJson(cb,"clientData");
         serverData.dataToJson(cb,"serverData");
 
@@ -107,5 +112,19 @@ public class SSHSession extends AbstractSourceEntry {
 
     public void setServerData(SSHData serverData) {
         this.serverData = serverData;
+    }
+
+    public String getStatBruteForce() {
+        return statBruteForce;
+    }
+
+    public void setStatBruteForce() {
+
+        StringBuffer sb = new StringBuffer();
+        sb.append(sessionEntry.getReqIP());
+        sb.append("|");
+        sb.append(sessionEntry.getResIP());
+
+        this.statBruteForce = sb.toString();
     }
 }

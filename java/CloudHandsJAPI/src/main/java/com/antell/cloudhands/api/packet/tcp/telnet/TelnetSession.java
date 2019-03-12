@@ -17,6 +17,7 @@ public class TelnetSession extends AbstractSourceEntry {
     private String user;
     private String passwd;
     private String contentPath;
+    private String statBruteForce;
 
     public TelnetSession(MessageUnpacker unpacker) throws IOException {
 
@@ -40,6 +41,7 @@ public class TelnetSession extends AbstractSourceEntry {
         setPasswd(MessagePackUtil.parseText(unpacker));
         setContentPath(MessagePackUtil.parseText(unpacker));
 
+        setStatBruteForce();
     }
 
     @Override
@@ -50,6 +52,7 @@ public class TelnetSession extends AbstractSourceEntry {
         TextUtils.addText(sb,"user",user);
         TextUtils.addText(sb,"passwd",passwd);
         TextUtils.addText(sb,"contentPath",contentPath);
+        TextUtils.addText(sb,"statBruteForce",statBruteForce);
 
         return sb.toString();
     }
@@ -70,6 +73,7 @@ public class TelnetSession extends AbstractSourceEntry {
         cb.field("user",user);
         cb.field("passwd",passwd);
         cb.field("contentPath",contentPath);
+        cb.field("statBruteForce",statBruteForce);
 
         return cb;
     }
@@ -122,5 +126,20 @@ public class TelnetSession extends AbstractSourceEntry {
 
     public SessionEntry getSessionEntry() {
         return sessionEntry;
+    }
+
+    public String getStatBruteForce() {
+        return statBruteForce;
+    }
+
+    public void setStatBruteForce() {
+
+        StringBuffer sb = new StringBuffer();
+
+        sb.append(sessionEntry.getReqIP());
+        sb.append("|");
+        sb.append(sessionEntry.getResIP());
+        this.statBruteForce = sb.toString();
+
     }
 }
