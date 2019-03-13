@@ -31,6 +31,8 @@ public class ARPPacket extends AbstractSourceEntry {
     private MacAddress srcMac;
     private MacAddress dstMac;
 
+    private String arpScan;
+
     public ARPPacket(DataInput input,long time) throws IOException {
 
         this.time = time;
@@ -48,6 +50,8 @@ public class ARPPacket extends AbstractSourceEntry {
         srcMac = new MacAddress(input);
 
         dstMac = new MacAddress(input);
+
+        setArpScan();
     }
 
 
@@ -93,6 +97,8 @@ public class ARPPacket extends AbstractSourceEntry {
 
         cb.field("srcMac", srcMac.toMacStr());
         cb.field("dstMac", dstMac.toMacStr());
+
+        cb.field("arpScan",arpScan);
 
         return cb;
     }
@@ -200,4 +206,17 @@ public class ARPPacket extends AbstractSourceEntry {
     }
 
 
+    public String getArpScan() {
+        return arpScan;
+    }
+
+    public void setArpScan() {
+
+        StringBuffer sb = new StringBuffer();
+        sb.append(sip);
+        sb.append("|");
+        sb.append(tip);
+
+        this.arpScan = sb.toString();
+    }
 }
