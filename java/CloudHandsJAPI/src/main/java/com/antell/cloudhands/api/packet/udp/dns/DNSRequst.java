@@ -94,6 +94,8 @@ public class DNSRequst implements BinDataInput,ESIndexable,DataDump{
         return "";
     }
 
+
+
     public void addQuestion(DNSQuestion question) {
 
         questions.add(question);

@@ -80,6 +80,31 @@ public class DNSSession  extends AbstractSourceEntry {
         return sessionEntry.getReqStartTime();
     }
 
+
+    private  static final String[] getSubDomains(String domain){
+
+        String[] res = new String[2];
+
+        res[0] = "";
+        res[1] = "";
+
+        if(!TextUtils.isEmpty(domain)) {
+            String[] strings = domain.split("\\.");
+
+            if(strings.length<=2){
+                res[0]=domain;
+                res[1]=domain;
+            }else{
+
+                res[0] = String.format("%s.%s",strings[strings.length-2],strings[strings.length-1]);
+                res[1] = domain.substring(0,domain.length()-res[0].length()-1);
+            }
+        }
+
+        return res;
+
+    }
+
     @Override
     public XContentBuilder dataToJson(XContentBuilder cb) throws IOException {
 
@@ -91,6 +116,11 @@ public class DNSSession  extends AbstractSourceEntry {
 
         cb.field("domain",domain);
         cb.field("domainLen",domain.length());
+
+        String[] subs = getSubDomains(domain);
+        cb.field("rootDomain",subs[0]);
+        cb.field("subDomain",subs[1]);
+        cb.field("ipRootDomain",sessionEntry.getReqIP()+"|"+subs[0]);
 
         List<String> ipList = dnsResponse==null?new ArrayList<>():dnsResponse.getIPV4Adresses();
 
