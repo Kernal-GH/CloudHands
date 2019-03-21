@@ -10,6 +10,8 @@ import org.elasticsearch.common.xcontent.XContentBuilder;
 
 import java.io.DataInput;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by dell on 2018/6/11.
@@ -82,6 +84,19 @@ public class DNSSession  extends AbstractSourceEntry {
     public XContentBuilder dataToJson(XContentBuilder cb) throws IOException {
 
         cb.field("objectId",getObjectId());
+
+        String domain = "";
+        if(dnsRequst!=null)
+            domain = dnsRequst.getDomain();
+
+        cb.field("domain",domain);
+        cb.field("domainLen",domain.length());
+
+        List<String> ipList = dnsResponse==null?new ArrayList<>():dnsResponse.getIPV4Adresses();
+
+        cb.field("ipCount",ipList.size());
+        cb.field("ipList",ipList);
+
         XContentBuilder seCB = cb.startObject("sessionEntry");
         sessionEntry.dataToJson(seCB);
         seCB.endObject();

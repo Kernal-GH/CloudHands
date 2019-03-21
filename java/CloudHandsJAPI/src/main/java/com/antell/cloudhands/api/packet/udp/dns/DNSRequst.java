@@ -3,6 +3,7 @@ package com.antell.cloudhands.api.packet.udp.dns;
 import com.antell.cloudhands.api.BinDataInput;
 import com.antell.cloudhands.api.DataDump;
 import com.antell.cloudhands.api.ESIndexable;
+import com.antell.cloudhands.api.utils.TextUtils;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 
 import java.io.DataInput;
@@ -72,6 +73,25 @@ public class DNSRequst implements BinDataInput,ESIndexable,DataDump{
 
     public List<DNSQuestion> getQuestions() {
         return questions;
+    }
+
+    public String getDomain(){
+
+        if(questions == null ||questions.isEmpty())
+            return "";
+
+        for(DNSQuestion question:questions){
+
+            Name name = question.getName();
+            if(name == null)
+                continue;
+
+            String dm = name.getName();
+            if(!TextUtils.isEmpty(dm))
+                return dm;
+        }
+
+        return "";
     }
 
     public void addQuestion(DNSQuestion question) {

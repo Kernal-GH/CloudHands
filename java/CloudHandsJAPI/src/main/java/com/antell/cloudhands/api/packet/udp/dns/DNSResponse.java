@@ -86,6 +86,26 @@ public class DNSResponse implements BinDataInput,ESIndexable,DataDump{
         return cb;
     }
 
+    public List<String> getIPV4Adresses(){
+
+        List<String> results = new ArrayList<>();
+        List<Record> records = getRecords(Section.ANSWER);
+
+        if(records!=null){
+
+            records.forEach(record -> {
+
+                if(record instanceof ARecord){
+
+                    ARecord aRecord = (ARecord)record;
+                    results.add(aRecord.rrToString());
+                }
+            });
+        }
+
+        return results;
+    }
+
     private XContentBuilder questionsToJson(XContentBuilder cb) throws IOException {
 
         String fname = Section.longString(Section.QUESTION);

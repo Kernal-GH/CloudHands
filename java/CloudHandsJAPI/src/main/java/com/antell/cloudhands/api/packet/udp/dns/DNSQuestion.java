@@ -55,4 +55,10 @@ public class DNSQuestion implements BinDataInput,ESIndexable,DataDump{
         return sb.toString();
 
     }
+
+    public Name getName() {
+        return name;
+    }
+
+
 }
