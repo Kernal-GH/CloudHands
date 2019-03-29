@@ -215,7 +215,7 @@ public class HTTPSession extends AbstractSourceEntry {
             if(!isReq&&TextUtils.isEmpty(server)){
 
                 if(isHeader(k,"Server"))
-                    setServer(server);
+                    setServer(v);
             }
 
             if(!isReq&& TextUtils.isEmpty(resContentType)){
