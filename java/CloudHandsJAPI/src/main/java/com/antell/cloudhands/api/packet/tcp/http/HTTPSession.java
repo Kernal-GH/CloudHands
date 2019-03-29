@@ -37,6 +37,9 @@ public class HTTPSession extends AbstractSourceEntry {
     private String version;
 
     private String host;
+    private String userAgent;
+    private String server;
+
     private String  referer;
     private String reqContentType;
     private String resContentType;
@@ -72,6 +75,8 @@ public class HTTPSession extends AbstractSourceEntry {
         contentEncoding = "";
         contentRange = "";
         contentDisposition = "";
+        userAgent = "";
+        server = "";
         parse(unpacker);
     }
 
@@ -196,12 +201,23 @@ public class HTTPSession extends AbstractSourceEntry {
                 if(isHeader(k,"Referer"))
                     setReferer(v);
             }
+            if(isReq&&TextUtils.isEmpty(userAgent)){
+
+                if(isHeader(k,"User-Agent"))
+                    setUserAgent(v);
+            }
 
             if(isReq&&TextUtils.isEmpty(reqContentType)){
 
                 if(isHeader(k,"Content-Type"))
                     setReqContentType(v);
             }
+            if(!isReq&&TextUtils.isEmpty(server)){
+
+                if(isHeader(k,"Server"))
+                    setServer(server);
+            }
+
             if(!isReq&& TextUtils.isEmpty(resContentType)){
                 if(isHeader(k,"Content-Type"))
                     setResContentType(v);
@@ -347,6 +363,9 @@ public class HTTPSession extends AbstractSourceEntry {
         cb.field("uri",TextUtils.getStrValue(uri));
         cb.field("extName",TextUtils.getStrValue(extName));
         cb.field("host",TextUtils.getStrValue(host));
+        cb.field("userAgent",userAgent);
+        cb.field("server",server);
+
         cb.field("referer",TextUtils.getStrValue(referer));
         cb.field("reqContentType",TextUtils.getStrValue(reqContentType));
         cb.field("resContentType",TextUtils.getStrValue(resContentType));
@@ -357,6 +376,9 @@ public class HTTPSession extends AbstractSourceEntry {
         cb.field("resBodyPath",TextUtils.getStrValue(resBodyPath));
         cb.field("reqHeaders",reqHeaders);
         cb.field("resHeaders",resHeaders);
+
+        cb.field("sdh",sessionEntry.getReqIP()+"|"+sessionEntry.getResIP()+"|"+host);
+
 
         if(hasMatchSec()){
             XContentBuilder attkCB = cb.startObject("attack");
@@ -573,4 +595,19 @@ public class HTTPSession extends AbstractSourceEntry {
         return sessionEntry.getReqStartTime();
     }
 
+    public String getUserAgent() {
+        return userAgent;
+    }
+
+    public void setUserAgent(String userAgent) {
+        this.userAgent = userAgent;
+    }
+
+    public String getServer() {
+        return server;
+    }
+
+    public void setServer(String server) {
+        this.server = server;
+    }
 }

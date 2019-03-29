@@ -30,7 +30,7 @@ for hit in hits:
         passStart = text[passIndex+5:]
         passEndIndex = passStart.find('\n')
         passwd = passStart[0:passEndIndex]
-        userList.add(src['dstIP']+" " +userName+' '+passwd)
+        userList.add(src['srcIP']+" "+src['dstIP']+" " +userName+' '+passwd)
 
 
 for user in userList:
