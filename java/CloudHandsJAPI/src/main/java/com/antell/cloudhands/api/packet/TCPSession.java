@@ -22,6 +22,7 @@ public class TCPSession extends SessionEntry implements SourceEntry{
     private final String objectId;
     private AttackEvent event;
     private String portScan;
+    private String sdp;
 
     public int getPhaseState() {
         return phaseState;
@@ -59,7 +60,7 @@ public class TCPSession extends SessionEntry implements SourceEntry{
 
 
         setPortScan();
-
+        setSdp();
     }
 
 
@@ -131,6 +132,8 @@ public class TCPSession extends SessionEntry implements SourceEntry{
         cb.field("resLastTime",getResLastTime());
         cb.field("timeDate", DateUtils.format(getReqStartTime()));
         cb.field("portScan",portScan);
+        cb.field("sdp",sdp);
+        
         XContentBuilder cbb = cb.startObject("app");
 
         PortItem portItem = Portmap.getPortItem(getReqPort(),getResPort());
@@ -181,5 +184,21 @@ public class TCPSession extends SessionEntry implements SourceEntry{
         sb.append(getResIP());
 
         this.portScan = sb.toString();
+    }
+
+    public String getSdp() {
+        return sdp;
+    }
+
+    public void setSdp() {
+
+        StringBuffer sb = new StringBuffer();
+        sb.append(getReqIP());
+        sb.append("|");
+        sb.append(getResIP());
+        sb.append("|");
+        sb.append(getResPort());
+
+        this.sdp = sb.toString();
     }
 }

@@ -3,8 +3,7 @@ host = "127.0.0.1"
 from elasticsearch import Elasticsearch
 import sys
 
-
-def del_es_index(es,cmd):
+def del_es_index(es):
 
     if len(sys.argv)<4:
         print("Usage: <host> <cmd> <index>")
@@ -20,7 +19,7 @@ def del_es_index(es,cmd):
 def handle_cmd(es,cmd):
 
     if cmd == "del":
-        del_es_index(es,cmd)
+        del_es_index(es)
 
 
 if __name__ == '__main__':
