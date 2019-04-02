@@ -42,6 +42,9 @@ public class UDPSession extends SessionEntry implements SourceEntry{
 
         setReqContent(reqContent);
         setResContent(resContent);
+
+        setPortScan();
+        setSdp();
     }
 
 
@@ -74,7 +77,8 @@ public class UDPSession extends SessionEntry implements SourceEntry{
         cb.field("resStartTime",getResStartTime());
         cb.field("resLastTime",getResLastTime());
         cb.field("timeDate", DateUtils.format(getReqStartTime()));
-
+        cb.field("portScan",getPortScan());
+        cb.field("sdp",getSdp());
         XContentBuilder cbb = cb.startObject("app");
 
         PortItem portItem = Portmap.getPortItem(getReqPort(),getResPort());

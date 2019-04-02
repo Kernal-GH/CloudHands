@@ -23,6 +23,9 @@ public abstract class SessionEntry implements MsgPackDataInput,BinDataInput,ESIn
     private long protocolID;
     private String protocol;
 
+    private String portScan;
+    private String sdp;
+
     private final SessionEndPoint req;
     private final SessionEndPoint res;
 
@@ -274,4 +277,35 @@ public abstract class SessionEntry implements MsgPackDataInput,BinDataInput,ESIn
     public void setProtocol(String protocol) {
         this.protocol = protocol;
     }
+
+    public String getPortScan() {
+        return portScan;
+    }
+
+    public void setPortScan() {
+
+        StringBuffer sb = new StringBuffer();
+        sb.append(getReqIP());
+        sb.append("|");
+        sb.append(getResIP());
+
+        this.portScan = sb.toString();
+    }
+
+    public String getSdp() {
+        return sdp;
+    }
+
+    public void setSdp() {
+
+        StringBuffer sb = new StringBuffer();
+        sb.append(getReqIP());
+        sb.append("|");
+        sb.append(getResIP());
+        sb.append("|");
+        sb.append(getResPort());
+
+        this.sdp = sb.toString();
+    }
+
 }
