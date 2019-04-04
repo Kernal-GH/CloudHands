@@ -135,7 +135,7 @@ public class TCPSession extends SessionEntry implements SourceEntry{
 
         XContentBuilder cbb = cb.startObject("app");
 
-        PortItem portItem = Portmap.getPortItem(getReqPort(),getResPort());
+        PortItem portItem = Portmap.getPortItem(this);
         portItem.toJson(cbb);
 
         cbb.endObject();

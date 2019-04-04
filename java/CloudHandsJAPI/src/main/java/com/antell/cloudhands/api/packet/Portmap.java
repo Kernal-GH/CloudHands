@@ -1,5 +1,7 @@
 package com.antell.cloudhands.api.packet;
 
+import com.antell.cloudhands.api.utils.HTTPUtils;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -83,4 +85,18 @@ public class Portmap {
         return new PortItem(0,"unknown","unknown","未知");
     }
 
+    public static PortItem getPortItem(TCPSession tcpSession){
+
+        PortItem portItem = getPortItem(tcpSession.getReqPort(),tcpSession.getResPort());
+        if(portItem.getPort() != 0)
+            return portItem;
+
+        boolean isHttp = HTTPUtils.isHTTPSession(tcpSession);
+
+        if(!isHttp)
+            return portItem;
+
+        return new PortItem(tcpSession.getResPort(),"http","http","超文本传输协议");
+
+    }
 }
