@@ -2,6 +2,7 @@ host = "127.0.0.1"
 
 from elasticsearch import Elasticsearch
 import sys
+import base64
 
 def del_es_index(es):
 
@@ -14,6 +15,7 @@ def del_es_index(es):
 
     for ind in indices:
         es.indices.delete(ind)
+
 
 def find_terms_topN(es):
 
@@ -52,6 +54,147 @@ def find_terms_topN(es):
     for item in results:
         print(item['key'])
 
+def get_http_unusual_server_and_port(es):
+
+    index = "log_stream_session_tcp_*"
+    doc = "esdatabase_doc"
+    query = {
+            "query":{
+                "bool":{
+                    "must_not":[
+                            {"term":{"dstPort":80}},
+                            {"term":{"dstPort":8080}}
+                        ],
+                    "must":{
+                            "term":{"app.uprotocol":"http"}
+                        }
+                }
+            }
+        }
+
+    count = es.count(index,doc,query)['count']
+
+    if count == 0:
+        print("No HTTP Servers Info that port is not 80 and 8080!")
+    else:
+        aggs = {
+            "group_by_dstIP":{
+                "terms":{
+                    "field":"dstIP",
+                    "order":{"_count":"desc"},
+                    "size":count
+                    },
+
+                    "aggs":{
+                        "group_by_dstPort":{
+                            "terms":{
+                                    "field":"dstPort",
+                                    "order":{"_count":"desc"},
+                                    "size":count
+                                }
+                            }
+                        }
+                }
+            }
+        query['size']=0
+        query['aggs']=aggs
+
+
+        results = es.search(index,doc,query)['aggregations']['group_by_dstIP']['buckets']
+
+        for ipkey in results:
+            ip = ipkey['key']
+            ports = "[ "
+            for port in ipkey['group_by_dstPort']['buckets']:
+                ports= ports+str(port['key'])+" "
+            ports= ports+"]"
+
+            print(ip+" "+ports)
+
+def get_mail_user_passwd(es):
+    #from tcp stream session get pop3 username and passwd
+    stream_index = "log_stream_session_tcp_*"
+    mail_index = "log_tcp_session_mail_*"
+    doc = "esdatabase_doc"
+    userList = set()
+    stream_query = {
+            "query":{
+                "bool":{
+                    "must":[
+                        {"term":{"app.uprotocol":"pop3"}},
+                        {"range":{"reqDataSize":{"gte":10}}}
+                        ]
+                    }
+                }
+            }
+
+    count = es.count(stream_index,doc,stream_query)['count']
+
+    if count>0:
+        stream_query['from']=0
+        stream_query['size']=count
+
+        hits = es.search(stream_index,doc,stream_query)['hits']['hits']
+
+        for hit in hits:
+            src = hit['_source']
+            reqData = src['reqData']
+            text = base64.b64decode(reqData)
+
+            userIndex = text.find('USER')
+            passIndex = text.find('PASS')
+            if userIndex != -1 and passIndex != -1:
+                userName = text[userIndex+5:passIndex-2]
+                passStart = text[passIndex+5:]
+                passEndIndex = passStart.find('\n')
+                passEndIndexR = passStart.find('\r')
+                pssInd = passEndIndex
+                if passEndIndexR!=-1:
+                    pssInd = passEndIndexR
+
+                passwd = passStart[0:pssInd]
+                userList.add(userName+' '+passwd)
+
+    #from mail session
+    mail_query = {
+            "query":{
+                    "match_all":{}
+                }
+            }
+    count = es.count(mail_index,doc,mail_query)['count']
+    if count>0:
+        mail_query['size'] = 0
+        mail_query['aggs'] = {
+                "group_by_user":{
+                    "terms":{
+                            "field":"userName",
+                            "size":count
+                        },
+                    "aggs":{
+                        "group_by_passwd":{
+                            "terms":{
+                                    "field":"passwd",
+                                    'size':count
+                                }
+                            }
+                        }
+                    }
+                }
+        mail_results = es.search(mail_index,doc,mail_query)['aggregations']['group_by_user']['buckets']
+        for userNameKey in mail_results:
+            user = userNameKey['key']
+            for passwd in userNameKey['group_by_passwd']['buckets']:
+                pas = passwd['key']
+
+                if len(pas)>=2 and pas[0]=='"' and pas[len(pas)-1]=='"':
+                    pas=pas[1:len(pas)-1]
+
+                userList.add(user+' '+pas)
+
+
+    for user in userList:
+        print(user)
+
 
 def handle_cmd(es,cmd):
 
@@ -59,7 +202,10 @@ def handle_cmd(es,cmd):
         del_es_index(es)
     elif cmd == "term_topN":
         find_terms_topN(es)
-
+    elif cmd == "http_servers":
+        get_http_unusual_server_and_port(es)
+    elif cmd == 'mail_users':
+        get_mail_user_passwd(es)
 
 if __name__ == '__main__':
 
