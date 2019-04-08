@@ -1,3 +1,4 @@
+#!/usr/bin/python
 host = "127.0.0.1"
 
 from elasticsearch import Elasticsearch
@@ -195,6 +196,14 @@ def get_mail_user_passwd(es):
     for user in userList:
         print(user)
 
+def count(es):
+    index = None
+
+    if len(sys.argv)>=4:
+        index = sys.argv[3]
+
+    print(es.count(index)['count'])
+
 
 def handle_cmd(es,cmd):
 
@@ -206,6 +215,8 @@ def handle_cmd(es,cmd):
         get_http_unusual_server_and_port(es)
     elif cmd == 'mail_users':
         get_mail_user_passwd(es)
+    elif cmd == 'count':
+        count(es)
 
 if __name__ == '__main__':
 
