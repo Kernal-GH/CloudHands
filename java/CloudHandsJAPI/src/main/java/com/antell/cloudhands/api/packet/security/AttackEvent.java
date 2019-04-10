@@ -23,8 +23,8 @@ public class AttackEvent extends AbstractSourceEntry {
     private String assetIP;
     private String dstIP;
     private String eventType;
-    private String engineName;
-    private long engineID;
+    private String eventEngine;
+    private long eventID;
     private long level;
 
     @Override
@@ -40,8 +40,8 @@ public class AttackEvent extends AbstractSourceEntry {
         TextUtils.addText(sb, "assetIP", assetIP);
         TextUtils.addText(sb, "dstIP", dstIP);
         TextUtils.addText(sb, "eventType", eventType);
-        TextUtils.addText(sb, "engineName", engineName);
-        TextUtils.addLong(sb, "engineID", engineID);
+        TextUtils.addText(sb, "eventEngine", eventEngine);
+        TextUtils.addLong(sb, "eventID", eventID);
         TextUtils.addLong(sb, "level", level);
 
         return sb.toString();
@@ -64,8 +64,8 @@ public class AttackEvent extends AbstractSourceEntry {
         cb.field("assetIP", assetIP);
         cb.field("dstIP", dstIP);
         cb.field("eventType", eventType);
-        cb.field("engineName", engineName);
-        cb.field("engineID", engineID);
+        cb.field("eventEngine", eventEngine);
+        cb.field("eventID", eventID);
         cb.field("level", level);
 
         return cb;
@@ -139,8 +139,8 @@ public class AttackEvent extends AbstractSourceEntry {
         }
 
         setEventType(eventType);
-        setEngineName(engineName);
-        setEngineID(0);
+        setEventEngine(engineName);
+        setEventID(0);
         setLevel(ruleLevel);
 
     }
@@ -201,21 +201,14 @@ public class AttackEvent extends AbstractSourceEntry {
         this.eventType = eventType;
     }
 
-    public String getEngineName() {
-        return engineName;
+    public String getEventEngine() {
+        return eventEngine;
     }
 
-    public void setEngineName(String engineName) {
-        this.engineName = engineName;
+    public long getEventID() {
+        return eventID;
     }
 
-    public long getEngineID() {
-        return engineID;
-    }
-
-    public void setEngineID(long engineID) {
-        this.engineID = engineID;
-    }
 
     public long getLevel() {
         return level;
@@ -226,4 +219,11 @@ public class AttackEvent extends AbstractSourceEntry {
     }
 
 
+    public void setEventEngine(String eventEngine) {
+        this.eventEngine = eventEngine;
+    }
+
+    public void setEventID(long eventID) {
+        this.eventID = eventID;
+    }
 }

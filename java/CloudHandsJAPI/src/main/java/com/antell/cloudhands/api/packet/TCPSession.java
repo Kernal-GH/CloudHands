@@ -1,5 +1,7 @@
 package com.antell.cloudhands.api.packet;
 
+import com.antell.cloudhands.api.packet.parser.StreamParserData;
+import com.antell.cloudhands.api.packet.parser.StreamParserPool;
 import com.antell.cloudhands.api.packet.security.AttackEvent;
 import com.antell.cloudhands.api.source.SourceEntry;
 import com.antell.cloudhands.api.utils.DateUtils;
@@ -137,10 +139,28 @@ public class TCPSession extends SessionEntry implements SourceEntry{
 
         PortItem portItem = Portmap.getPortItem(this);
         portItem.toJson(cbb);
-
         cbb.endObject();
 
+        appendParserData(cb);
+
         return cb;
+    }
+
+    private void appendParserData(XContentBuilder cb) throws IOException {
+
+        XContentBuilder cbb = cb.startObject("parseData");
+
+        StreamParserData  parserData = StreamParserPool.parse(this);
+
+        if(parserData!=null){
+            cbb.field("hasData",1);
+            parserData.toJson(cbb);
+        }else{
+
+            cbb.field("hasData",0);
+        }
+
+        cbb.endObject();
     }
 
     @Override
