@@ -67,7 +67,8 @@ public class AttackEvent extends AbstractSourceEntry {
         cb.field("eventEngine", eventEngine);
         cb.field("eventID", eventID);
         cb.field("level", level);
-
+        cb.field("eventIP",assetIP);
+        
         return cb;
     }
 
