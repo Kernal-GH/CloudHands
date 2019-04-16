@@ -2,6 +2,7 @@ package com.antell.cloudhands.api.packet.parser;
 
 import com.antell.cloudhands.api.packet.SessionEntry;
 import com.antell.cloudhands.api.packet.parser.http.HTTPStreamParser;
+import com.antell.cloudhands.api.packet.parser.mysql.MySQLStreamParser;
 import com.antell.cloudhands.api.packet.parser.pop3.POP3StreamParser;
 import com.antell.cloudhands.api.packet.parser.rdp.RDPStreamParser;
 
@@ -11,7 +12,8 @@ public class StreamParserPool {
     private static final StreamParser[] streamParsers = {
             new RDPStreamParser(),
             new POP3StreamParser(),
-            new HTTPStreamParser()
+            new HTTPStreamParser(),
+            new MySQLStreamParser()
     };
 
     private StreamParserPool() {
