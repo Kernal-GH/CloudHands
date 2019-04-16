@@ -4,7 +4,10 @@ import com.antell.cloudhands.api.packet.ByteData;
 import com.antell.cloudhands.api.packet.SessionEntry;
 import com.antell.cloudhands.api.packet.parser.StreamParser;
 import com.antell.cloudhands.api.packet.parser.StreamParserData;
+import com.antell.cloudhands.api.packet.tcp.TCPSessionEntry;
 import com.antell.cloudhands.api.utils.TextUtils;
+
+import java.util.Base64;
 
 public class MySQLStreamParser implements StreamParser {
 
@@ -125,7 +128,7 @@ public class MySQLStreamParser implements StreamParser {
 
     private static final int getNextPacketOffset(MYSQLPacket packet) {
 
-        return packet.getOffset() + packet.getPacketLen() + 1;
+        return packet.getOffset() + packet.getPacketLen() + 4;
     }
 
     private MYSQLPacket getNextPacket(MYSQLPacket packet, ByteData content) {
@@ -167,7 +170,7 @@ public class MySQLStreamParser implements StreamParser {
                 parserData.setLoginStatus(MySQLStreamParserData.LOGIN_FAILED);
             } else if (packet.getSeq() >= 2 && packet.getOffset() + 4 <= content.getDataSize()) {
 
-                int flag = content.getData()[packet.getOffset() + 4];
+                int flag = (content.getData()[packet.getOffset() + 4])&0xff;
                 if (flag == 0xff) {
                     parserData.setLoginStatus(MySQLStreamParserData.LOGIN_FAILED);
                 } else if (flag == 0 || flag == 0xfe) {
@@ -186,6 +189,24 @@ public class MySQLStreamParser implements StreamParser {
 
         parseLoginResponse(sessionEntry, parserData);
         return parserData;
+    }
+
+    public static void main(String[] args){
+
+        String req = "SQAAAY2iPgAAAABACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAYWRtaW5pc3RyYXRvcgAUCplIeo3oBSE60PfTbEysUmpqZFpteXNxbAA=";
+        String res = "NAAAAAo1LjEuNzMAij8RADFOdSVTUydmAP/3CAIAAAAAAAAAAAAAAAAAAFE/KEdwfEJvLTBIWQBVAAAC/xUEIzI4MDAwQWNjZXNzIGRlbmllZCBmb3IgdXNlciAnYWRtaW5pc3RyYXRvcidAJzYxLjQ4LjEzMS4yMzgnICh1c2k=";
+        TCPSessionEntry sessionEntry = new TCPSessionEntry();
+        sessionEntry.setResPort(3306);
+        sessionEntry.setReqContent(new ByteData(Base64.getDecoder().decode(req)));
+        sessionEntry.setResContent(new ByteData(Base64.getDecoder().decode(res)));
+
+        MySQLStreamParser parser = new MySQLStreamParser();
+
+        MySQLStreamParserData parserData = (MySQLStreamParserData) parser.parse(sessionEntry);
+        boolean t = parser.parsable(sessionEntry);
+
+
+
     }
 
 }
