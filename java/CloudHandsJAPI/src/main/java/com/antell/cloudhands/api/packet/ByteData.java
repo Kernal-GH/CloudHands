@@ -26,6 +26,12 @@ public class ByteData {
 
     }
 
+    public ByteData(byte[] data){
+
+        this.data = data;
+        this.dataSize = data.length;
+    }
+
     public String decode(){
 
         if(dataSize == 0||data == null||data.length == 0)
