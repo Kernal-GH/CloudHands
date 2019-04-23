@@ -5,6 +5,25 @@ from elasticsearch import Elasticsearch
 import sys
 import base64
 
+def del_by_query(es):
+    if len(sys.argv)<6:
+        print("Usage:<host><cmd><index><docType><field><value>")
+        sys.exit(-1)
+    index = sys.argv[3]
+    doc = sys.argv[4]
+    field = sys.argv[5]
+    value = sys.argv[6]
+    query = {
+            "query": {
+                    "term" : { field: value  }
+
+                }
+
+            }
+    print(query)
+    print(es.count(index,doc,query)['count'])
+    es.delete_by_query(index,query,doc)
+
 def del_es_index(es):
 
     if len(sys.argv)<4:
@@ -217,6 +236,8 @@ def handle_cmd(es,cmd):
         get_mail_user_passwd(es)
     elif cmd == 'count':
         count(es)
+    elif cmd == 'del_by_query':
+        del_by_query(es)
 
 if __name__ == '__main__':
 

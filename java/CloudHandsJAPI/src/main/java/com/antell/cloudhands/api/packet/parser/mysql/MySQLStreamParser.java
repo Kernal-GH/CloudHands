@@ -193,6 +193,7 @@ public class MySQLStreamParser implements StreamParser {
 
     public static void main(String[] args){
 
+
         String req = "SQAAAY2iPgAAAABACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAYWRtaW5pc3RyYXRvcgAUCplIeo3oBSE60PfTbEysUmpqZFpteXNxbAA=";
         String res = "NAAAAAo1LjEuNzMAij8RADFOdSVTUydmAP/3CAIAAAAAAAAAAAAAAAAAAFE/KEdwfEJvLTBIWQBVAAAC/xUEIzI4MDAwQWNjZXNzIGRlbmllZCBmb3IgdXNlciAnYWRtaW5pc3RyYXRvcidAJzYxLjQ4LjEzMS4yMzgnICh1c2k=";
         TCPSessionEntry sessionEntry = new TCPSessionEntry();

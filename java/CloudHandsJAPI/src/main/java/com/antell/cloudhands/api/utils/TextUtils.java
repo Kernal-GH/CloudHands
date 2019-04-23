@@ -120,4 +120,11 @@ public final class TextUtils {
         return UUID.randomUUID().toString().replace("-","");
     }
 
+    public static final int getLineIndex(String line,int offset){
+
+        int rIndex = line.indexOf('\r',offset);
+        int nIndex = line.indexOf('\n',offset);
+
+        return rIndex!=-1?rIndex:nIndex;
+    }
 }
