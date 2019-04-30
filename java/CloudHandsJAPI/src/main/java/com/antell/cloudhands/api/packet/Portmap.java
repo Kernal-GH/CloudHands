@@ -68,7 +68,7 @@ public class Portmap {
         ports.put(591,new PortItem(591,"filemaker","filemaker","filemaker"));
         ports.put(593,new PortItem(593,"microsoft-dcom","microsoft-dcom","microsoft-dcom"));
         ports.put(631,new PortItem(631,"internet-printing","internet-print","网络打印机"));
-        ports.put(1143,new PortItem(1143,"mssql","mssql","mssqlserver"));
+        ports.put(1433,new PortItem(1433,"mssql","mssql","mssqlserver"));
         ports.put(3389,new PortItem(3389,"rdp","rdp","远程桌面登录协议"));
         ports.put(3306,new PortItem(3306,"mysql","mysql","MYSQL协议"));
         ports.put(6379,new PortItem(6379,"redis","redis","redis协议"));

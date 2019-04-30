@@ -6,7 +6,7 @@ CFLAGS  = ${BUILD_CFLAGS}  -O0 -rdynamic -D_GNU_SOURCE -DUSE_DPDK ${DPDK_FLAGS} 
 CFLAGS += -I../lib/common  -I../lib/shm -I../lib/thread -I../lib/ptables  -I../packet -I../MProcess -I./app/ -I../SessionMonitor -I. -I../WBList
 CFLAGS += -I${DPDK}/include -include ${DPDK}/include/rte_config.h
 
-LDFLAGS  = ${BUILD_LDFLAGS} ${DPDK_LIB_FLAGS}
+LDFLAGS  = ${BUILD_LDFLAGS} ${DPDK_LIB_FLAGS} -lhiredis
 
 
 common_package = ../lib/common/*.o
@@ -18,6 +18,7 @@ mprocess_package = ../MProcess/*.o
 smon_package = ../SessionMonitor/*.o
 app_package = ./app/*.o
 fstore_package = ../lib/fstore/*.o
+redis_package = ../lib/redis/*.o
 wblist_package = ../WBList/*.o
 
 
@@ -42,6 +43,7 @@ quiet_cmd_dpdk = LINK   $@
 	cmd_udp = ${CC} ${CFLAGS} -o $@ $(udp_OBJECTS)  \
 				   $(common_package) $(cpool_package) $(shm_package) $(ptables_package)\
 				   $(pkt_package)  $(mprocess_package) $(app_package) $(smon_package) $(fstore_package) $(wblist_package)\
+				   $(redis_package) \
 				   $(LDFLAGS)
 
 .PHONY: all clean

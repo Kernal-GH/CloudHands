@@ -1,19 +1,22 @@
-package com.antell.cloudhands.api.packet.parser.pop3;
+package com.antell.cloudhands.api.packet.parser.smtp;
 
 import com.antell.cloudhands.api.packet.parser.StreamParserData;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 
 import java.io.IOException;
 
-public class POP3StreamParserData implements StreamParserData {
+public class SMTPStreamParserData implements StreamParserData {
 
-    private final String user;
-    private final String passwd;
+    private String user;
+    private String passwd;
+    private String from;
     private int isLoginOK;
 
-    public POP3StreamParserData(String user, String passwd) {
+    public SMTPStreamParserData(String user,String passwd,String from){
+
         this.user = user;
         this.passwd = passwd;
+        this.from = from;
         this.isLoginOK = 0;
     }
 
@@ -22,18 +25,36 @@ public class POP3StreamParserData implements StreamParserData {
 
         cb.field("user",user);
         cb.field("passwd",passwd);
+        cb.field("from",from);
         cb.field("isLoginOK",isLoginOK);
 
     }
-
 
     public String getUser() {
         return user;
     }
 
+    public void setUser(String user) {
+        this.user = user;
+    }
+
     public String getPasswd() {
         return passwd;
     }
+
+    public void setPasswd(String passwd) {
+        this.passwd = passwd;
+    }
+
+    public String getFrom() {
+        return from;
+    }
+
+    public void setFrom(String from) {
+        this.from = from;
+    }
+
+
 
     public int getIsLoginOK() {
         return isLoginOK;

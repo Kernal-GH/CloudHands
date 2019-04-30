@@ -1,0 +1,31 @@
+include ../../make.include
+CFLAGS  = ${BUILD_CFLAGS}  -O0 -rdynamic -D_GNU_SOURCE
+LDFLAGS += -lhiredis
+
+IPBitmapCmd_package= IPBitmapCmd
+
+IPBitmapCmd_SOURCES = ch_redis.c \
+				  IPBitmapCmd.c 
+
+IPBitmapCmd_OBJECTS =$(patsubst %.c,%.o,$(IPBitmapCmd_SOURCES))
+IPBitmapCmd_DEPENDS =$(patsubst %.c,%.d,$(IPBitmapCmd_SOURCES))
+IPBitmapCmd_ASMFILE =$(patsubst %.c,%.s,$(IPBitmapCmd_SOURCES))
+
+quiet_cmd_dpdk = LINK   $@ 
+	cmd_IPBitmapCmd = ${CC} ${CFLAGS} -o $@ $(IPBitmapCmd_OBJECTS)  \
+					$(common_package) \
+					$(LDFLAGS)
+
+.PHONY: all clean
+
+all: $(IPBitmapCmd_package)
+
+$(IPBitmapCmd_package): $(IPBitmapCmd_OBJECTS) 
+	$(call cmd,IPBitmapCmd)
+-include $(IPBitmapCmd_DEPENDS)
+
+$(common_package):
+	$(call,make)
+
+clean:
+	@rm -rf $(IPBitmapCmd_OBJECTS) $(IPBitmapCmd_DEPENDS) $(IPBitmapCmd_ASMFILE) $(IPBitmapCmd_package)

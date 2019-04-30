@@ -13,6 +13,7 @@
 
 typedef struct ch_vformatter_buff_t ch_vformatter_buff_t;                                                                     
 
+#include <string.h>
 #include "ch_constants.h"
 #include "ch_mpool.h"
 
@@ -22,6 +23,7 @@ typedef struct {
 }ch_str_t;
 
 #define ch_string(str) { sizeof(str) - 1, str}
+#define ch_string_empty(str) ((str)==NULL||strlen(str)==0)
 
 #define VALID_HEX(X) (((X >= '0')&&(X <= '9')) || ((X >= 'a')&&(X <= 'f')) || ((X >= 'A')&&(X <= 'F')))
 #define NBSP 160
@@ -425,6 +427,8 @@ static inline int ch_is_empty_string(const char *string) {
 
     return 1;
 }
+
+extern int ch_string_endsWith(const char *target,const char *match);
 
 extern int ch_decode_base64(ch_str_t *dst, ch_str_t *src);
 

@@ -7,12 +7,13 @@ include ../../../make.include
 DPDK=/usr/local/dpdk/dpdk_src
 DPDK_FLAGS=$(shell cat ${DPDK}/include/cflags.txt)
 CFLAGS  = ${BUILD_CFLAGS}  -O0 -rdynamic -D_GNU_SOURCE -DUSE_DPDK ${DPDK_FLAGS}
-CFLAGS += -I../../../lib/common -I../../../packet -I../../../lib/ptables -I../../../lib/shm -I../../../lib/thread 
+CFLAGS += -I../../../lib/common -I../../../packet -I../../../lib/ptables -I../../../lib/shm -I../../../lib/thread -I../../../lib/redis 
 CFLAGS += -I../../../MProcess -I../../../SessionMonitor -I../../../WBList
 CFLAGS += -I../ -I../../ -I${DPDK}/include -include ${DPDK}/include/rte_config.h
 CFLAGS +=  -fPIC
 
 ch_dns_SOURCES = ch_dns_app.c \
+				 ch_dns_app_context.c \
 				 ch_dns_session.c \
 				 ch_dns_header.c \
 				 ch_dns_request.c \

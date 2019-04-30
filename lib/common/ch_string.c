@@ -22,7 +22,9 @@ char * ch_pstrdup(ch_pool_t *a, const char *s)
         return NULL;
     }
     len = strlen(s) + 1;
-    res = ch_pmemdup(a, s, len);
+    res = ch_pcalloc(a,len);
+    memcpy(res,s,len-1);
+
     return res;
 }
 
@@ -409,3 +411,34 @@ ch_strlcasestrn(char *s1, char *last, char *s2, size_t n)
 
     return --s1;
 }
+
+int ch_string_endsWith(const char *target,const char *match){
+
+    if(match == NULL||target==NULL)
+        return 0;
+
+    size_t match_length = strlen(match);
+    size_t target_length = strlen(target);
+
+    /* The empty string always matches */
+    if (match_length == 0) {
+        /* Match. */
+        return 1;
+    }
+
+    /* This is impossible to match */
+    if (match_length > target_length) {
+        /* No match. */
+        return 0;
+    }
+
+    if (memcmp(match, (target + (target_length - match_length)), match_length) == 0) {
+        /* Match. */
+        return 1;
+    }
+
+    /* No match. */
+    return 0;
+
+}
+

@@ -18,6 +18,7 @@ typedef struct ch_dns_session_t ch_dns_session_t;
 #include "ch_dns_response.h"
 #include "ch_data_output.h"
 #include "ch_udp_app_pool.h"
+#include "ch_dns_rdata_ipv4.h"
 
 struct ch_dns_session_t {
 
@@ -71,6 +72,41 @@ static inline ssize_t ch_dns_session_write(ch_dns_session_t *ds,ch_data_output_t
 	}
 
 	return len;
+}
+
+static inline const char *ch_dns_session_domain_get(ch_dns_session_t *ds){
+
+    ch_dns_requst_t *dns_req = ds->dns_req;
+    if(dns_req == NULL)
+        return NULL;
+
+    return ch_dns_request_name_get(dns_req);
+}
+
+static inline int ch_dns_session_ipv4s_walk(ch_dns_session_t *ds,void (*call_fun)(uint32_t address,void *user_data),void *user_data){
+
+    int n = 0;
+    ch_dns_rdata_t *rdata;
+    ch_dns_rdata_ipv4_t *ipv4;
+
+    ch_dns_response_t *dns_res = ds->dns_res;
+    
+    if(dns_res){
+
+        list_for_each_entry(rdata,&dns_res->alist,node){
+        
+            if(rdata->type == dns_rdatatype_a){
+
+                n++;
+                ipv4 = (ch_dns_rdata_ipv4_t*)rdata;
+
+                call_fun(ipv4->address,user_data);
+
+            }
+        }
+    }
+
+    return n;
 }
 
 #endif /*CH_DNS_SESSION_H*/

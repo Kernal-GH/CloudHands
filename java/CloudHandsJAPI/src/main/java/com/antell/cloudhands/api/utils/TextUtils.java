@@ -2,6 +2,7 @@ package com.antell.cloudhands.api.utils;
 
 import java.io.DataInput;
 import java.io.IOException;
+import java.util.Base64;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
@@ -127,4 +128,16 @@ public final class TextUtils {
 
         return rIndex!=-1?rIndex:nIndex;
     }
+
+    public static final String decodeBase64(String text){
+
+        try {
+
+            return new String(Base64.getDecoder().decode(text));
+        }catch (Exception e){
+
+            return null;
+        }
+    }
+
 }

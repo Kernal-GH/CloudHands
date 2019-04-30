@@ -95,6 +95,22 @@ void ch_dns_request_dump(ch_dns_requst_t *dnsr,FILE *fp){
 
 }
 
+const char *ch_dns_request_name_get(ch_dns_requst_t *dns_req){
+
+	ch_dns_question_t *dnsq;
+
+	list_for_each_entry(dnsq,&dns_req->questions,node){
+	
+        if(dnsq->qtype == 1&&(dnsq->qname.ndata&&strlen((const char*)dnsq->qname.ndata))>0){
+
+            return (const char*)dnsq->qname.ndata;
+        }
+	}
+
+    return NULL;
+
+}
+
 ssize_t ch_dns_question_write(ch_dns_question_t *dnsq,ch_data_output_t *dout){
 
 	ssize_t rc,len = 0;

@@ -47,6 +47,8 @@ extern void ch_dns_request_dump(ch_dns_requst_t *dnsr,FILE *fp);
 
 extern void ch_dns_question_dump(ch_dns_question_t *dnsq,FILE *fp);
 
+extern const char * ch_dns_request_name_get(ch_dns_requst_t *dns_req);
+
 extern ssize_t ch_dns_question_write(ch_dns_question_t *dnsq,ch_data_output_t *dout);
 #define CH_DNS_QUESTION_WRITE(dout,dnsq,len,rc) do {   \
 	if(-1 == (rc = ch_dns_question_write(dnsq,dout)))  \
@@ -62,5 +64,6 @@ extern ssize_t ch_dns_request_write(ch_dns_requst_t *dnsr,ch_data_output_t *dout
 		return -1;									  \
 	len+=rc;										  \
 }while(0)
+
 
 #endif /*CH_DNS_REQUEST_H*/
