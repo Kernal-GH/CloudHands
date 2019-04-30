@@ -32,6 +32,7 @@ typedef struct ch_pdispatcher_context_t ch_pdispatcher_context_t;
 #include "ch_wb_list.h"
 #include "ch_wb_list_ip.h"
 #include "ch_stat_pool.h"
+#include "ch_redis_ip_wblist.h"
 
 #define LOG_NAME_DEFAULT "/tmp/pdispatcher.log"
 #define LOG_LEVEL_DEFAULT CH_LOG_NOTICE
@@ -52,6 +53,8 @@ struct ch_pdispatcher_context_t {
 
    ch_wb_list_t ip_white_list;
    ch_wb_list_t ip_black_list;
+
+   ch_redis_ip_wblist_t *ip_wblist;
 
    ch_process_interface_tcp_context_t *pint_tcp_context;
    
@@ -91,6 +94,8 @@ struct ch_pdispatcher_context_t {
    /*config ip black list */
    const char *ip_blist_mmap_fname;
    size_t ip_blist_msize;
+
+   const char *redis_ipwblist_fname;
 
    /*statistic configs*/
 	const char *stat_mmap_fname;

@@ -54,6 +54,9 @@ static void do_pdcontext_init(ch_pdispatcher_context_t *pdcontext){
 	pdcontext->stat_time_up = 7*24*3600;
 	pdcontext->stat_time_tv = 5*60;
 
+    pdcontext->redis_ipwblist_fname = NULL;
+    pdcontext->ip_wblist = NULL;
+
 }
 
 static const char *cmd_log(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1,const char *p2){
@@ -162,6 +165,16 @@ static const char *cmd_ip_white_list(cmd_parms *cmd ch_unused, void *_dcfg, cons
 	pdcontext->ip_wlist_mmap_fname = p1;
 
 	pdcontext->ip_wlist_msize = (size_t)strtoul(p2,&endptr,10);
+
+
+    return NULL;
+}
+
+static const char *cmd_redis_ipwblist_fname(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1){
+
+    ch_pdispatcher_context_t *pdcontext = (ch_pdispatcher_context_t*)_dcfg;
+    
+	pdcontext->redis_ipwblist_fname = p1;
 
 
     return NULL;
@@ -285,6 +298,14 @@ static const command_rec pdcontext_directives[] ={
             0,
             "set ip black list path and size"
             ),
+    
+    CH_INIT_TAKE1(
+            "CHRedisIPWBListFName",
+            cmd_redis_ipwblist_fname,
+            NULL,
+            0,
+            "set redis ip wblist config file path"
+            ),
 	
     CH_INIT_TAKE1(
             "CHStatMMapFName",
@@ -384,6 +405,13 @@ int ch_pdispatcher_context_start(ch_pdispatcher_context_t *pdcontext){
 		ch_log(CH_LOG_ERR,"Cannot load ip black list!");
 		return -1;
 	}
+
+    pdcontext->ip_wblist = ch_redis_ip_wblist_create(pdcontext->mp,pdcontext->redis_ipwblist_fname);
+    if(pdcontext->ip_wblist == NULL){
+
+        ch_log(CH_LOG_ERR,"Cannot load redis ip wblist config!");
+        return -1;
+    }
 
 	pdcontext->pint_tcp_context = ch_process_interface_tcp_context_create(pdcontext->mp,
 		pdcontext->pint_tcp_cfname,1); 

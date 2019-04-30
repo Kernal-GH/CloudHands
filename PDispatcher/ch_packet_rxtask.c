@@ -46,6 +46,35 @@ static void _dump_port(ch_packet_rxtask_t *prxtask,ch_port_t *port){
 
 }
 
+static int _pkt_is_accept(ch_pdispatcher_context_t *pdcontext,ch_packet_t *pkt){
+
+    ch_packet_tcp_t tcp_pkt;
+    ch_packet_udp_t udp_pkt;
+
+    int type = pkt->pkt_type;
+
+    if(type<0||type>4)
+        return 0;
+
+    if(type == PKT_TYPE_TCP) {
+
+        if(-1 == ch_packet_tcp_init_from_pkt(&tcp_pkt,pkt))
+            return 0;
+        
+        return ch_redis_ip_wblist_accept(pdcontext->ip_wblist,tcp_pkt.src_ip,tcp_pkt.dst_ip);
+
+    }else if(type == PKT_TYPE_UDP){
+        
+        if(-1 == ch_packet_udp_init_from_pkt(&udp_pkt,pkt))
+            return 0;
+        
+        return ch_redis_ip_wblist_accept(pdcontext->ip_wblist,udp_pkt.src_ip,udp_pkt.dst_ip);
+
+    }
+
+    return 1;
+}
+
 static void _pkt_stat_handle(ch_stat_pool_t *st_pool,ch_packet_t *pkt,uint64_t time){
 
     int stat_pkt_type = STAT_OTHER;
@@ -107,6 +136,12 @@ static void _pkt_handle(ch_packet_rxtask_t *prxtask,ch_port_queue_t *pq ch_unuse
 	}
 
     _pkt_stat_handle(prxtask->pdcontext->st_pool,pkt,time);
+
+    if(_pkt_is_accept(prxtask->pdcontext,pkt)==0){
+    
+        rte_pktmbuf_free(mbuf);
+        return;
+    }
 
 	//ch_packet_ref_count_set(pkt,1);
 

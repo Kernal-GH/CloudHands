@@ -3,15 +3,16 @@ DPDK=/usr/local/dpdk/dpdk_src
 DPDK_FLAGS=$(shell cat ${DPDK}/include/cflags.txt)
 DPDK_LIB_FLAGS = $(shell cat ${DPDK}/lib/ldflags.txt)
 CFLAGS  = ${BUILD_CFLAGS}  -O0 -rdynamic -D_GNU_SOURCE -DUSE_DPDK ${DPDK_FLAGS} -pthread
-CFLAGS += -I../lib/common  -I../lib/shm -I../lib/thread -I../lib/ptables -I../packet -I../MProcess  -I../SessionMonitor -I../WBList -I../statistic
+CFLAGS += -I../lib/common  -I../lib/shm -I../lib/thread -I../lib/ptables -I../lib/redis -I../packet -I../MProcess  -I../SessionMonitor -I../WBList -I../statistic
 CFLAGS += -I${DPDK}/include -include ${DPDK}/include/rte_config.h
 
-LDFLAGS  = ${BUILD_LDFLAGS} ${DPDK_LIB_FLAGS} -lpthread
+LDFLAGS  = ${BUILD_LDFLAGS} ${DPDK_LIB_FLAGS} -lpthread -lhiredis
 
 
 common_package = ../lib/common/*.o
 cpool_package = ../lib/thread/*.o
 shm_package = ../lib/shm/*.o
+redis_package = ../lib/redis/*.o
 ptables_package = ../lib/ptables/*.o
 pkt_package = ../packet/*.o
 mprocess_package = ../MProcess/*.o
@@ -36,6 +37,7 @@ quiet_cmd_dpdk = LINK   $@
 	cmd_pdis = ${CC} ${CFLAGS} -o $@ $(pdis_OBJECTS)  \
 				   $(common_package) $(cpool_package) $(shm_package) $(ptables_package)\
 				   $(pkt_package) $(mprocess_package) $(smon_package) $(wblist_package) $(stat_package)\
+				   $(redis_package) \
 				   $(LDFLAGS)
 
 .PHONY: all clean
