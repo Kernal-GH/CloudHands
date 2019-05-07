@@ -130,14 +130,15 @@ static void _pkt_handle(ch_packet_rxtask_t *prxtask,ch_port_queue_t *pq ch_unuse
 
 	/*parse packet*/
 	rc = ch_packet_parse(pkt,mbuf);
-	if(rc != PKT_PARSE_OK)
+    
+    _pkt_stat_handle(prxtask->pdcontext->st_pool,pkt,time);
+	
+    if(rc != PKT_PARSE_OK)
 	{
 	
 		rte_pktmbuf_free(mbuf);
 		return;
 	}
-
-    _pkt_stat_handle(prxtask->pdcontext->st_pool,pkt,time);
 
     if(_pkt_is_accept(prxtask->pdcontext,pkt)==0){
     
