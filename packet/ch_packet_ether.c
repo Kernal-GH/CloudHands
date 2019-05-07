@@ -99,9 +99,9 @@ int ch_packet_ether_parse(ch_packet_t *pkt){
         if (ph->code != 0) /*  Not Seesion Data */
             return PKT_PARSE_DROP;
         if (ph->proto == rte_cpu_to_be_16(0x21))
-            proto = rte_cpu_to_be_16(ETHER_TYPE_IPv4);
+            proto = ETHER_TYPE_IPv4;
         else if (ph->proto == rte_cpu_to_be_16(0x57))
-            proto = rte_cpu_to_be_16(ETHER_TYPE_IPv6);
+            proto = ETHER_TYPE_IPv6;
         else
             return PKT_PARSE_DROP;
     
