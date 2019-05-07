@@ -20,6 +20,8 @@
 #include "ch_packet_rxtask.h"
 #include "ch_packet.h"
 #include "ch_util.h"
+#include "ch_packet_tcp.h"
+#include "ch_packet_udp.h"
 
 #define PREFETCH_OFFSET 3
 

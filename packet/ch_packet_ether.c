@@ -65,7 +65,7 @@ int ch_packet_ether_parse(ch_packet_t *pkt){
 			//ch_log(CH_LOG_DEBUG,"802.1q!\n");
 			vh = rte_pktmbuf_read(mbuf, off, sizeof(*vh), &vh_copy);
 			if(vh == NULL)
-				break;
+				return PKT_PARSE_DROP;
 
 			off += sizeof(*vh);
 			proto = rte_be_to_cpu_16(vh->eth_proto);
@@ -77,12 +77,35 @@ int ch_packet_ether_parse(ch_packet_t *pkt){
 			vh = rte_pktmbuf_read(mbuf, off + sizeof(*vh), sizeof(*vh),
 				&vh_copy);
 			if(vh == NULL)
-				break;
+				return PKT_PARSE_DROP;
 
 			off += 2 * sizeof(*vh);
 			proto = rte_be_to_cpu_16(vh->eth_proto);
-		}
+        }
+
 	}while(proto == CH_ETH_P_8021Q||proto == CH_ETH_P_8021AD);
+
+    /*PPPOE*/
+    if(proto == CH_ETH_P_PPP_SES){
+        
+        const struct pppoe_hdr *ph;
+        struct pppoe_hdr ph_copy;
+        
+        ph = rte_pktmbuf_read(mbuf, off, sizeof(*ph), &ph_copy);
+        if (ph == NULL)
+            return PKT_PARSE_DROP;
+          
+        off += sizeof(*ph);
+        if (ph->code != 0) /*  Not Seesion Data */
+            return PKT_PARSE_DROP;
+        if (ph->proto == rte_cpu_to_be_16(0x21))
+            proto = rte_cpu_to_be_16(ETHER_TYPE_IPv4);
+        else if (ph->proto == rte_cpu_to_be_16(0x57))
+            proto = rte_cpu_to_be_16(ETHER_TYPE_IPv6);
+        else
+            return PKT_PARSE_DROP;
+    
+    }
 
 	pkt->l2_len = off;
 	pkt->parse_off = off;
