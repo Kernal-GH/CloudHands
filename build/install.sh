@@ -130,6 +130,7 @@ install_cloudhands(){
 	make -C CloudHands/WBList -f MakefileIPCmd
 	make -C CloudHands/WBList -f MakefileStrCmd
 	make -C CloudHands/lib/redis/ -f MakefileIPBitmapCmd
+	make -C CloudHands/lib/shm/ -f MakefileSHMInfoDump
 
 	cp -rf CloudHands/conf $dpdk_install_prefix/CloudHands
 	cp -rf CloudHands/PDispatcher/PDispatcher $dpdk_install_prefix/CloudHands/bin
@@ -142,6 +143,7 @@ install_cloudhands(){
 	cp -rf CloudHands/WBList/WBListIPCmd $dpdk_install_prefix/CloudHands/bin
 	cp -rf CloudHands/WBList/WBListStrCmd $dpdk_install_prefix/CloudHands/bin
 	cp -rf CloudHands/lib/redis/IPBitmapCmd $dpdk_install_prefix/CloudHands/bin
+	cp -rf CloudHands/lib/shm/SHMInfoDump $dpdk_install_prefix/CloudHands/bin
 
     echo "install lua script"
     cp -rf CloudHands/lib/lua/base/* $dpdk_install_prefix/CloudHands/lua

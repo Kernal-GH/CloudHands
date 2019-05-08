@@ -53,6 +53,10 @@ struct ch_shm_header_t {
 	uint64_t shm_write_entry_pos;
 	uint64_t shm_read_entry_pos;
 	uint64_t shm_priv_data_size;
+    uint64_t shm_last_write_time;
+    uint64_t shm_last_read_time;
+    uint64_t shm_last_write_ok_time;
+    uint64_t shm_last_read_ok_time;
 };
 #pragma pack(pop)
 

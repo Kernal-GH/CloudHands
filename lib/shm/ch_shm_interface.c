@@ -19,6 +19,7 @@
 #include "ch_log.h"
 #include "ch_shm_interface.h"
 #include "ch_constants.h"
+#include "ch_util.h"
 
 static inline uint64_t _shm_entries_count_get(ch_shm_interface_t *shm_int,uint64_t hsize,uint64_t entry_size){
 
@@ -37,7 +38,10 @@ static void  _shm_header_init(ch_shm_interface_t *shm_int,uint64_t entry_size,ui
 	mh->shm_write_entry_pos = 0;
 	mh->shm_read_entry_pos = 0;
 	mh->shm_priv_data_size = priv_data_size;
-
+    mh->shm_last_write_time = 0;
+    mh->shm_last_read_time = 0;
+    mh->shm_last_write_ok_time = 0;
+    mh->shm_last_read_ok_time = 0;
 }
 
 void ch_shm_init(ch_shm_interface_t *shm_int,void *address,
@@ -107,6 +111,15 @@ int ch_shm_entry_get(ch_shm_interface_t *shm_int,ch_shm_entry_t *entry){
 
     uint64_t indx;
 
+    uint64_t time = ch_get_current_timems();
+
+    if(shm_int->is_write){
+
+        shm_int->shm_header->shm_last_write_time = time;
+    }else{
+        shm_int->shm_header->shm_last_read_time = time;
+    }
+
     if(_shm_entry_can_get(shm_int) == 0){
 
         ch_log(CH_LOG_INFO,"No buf get from shm used to %s",shm_int->is_write?"write":"read");
@@ -114,6 +127,13 @@ int ch_shm_entry_get(ch_shm_interface_t *shm_int,ch_shm_entry_t *entry){
     }
 
     indx = _shm_entry_index_get(shm_int);
+
+    if(shm_int->is_write){
+
+        shm_int->shm_header->shm_last_write_ok_time = time;
+    }else{
+        shm_int->shm_header->shm_last_read_ok_time = time;
+    }
 
     return _shm_entry_init(shm_int,entry,indx);
 }
