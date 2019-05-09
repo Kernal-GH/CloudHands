@@ -106,8 +106,8 @@ int ch_packet_ether_parse(ch_packet_t *pkt){
             return PKT_PARSE_DROP;
     
     }
-
-	pkt->l2_len = off;
+	
+    pkt->l2_len = off;
 	pkt->parse_off = off;
 	pkt->l3_proto = proto;
 
