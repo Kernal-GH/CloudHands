@@ -4,6 +4,8 @@ host = "127.0.0.1"
 from elasticsearch import Elasticsearch
 import sys
 import base64
+import time
+import datetime
 
 def del_by_query(es):
     if len(sys.argv)<6:
@@ -224,6 +226,109 @@ def count(es):
     print(es.count(index)['count'])
 
 
+def catIndices(es):
+    index = "*"
+    if len(sys.argv)>=4:
+        index = sys.argv[3]
+
+    results = es.cat.indices(index,v=True)
+    print(results)
+
+def getIndices(es):
+    index = "*"
+    if len(sys.argv)>=4:
+        index = sys.argv[3]
+
+    return es.indices.get(index).keys()
+
+def getClosedIndices(es):
+    index = "*"
+    if len(sys.argv)>=4:
+        index = sys.argv[3]
+    results = es.cat.indices(index).split("\n")
+
+    mres = []
+    for k in results:
+        if len(k)==0 or k.find('close')==-1:
+            continue
+
+        i = 0
+        ksplits = k.split(' ')
+        for ki in ksplits:
+            if ki == 'close':
+                mres.append(ksplits[i+1])
+                break
+            i=i+1
+
+    return mres
+
+def getOpenedIndices(es):
+    index = "*"
+    if len(sys.argv)>=4:
+        index = sys.argv[3]
+    results = es.cat.indices(index).split("\n")
+
+    mres = []
+    for k in results:
+        if len(k)==0 or k.find('open')==-1:
+            continue
+
+        i = 0
+        ksplits = k.split(' ')
+        for ki in ksplits:
+            if ki == 'open':
+                mres.append(ksplits[i+1])
+                break
+            i=i+1
+
+    return mres
+
+def openIndices(es):
+    index = "*"
+    if len(sys.argv)>=4:
+        index = sys.argv[3]
+
+    indices = getClosedIndices(es)
+    for k in indices:
+        es.indices.open(k,timeout='30m')
+
+def closeIndices(es):
+    index = "*"
+    if len(sys.argv)>=4:
+        index = sys.argv[3]
+
+    indices = getOpenedIndices(es)
+    for k in indices:
+        es.indices.close(k,timeout='30m')
+
+
+def getTimeFromIndex(index):
+    dstr = index[index.rfind('_')+1:]
+    ta = time.strptime(dstr, "%Y.%m.%d")
+    return int(time.mktime(ta))
+
+def getTimeFromDateNumber(dn):
+    dayAgo = (datetime.datetime.now() - datetime.timedelta(days = dn))
+    return int(time.mktime(dayAgo.timetuple()))
+
+def isOldIndex(index,oldTime):
+    indexTime = getTimeFromIndex(index)
+    return indexTime<=oldTime
+
+def closeIndicesWithDate(es):
+    if len(sys.argv)<5:
+        print('Usage: <host> <cmd> <index> <dateNumber>')
+        sys.exit(-1)
+    index = sys.argv[3]
+    dn = int(sys.argv[4])
+
+    oldTime = getTimeFromDateNumber(dn)
+
+    indices = getOpenedIndices(es)
+    for ind in indices:
+        if isOldIndex(ind,oldTime):
+            es.indices.close(ind,timeout='30m')
+
 def handle_cmd(es,cmd):
 
     if cmd == "del":
@@ -238,6 +343,14 @@ def handle_cmd(es,cmd):
         count(es)
     elif cmd == 'del_by_query':
         del_by_query(es)
+    elif cmd == 'cat':
+        catIndices(es)
+    elif cmd == 'open':
+        openIndices(es)
+    elif cmd == 'close':
+        closeIndices(es)
+    elif cmd == 'closeWithDate':
+        closeIndicesWithDate(es)
 
 if __name__ == '__main__':
 
