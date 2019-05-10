@@ -253,7 +253,7 @@ def getClosedIndices(es):
             continue
 
         i = 0
-        ksplits = k.split(' ')
+        ksplits = list(filter(lambda s:False if len(s) == 0 else True, k.split(' ')))
         for ki in ksplits:
             if ki == 'close':
                 mres.append(ksplits[i+1])
@@ -274,7 +274,7 @@ def getOpenedIndices(es):
             continue
 
         i = 0
-        ksplits = k.split(' ')
+        ksplits = list(filter(lambda s:False if len(s) == 0 else True, k.split(' ')))
         for ki in ksplits:
             if ki == 'open':
                 mres.append(ksplits[i+1])
