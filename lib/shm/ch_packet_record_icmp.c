@@ -47,7 +47,9 @@ size_t ch_packet_record_icmp_write(ch_packet_record_icmp_t *icmp_rcd,void *buffe
 	if(data&&dlen>0){
 	
 		ch_bf_bytes_write(bfmt,data,dlen);
-	}
+    }else{
+		ch_bf_bytes_write(bfmt,"N",1);
+    }
 
 	return ch_bf_content_size(bfmt);
 

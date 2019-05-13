@@ -28,6 +28,8 @@ struct ch_packet_record_icmp_t {
 	uint32_t icmp_sip;    /*ICMP packet send ip*/
 	uint32_t icmp_tip;    /*ICMP packet target ip*/
 
+    size_t dlen;
+    void *data;
 };
 #define CH_PACKET_RECORD_ICMP_META_SIZE (sizeof(uint8_t)*3+\
 	sizeof(uint16_t)*3+\

@@ -25,6 +25,7 @@ public class ICMPPacket extends AbstractSourceEntry {
 
     private long sip;
     private long tip;
+    private ByteData content;
 
     public ICMPPacket(DataInput input,long time) throws IOException {
 
@@ -37,6 +38,8 @@ public class ICMPPacket extends AbstractSourceEntry {
         seqNumber = input.readUnsignedShort();
         sip = (long)input.readInt();
         tip = (long)input.readInt();
+
+        content = new ByteData(input);
 
     }
 
@@ -76,7 +79,8 @@ public class ICMPPacket extends AbstractSourceEntry {
         cb.field("seqNumber",seqNumber);
         cb.field("sendIP", IPUtils.ipv4Str(sip));
         cb.field("targetIP", IPUtils.ipv4Str(tip));
-
+        cb.field("dlen",content!=null?content.getDataSize():0);
+        cb.field("data",content!=null?content.getData():"".getBytes());
         return cb;
     }
 
@@ -146,4 +150,11 @@ public class ICMPPacket extends AbstractSourceEntry {
     }
 
 
+    public ByteData getContent() {
+        return content;
+    }
+
+    public void setContent(ByteData content) {
+        this.content = content;
+    }
 }

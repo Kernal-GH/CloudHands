@@ -23,6 +23,8 @@ static inline int ch_packet_icmp_read(ch_packet_record_icmp_t *icmp_rcd,ch_packe
 	
 	const struct icmp_hdr *icmp;
 	struct icmp_hdr icmp_copy;
+    size_t dlen = 0;
+    size_t hlen = 0;
 
 	iph = rte_pktmbuf_read(pkt->mbuf, pkt->l2_len, sizeof(*iph),&iph_copy);
 
@@ -44,6 +46,18 @@ static inline int ch_packet_icmp_read(ch_packet_record_icmp_t *icmp_rcd,ch_packe
 
 	icmp_rcd->icmp_sip = iph->src_addr;
 	icmp_rcd->icmp_tip = iph->dst_addr;
+
+    hlen = pkt->l2_len+pkt->l3_len+sizeof(*icmp);
+    dlen = pkt->mbuf->data_len-hlen;
+
+    if(dlen>0){
+
+        icmp_rcd->dlen = dlen;
+        icmp_rcd->data = rte_pktmbuf_mtod_offset(pkt->mbuf,void*,hlen);
+    }else{
+        icmp_rcd->dlen = 0;
+        icmp_rcd->data = NULL;
+    }
 
 	return 0;
 }

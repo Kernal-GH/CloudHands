@@ -21,20 +21,22 @@ int ch_sa_icmp_handle(ch_sa_session_task_t *sa_task,ch_packet_t *pkt){
 	ch_buffer_t *p_buffer = &sa_task->sa_buffer;
 	size_t meta_data_size = CH_PACKET_RECORD_ICMP_META_SIZE;
 	size_t p_dlen = 0;
+    size_t rlen = 0;
 
 	if(ch_packet_icmp_read(&icmp_rcd,pkt))
 		return -1;
 
-	if(ch_buffer_need_update(p_buffer,meta_data_size)){
+    rlen = meta_data_size+icmp_rcd.dlen+sizeof(uint64_t)*2;
+	if(ch_buffer_need_update(p_buffer,rlen)){
 	
-		if(ch_buffer_update(p_buffer,meta_data_size)){
+		if(ch_buffer_update(p_buffer,rlen)){
 		
 			ch_log(CH_LOG_ERR,"Cannot create buffer failed for icmp session handler!");
 			return -1;
 		}
 	}
 	
-	p_dlen = ch_packet_record_icmp_write(&icmp_rcd,p_buffer->bdata,p_buffer->b_current_size,NULL,0);
+	p_dlen = ch_packet_record_icmp_write(&icmp_rcd,p_buffer->bdata,p_buffer->b_current_size,icmp_rcd.data,icmp_rcd.dlen);
 
 	pkt_rcd.type = PKT_RECORD_TYPE_ICMP;
 	pkt_rcd.meta_data_size = meta_data_size;
