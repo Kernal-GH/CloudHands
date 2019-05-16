@@ -26,6 +26,7 @@ public class ICMPPacket extends AbstractSourceEntry {
     private long sip;
     private long tip;
     private ByteData content;
+    private String sessionID;
 
     public ICMPPacket(DataInput input,long time) throws IOException {
 
@@ -40,8 +41,10 @@ public class ICMPPacket extends AbstractSourceEntry {
         tip = (long)input.readInt();
 
         content = new ByteData(input);
-
+        sessionID(sip,tip,seqNumber);
     }
+
+
 
     @Override
     public String dataToString() {
@@ -66,6 +69,21 @@ public class ICMPPacket extends AbstractSourceEntry {
         return dataToString();
     }
 
+    private boolean isCommonEchoPacket(){
+
+        if(type!=8||type!=0)
+            return false;
+
+        if(content == null||content.getDataSize()==0)
+            return true;
+
+        String text = content.decode();
+        if(text.contains("/01234567")||text.contains("abcdefghijklmnopqrstuvw"))
+            return true;
+
+        return false;
+    }
+
     @Override
     public XContentBuilder dataToJson(XContentBuilder cb) throws IOException {
 
@@ -81,6 +99,8 @@ public class ICMPPacket extends AbstractSourceEntry {
         cb.field("targetIP", IPUtils.ipv4Str(tip));
         cb.field("dlen",content!=null?content.getDataSize():0);
         cb.field("data",content!=null?content.getData():"".getBytes());
+        cb.field("sessionID",sessionID);
+        cb.field("isCommonEchoPacket",isCommonEchoPacket()?1:0);
         return cb;
     }
 
@@ -156,5 +176,30 @@ public class ICMPPacket extends AbstractSourceEntry {
 
     public void setContent(ByteData content) {
         this.content = content;
+    }
+
+    public String getSessionID() {
+        return sessionID;
+    }
+
+
+    private void sessionID(long sip, long tip, int seqNumber) {
+
+        StringBuffer sb = new StringBuffer();
+
+        if(sip<tip){
+            sb.append(sip);
+            sb.append("|");
+            sb.append(tip);
+            sb.append("|");
+            sb.append(seqNumber);
+        }else{
+            sb.append(tip);
+            sb.append("|");
+            sb.append(sip);
+            sb.append("|");
+            sb.append(seqNumber);
+
+        }
     }
 }
