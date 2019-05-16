@@ -71,7 +71,7 @@ public class ICMPPacket extends AbstractSourceEntry {
 
     private boolean isCommonEchoPacket(){
 
-        if(type!=8||type!=0)
+        if(type!=8&&type!=0)
             return false;
 
         if(content == null||content.getDataSize()==0)
@@ -201,5 +201,9 @@ public class ICMPPacket extends AbstractSourceEntry {
             sb.append(seqNumber);
 
         }
+        this.sessionID = sb.toString();
     }
+
+
+
 }
