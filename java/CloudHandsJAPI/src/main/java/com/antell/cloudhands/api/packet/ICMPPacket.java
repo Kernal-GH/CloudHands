@@ -84,6 +84,16 @@ public class ICMPPacket extends AbstractSourceEntry {
         return false;
     }
 
+    private String getIPPairs(){
+
+        StringBuffer sb = new StringBuffer();
+        sb.append(sip);
+        sb.append("|");
+        sb.append(tip);
+
+        return sb.toString();
+    }
+
     @Override
     public XContentBuilder dataToJson(XContentBuilder cb) throws IOException {
 
@@ -101,6 +111,8 @@ public class ICMPPacket extends AbstractSourceEntry {
         cb.field("data",content!=null?content.getData():"".getBytes());
         cb.field("sessionID",sessionID);
         cb.field("isCommonEchoPacket",isCommonEchoPacket()?1:0);
+        cb.field("ippairs",getIPPairs());
+
         return cb;
     }
 
