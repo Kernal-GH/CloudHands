@@ -99,7 +99,7 @@
                         <configuration>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>com.antell.cloudhands.api.packet.security.clamav.TestClamAVScan</mainClass>
+                                    <mainClass>com.antell.smarteye.security.clamav.TestClamAVScan</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>
