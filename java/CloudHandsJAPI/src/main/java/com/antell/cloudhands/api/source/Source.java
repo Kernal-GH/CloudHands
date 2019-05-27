@@ -11,6 +11,7 @@ public interface Source {
 
     /*init Source*/
     void init(Context context,Filter filter) throws SourceException;
+    void init(List<String> mmapFiles,Filter filter) throws SourceException;
 
     void start() throws SourceException;
 
