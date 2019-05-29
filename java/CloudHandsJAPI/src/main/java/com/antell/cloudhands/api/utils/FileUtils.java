@@ -31,8 +31,9 @@ public class FileUtils {
 
             try {
                 Files.createDirectories(path.getParent());
-                Files.createFile(path);
+               // Files.createFile(path);
             } catch (IOException e) {
+                e.printStackTrace();
                 return fpath;
             }
         }
@@ -40,6 +41,7 @@ public class FileUtils {
         try {
             Files.copy(Paths.get(fpath),path);
         } catch (IOException e) {
+            e.printStackTrace();
             return fpath;
         }
 
