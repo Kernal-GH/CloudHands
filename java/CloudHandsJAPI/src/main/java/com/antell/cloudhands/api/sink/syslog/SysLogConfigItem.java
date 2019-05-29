@@ -1,5 +1,7 @@
 package com.antell.cloudhands.api.sink.syslog;
 
+import java.util.List;
+
 public class SysLogConfigItem {
 
     private String host;
@@ -8,6 +10,7 @@ public class SysLogConfigItem {
     private String devName;
     private int threadNum;
     private int queueLimits;
+    private List<String> acceptLogs;
 
     public String getHost() {
         return host;
@@ -55,5 +58,13 @@ public class SysLogConfigItem {
 
     public void setQueueLimits(int queueLimits) {
         this.queueLimits = queueLimits;
+    }
+
+    public List<String> getAcceptLogs() {
+        return acceptLogs;
+    }
+
+    public void setAcceptLogs(List<String> acceptLogs) {
+        this.acceptLogs = acceptLogs;
     }
 }
