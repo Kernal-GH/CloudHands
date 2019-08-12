@@ -161,7 +161,7 @@ ssize_t ch_dns_request_write(ch_dns_requst_t *dnsr,ch_data_output_t *dout){
 	return len;
 }
 
-void  ch_dns_requst_store(ch_msgpack_store_t *dstore,ch_dns_requst_t *dnsr) {
+void  ch_dns_request_store(ch_msgpack_store_t *dstore,ch_dns_requst_t *dnsr) {
 
     ch_msgpack_store_map_start(dstore,"req",2);
 
