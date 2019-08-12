@@ -22,6 +22,7 @@ typedef struct ch_udp_app_session_t ch_udp_app_session_t;
 #include "ch_data_output.h"
 #include "ch_packet_udp.h"
 #include "ch_udp_app_context.h"
+#include "ch_msgpack_store.h"
 
 /*UDP APP Packet Process Status*/
 #define PROCESS_CONTINUE 0
@@ -79,6 +80,8 @@ struct ch_udp_app_t {
 
 	ssize_t (*app_session_write)(ch_udp_app_session_t *app_session,ch_data_output_t *dout);
 	
+    int (*app_session_store)(ch_udp_app_session_t *app_session,ch_msgpack_store_t *dstore);
+	
 	void (*app_session_dump)(ch_udp_app_session_t *app_session,FILE *fp);
 
 	void (*app_session_fin)(ch_udp_app_session_t *app_session);
@@ -103,6 +106,8 @@ extern int  ch_udp_app_session_request_process(ch_udp_session_request_t *req_ses
 extern int  ch_udp_app_session_packet_process(ch_udp_app_session_t *app_session,ch_packet_udp_t *pkt_udp);
 
 extern ssize_t  ch_udp_app_session_write(ch_udp_session_t *usession,ch_udp_app_session_t *app_session,ch_data_output_t *dout);
+
+extern int ch_udp_app_session_store(ch_udp_session_t *usession,ch_udp_app_session_t *app_session,ch_msgpack_store_t *dstore);
 
 extern void ch_udp_app_session_dump(ch_udp_app_session_t *app_session,ch_udp_session_t *udp_session,FILE *fp);
 

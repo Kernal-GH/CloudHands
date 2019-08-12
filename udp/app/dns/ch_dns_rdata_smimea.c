@@ -42,6 +42,19 @@ static ssize_t  _rdata_smimea_write(ch_dns_rdata_t *rdata,ch_data_output_t *dout
 	return len;
 }
 
+static void _rdata_smimea_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore){
+
+    ch_dns_rdata_smimea_t *smimea = (ch_dns_rdata_smimea_t*)rdata;
+
+    ch_msgpack_store_map_start(dstore,"smimea",4);
+    ch_msgpack_store_write_uint8(dstore,"certUsage",smimea->cert_usage);
+    ch_msgpack_store_write_uint8(dstore,"selector",smimea->selector);
+    ch_msgpack_store_write_uint8(dstore,"matchingType",smimea->matching_type);
+
+    ch_msgpack_store_write_str_wlen(dstore,"data",(const char*)smimea->cert_data,smimea->cert_dlen);
+
+}
+
 static ch_dns_rdata_t * _rdata_smimea_create(ch_pool_t *mp,void *priv_data ch_unused){
 
 
@@ -49,6 +62,7 @@ static ch_dns_rdata_t * _rdata_smimea_create(ch_pool_t *mp,void *priv_data ch_un
 
 	smimea->rdata.rdata_dump = _rdata_smimea_dump;
 	smimea->rdata.rdata_write = _rdata_smimea_write;
+	smimea->rdata.rdata_store = _rdata_smimea_store;
 
 	smimea->cert_usage = 0;
 	smimea->selector = 0;

@@ -29,6 +29,14 @@ static ssize_t  _rdata_ptr_write(ch_dns_rdata_t *rdata,ch_data_output_t *dout,vo
 
 }
 
+static void _rdata_ptr_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore){
+
+    ch_dns_rdata_ptr_t *ptr = (ch_dns_rdata_ptr_t*)rdata;
+    ch_msgpack_store_map_start(dstore,"ptr",1);
+    ch_dns_name_store(&ptr->name,dstore);
+
+}
+
 static ch_dns_rdata_t * _rdata_ptr_create(ch_pool_t *mp,void *priv_data ch_unused){
 
 
@@ -39,6 +47,7 @@ static ch_dns_rdata_t * _rdata_ptr_create(ch_pool_t *mp,void *priv_data ch_unuse
 
 	ptr->rdata.rdata_dump = _rdata_ptr_dump;
 	ptr->rdata.rdata_write = _rdata_ptr_write;
+	ptr->rdata.rdata_store = _rdata_ptr_store;
 	
 	CH_DNS_NAME_INIT(name);
 

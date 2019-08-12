@@ -93,4 +93,23 @@ ssize_t ch_dns_sec_sig_write(ch_dns_sec_sig_t *ssig,ch_data_output_t *dout){
 	return len;
 }
 
+void ch_dns_sec_sig_store(ch_dns_sec_sig_t *ssig,ch_msgpack_store_t *dstore){
+
+    size_t sign_len = ssig->sign_len;   
+    const char *signature = (const char*)ssig->signature;
+
+    ch_msgpack_store_map_start(dstore,"ssig",9);
+
+    ch_msgpack_store_write_uint16(dstore,"covered",ssig->covered);
+    ch_msgpack_store_write_uint8(dstore,"alg",ssig->alg);
+    ch_msgpack_store_write_uint8(dstore,"labels",ssig->labels);
+    ch_msgpack_store_write_uint32(dstore,"origttl",ssig->origttl);
+    ch_msgpack_store_write_uint32(dstore,"expire",ssig->expire);
+    ch_msgpack_store_write_uint32(dstore,"timeSigned",ssig->timeSigned);
+    ch_msgpack_store_write_uint16(dstore,"footprint",ssig->footprint);
+
+    ch_dns_name_store(&ssig->signer,dstore);
+    ch_msgpack_store_write_str_wlen(dstore,"signature",signature,sign_len);
+
+}
 

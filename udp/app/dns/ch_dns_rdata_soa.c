@@ -53,6 +53,23 @@ static ssize_t  _rdata_soa_write(ch_dns_rdata_t *rdata,ch_data_output_t *dout,vo
 
 }
 
+static void _rdata_soa_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore){
+
+    ch_dns_rdata_soa_t *soa = (ch_dns_rdata_soa_t*)rdata;
+    ch_dns_name_t *host = &soa->host;   
+    ch_dns_name_t *admin = &soa->admin; 
+
+    ch_msgpack_store_map_start(dstore,"soa",7);
+    ch_dns_name_store_wkey(host,dstore,"host");
+    ch_dns_name_store_wkey(admin,dstore,"admin");
+    ch_msgpack_store_write_uint32(dstore,"serial",soa->serial);
+    ch_msgpack_store_write_uint32(dstore,"refresh",soa->refresh);
+    ch_msgpack_store_write_uint32(dstore,"retry",soa->retry);
+    ch_msgpack_store_write_uint32(dstore,"expire",soa->expire);
+    ch_msgpack_store_write_uint32(dstore,"minimum",soa->minimum);
+
+}
+
 static ch_dns_rdata_t * _rdata_soa_create(ch_pool_t *mp,void *priv_data ch_unused){
 
 
@@ -61,6 +78,7 @@ static ch_dns_rdata_t * _rdata_soa_create(ch_pool_t *mp,void *priv_data ch_unuse
 
 	soa->rdata.rdata_dump = _rdata_soa_dump;
 	soa->rdata.rdata_write = _rdata_soa_write;
+	soa->rdata.rdata_store = _rdata_soa_store;
 	
 	ch_dns_name_t *host = &soa->host;
 	ch_dns_name_t *admin = &soa->admin;

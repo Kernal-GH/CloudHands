@@ -27,7 +27,24 @@ void ch_tcp_session_endpoint_init(ch_tcp_session_endpoint_t *ep,uint32_t ip,uint
     ep->init_seq = init_seq;
     ep->ip = ip;
     ep->port = port;
+    
+    ep->is_ipv6 = 0;
     ep->priv_data = NULL;
+    ep->time = ch_get_current_timems();
+}
+
+void ch_tcp_session_endpoint_init_ipv6(ch_tcp_session_endpoint_t *ep,uint8_t *addr,uint16_t port,uint32_t init_seq,ch_memory_t *mm){
+
+    ch_assemble_fragment_init(&ep->as_frag,mm);
+
+    ep->last_offset = 0;
+	ep->last_ack = 0;
+    ep->init_seq = init_seq;
+    ep->ip = 0;
+    ep->port = port;
+    ep->priv_data = NULL;
+    memcpy(ep->addr,addr,16);
+    ep->is_ipv6 = 1;
     ep->time = ch_get_current_timems();
 }
 

@@ -37,6 +37,15 @@ static ssize_t  _rdata_hinfo_write(ch_dns_rdata_t *rdata,ch_data_output_t *dout,
 
 }
 
+static void _rdata_hinfo_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore) {
+
+    ch_dns_rdata_hinfo_t *hinfo = (ch_dns_rdata_hinfo_t*)rdata;
+    ch_msgpack_store_map_start(dstore,"hinfo",2);
+    ch_msgpack_store_write_kv(dstore,"cpu",(const char*)hinfo->cpu);
+    ch_msgpack_store_write_kv(dstore,"os",(const char*)hinfo->os);
+
+}
+
 static ch_dns_rdata_t * _rdata_hinfo_create(ch_pool_t *mp,void *priv_data ch_unused){
 
 
@@ -47,6 +56,7 @@ static ch_dns_rdata_t * _rdata_hinfo_create(ch_pool_t *mp,void *priv_data ch_unu
 
 	hinfo->rdata.rdata_dump = _rdata_hinfo_dump;
 	hinfo->rdata.rdata_write = _rdata_hinfo_write;
+	hinfo->rdata.rdata_store = _rdata_hinfo_store;
 
 	return (ch_dns_rdata_t*)hinfo;
 

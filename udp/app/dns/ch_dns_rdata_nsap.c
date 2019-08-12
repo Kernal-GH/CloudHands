@@ -36,6 +36,14 @@ static ssize_t  _rdata_nsap_write(ch_dns_rdata_t *rdata,ch_data_output_t *dout,v
 	return len;
 }
 
+static void _rdata_nsap_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore){
+
+    ch_dns_rdata_nsap_t *nsap = (ch_dns_rdata_nsap_t*)rdata;
+
+    ch_msgpack_store_map_start(dstore,"nsap",1);
+    ch_msgpack_store_write_str_wlen(dstore,"addr",(const char*)nsap->addr,nsap->addr_len);
+}
+
 static ch_dns_rdata_t * _rdata_nsap_create(ch_pool_t *mp,void *priv_data ch_unused){
 
 
@@ -43,6 +51,7 @@ static ch_dns_rdata_t * _rdata_nsap_create(ch_pool_t *mp,void *priv_data ch_unus
 
 	nsap->rdata.rdata_dump = _rdata_nsap_dump;
 	nsap->rdata.rdata_write = _rdata_nsap_write;
+	nsap->rdata.rdata_store = _rdata_nsap_store;
 
 	nsap->addr_len = 0;
 	nsap->addr = NULL;

@@ -37,6 +37,14 @@ static ssize_t  _rdata_openpgpkey_write(ch_dns_rdata_t *rdata,ch_data_output_t *
 	return len;
 }
 
+static void _rdata_openpgpkey_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore){
+
+    ch_dns_rdata_openpgpkey_t *openpgpkey = (ch_dns_rdata_openpgpkey_t*)rdata;
+    ch_msgpack_store_map_start(dstore,"openpgpkey",1);
+    ch_msgpack_store_write_str_wlen(dstore,"key",(const char*) openpgpkey->key,openpgpkey->key_len);
+
+}
+
 static ch_dns_rdata_t * _rdata_openpgpkey_create(ch_pool_t *mp,void *priv_data ch_unused){
 
 
@@ -44,6 +52,7 @@ static ch_dns_rdata_t * _rdata_openpgpkey_create(ch_pool_t *mp,void *priv_data c
 
 	openpgpkey->rdata.rdata_dump = _rdata_openpgpkey_dump;
 	openpgpkey->rdata.rdata_write = _rdata_openpgpkey_write;
+	openpgpkey->rdata.rdata_store = _rdata_openpgpkey_store;
 
 	openpgpkey->key_len = 0;
 	openpgpkey->key = NULL;

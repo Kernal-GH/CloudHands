@@ -39,6 +39,18 @@ static ssize_t  _rdata_nsec_write(ch_dns_rdata_t *rdata,ch_data_output_t *dout,v
 	return len;
 }
 
+static void _rdata_nsec_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore){
+
+     ch_dns_rdata_nsec_t *nsec = (ch_dns_rdata_nsec_t*)rdata; 
+     ch_dns_name_t *name = &nsec->name; 
+
+     ch_msgpack_store_map_start(dstore,"nsec",2);
+     
+     ch_dns_name_store(name,dstore);
+     ch_msgpack_store_write_str_wlen(dstore,"tbtm",(const char*)nsec->typebitmap,nsec->typebitmap_len);
+     
+}
+
 static ch_dns_rdata_t * _rdata_nsec_create(ch_pool_t *mp,void *priv_data ch_unused){
 
 
@@ -48,6 +60,7 @@ static ch_dns_rdata_t * _rdata_nsec_create(ch_pool_t *mp,void *priv_data ch_unus
 
 	nsec->rdata.rdata_dump = _rdata_nsec_dump;
 	nsec->rdata.rdata_write = _rdata_nsec_write;
+	nsec->rdata.rdata_store = _rdata_nsec_store;
 
 
 	CH_DNS_NAME_INIT(name);

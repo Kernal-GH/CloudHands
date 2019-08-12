@@ -20,6 +20,18 @@
 #include "ch_util.h"
 #include "ch_tcp_session_request_pool.h"
 
+ static inline uint32_t
+ ipv6_hash(uint8_t *src_addr,uint8_t *dst_addr)
+ {
+     uint32_t *word_src_addr = (uint32_t *)&(src_addr[0]);
+     uint32_t *word_dst_addr = (uint32_t *)&(dst_addr[0]);
+ 
+     return (word_src_addr[0] ^ word_dst_addr[0]) ^
+             (word_src_addr[1] ^ word_dst_addr[1]) ^
+             (word_src_addr[2] ^ word_dst_addr[2]) ^
+             (word_src_addr[3] ^ word_dst_addr[3]);
+ }
+
 static size_t session_request_entry_hash(void *key,void *priv_data){
 
 	/*unused*/
@@ -27,16 +39,32 @@ static size_t session_request_entry_hash(void *key,void *priv_data){
 
 	ch_packet_tcp_t *tcp_pkt = (ch_packet_tcp_t*)key;
 
+    if(tcp_pkt->is_ipv6){
+        uint32_t addr_hash = ipv6_hash(tcp_pkt->src_addr,tcp_pkt->dst_addr);
+        return (size_t)ch_jhash_3words_sort(addr_hash,(uint32_t)(tcp_pkt->src_port),(uint32_t)(tcp_pkt->dst_port),0);
+    }
+
     return (size_t)ch_jhash_4words_sort(tcp_pkt->src_ip,tcp_pkt->dst_ip,
             (uint32_t)(tcp_pkt->src_port),(uint32_t)(tcp_pkt->dst_port),0);
 }
 
 static inline int _is_request(ch_tcp_session_request_t *r,ch_packet_tcp_t *tcp_pkt){
 
+    if(tcp_pkt->is_ipv6){
+
+        return (r->is_ipv6)&&(memcmp(r->src_addr,tcp_pkt->src_addr,16)==0)&&(r->req_port==tcp_pkt->src_port)&&(memcmp(r->dst_addr,tcp_pkt->dst_addr,16)==0)&&(r->res_port==tcp_pkt->dst_port);
+    }
+
     return (r->req_ip == tcp_pkt->src_ip&&r->req_port == tcp_pkt->src_port)&&(r->res_ip == tcp_pkt->dst_ip&&r->res_port == tcp_pkt->dst_port);
 }
 
 static inline int _is_response(ch_tcp_session_request_t *r,ch_packet_tcp_t *tcp_pkt){
+
+    if(tcp_pkt->is_ipv6)
+    {
+        return (r->is_ipv6)&&(memcmp(r->src_addr,tcp_pkt->dst_addr,16)==0)&&(r->req_port==tcp_pkt->dst_port)&&(memcmp(r->dst_addr,tcp_pkt->src_addr,16)==0)&&(r->res_port==tcp_pkt->src_port);
+
+    }
 
     return (r->req_ip == tcp_pkt->dst_ip&&r->req_port == tcp_pkt->dst_port)&&(r->res_ip == tcp_pkt->src_ip&&r->res_port == tcp_pkt->src_port);
 }
@@ -124,7 +152,7 @@ ch_tcp_session_request_create(ch_tcp_session_request_pool_t *req_pool,ch_packet_
         ch_log(CH_LOG_ERR,"Create tcp session request failed!");
         return NULL;
     }
-
+    req->is_ipv6 = tcp_pkt->is_ipv6;
     req->req_sn_init = 0;
     req->res_sn_init = 0;
     req->req_ip = 0;

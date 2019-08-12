@@ -23,7 +23,7 @@ struct ch_udp_session_endpoint_t {
 
 	uint16_t port;
 	uint32_t ip;
-
+    uint8_t addr[16];
 	uint64_t packets;
 	uint64_t bytes;
 	
@@ -36,7 +36,8 @@ struct ch_udp_session_endpoint_t {
 struct ch_udp_session_t {
 
 	ch_ptable_entry_t entry;
-	
+    uint8_t is_ipv6;
+
 	ch_udp_session_endpoint_t endpoint_req;
 	ch_udp_session_endpoint_t endpoint_res;
 
@@ -60,7 +61,38 @@ struct ch_udp_session_t {
 #define ch_udp_session_res_start_time(udp_session) ((udp_session)->endpoint_res.start_time)
 #define ch_udp_session_res_last_time(udp_session) ((udp_session)->endpoint_res.last_time)
 
-#define EP_EQUAL(ep,eip,eport) ((ep->ip == eip)&&(ep->port == eport))
+#define ch_udp_session_isipv6(udp_session) (udp_session->is_ipv6)
+#define ch_udp_session_srcaddr_get(udp_session)   ((udp_session)->endpoint_req.addr)
+#define ch_udp_session_dstaddr_get(udp_session)   ((udp_session)->endpoint_res.addr)
+
+
+static inline int is_udp_request(ch_udp_session_t *udp_session,ch_packet_udp_t *pkt){
+
+    ch_udp_session_endpoint_t *req = &udp_session->endpoint_req;
+    ch_udp_session_endpoint_t *res = &udp_session->endpoint_res;
+    
+    if(pkt->is_ipv6){
+
+        return (udp_session->is_ipv6)&&(memcmp(req->addr,pkt->src_addr,16)==0)&&(req->port==pkt->src_port)&&(memcmp(res->addr,pkt->dst_addr,16)==0)&&(res->port==pkt->dst_port);
+    }else
+    {
+        return (req->ip==pkt->src_ip)&&(req->port == pkt->src_port)&&(res->ip==pkt->dst_ip)&&(res->port==pkt->dst_port);
+    }
+}
+
+static inline int is_udp_response(ch_udp_session_t *udp_session,ch_packet_udp_t *pkt){
+
+    ch_udp_session_endpoint_t *req = &udp_session->endpoint_req;
+    ch_udp_session_endpoint_t *res = &udp_session->endpoint_res;
+    
+    if(pkt->is_ipv6){
+
+        return (udp_session->is_ipv6)&&(memcmp(req->addr,pkt->dst_addr,16)==0)&&(req->port==pkt->dst_port)&&(memcmp(res->addr,pkt->src_addr,16)==0)&&(res->port==pkt->src_port);
+    }else
+    {
+        return (req->ip==pkt->dst_ip)&&(req->port == pkt->dst_port)&&(res->ip==pkt->src_ip)&&(res->port==pkt->src_port);
+    }
+}
 
 
 extern int ch_udp_session_init(ch_udp_session_t *udp_session,ch_packet_udp_t *pkt_udp,ch_udp_app_session_t *app_session,
@@ -89,12 +121,12 @@ ch_udp_session_endpoint_get(ch_udp_session_t *udp_session,ch_packet_udp_t *udp_p
     ch_udp_session_endpoint_t *req = &udp_session->endpoint_req;
     ch_udp_session_endpoint_t *res = &udp_session->endpoint_res;
 
-    if(EP_EQUAL(req,udp_pkt->src_ip,udp_pkt->src_port)&&EP_EQUAL(res,udp_pkt->dst_ip,udp_pkt->dst_port)){
+    if(is_udp_request(udp_session,udp_pkt)){
         /*request packet!*/
         return req;
     }
 
-    if(EP_EQUAL(req,udp_pkt->dst_ip,udp_pkt->dst_port)&&EP_EQUAL(res,udp_pkt->src_ip,udp_pkt->src_port)){
+    if(is_udp_response(udp_session,udp_pkt)){
         /*response packet!*/
         return res;
     }

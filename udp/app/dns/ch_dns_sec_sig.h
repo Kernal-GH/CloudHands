@@ -44,6 +44,8 @@ extern void ch_dns_sec_sig_dump(ch_dns_sec_sig_t *ssig,FILE *fp);
 
 extern ssize_t ch_dns_sec_sig_write(ch_dns_sec_sig_t *ssig,ch_data_output_t *dout);
 
+extern void ch_dns_sec_sig_store(ch_dns_sec_sig_t *ssig,ch_msgpack_store_t *dstore);
+
 
 #define CH_DNS_SEC_SIG_WRITE(dout,ssig,len,rc) do {   \
 	if(-1 == (rc = ch_dns_sec_sig_write(ssig,dout)))  \

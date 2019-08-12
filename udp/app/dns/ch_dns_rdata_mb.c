@@ -29,6 +29,14 @@ static ssize_t  _rdata_mb_write(ch_dns_rdata_t *rdata,ch_data_output_t *dout,voi
 
 }
 
+static void _rdata_mb_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore){
+
+    ch_dns_rdata_mb_t *mb = (ch_dns_rdata_mb_t*)rdata;
+    ch_msgpack_store_map_start(dstore,"mb",1);
+    ch_dns_name_store(&mb->name,dstore);
+
+}
+
 static ch_dns_rdata_t * _rdata_mb_create(ch_pool_t *mp,void *priv_data ch_unused){
 
 
@@ -38,6 +46,7 @@ static ch_dns_rdata_t * _rdata_mb_create(ch_pool_t *mp,void *priv_data ch_unused
 
 	mb->rdata.rdata_dump = _rdata_mb_dump;
 	mb->rdata.rdata_write = _rdata_mb_write;
+	mb->rdata.rdata_store = _rdata_mb_store;
 
 	CH_DNS_NAME_INIT(name);
 

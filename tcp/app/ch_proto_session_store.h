@@ -110,12 +110,32 @@ static inline ch_proto_body_store_t * ch_proto_store_body_find_create(ch_proto_s
 	return bstore;
 
 }
+static inline int _str_empty(const char *v){
+
+    return v == NULL || strlen(v) == 0;
+}
 
 static inline void ch_msgpack_write_str(msgpack_packer *pk,const char *str){
 
     size_t len = strlen(str);
     msgpack_pack_str(pk,len);
     msgpack_pack_str_body(pk,str,len);
+}
+
+static inline void ch_msgpack_write_bin(msgpack_packer *pk,void *data,size_t dlen){
+
+    msgpack_pack_bin(pk,dlen);
+    msgpack_pack_bin_body(pk,data,dlen);
+}
+
+static inline void ch_msgpack_write_bin_kv(msgpack_packer *pk,const char *k,void *data,size_t dlen){
+    
+	if(_str_empty(k)==0){
+		ch_msgpack_write_str(pk,k);
+	}
+	
+	ch_msgpack_write_bin(pk,data,dlen);
+
 }
 
 static inline void ch_msgpack_write_kv(msgpack_packer *pk,const char *k,const char *v){
@@ -131,10 +151,7 @@ static inline void ch_msgpack_write_number_str(msgpack_packer *pk,const char *k,
     ch_msgpack_write_kv(pk,k,(const char *)b);                                                                                            
 }                                                                                                                                      
 
-static inline int _str_empty(const char *v){
 
-    return v == NULL || strlen(v) == 0;
-}
 
 static inline void ch_msgpack_map_start(msgpack_packer *pk,const char *k,size_t n){
 

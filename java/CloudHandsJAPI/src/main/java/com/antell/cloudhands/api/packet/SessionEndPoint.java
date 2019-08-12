@@ -9,6 +9,7 @@ import com.antell.cloudhands.api.utils.TextUtils;
 public class SessionEndPoint implements DataDump {
 
     private long ip;
+    private byte[] addr;
     private int port;
     private long packets;
     private long bytes;
@@ -96,5 +97,13 @@ public class SessionEndPoint implements DataDump {
             sb.append(content.toString());
         }
         return sb.toString();
+    }
+
+    public byte[] getAddr() {
+        return addr;
+    }
+
+    public void setAddr(byte[] addr) {
+        this.addr = addr;
     }
 }

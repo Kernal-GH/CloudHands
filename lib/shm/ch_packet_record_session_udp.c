@@ -20,7 +20,8 @@ void ch_packet_record_session_udp_read(ch_packet_record_session_udp_t *pkt_udp_s
 
 	/*start read*/
 	unsigned char *req_data,*res_data;
-	size_t req_dsize,res_dsize;
+	size_t req_dsize,res_dsize,addr_len;
+    uint8_t *addr;
 
     pkt_udp_session->is_timeout = ch_bf_uint8_read(bfmt);
     
@@ -28,9 +29,17 @@ void ch_packet_record_session_udp_read(ch_packet_record_session_udp_t *pkt_udp_s
     pkt_udp_session->src_port = ch_bf_uint16_read(bfmt);
     pkt_udp_session->dst_port = ch_bf_uint16_read(bfmt);
 
-    
-    pkt_udp_session->src_ip = ch_bf_uint32_read(bfmt);
-    pkt_udp_session->dst_ip = ch_bf_uint32_read(bfmt);
+    pkt_udp_session->is_ipv6 = ch_bf_uint8_read(bfmt);
+    if(pkt_udp_session->is_ipv6){
+        ch_bf_bytes_read(bfmt,&addr,&addr_len);
+        pkt_udp_session->src_addr = addr;
+        ch_bf_bytes_read(bfmt,&addr,&addr_len);
+        pkt_udp_session->dst_addr = addr;
+    }else{
+        pkt_udp_session->src_ip = ch_bf_uint32_read(bfmt);
+        pkt_udp_session->dst_ip = ch_bf_uint32_read(bfmt);
+    }
+
 
     pkt_udp_session->session_id = ch_bf_uint64_read(bfmt);
 	pkt_udp_session->req_packets = ch_bf_uint64_read(bfmt);
@@ -67,10 +76,17 @@ size_t ch_packet_record_session_udp_write(ch_packet_record_session_udp_t *pkt_ud
     ch_bf_uint16_write(bfmt,pkt_udp_session->src_port);
     ch_bf_uint16_write(bfmt,pkt_udp_session->dst_port);
     
-    
-	ch_bf_uint32_write(bfmt,pkt_udp_session->src_ip);
-    ch_bf_uint32_write(bfmt,pkt_udp_session->dst_ip);
+    ch_bf_uint8_write(bfmt,pkt_udp_session->is_ipv6);
+    if(pkt_udp_session->is_ipv6){
 
+        ch_bf_bytes_write(bfmt,pkt_udp_session->src_addr,16);
+        ch_bf_bytes_write(bfmt,pkt_udp_session->dst_addr,16);
+    }else{
+
+        ch_bf_uint32_write(bfmt,pkt_udp_session->src_ip);
+        ch_bf_uint32_write(bfmt,pkt_udp_session->dst_ip);
+    }
+    
     
     ch_bf_uint64_write(bfmt,pkt_udp_session->session_id);
 	ch_bf_uint64_write(bfmt,pkt_udp_session->req_packets);

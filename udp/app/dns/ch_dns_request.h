@@ -20,6 +20,7 @@ typedef struct ch_dns_question_t ch_dns_question_t;
 #include "ch_dns_data_input.h"
 #include "ch_list.h"
 #include "ch_data_output.h"
+#include "ch_msgpack_store.h"
 
 struct ch_dns_requst_t {
 
@@ -48,6 +49,9 @@ extern void ch_dns_request_dump(ch_dns_requst_t *dnsr,FILE *fp);
 extern void ch_dns_question_dump(ch_dns_question_t *dnsq,FILE *fp);
 
 extern const char * ch_dns_request_name_get(ch_dns_requst_t *dns_req);
+
+extern void  ch_dns_request_store(ch_msgpack_store_t *dstore,ch_dns_requst_t *dnsr);
+extern void  ch_dns_question_store(ch_dns_question_t *dnsq,ch_msgpack_store_t *dstore);
 
 extern ssize_t ch_dns_question_write(ch_dns_question_t *dnsq,ch_data_output_t *dout);
 #define CH_DNS_QUESTION_WRITE(dout,dnsq,len,rc) do {   \

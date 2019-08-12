@@ -77,9 +77,11 @@ static void _tcp_session_request_out(ch_sa_tcp_session_request_handler_t *req_ha
 	p_tcp_session->timeout_tv = timeout_tv;
 	p_tcp_session->phase_state = _phase_state_get(req_session);
 	p_tcp_session->session_id = 0;
-	p_tcp_session->src_ip = req_session->req_ip; 
+	p_tcp_session->is_ipv6 = req_session->is_ipv6;
+    p_tcp_session->src_ip = req_session->req_ip; 
 	p_tcp_session->dst_ip = req_session->res_ip;
-
+    p_tcp_session->src_addr = req_session->src_addr;
+    p_tcp_session->dst_addr = req_session->dst_addr;
 	p_tcp_session->src_port = req_session->req_port;
 	p_tcp_session->dst_port = req_session->res_port;
 
@@ -250,9 +252,14 @@ _three_way_handshake_process(ch_sa_tcp_session_request_handler_t *req_handler,
 
             /*init session request*/
             sreq->req_sn_init = sent_seq+1;
-            sreq->req_ip = src_ip;
+            if(tcp_pkt->is_ipv6){
+                memcpy(sreq->src_addr,tcp_pkt->src_addr,16);
+                memcpy(sreq->dst_addr,tcp_pkt->dst_addr,16);
+            }else{
+                sreq->req_ip = src_ip;
+                sreq->res_ip = dst_ip;
+            }
             sreq->req_port = src_port;
-            sreq->res_ip = dst_ip;
             sreq->res_port = dst_port;
             sreq->three_way_state = THREE_WAY_SYN;
             

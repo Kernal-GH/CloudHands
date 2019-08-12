@@ -53,10 +53,14 @@ struct ch_tcp_session_request_t {
     uint32_t req_sn_init;
     uint32_t res_sn_init;
 
+    uint8_t is_ipv6;
+
     uint32_t req_ip;
+    uint8_t  src_addr[16];
     uint16_t req_port;
     
     uint32_t res_ip;
+    uint8_t  dst_addr[16];
     uint16_t res_port;
 
     uint8_t three_way_state;

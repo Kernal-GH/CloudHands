@@ -41,6 +41,17 @@ static ssize_t  _rdata_gpos_write(ch_dns_rdata_t *rdata,ch_data_output_t *dout,v
 	return len;
 }
 
+static void _rdata_gpos_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore){
+
+    ch_dns_rdata_gpos_t *gpos = (ch_dns_rdata_gpos_t*)rdata;    
+
+    ch_msgpack_store_map_start(dstore,"gpos",3);
+    ch_msgpack_store_write_kv(dstore,"longitude",(const char*)gpos->longitude);
+    ch_msgpack_store_write_kv(dstore,"latitude",(const char*)gpos->latitude);
+    ch_msgpack_store_write_kv(dstore,"altitude",(const char*)gpos->altitude);
+
+}
+
 static ch_dns_rdata_t * _rdata_gpos_create(ch_pool_t *mp,void *priv_data ch_unused){
 
 
@@ -48,6 +59,7 @@ static ch_dns_rdata_t * _rdata_gpos_create(ch_pool_t *mp,void *priv_data ch_unus
 
 	gpos->rdata.rdata_dump = _rdata_gpos_dump;
 	gpos->rdata.rdata_write = _rdata_gpos_write;
+	gpos->rdata.rdata_store = _rdata_gpos_store;
 
 	gpos->longitude = NULL;
 	gpos->latitude = NULL;

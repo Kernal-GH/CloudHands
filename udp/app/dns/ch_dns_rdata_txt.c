@@ -35,6 +35,12 @@ static ssize_t  _rdata_txt_write(ch_dns_rdata_t *rdata,ch_data_output_t *dout,vo
 	return len;
 }
 
+static void _rdata_txt_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore){
+
+    ch_dns_rdata_txt_t *txt = (ch_dns_rdata_txt_t*)rdata; 
+    ch_msgpack_store_map_start(dstore,"txt",1);
+    ch_dns_txt_base_store(&txt->txt_base,dstore);
+}
 
 static ch_dns_rdata_t * _rdata_txt_create(ch_pool_t *mp,void *priv_data ch_unused){
 
@@ -44,6 +50,7 @@ static ch_dns_rdata_t * _rdata_txt_create(ch_pool_t *mp,void *priv_data ch_unuse
 
 	txt->rdata.rdata_dump = _rdata_txt_dump;
 	txt->rdata.rdata_write = _rdata_txt_write;
+	txt->rdata.rdata_store = _rdata_txt_store;
 
 	ch_dns_txt_base_init(mp,&txt->txt_base);
 

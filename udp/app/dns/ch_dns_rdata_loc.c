@@ -47,6 +47,20 @@ static ssize_t  _rdata_loc_write(ch_dns_rdata_t *rdata,ch_data_output_t *dout,vo
 	return len;
 }
 
+static void _rdata_loc_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore){
+
+    ch_dns_rdata_loc_t *loc = (ch_dns_rdata_loc_t*)rdata;
+
+    ch_msgpack_store_map_start(dstore,"loc",7);
+    ch_msgpack_store_write_uint8(dstore,"version",loc->version);
+    ch_msgpack_store_write_uint8(dstore,"size",loc->size);
+    ch_msgpack_store_write_uint8(dstore,"hprecision",loc->hprecision);
+    ch_msgpack_store_write_uint8(dstore,"vprecision",loc->vprecision);
+    ch_msgpack_store_write_uint32(dstore,"latitude",loc->latitude);
+    ch_msgpack_store_write_uint32(dstore,"longitude",loc->longitude);
+    ch_msgpack_store_write_uint32(dstore,"altitude",loc->altitude);
+}
+
 static ch_dns_rdata_t * _rdata_loc_create(ch_pool_t *mp,void *priv_data ch_unused){
 
 
@@ -54,6 +68,7 @@ static ch_dns_rdata_t * _rdata_loc_create(ch_pool_t *mp,void *priv_data ch_unuse
 
 	loc->rdata.rdata_dump = _rdata_loc_dump;
 	loc->rdata.rdata_write = _rdata_loc_write;
+	loc->rdata.rdata_store = _rdata_loc_store;
 	
 	loc->version = 0;
 	loc->size = 0;

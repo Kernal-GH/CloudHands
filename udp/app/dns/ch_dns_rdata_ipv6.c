@@ -33,6 +33,12 @@ static ssize_t  _rdata_ipv6_write(ch_dns_rdata_t *rdata,ch_data_output_t *dout,v
 	return ch_dout_string16_write(dout,ipv6->address,16);
 }
 
+static void _rdata_ipv6_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore) {
+
+    ch_dns_rdata_ipv6_t *ipv6 = (ch_dns_rdata_ipv6_t*)rdata; 
+    ch_msgpack_store_map_start(dstore,"ipv6",1);
+    ch_msgpack_store_write_str_wlen(dstore,"addr",(const char*)ipv6->address,16);
+}
 
 static ch_dns_rdata_t * _rdata_ipv6_create(ch_pool_t *mp,void *priv_data ch_unused){
 
@@ -43,6 +49,7 @@ static ch_dns_rdata_t * _rdata_ipv6_create(ch_pool_t *mp,void *priv_data ch_unus
 
 	rdata->rdata.rdata_dump = _rdata_ipv6_dump;
 	rdata->rdata.rdata_write = _rdata_ipv6_write;
+	rdata->rdata.rdata_store = _rdata_ipv6_store;
 
 	return (ch_dns_rdata_t*)rdata;
 

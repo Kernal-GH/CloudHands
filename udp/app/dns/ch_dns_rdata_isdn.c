@@ -37,6 +37,15 @@ static ssize_t  _rdata_isdn_write(ch_dns_rdata_t *rdata,ch_data_output_t *dout,v
 
 }
 
+static void _rdata_isdn_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore){
+
+    ch_dns_rdata_isdn_t *isdn = (ch_dns_rdata_isdn_t*)rdata;
+    ch_msgpack_store_map_start(dstore,"isdn",2);
+    ch_msgpack_store_write_kv(dstore,"addr",(const char*)isdn->addr);
+    ch_msgpack_store_write_kv(dstore,"subaddr",(const char*)isdn->subaddr);
+
+}
+
 static ch_dns_rdata_t * _rdata_isdn_create(ch_pool_t *mp,void *priv_data ch_unused){
 
 
@@ -46,6 +55,7 @@ static ch_dns_rdata_t * _rdata_isdn_create(ch_pool_t *mp,void *priv_data ch_unus
 
 	isdn->rdata.rdata_dump = _rdata_isdn_dump;
 	isdn->rdata.rdata_write = _rdata_isdn_write;
+	isdn->rdata.rdata_store = _rdata_isdn_store;
 	
 	isdn->addr = NULL;
 	isdn->subaddr = NULL;

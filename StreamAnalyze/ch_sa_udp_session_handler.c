@@ -65,7 +65,12 @@ static void _udp_session_out(ch_sa_udp_session_handler_t *udp_handler,
 	p_udp_session->is_timeout = is_timeout;
 	p_udp_session->timeout_tv = timeout_tv;
 	p_udp_session->session_id = udp_session->session_id;
-	p_udp_session->src_ip = ch_sa_udp_session_srcip_get(udp_session); 
+	
+    p_udp_session->is_ipv6 = udp_session->is_ipv6;
+    p_udp_session->src_addr = ch_sa_udp_session_srcaddr_get(udp_session);
+    p_udp_session->dst_addr = ch_sa_udp_session_dstaddr_get(udp_session);
+
+    p_udp_session->src_ip = ch_sa_udp_session_srcip_get(udp_session); 
 	p_udp_session->dst_ip = ch_sa_udp_session_dstip_get(udp_session);
 
 	p_udp_session->src_port = ch_sa_udp_session_srcport_get(udp_session);

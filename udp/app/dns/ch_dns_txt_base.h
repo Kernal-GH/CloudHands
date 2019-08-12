@@ -16,6 +16,7 @@ typedef struct ch_dns_txt_base_t ch_dns_txt_base_t;
 #include "ch_tables.h"
 #include "ch_dns_data_input.h"
 #include "ch_data_output.h"
+#include "ch_msgpack_store.h"
 
 struct ch_dns_txt_base_t {
 
@@ -34,6 +35,8 @@ extern void ch_dns_txt_base_dump(ch_dns_txt_base_t *txt_base,FILE *fp);
 
 
 extern ssize_t ch_dns_txt_base_write(ch_dns_txt_base_t *txt_base,ch_data_output_t *dout);
+
+extern void ch_dns_txt_base_store(ch_dns_txt_base_t *txt_base,ch_msgpack_store_t *dstore);
 
 
 #define CH_DNS_TXT_BASE_WRITE(dout,txt_base,len,rc) do {   \

@@ -43,6 +43,17 @@ static ssize_t  _rdata_cert_write(ch_dns_rdata_t *rdata,ch_data_output_t *dout,v
 	return len;
 }
 
+static void _rdata_cert_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore){
+
+    ch_dns_rdata_cert_t *cert = (ch_dns_rdata_cert_t*)rdata;
+
+    ch_msgpack_store_map_start(dstore,"cert",4);
+    ch_msgpack_store_write_uint16(dstore,"type",cert->cert_type);
+    ch_msgpack_store_write_uint16(dstore,"tag",cert->key_tag);
+    ch_msgpack_store_write_uint8(dstore,"alg",cert->alg);
+    ch_msgpack_store_write_kv(dstore,"value",(const char*)cert->cert);
+}
+
 static ch_dns_rdata_t * _rdata_cert_create(ch_pool_t *mp,void *priv_data ch_unused){
 
 
@@ -50,6 +61,7 @@ static ch_dns_rdata_t * _rdata_cert_create(ch_pool_t *mp,void *priv_data ch_unus
 
 	cert->rdata.rdata_dump = _rdata_cert_dump;
 	cert->rdata.rdata_write = _rdata_cert_write;
+    cert->rdata.rdata_store = _rdata_cert_store;
 
 	cert->cert_type = 0;
 	cert->key_tag = 0;

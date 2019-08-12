@@ -135,7 +135,7 @@ static void add_ip_wblist(uint32_t address,void *user_data){
 
     ch_ip_to_str(buf,64,address);
 
-    printf("add ip address:%s|%lu\n to ip wblist!\n",buf,address);
+    printf("add ip address:%s|%lu\n to ip wblist!\n",(const char*)buf,(unsigned long)address);
 
 } 
 
@@ -165,6 +165,38 @@ static ssize_t _dns_session_write(ch_udp_app_session_t *app_session,ch_data_outp
 
 	return ch_dns_session_write(dns_s,dout);
 
+}
+
+static int _dns_session_store(ch_udp_app_session_t *app_session,ch_msgpack_store_t *dstore){
+
+	ch_dns_session_t *dns_s = (ch_dns_session_t*)app_session;
+    ch_dns_app_context_t *dns_context = (ch_dns_app_context_t*)app_session->app->context;
+    const char *domain = NULL;
+
+	if(dns_s == NULL)
+		return -1;
+
+    if(dns_s->dns_req == NULL &&dns_s->dns_res == NULL)
+        return -1;
+
+    domain = ch_dns_session_domain_get(dns_s);
+
+    if(domain!=NULL&&strlen(domain)>0){
+
+        if(!ch_dns_app_context_wblist_domain_is_accept(dns_context,domain)){
+
+            printf("Pass this domain:%s\n",domain);
+            /*add ip to wblist*/
+            
+            ch_dns_session_ipv4s_walk(dns_s,add_ip_wblist,(void*)dns_context);
+
+            return -2;
+        }
+    }
+
+	ch_dns_session_store(dns_s,dstore);
+    
+    return 0;
 }
 
 static void _dns_session_dump(ch_udp_app_session_t *app_session,FILE *fp){
@@ -197,6 +229,7 @@ static ch_udp_app_t dns_app = {
 	.req_pkt_process = _dns_req_pkt_process,
 	.res_pkt_process = _dns_res_pkt_process,
 	.app_session_write = _dns_session_write,
+    .app_session_store = _dns_session_store,
 	.app_session_dump = _dns_session_dump,
 	.app_session_fin = _dns_session_fin
 };

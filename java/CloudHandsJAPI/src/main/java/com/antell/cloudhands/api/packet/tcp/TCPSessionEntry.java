@@ -72,15 +72,18 @@ public class TCPSessionEntry extends SessionEntry {
     public void parse(MessageUnpacker unpacker) throws IOException {
 
         int n = MessagePackUtil.parseMapHeader(unpacker,true);
-        Preconditions.checkArgument(n==14,"Invalid msgpack packet of session entry:"+n);
+        Preconditions.checkArgument(n==17,"Invalid msgpack packet of session entry:"+n);
 
         setProtocolID(MessagePackUtil.parseLong(unpacker));
         setProtocol(Constants.protoID2String[(int)getProtocolID()]);
         setSessionID(MessagePackUtil.parseLong(unpacker));
         setReqStartTime(MessagePackUtil.parseLong(unpacker));
         setResStartTime(MessagePackUtil.parseLong(unpacker));
+        setIPV6(MessagePackUtil.parseByte(unpacker)==1);
         setReqIP(MessagePackUtil.parseLong(unpacker));
         setResIP(MessagePackUtil.parseLong(unpacker));
+        setReqAddr(MessagePackUtil.parseBin(unpacker));
+        setResAddr(MessagePackUtil.parseBin(unpacker));
         setReqPort(MessagePackUtil.parseInt(unpacker));
         setResPort(MessagePackUtil.parseInt(unpacker));
         setReqPackets(MessagePackUtil.parseLong(unpacker));

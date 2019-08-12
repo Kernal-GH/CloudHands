@@ -135,6 +135,32 @@ void ch_dns_response_dump(ch_dns_response_t *dnsr,FILE *fp){
 	_rdata_list_dump(&dnsr->adlist,"adlist",fp);
 }
 
+static inline uint16_t _rdata_list_count(struct list_head *list){
+
+    uint16_t c = 0;
+    ch_dns_rdata_t *rdata;
+    list_for_each_entry(rdata,list,node){
+
+        c++;
+    }
+
+    return c;
+}
+
+static inline void _rdata_list_store(ch_msgpack_store_t *dstore,const char *name,struct list_head *list){
+
+    ch_dns_rdata_t *rdata;
+
+    ch_msgpack_store_map_start(dstore,name,1);
+    ch_msgpack_store_array_start(dstore,"rdatas",_rdata_list_count(list));
+	
+    list_for_each_entry(rdata,list,node){
+
+        ch_dns_rdata_store(rdata,dstore);
+	}
+
+}
+
 static inline ssize_t _rdata_list_write(struct list_head *list,ch_data_output_t *dout){
 
 	ssize_t rc,len = 0;
@@ -153,6 +179,18 @@ static inline ssize_t _rdata_list_write(struct list_head *list,ch_data_output_t 
 	len+=rc;                                      \
 }while(0)
 
+static inline uint16_t _qlist_count(struct list_head *qlist){
+
+    uint16_t c = 0;
+    ch_dns_question_t *qu;
+    list_for_each_entry(qu,qlist,node){
+
+        c++;
+    }
+
+    return c;
+}
+
 ssize_t ch_dns_response_write(ch_dns_response_t *dnsr,ch_data_output_t *dout){
 
 	
@@ -170,4 +208,23 @@ ssize_t ch_dns_response_write(ch_dns_response_t *dnsr,ch_data_output_t *dout){
 	_RDATA_LIST_WRITE(&dnsr->adlist,dout,len,rc);
 
 	return len;
+}
+
+void ch_dns_response_store(ch_msgpack_store_t *dstore,ch_dns_response_t *dnsr){
+
+    ch_msgpack_store_map_start(dstore,"res",5);
+    ch_dns_header_store(&dnsr->hdr,dstore);
+    ch_msgpack_store_array_start(dstore,"questions",_qlist_count(&dnsr->qlist));
+
+	ch_dns_question_t *dnsq;
+	
+    list_for_each_entry(dnsq,&dnsr->qlist,node){
+        
+        ch_dns_question_store(dnsq,dstore);
+	}
+
+    _rdata_list_store(dstore,"alist",&dnsr->alist);
+    _rdata_list_store(dstore,"aulist",&dnsr->aulist);
+    _rdata_list_store(dstore,"adlist",&dnsr->adlist);
+
 }

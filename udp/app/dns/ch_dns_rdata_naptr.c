@@ -49,6 +49,23 @@ static ssize_t  _rdata_naptr_write(ch_dns_rdata_t *rdata,ch_data_output_t *dout,
 
 }
 
+static void _rdata_naptr_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore){
+
+    ch_dns_rdata_naptr_t *naptr = (ch_dns_rdata_naptr_t*)rdata; 
+    ch_dns_name_t *name = &naptr->replacement;
+    const char *flags = (const char*)naptr->flags;
+    const char *service = (const char*)naptr->service;
+    const char *regex = (const char*)naptr->regex;
+
+    ch_msgpack_store_map_start(dstore,"naptr",6);
+    ch_msgpack_store_write_uint16(dstore,"order",naptr->order);
+    ch_msgpack_store_write_uint16(dstore,"preference",naptr->preference);
+    ch_msgpack_store_write_kv(dstore,"flags",flags);
+    ch_msgpack_store_write_kv(dstore,"service",service);
+    ch_msgpack_store_write_kv(dstore,"regex",regex);
+    ch_dns_name_store(name,dstore);
+}
+
 static ch_dns_rdata_t * _rdata_naptr_create(ch_pool_t *mp,void *priv_data ch_unused){
 
 
@@ -59,6 +76,7 @@ static ch_dns_rdata_t * _rdata_naptr_create(ch_pool_t *mp,void *priv_data ch_unu
 
 	naptr->rdata.rdata_dump = _rdata_naptr_dump;
 	naptr->rdata.rdata_write = _rdata_naptr_write;
+	naptr->rdata.rdata_store = _rdata_naptr_store;
 
 	naptr->order = 0;
 	naptr->preference = 0;

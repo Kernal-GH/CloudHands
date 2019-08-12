@@ -19,6 +19,7 @@ typedef struct ch_udp_session_task_t ch_udp_session_task_t;
 #include "ch_udp_session_request_handler.h"
 #include "ch_shm_format.h"
 #include "ch_data_output.h"
+#include "ch_msgpack_store.h"
 
 struct ch_udp_session_task_t {
 
@@ -35,6 +36,9 @@ struct ch_udp_session_task_t {
 	ch_shm_format_t *shm_fmt;
 
 	ch_data_output_t dout;
+
+    ch_msgpack_store_t *dstore;
+
 };
 
 extern ch_udp_session_task_t *

@@ -36,6 +36,14 @@ static ssize_t  _rdata_kx_write(ch_dns_rdata_t *rdata,ch_data_output_t *dout,voi
 
 }
 
+static void _rdata_kx_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore){
+
+    ch_dns_rdata_kx_t *kx = (ch_dns_rdata_kx_t*)rdata;
+    ch_msgpack_store_map_start(dstore,"kx",2);
+    ch_msgpack_store_write_uint16(dstore,"preference",kx->preference);
+    ch_dns_name_store(&kx->name,dstore);
+}
+
 static ch_dns_rdata_t * _rdata_kx_create(ch_pool_t *mp,void *priv_data ch_unused){
 
 
@@ -46,6 +54,7 @@ static ch_dns_rdata_t * _rdata_kx_create(ch_pool_t *mp,void *priv_data ch_unused
 
 	kx->rdata.rdata_dump = _rdata_kx_dump;
 	kx->rdata.rdata_write = _rdata_kx_write;
+	kx->rdata.rdata_store = _rdata_kx_store;
 
 	kx->preference = 0;
 	CH_DNS_NAME_INIT(name);

@@ -31,6 +31,13 @@ static ssize_t  _rdata_x25_write(ch_dns_rdata_t *rdata,ch_data_output_t *dout,vo
 
 }
 
+static void _rdata_x25_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore){
+
+     ch_dns_rdata_x25_t *x25 = (ch_dns_rdata_x25_t*)rdata;
+     ch_msgpack_store_map_start(dstore,"x25",1);
+     ch_msgpack_store_write_kv(dstore,"address",(const char*)x25->address);
+}
+
 static ch_dns_rdata_t * _rdata_x25_create(ch_pool_t *mp,void *priv_data ch_unused){
 
 
@@ -38,6 +45,7 @@ static ch_dns_rdata_t * _rdata_x25_create(ch_pool_t *mp,void *priv_data ch_unuse
 
 	x25->rdata.rdata_dump = _rdata_x25_dump;
 	x25->rdata.rdata_write = _rdata_x25_write;
+	x25->rdata.rdata_store = _rdata_x25_store;
 
 	x25->address = NULL;
 

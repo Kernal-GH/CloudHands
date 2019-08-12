@@ -39,6 +39,17 @@ static ssize_t  _rdata_rp_write(ch_dns_rdata_t *rdata,ch_data_output_t *dout,voi
 	return len;
 }
 
+static void _rdata_rp_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore){
+
+    ch_dns_rdata_rp_t *rp = (ch_dns_rdata_rp_t*)rdata;
+    ch_dns_name_t *mailbox = &rp->mailbox; 
+    ch_dns_name_t *textdomain = &rp->textdomain;
+    ch_msgpack_store_map_start(dstore,"rp",2);
+    ch_dns_name_store_wkey(mailbox,dstore,"mailbox");
+    ch_dns_name_store_wkey(textdomain,dstore,"textdomain");
+
+}
+
 static ch_dns_rdata_t * _rdata_rp_create(ch_pool_t *mp,void *priv_data ch_unused){
 
 
@@ -51,6 +62,7 @@ static ch_dns_rdata_t * _rdata_rp_create(ch_pool_t *mp,void *priv_data ch_unused
 
 	rp->rdata.rdata_dump = _rdata_rp_dump;
 	rp->rdata.rdata_write = _rdata_rp_write;
+	rp->rdata.rdata_store = _rdata_rp_store;
 	
 	CH_DNS_NAME_INIT(mailbox);
 	CH_DNS_NAME_INIT(textdomain);

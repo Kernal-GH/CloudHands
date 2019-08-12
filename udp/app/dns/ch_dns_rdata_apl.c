@@ -55,6 +55,17 @@ static ssize_t _apl_entry_write(ch_dns_rdata_apl_entry_t *entry,ch_data_output_t
 	return len;
 }
 
+static void _apl_entry_store(ch_dns_rdata_apl_entry_t *entry,ch_msgpack_store_t *dstore){
+
+    ch_msgpack_store_map_start(dstore,NULL,4);
+
+    ch_msgpack_store_write_uint16(dstore,"family",entry->family);
+    ch_msgpack_store_write_uint8(dstore,"prefix",entry->prefix);
+    ch_msgpack_store_write_uint8(dstore,"neg",entry->neg);
+    ch_msgpack_store_write_str_wlen(dstore,"data",(const char*)entry->data,entry->dlen);
+
+}
+
 #define ENTRY_WRITE(entry,dout,len,rc) do {     \
 	if(-1 == (rc=_apl_entry_write(entry,dout))) \
 		return -1;                              \
@@ -78,6 +89,20 @@ static ssize_t  _rdata_apl_write(ch_dns_rdata_t *rdata,ch_data_output_t *dout,vo
 	return len;
 }
 
+static void _rdata_apl_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore){
+
+	ch_dns_rdata_apl_t *apl = (ch_dns_rdata_apl_t*)rdata;
+    ch_dns_rdata_apl_entry_t *entry;  
+    
+    ch_msgpack_store_array_start(dstore,"entries",apl->entries_n);
+
+    list_for_each_entry(entry,&apl->entries,node){
+
+        _apl_entry_store(entry,dstore);
+    }
+
+}
+
 static ch_dns_rdata_t * _rdata_apl_create(ch_pool_t *mp,void *priv_data ch_unused){
 
 
@@ -85,7 +110,7 @@ static ch_dns_rdata_t * _rdata_apl_create(ch_pool_t *mp,void *priv_data ch_unuse
 
 	apl->rdata.rdata_dump = _rdata_apl_dump;
 	apl->rdata.rdata_write = _rdata_apl_write;
-
+    apl->rdata.rdata_store = _rdata_apl_store;
 	apl->entries_n = 0;
 	INIT_LIST_HEAD(&apl->entries);
 

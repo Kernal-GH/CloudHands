@@ -40,6 +40,19 @@ static ssize_t  _rdata_px_write(ch_dns_rdata_t *rdata,ch_data_output_t *dout,voi
 	return len;
 }
 
+static void _rdata_px_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore){
+
+    ch_dns_rdata_px_t *px = (ch_dns_rdata_px_t*)rdata; 
+    ch_dns_name_t *map822 = &px->map822;
+    ch_dns_name_t *mapx400 = &px->mapx400;  
+
+    ch_msgpack_store_map_start(dstore,"px",3);
+    ch_msgpack_store_write_uint16(dstore,"preference",px->preference);
+    ch_dns_name_store_wkey(map822,dstore,"map822");
+    ch_dns_name_store_wkey(mapx400,dstore,"mapx400");
+
+}
+
 static ch_dns_rdata_t * _rdata_px_create(ch_pool_t *mp,void *priv_data ch_unused){
 
 
@@ -52,6 +65,7 @@ static ch_dns_rdata_t * _rdata_px_create(ch_pool_t *mp,void *priv_data ch_unused
 
 	px->rdata.rdata_dump = _rdata_px_dump;
 	px->rdata.rdata_write = _rdata_px_write;
+	px->rdata.rdata_store = _rdata_px_store;
 	
 	px->preference = 0;
 	CH_DNS_NAME_INIT(map822);

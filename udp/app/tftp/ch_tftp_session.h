@@ -15,6 +15,7 @@ typedef struct ch_tftp_session_t ch_tftp_session_t;
 
 #include "ch_log.h"
 #include "ch_udp_app_pool.h"
+#include "ch_msgpack_store.h"
 
 struct ch_tftp_session_t {
 
@@ -72,6 +73,22 @@ static inline ssize_t ch_tftp_session_write(ch_tftp_session_t *tftp_session,ch_d
 	CH_DOUT_STRING16_WRITE2(dout,tftp_session->fpath,len,rc);
 
 	return len;
+}
+
+static inline int ch_tftp_session_store(ch_tftp_session_t *tftp_session,ch_msgpack_store_t *dstore){
+
+    if(tftp_session == NULL)
+        return -1;
+
+    ch_msgpack_store_map_start(dstore,"tftp",6);
+    ch_msgpack_store_write_uint8(dstore,"isRead",tftp_session->is_read?1:0);
+    ch_msgpack_store_write_uint8(dstore,"isError",tftp_session->is_error?1:0);
+    ch_msgpack_store_write_kv(dstore,"fname",tftp_session->fname);
+    ch_msgpack_store_write_kv(dstore,"mode",tftp_session->mode);
+    ch_msgpack_store_write_kv(dstore,"errmsg",tftp_session->errmsg);
+    ch_msgpack_store_write_kv(dstore,"fpath",tftp_session->fpath);
+
+    return 0;
 }
 
 static inline int ch_tftp_session_fpath_init(ch_tftp_session_t *tftp_session,const char *fpath){

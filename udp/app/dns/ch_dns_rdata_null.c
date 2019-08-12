@@ -35,6 +35,15 @@ static ssize_t  _rdata_null_write(ch_dns_rdata_t *rdata,ch_data_output_t *dout,v
 	return len;
 }
 
+static void _rdata_null_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore){
+
+     ch_dns_rdata_null_t *null = (ch_dns_rdata_null_t*)rdata;
+
+     ch_msgpack_store_map_start(dstore,"null",1);
+     ch_msgpack_store_write_str_wlen(dstore,"data",(const char*)null->data,null->dlen);
+
+}
+
 static ch_dns_rdata_t * _rdata_null_create(ch_pool_t *mp,void *priv_data ch_unused){
 
 
@@ -42,6 +51,7 @@ static ch_dns_rdata_t * _rdata_null_create(ch_pool_t *mp,void *priv_data ch_unus
 
 	null->rdata.rdata_dump = _rdata_null_dump;
 	null->rdata.rdata_write = _rdata_null_write;
+	null->rdata.rdata_store = _rdata_null_store;
 
 	null->dlen = 0;
 	null->data = NULL;

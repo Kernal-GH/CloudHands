@@ -26,6 +26,8 @@ struct ch_dns_rdata_t {
 
 	void (*rdata_dump)(ch_dns_rdata_t *rdata,FILE *fp,void *priv_data);
 
+    void (*rdata_store)(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore);
+
 	ssize_t (*rdata_write)(ch_dns_rdata_t *rdata,ch_data_output_t *dout,void *priv_data);
 
 	ch_dns_name_t name;
@@ -69,6 +71,26 @@ static inline void ch_dns_rdata_dump(ch_dns_rdata_t *rdata,FILE *fp){
 		rdata->rdata_dump(rdata,fp,NULL);
 	else
 		fprintf(fp,"%s\n",rdata->data?(const char*)rdata->data:"");
+
+}
+
+static inline void ch_dns_rdata_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore){
+
+    ch_msgpack_store_map_start(dstore,"rdata",6);
+
+    ch_dns_name_store(&rdata->name,dstore);
+    ch_msgpack_store_write_uint16(dstore,"type",rdata->type);
+    ch_msgpack_store_write_uint16(dstore,"dclass",rdata->dclass);
+    ch_msgpack_store_write_uint32(dstore,"ttl",rdata->ttl);
+
+    ch_msgpack_store_write_uint8(dstore,"parsed",rdata->rdata_store?1:0);
+
+    if(rdata->rdata_store){
+        rdata->rdata_store(rdata,dstore);
+    }else{
+
+        ch_msgpack_store_write_bin_kv(dstore,"rdataRaw",rdata->data,rdata->dlen);
+    }
 
 }
 

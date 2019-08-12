@@ -52,6 +52,14 @@ static ssize_t  _rdata_dhcid_write(ch_dns_rdata_t *rdata,ch_data_output_t *dout,
 	return len;
 }
 
+static void _rdata_dhcid_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore){
+
+     ch_dns_rdata_dhcid_t *dhcid = (ch_dns_rdata_dhcid_t*)rdata; 
+     ch_msgpack_store_map_start(dstore,"dhcid",1);
+     ch_msgpack_store_write_str_wlen(dstore,"data",(const char*)dhcid->data,dhcid->dlen);
+
+}
+
 static ch_dns_rdata_t * _rdata_dhcid_create(ch_pool_t *mp,void *priv_data ch_unused){
 
 
@@ -59,7 +67,7 @@ static ch_dns_rdata_t * _rdata_dhcid_create(ch_pool_t *mp,void *priv_data ch_unu
 
 	dhcid->rdata.rdata_dump = _rdata_dhcid_dump;
 	dhcid->rdata.rdata_write = _rdata_dhcid_write;
-
+    dhcid->rdata.rdata_store = _rdata_dhcid_store;
 	dhcid->dlen = 0;
 	dhcid->data = NULL;
 

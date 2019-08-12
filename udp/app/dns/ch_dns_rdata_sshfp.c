@@ -41,6 +41,18 @@ static ssize_t  _rdata_sshfp_write(ch_dns_rdata_t *rdata,ch_data_output_t *dout,
 	return len;
 }
 
+static void _rdata_sshfp_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore){
+
+     ch_dns_rdata_sshfp_t *sshfp = (ch_dns_rdata_sshfp_t*)rdata; 
+     const char *fingerprint = (const char*)sshfp->fingerprint;
+
+     ch_msgpack_store_map_start(dstore,"sshfp",3);
+     ch_msgpack_store_write_uint8(dstore,"alg",sshfp->alg);
+     ch_msgpack_store_write_uint8(dstore,"digestType",sshfp->digest_type);
+     ch_msgpack_store_write_str_wlen(dstore,"fingerprint",fingerprint,sshfp->fp_len);
+
+}
+
 static ch_dns_rdata_t * _rdata_sshfp_create(ch_pool_t *mp,void *priv_data ch_unused){
 
 
@@ -48,6 +60,7 @@ static ch_dns_rdata_t * _rdata_sshfp_create(ch_pool_t *mp,void *priv_data ch_unu
 
 	sshfp->rdata.rdata_dump = _rdata_sshfp_dump;
 	sshfp->rdata.rdata_write = _rdata_sshfp_write;
+	sshfp->rdata.rdata_store = _rdata_sshfp_store;
 
 	sshfp->alg = 0;
 	sshfp->digest_type = 0;

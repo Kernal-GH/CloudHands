@@ -59,4 +59,18 @@ static inline ssize_t ch_smon_session_write(ch_smon_session_t *smon_session,ch_d
 	return len;
 }
 
+static inline int ch_smon_session_store(ch_smon_session_t *smon_session,ch_msgpack_store_t *dstore,uint64_t id){
+
+
+    ch_msgpack_store_map_start(dstore,"smon",3);
+
+    ch_msgpack_store_write_uint64(dstore,"id",id);
+    ch_msgpack_store_write_kv(dstore,"reqFpath",smon_session->req_content_fpath);
+    ch_msgpack_store_write_kv(dstore,"resFpath",smon_session->res_content_fpath);
+
+
+    return 0;
+}
+
+
 #endif /*CH_SMON_SESSION_H*/

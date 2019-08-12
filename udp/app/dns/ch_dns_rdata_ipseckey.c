@@ -108,6 +108,43 @@ static ssize_t  _rdata_ipseckey_write(ch_dns_rdata_t *rdata,ch_data_output_t *do
 	return len;
 }
 
+static void  _rdata_ipseckey_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore){
+
+	ch_dns_rdata_ipseckey_t *ipseckey = (ch_dns_rdata_ipseckey_t*)rdata;
+
+	uint32_t v;
+
+    ch_msgpack_store_map_start(dstore,"ipseckey",5);
+    ch_msgpack_store_write_uint8(dstore,"precedence",ipseckey->precedence);
+    ch_msgpack_store_write_uint8(dstore,"gatewayType",ipseckey->gateway_type);
+    ch_msgpack_store_write_uint8(dstore,"alg",ipseckey->alg);
+
+	switch(ipseckey->gateway_type){
+	
+	case 1:
+		v =  ntohl(ipseckey->in_addr.s_addr);
+        ch_msgpack_store_write_uint32(dstore,"adr4",v);
+
+		break;
+
+	case 2:
+		
+        ch_msgpack_store_write_str_wlen(dstore,"addr6",(const char*)ipseckey->in6_addr.s6_addr,16);
+
+		break;
+
+	case 3:
+		ch_dns_name_store(&ipseckey->gateway,dstore);
+		break;
+
+	default:
+        ch_msgpack_store_write_uint8(dstore,"unknown",1);
+        break;
+	}
+
+    ch_msgpack_store_write_str_wlen(dstore,"key",(const char*)ipseckey->key,ipseckey->key_len);
+}
+
 static ch_dns_rdata_t * _rdata_ipseckey_create(ch_pool_t *mp,void *priv_data ch_unused){
 
 
@@ -115,6 +152,7 @@ static ch_dns_rdata_t * _rdata_ipseckey_create(ch_pool_t *mp,void *priv_data ch_
 
 	ipseckey->rdata.rdata_dump = _rdata_ipseckey_dump;
 	ipseckey->rdata.rdata_write = _rdata_ipseckey_write;
+	ipseckey->rdata.rdata_store = _rdata_ipseckey_store;
 
 	ipseckey->precedence = 0;
 	ipseckey->gateway_type = 0;

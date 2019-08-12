@@ -39,6 +39,17 @@ static ssize_t  _rdata_nxt_write(ch_dns_rdata_t *rdata,ch_data_output_t *dout,vo
 	return len;
 }
 
+static void _rdata_nxt_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore){
+
+     ch_dns_rdata_nxt_t *nxt = (ch_dns_rdata_nxt_t*)rdata;
+     ch_dns_name_t *name = &nxt->name;  
+
+     ch_msgpack_store_map_start(dstore,"nxt",2);
+     ch_dns_name_store(name,dstore);
+     ch_msgpack_store_write_str_wlen(dstore,"tbtm",(const char*)nxt->typebitmap,nxt->typebitmap_len);
+
+}
+
 static ch_dns_rdata_t * _rdata_nxt_create(ch_pool_t *mp,void *priv_data ch_unused){
 
 
@@ -48,6 +59,7 @@ static ch_dns_rdata_t * _rdata_nxt_create(ch_pool_t *mp,void *priv_data ch_unuse
 
 	nxt->rdata.rdata_dump = _rdata_nxt_dump;
 	nxt->rdata.rdata_write = _rdata_nxt_write;
+	nxt->rdata.rdata_store = _rdata_nxt_store;
 
 
 	CH_DNS_NAME_INIT(name);

@@ -147,6 +147,34 @@ ch_udp_app_session_write(ch_udp_session_t *udp_session,ch_udp_app_session_t *app
 	return len+rc;
 }
 
+int  
+ch_udp_app_session_store(ch_udp_session_t *udp_session,ch_udp_app_session_t *app_session,ch_msgpack_store_t *dstore){
+
+    ch_msgpack_store_map_start(dstore,NULL,2);
+
+    ch_msgpack_store_map_start(dstore,"common",13);
+
+	ch_msgpack_store_write_uint64(dstore,"sessionID",udp_session->session_id);
+	ch_msgpack_store_write_uint32(dstore,"srcIP",ch_udp_session_srcip_get(udp_session));
+	ch_msgpack_store_write_uint32(dstore,"dstIP",ch_udp_session_dstip_get(udp_session));
+	ch_msgpack_store_write_uint16(dstore,"srcPort",ch_udp_session_srcport_get(udp_session));
+	ch_msgpack_store_write_uint16(dstore,"dstPort",ch_udp_session_dstport_get(udp_session));
+	
+	ch_msgpack_store_write_uint64(dstore,"reqPackets",ch_udp_session_req_packets(udp_session));
+	ch_msgpack_store_write_uint64(dstore,"reqBytes",ch_udp_session_req_bytes(udp_session));
+	ch_msgpack_store_write_uint64(dstore,"resPackets",ch_udp_session_res_packets(udp_session));
+	ch_msgpack_store_write_uint64(dstore,"resBytes",ch_udp_session_res_bytes(udp_session));
+	ch_msgpack_store_write_uint64(dstore,"reqStartTime",ch_udp_session_req_start_time(udp_session));
+	ch_msgpack_store_write_uint64(dstore,"reqLastTime",ch_udp_session_req_last_time(udp_session));
+	ch_msgpack_store_write_uint64(dstore,"resStartTime",ch_udp_session_res_start_time(udp_session));
+	ch_msgpack_store_write_uint64(dstore,"resLastTime",ch_udp_session_res_last_time(udp_session));
+
+    if(app_session->app->app_session_store(app_session,dstore)<0)
+        return -1;
+
+    return 0;
+}
+
 void ch_udp_app_session_dump(ch_udp_app_session_t *app_session,ch_udp_session_t *udp_session,FILE *fp){
 	
 	char b[64] = {0};

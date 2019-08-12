@@ -36,6 +36,16 @@ static ssize_t  _rdata_dnskey_write(ch_dns_rdata_t *rdata,ch_data_output_t *dout
 	return len;
 }
 
+static void _rdata_dnskey_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore){
+
+	ch_dns_rdata_dnskey_t *dnskey = (ch_dns_rdata_dnskey_t*)rdata;
+	ch_dns_sec_key_t *skey = &dnskey->skey;
+
+    ch_msgpack_store_map_start(dstore,"dnskey",1);
+    ch_dns_sec_key_store(skey,dstore);
+
+}
+
 static ch_dns_rdata_t * _rdata_dnskey_create(ch_pool_t *mp,void *priv_data ch_unused){
 
 
@@ -43,6 +53,7 @@ static ch_dns_rdata_t * _rdata_dnskey_create(ch_pool_t *mp,void *priv_data ch_un
 
 	dnskey->rdata.rdata_dump = _rdata_dnskey_dump;
 	dnskey->rdata.rdata_write = _rdata_dnskey_write;
+	dnskey->rdata.rdata_store = _rdata_dnskey_store;
 
 	ch_dns_sec_key_init(&dnskey->skey);
 

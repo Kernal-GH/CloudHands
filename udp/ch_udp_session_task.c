@@ -114,13 +114,22 @@ ch_udp_session_task_t * ch_udp_session_task_create(ch_udp_work_t *udp_work,uint3
 		return NULL;
 	}
 
-	if(ch_dout_init(&udp_session_task->dout))
-	{
-	
-		ch_log(CH_LOG_ERR,"Init data output failed for udp session!");
-		return NULL;
-	}
+    if(udp_context->use_msgpack){
 
+        udp_session_task->dstore = ch_msgpack_store_create(udp_work->mp);
+        if(udp_session_task->dstore == NULL){
+            ch_log(CH_LOG_ERR,"Create udp session task failed,cannot create msgpack store!");
+            return NULL;
+        }
+
+    }else{ 
+        if(ch_dout_init(&udp_session_task->dout))
+        {
+        
+            ch_log(CH_LOG_ERR,"Init data output failed for udp session!");
+            return NULL;
+        }
+    }
 	return udp_session_task;
 }
 

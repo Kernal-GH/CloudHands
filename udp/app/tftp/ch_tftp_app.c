@@ -127,6 +127,13 @@ static ssize_t _tftp_session_write(ch_udp_app_session_t *app_session,ch_data_out
 
 }
 
+static int _tftp_session_store(ch_udp_app_session_t *app_session,ch_msgpack_store_t *dstore){
+
+	ch_tftp_session_t *tftp_session = (ch_tftp_session_t*)app_session;
+	return ch_tftp_session_store(tftp_session,dstore);
+
+}
+
 static void _tftp_session_dump(ch_udp_app_session_t *app_session,FILE *fp){
 
 	ch_tftp_session_t *tftp_session = (ch_tftp_session_t*)app_session;
@@ -155,6 +162,7 @@ static ch_udp_app_t tftp_app = {
 	.req_pkt_process = _tftp_req_pkt_process,
 	.res_pkt_process = _tftp_res_pkt_process,
 	.app_session_write = _tftp_session_write,
+    .app_session_store = _tftp_session_store,
 	.app_session_dump = _tftp_session_dump,
 	.app_session_fin = _tftp_session_fin
 };

@@ -71,3 +71,21 @@ ssize_t ch_dns_txt_base_write(ch_dns_txt_base_t *txt_base,ch_data_output_t *dout
 	return len;
 
 }
+
+void ch_dns_txt_base_store(ch_dns_txt_base_t *txt_base,ch_msgpack_store_t *dstore){
+
+
+    unsigned char ** texts,*str;
+    int i;
+
+    texts = (unsigned char**)txt_base->txts->elts;
+    uint16_t n = txt_base->txts->nelts;  
+
+    ch_msgpack_store_array_start(dstore,"texts",n);
+
+    for(i = 0;i<n;i++){
+
+        str = texts[i];  
+        ch_msgpack_store_write_str(dstore,(const char*)str);
+    }
+}

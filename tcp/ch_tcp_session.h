@@ -86,6 +86,10 @@ struct  ch_tcp_session_t {
 
 #define ch_tcp_session_state_is_rst(tcp_session) ((tcp_session)->state == SESSION_STATE_RST)
 
+#define ch_tcp_session_is_ipv6(tcp_session) ((tcp_session)->endpoint_req.is_ipv6)
+#define ch_tcp_session_srcaddr_get(tcp_session) ((tcp_session)->endpoint_req.addr)
+#define ch_tcp_session_dstaddr_get(tcp_session) ((tcp_session)->endpoint_res.addr)
+
 extern int ch_tcp_session_init(ch_tcp_session_t *tcp_session,ch_tcp_session_request_t *sreq,ch_tcp_app_t *app,
         void *sentry,
         ch_memory_t *mm); 

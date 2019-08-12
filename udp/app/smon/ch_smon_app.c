@@ -176,6 +176,15 @@ static ssize_t _smon_session_write(ch_udp_app_session_t *app_session,ch_data_out
 
 }
 
+static int _smon_session_store(ch_udp_app_session_t *app_session,ch_msgpack_store_t *dstore){
+
+	ch_smon_session_t *smon_session = (ch_smon_session_t*)app_session;
+	ch_session_monitor_item_t *item = ch_udp_app_priv_data_get(app_session,ch_session_monitor_item_t);
+
+
+	return ch_smon_session_store(smon_session,dstore,item->id);
+}
+
 static void _smon_session_dump(ch_udp_app_session_t *app_session,FILE *fp){
 
 	ch_smon_session_t *smon_session = (ch_smon_session_t*)app_session;
@@ -204,6 +213,7 @@ static ch_udp_app_t smon_app = {
 	.req_pkt_process = _smon_req_pkt_process,
 	.res_pkt_process = _smon_res_pkt_process,
 	.app_session_write = _smon_session_write,
+	.app_session_store = _smon_session_store,
 	.app_session_dump = _smon_session_dump,
 	.app_session_fin = _smon_session_fin
 };

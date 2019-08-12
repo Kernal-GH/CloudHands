@@ -52,6 +52,20 @@ static ssize_t  _rdata_tkey_write(ch_dns_rdata_t *rdata,ch_data_output_t *dout,v
 	return len;
 }
 
+static void _rdata_tkey_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore){
+
+    ch_dns_rdata_tkey_t *tkey = (ch_dns_rdata_tkey_t*)rdata;
+    ch_msgpack_store_map_start(dstore,"tkey",7);
+    ch_dns_name_store(&tkey->alg,dstore);
+    ch_msgpack_store_write_uint32(dstore,"timeInception",tkey->time_inception);
+    ch_msgpack_store_write_uint32(dstore,"timeExpire",tkey->time_expire);
+    ch_msgpack_store_write_uint16(dstore,"mode",tkey->mode);
+    ch_msgpack_store_write_uint16(dstore,"error",tkey->error);
+    ch_msgpack_store_write_str_wlen(dstore,"key",(const char*)tkey->key,tkey->key_len);
+    ch_msgpack_store_write_str_wlen(dstore,"other",(const char*)tkey->other,tkey->other_len);
+
+}
+
 static ch_dns_rdata_t * _rdata_tkey_create(ch_pool_t *mp,void *priv_data ch_unused){
 
 
@@ -59,6 +73,7 @@ static ch_dns_rdata_t * _rdata_tkey_create(ch_pool_t *mp,void *priv_data ch_unus
 
 	tkey->rdata.rdata_dump = _rdata_tkey_dump;
 	tkey->rdata.rdata_write = _rdata_tkey_write;
+	tkey->rdata.rdata_store = _rdata_tkey_store;
 
 	CH_DNS_NAME_INIT(&tkey->alg);
 	tkey->time_inception = 0;

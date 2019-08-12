@@ -40,6 +40,19 @@ static ssize_t  _rdata_ds_write(ch_dns_rdata_t *rdata,ch_data_output_t *dout,voi
 	return len;
 }
 
+static void _rdata_ds_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore){
+
+    ch_dns_rdata_ds_t *ds = (ch_dns_rdata_ds_t*)rdata;
+
+    ch_msgpack_store_map_start(dstore,"ds",4);
+
+    ch_msgpack_store_write_uint16(dstore,"footprint",ds->footprint);
+    ch_msgpack_store_write_uint8(dstore,"alg",ds->alg);
+    ch_msgpack_store_write_uint8(dstore,"digestid",ds->digestid);
+    ch_msgpack_store_write_str_wlen(dstore,"digest",(const char*)ds->digest,ds->digest_len);
+
+}
+
 static ch_dns_rdata_t * _rdata_ds_create(ch_pool_t *mp,void *priv_data ch_unused){
 
 
@@ -47,6 +60,7 @@ static ch_dns_rdata_t * _rdata_ds_create(ch_pool_t *mp,void *priv_data ch_unused
 
 	ds->rdata.rdata_dump = _rdata_ds_dump;
 	ds->rdata.rdata_write = _rdata_ds_write;
+	ds->rdata.rdata_store = _rdata_ds_store;
 
 	ds->footprint = 0;
 	ds->alg = 0;

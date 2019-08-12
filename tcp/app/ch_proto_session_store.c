@@ -98,14 +98,18 @@ int ch_proto_session_store_write(ch_proto_session_store_t *pstore,ch_tcp_session
 
 	/*packer the common data into msgpack*/
 	ch_msgpack_map_start(pk,NULL,2);
-	ch_msgpack_map_start(pk,"common",14);
+	ch_msgpack_map_start(pk,"common",17);
 
 	ch_msgpack_write_uint32(pk,"protoID",app->protocol_id);
 	ch_msgpack_write_uint64(pk,"sessionID",tsession->session_id);
 	ch_msgpack_write_uint64(pk,"reqTime",ch_tcp_session_reqtime_get(tsession));
 	ch_msgpack_write_uint64(pk,"resTime",ch_tcp_session_restime_get(tsession));
+    ch_msgpack_write_uint8(pk,"isIPV6",ch_tcp_session_is_ipv6(tsession));
 	ch_msgpack_write_uint32(pk,"srcIP",ch_tcp_session_srcip_get(tsession));
 	ch_msgpack_write_uint32(pk,"dstIP",ch_tcp_session_dstip_get(tsession));
+    ch_msgpack_write_bin_kv(pk,"srcAddr",ch_tcp_session_srcaddr_get(tsession),16);
+    ch_msgpack_write_bin_kv(pk,"dstAddr",ch_tcp_session_dstaddr_get(tsession),16);
+
 	ch_msgpack_write_uint16(pk,"srcPort",ch_tcp_session_srcport_get(tsession));
 	ch_msgpack_write_uint16(pk,"dstPort",ch_tcp_session_dstport_get(tsession));
 	ch_msgpack_write_uint64(pk,"reqPackets",session->reqPackets);

@@ -21,6 +21,14 @@ static void _rdata_cname_dump(ch_dns_rdata_t *rdata,FILE *fp,void *priv_data ch_
 
 }
 
+static void _rdata_cname_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore){
+
+     ch_dns_rdata_cname_t *cname = (ch_dns_rdata_cname_t*)rdata; 
+     ch_msgpack_store_map_start(dstore,"cname",1);
+     ch_dns_name_store(&cname->name,dstore);
+
+}
+
 static ssize_t  _rdata_cname_write(ch_dns_rdata_t *rdata,ch_data_output_t *dout,void *priv_data ch_unused){
 
 	ch_dns_rdata_cname_t *cname = (ch_dns_rdata_cname_t*)rdata;
@@ -39,7 +47,8 @@ static ch_dns_rdata_t * _rdata_cname_create(ch_pool_t *mp,void *priv_data ch_unu
 
 	cname->rdata.rdata_dump = _rdata_cname_dump;
 	cname->rdata.rdata_write = _rdata_cname_write;
-	
+    cname->rdata.rdata_store = _rdata_cname_store;
+
 	CH_DNS_NAME_INIT(name);
 
 	return (ch_dns_rdata_t*)cname;

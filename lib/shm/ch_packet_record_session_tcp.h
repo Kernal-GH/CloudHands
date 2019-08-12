@@ -33,9 +33,12 @@ struct ch_packet_record_session_tcp_t {
 	uint16_t phase_state;
     uint16_t src_port;
     uint16_t dst_port;
-	
+
+    uint8_t is_ipv6;
     uint32_t src_ip;
     uint32_t dst_ip;
+    uint8_t *src_addr;
+    uint8_t *dst_addr;
 
 	uint64_t session_id;
 	uint64_t req_packets;
@@ -55,12 +58,12 @@ struct ch_packet_record_session_tcp_t {
 
 };
 
-#define CH_PACKET_RECORD_SESSION_TCP_META_SIZE(req_dsize,res_dsize) (sizeof(uint8_t)+\
+#define CH_PACKET_RECORD_SESSION_TCP_META_SIZE(req_dsize,res_dsize) (sizeof(uint8_t)*2+\
 	sizeof(uint16_t)*4+\
 	sizeof(uint32_t)*2+\
 	sizeof(uint64_t)*9+\
-	sizeof(size_t)*2+\
-	req_dsize+res_dsize)
+	sizeof(size_t)*4+\
+	req_dsize+res_dsize+32)
 
 extern void ch_packet_record_session_tcp_read(ch_packet_record_session_tcp_t *pkt_tcp_session,ch_packet_record_t *pkt_rcd);
 

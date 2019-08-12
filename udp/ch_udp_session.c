@@ -20,7 +20,13 @@ int ch_udp_session_init(ch_udp_session_t *udp_session,ch_packet_udp_t *pkt_udp,c
 
 	udp_session->session_id = session_id;
 	udp_session->app_session = app_session;
+    udp_session->is_ipv6 = pkt_udp->is_ipv6;
 
+    if(pkt_udp->is_ipv6){
+
+        memcpy(req->addr,pkt_udp->src_addr,16);
+        memcpy(res->addr,pkt_udp->dst_addr,16);
+    }
 	/*init req endpoint*/
 	req->ip = pkt_udp->src_ip;
 	req->port = pkt_udp->src_port;

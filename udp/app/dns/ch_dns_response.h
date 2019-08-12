@@ -39,6 +39,8 @@ extern void ch_dns_response_dump(ch_dns_response_t *dnsr,FILE *fp);
 
 extern ssize_t ch_dns_response_write(ch_dns_response_t *dnsr,ch_data_output_t *dout);
 
+extern void ch_dns_response_store(ch_msgpack_store_t *dstore,ch_dns_response_t *dnsr);
+
 #define CH_DNS_RESPONSE_WRITE(dout,dnsr,len,rc) do {   \
 	if(-1 == (rc = ch_dns_response_write(dnsr,dout)))  \
 		return -1;									   \

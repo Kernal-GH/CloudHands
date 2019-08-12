@@ -45,6 +45,19 @@ static ssize_t  _rdata_srv_write(ch_dns_rdata_t *rdata,ch_data_output_t *dout,vo
 
 }
 
+static void _rdata_srv_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore){
+
+     ch_dns_rdata_srv_t *srv = (ch_dns_rdata_srv_t*)rdata;
+     ch_dns_name_t *target = &srv->target;         
+
+     ch_msgpack_store_map_start(dstore,"srv",4);
+     ch_msgpack_store_write_uint16(dstore,"priority",srv->priority);
+     ch_msgpack_store_write_uint16(dstore,"weight",srv->weight);
+     ch_msgpack_store_write_uint16(dstore,"port",srv->port);
+
+     ch_dns_name_store(target,dstore);
+}
+
 static ch_dns_rdata_t * _rdata_srv_create(ch_pool_t *mp,void *priv_data ch_unused){
 
 
@@ -52,7 +65,8 @@ static ch_dns_rdata_t * _rdata_srv_create(ch_pool_t *mp,void *priv_data ch_unuse
 
 	srv->rdata.rdata_dump = _rdata_srv_dump;
 	srv->rdata.rdata_write = _rdata_srv_write;
-	
+	srv->rdata.rdata_store = _rdata_srv_store;
+
 	ch_dns_name_t *target = &srv->target;
 
 	srv->priority = 0;

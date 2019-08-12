@@ -76,8 +76,12 @@ static void _tcp_session_out(ch_sa_tcp_session_handler_t *shandler,
 	p_tcp_session->timeout_tv = timeout_tv;
 	p_tcp_session->phase_state = is_close?TCP_SESSION_PHASE_STATE_CLOSE:TCP_SESSION_PHASE_STATE_CON;
 	p_tcp_session->session_id = tcp_session->session_id;
-	p_tcp_session->src_ip = ch_tcp_session_srcip_get(tcp_session); 
+	
+    p_tcp_session->is_ipv6 = ch_tcp_session_is_ipv6(tcp_session);
+    p_tcp_session->src_ip = ch_tcp_session_srcip_get(tcp_session); 
 	p_tcp_session->dst_ip = ch_tcp_session_dstip_get(tcp_session);
+    p_tcp_session->src_addr = ch_tcp_session_srcaddr_get(tcp_session);
+    p_tcp_session->dst_addr = ch_tcp_session_dstaddr_get(tcp_session);
 
 	p_tcp_session->src_port = ch_tcp_session_srcport_get(tcp_session);
 	p_tcp_session->dst_port = ch_tcp_session_dstport_get(tcp_session);

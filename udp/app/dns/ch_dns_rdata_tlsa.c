@@ -42,6 +42,18 @@ static ssize_t  _rdata_tlsa_write(ch_dns_rdata_t *rdata,ch_data_output_t *dout,v
 	return len;
 }
 
+static void _rdata_tlsa_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore){
+
+    ch_dns_rdata_tlsa_t *tlsa = (ch_dns_rdata_tlsa_t*)rdata;  
+
+    ch_msgpack_store_map_start(dstore,"tlsa",4);
+    ch_msgpack_store_write_uint8(dstore,"certUsage",tlsa->cert_usage);
+    ch_msgpack_store_write_uint8(dstore,"selector",tlsa->selector);
+    ch_msgpack_store_write_uint8(dstore,"matchingType",tlsa->matching_type);
+    ch_msgpack_store_write_str_wlen(dstore,"data",(const char*)tlsa->cert_data,tlsa->cert_dlen);
+
+}
+
 static ch_dns_rdata_t * _rdata_tlsa_create(ch_pool_t *mp,void *priv_data ch_unused){
 
 
@@ -49,6 +61,7 @@ static ch_dns_rdata_t * _rdata_tlsa_create(ch_pool_t *mp,void *priv_data ch_unus
 
 	tlsa->rdata.rdata_dump = _rdata_tlsa_dump;
 	tlsa->rdata.rdata_write = _rdata_tlsa_write;
+	tlsa->rdata.rdata_store = _rdata_tlsa_store;
 
 	tlsa->cert_usage = 0;
 	tlsa->selector = 0;

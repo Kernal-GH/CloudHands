@@ -36,6 +36,14 @@ static ssize_t  _rdata_sig_write(ch_dns_rdata_t *rdata,ch_data_output_t *dout,vo
 	return len;
 }
 
+static void _rdata_sig_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore){
+
+     ch_dns_rdata_sig_t *sig = (ch_dns_rdata_sig_t*)rdata;
+
+     ch_msgpack_store_map_start(dstore,"sig",1);
+     ch_dns_sec_sig_store(&sig->sig,dstore);
+}
+
 static ch_dns_rdata_t * _rdata_sig_create(ch_pool_t *mp,void *priv_data ch_unused){
 
 
@@ -43,6 +51,7 @@ static ch_dns_rdata_t * _rdata_sig_create(ch_pool_t *mp,void *priv_data ch_unuse
 
 	sig->rdata.rdata_dump = _rdata_sig_dump;
 	sig->rdata.rdata_write = _rdata_sig_write;
+	sig->rdata.rdata_store = _rdata_sig_store;
 
 	ch_dns_sec_sig_init(&sig->sig);
 

@@ -35,8 +35,15 @@ public class TCPSession extends SessionEntry implements SourceEntry{
         setPhaseState(input.readUnsignedShort());
         setReqPort(input.readUnsignedShort());
         setResPort(input.readUnsignedShort());
-        setReqIP((long)input.readInt());
-        setResIP((long)input.readInt());
+        setIPV6(input.readUnsignedByte()==1);
+        if(isIPV6()){
+            setReqAddr(readBytes(input));
+            setResAddr(readBytes(input));
+        }else{
+            setReqIP((long)input.readInt());
+            setResIP((long)input.readInt());
+        }
+
         setSessionID(input.readLong());
         setReqPackets(input.readLong());
         setResPackets(input.readLong());
@@ -89,8 +96,9 @@ public class TCPSession extends SessionEntry implements SourceEntry{
 
         cb.field("objectId",objectId);
         cb.field("proto","tcp");
-        cb.field("srcIP", IPUtils.ipv4Str(getReqIP()));
-        cb.field("dstIP",IPUtils.ipv4Str(getResIP()));
+        cb.field("isIPV6",isIPV6()?1:0);
+        cb.field("srcIP", getsrcIPStr());
+        cb.field("dstIP",getdstIPStr());
         cb.field("srcPort",getReqPort());
         cb.field("dstPort",getResPort());
         cb.field("phaseState",getPhaseState());

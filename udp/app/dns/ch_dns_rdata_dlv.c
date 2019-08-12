@@ -40,6 +40,19 @@ static ssize_t  _rdata_dlv_write(ch_dns_rdata_t *rdata,ch_data_output_t *dout,vo
 	return len;
 }
 
+static void _rdata_dlv_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore){
+
+    ch_dns_rdata_dlv_t *dlv = (ch_dns_rdata_dlv_t*)rdata;
+
+    ch_msgpack_store_map_start(dstore,"dlv",4);
+
+    ch_msgpack_store_write_uint16(dstore,"footprint",dlv->footprint);
+    ch_msgpack_store_write_uint8(dstore,"alg",dlv->alg);
+    ch_msgpack_store_write_uint8(dstore,"digestid",dlv->digestid);
+    ch_msgpack_store_write_str_wlen(dstore,"digest",(const char*)dlv->digest,dlv->digest_len);
+
+}
+
 static ch_dns_rdata_t * _rdata_dlv_create(ch_pool_t *mp,void *priv_data ch_unused){
 
 
@@ -47,6 +60,7 @@ static ch_dns_rdata_t * _rdata_dlv_create(ch_pool_t *mp,void *priv_data ch_unuse
 
 	dlv->rdata.rdata_dump = _rdata_dlv_dump;
 	dlv->rdata.rdata_write = _rdata_dlv_write;
+    dlv->rdata.rdata_store = _rdata_dlv_store;
 
 	dlv->footprint = 0;
 	dlv->alg = 0;

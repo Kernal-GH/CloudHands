@@ -36,6 +36,17 @@ static ssize_t  _rdata_afsdb_write(ch_dns_rdata_t *rdata,ch_data_output_t *dout,
 
 }
 
+static void _rdata_afsdb_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore) {
+
+	ch_dns_rdata_afsdb_t *afsdb = (ch_dns_rdata_afsdb_t*)rdata;
+	ch_dns_name_t *host = &afsdb->host;
+
+    ch_msgpack_store_map_start(dstore,"afsdb",2);
+    ch_msgpack_store_write_uint16(dstore,"subtype",afsdb->subtype);
+    ch_dns_name_store(host,dstore);
+
+}
+
 static ch_dns_rdata_t * _rdata_afsdb_create(ch_pool_t *mp,void *priv_data ch_unused){
 
 
@@ -46,7 +57,7 @@ static ch_dns_rdata_t * _rdata_afsdb_create(ch_pool_t *mp,void *priv_data ch_unu
 
 	afsdb->rdata.rdata_dump = _rdata_afsdb_dump;
 	afsdb->rdata.rdata_write = _rdata_afsdb_write;
-
+    afsdb->rdata.rdata_store = _rdata_afsdb_store;
 	afsdb->subtype = 0;
 	CH_DNS_NAME_INIT(host);
 

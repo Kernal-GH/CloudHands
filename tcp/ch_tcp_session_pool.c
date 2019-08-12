@@ -19,9 +19,29 @@
 #include "ch_log.h"
 #include "ch_tcp_session_pool.h"
 
+ static inline uint32_t
+ ipv6_hash(uint8_t *src_addr,uint8_t *dst_addr)
+ {
+     uint32_t *word_src_addr = (uint32_t *)&(src_addr[0]);
+     uint32_t *word_dst_addr = (uint32_t *)&(dst_addr[0]);
+ 
+     return (word_src_addr[0] ^ word_dst_addr[0]) ^
+             (word_src_addr[1] ^ word_dst_addr[1]) ^
+             (word_src_addr[2] ^ word_dst_addr[2]) ^
+             (word_src_addr[3] ^ word_dst_addr[3]);
+ }
+
+#define ipv6_addr_equal(a,b) (memcmp(a,b,16)==0)
+
 static size_t tcp_session_entry_hash(void *key,void *priv_data ch_unused){
 
 	ch_packet_tcp_t *tcp_pkt = (ch_packet_tcp_t*)key;
+
+    if(tcp_pkt->is_ipv6){
+
+        uint32_t addr_hash = ipv6_hash(tcp_pkt->src_addr,tcp_pkt->dst_addr);
+        return ch_jhash_3words_sort(addr_hash,(uint32_t)(tcp_pkt->src_port),(uint32_t)(tcp_pkt->dst_port),0);
+    }
 
     return (size_t)ch_jhash_4words_sort(tcp_pkt->src_ip,tcp_pkt->dst_ip,
             (uint32_t)(tcp_pkt->src_port),(uint32_t)(tcp_pkt->dst_port),0);
@@ -29,17 +49,32 @@ static size_t tcp_session_entry_hash(void *key,void *priv_data ch_unused){
 
 static inline int _is_request(ch_tcp_session_t *tcp_session,ch_packet_tcp_t *tcp_pkt){
 
-    int v1 = (tcp_session->endpoint_req.ip == tcp_pkt->src_ip)&&(tcp_session->endpoint_req.port == tcp_pkt->src_port);
-    int v2 = (tcp_session->endpoint_res.ip == tcp_pkt->dst_ip)&&(tcp_session->endpoint_res.port == tcp_pkt->dst_port);
-    
+    int v1,v2;
+
+    if(tcp_pkt->is_ipv6){
+        v1 = (tcp_session->endpoint_req.is_ipv6)&&(ipv6_addr_equal(tcp_session->endpoint_req.addr,tcp_pkt->src_addr))&&(tcp_session->endpoint_req.port == tcp_pkt->src_port);
+        v2 = (tcp_session->endpoint_res.is_ipv6)&&(ipv6_addr_equal(tcp_session->endpoint_res.addr,tcp_pkt->dst_addr))&&(tcp_session->endpoint_res.port == tcp_pkt->dst_port);
+    }else{
+        v1 = (tcp_session->endpoint_req.ip == tcp_pkt->src_ip)&&(tcp_session->endpoint_req.port == tcp_pkt->src_port);
+        v2 = (tcp_session->endpoint_res.ip == tcp_pkt->dst_ip)&&(tcp_session->endpoint_res.port == tcp_pkt->dst_port);
+    }
+
     return v1&&v2;
 }
 
 static inline int _is_response(ch_tcp_session_t *tcp_session,ch_packet_tcp_t *tcp_pkt){
 
-    int v1 = (tcp_session->endpoint_req.ip == tcp_pkt->dst_ip)&&(tcp_session->endpoint_req.port == tcp_pkt->dst_port);
-    int v2 = (tcp_session->endpoint_res.ip == tcp_pkt->src_ip)&&(tcp_session->endpoint_res.port == tcp_pkt->src_port);
-    
+    int v1,v2;
+
+    if(tcp_pkt->is_ipv6){
+        v1 = (tcp_session->endpoint_req.is_ipv6)&&(ipv6_addr_equal(tcp_session->endpoint_req.addr,tcp_pkt->dst_addr))&&(tcp_session->endpoint_req.port == tcp_pkt->dst_port);
+        v2 = (tcp_session->endpoint_res.is_ipv6)&&(ipv6_addr_equal(tcp_session->endpoint_res.addr,tcp_pkt->src_addr))&&(tcp_session->endpoint_res.port == tcp_pkt->src_port);
+
+    }else{
+        v1 = (tcp_session->endpoint_req.ip == tcp_pkt->dst_ip)&&(tcp_session->endpoint_req.port == tcp_pkt->dst_port);
+        v2 = (tcp_session->endpoint_res.ip == tcp_pkt->src_ip)&&(tcp_session->endpoint_res.port == tcp_pkt->src_port);
+    }
+
     return v1&&v2;
 }
 

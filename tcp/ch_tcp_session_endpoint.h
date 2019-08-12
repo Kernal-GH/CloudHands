@@ -42,6 +42,9 @@ struct ch_tcp_session_endpoint_t {
     
     uint16_t port;
 
+    /*for ipv6 address*/
+    uint8_t addr[16];
+    uint8_t is_ipv6;
 
     void *priv_data;
 
@@ -59,6 +62,8 @@ static inline uint32_t ch_tcp_session_endpoint_offset_get(ch_tcp_session_endpoin
  * 
  */
 extern void ch_tcp_session_endpoint_init(ch_tcp_session_endpoint_t *ep,uint32_t ip,uint16_t port,uint32_t init_seq,ch_memory_t *mm);
+
+extern void ch_tcp_session_endpoint_init_ipv6(ch_tcp_session_endpoint_t *ep,uint8_t *addr,uint16_t port,uint32_t init_seq,ch_memory_t *mm);
 
 
 /*Clean the instance of assemble session endpoint

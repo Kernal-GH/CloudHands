@@ -38,6 +38,15 @@ static ssize_t  _rdata_caa_write(ch_dns_rdata_t *rdata,ch_data_output_t *dout,vo
 	return len;
 }
 
+static void _rdata_caa_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore){
+
+    ch_dns_rdata_caa_t *caa = (ch_dns_rdata_caa_t*)rdata; 
+    ch_msgpack_store_map_start(dstore,"caa",3);
+    ch_msgpack_store_write_uint8(dstore,"flags",caa->flags);
+    ch_msgpack_store_write_kv(dstore,"tag",(const char*)caa->tag);
+    ch_msgpack_store_write_kv(dstore,"value",(const char*)caa->value);
+}
+
 static ch_dns_rdata_t * _rdata_caa_create(ch_pool_t *mp,void *priv_data ch_unused){
 
 
@@ -45,6 +54,7 @@ static ch_dns_rdata_t * _rdata_caa_create(ch_pool_t *mp,void *priv_data ch_unuse
 
 	caa->rdata.rdata_dump = _rdata_caa_dump;
 	caa->rdata.rdata_write = _rdata_caa_write;
+    caa->rdata.rdata_store = _rdata_caa_store;
 
 	caa->flags = 0;
 	caa->tag = NULL;

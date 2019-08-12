@@ -36,6 +36,14 @@ static ssize_t  _rdata_key_write(ch_dns_rdata_t *rdata,ch_data_output_t *dout,vo
 	return len;
 }
 
+static void _rdata_key_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore){
+
+     ch_dns_rdata_key_t *key = (ch_dns_rdata_key_t*)rdata; 
+     ch_msgpack_store_map_start(dstore,"key",1);
+     ch_dns_sec_key_store(&key->skey,dstore);
+
+}
+
 static ch_dns_rdata_t * _rdata_key_create(ch_pool_t *mp,void *priv_data ch_unused){
 
 
@@ -43,6 +51,7 @@ static ch_dns_rdata_t * _rdata_key_create(ch_pool_t *mp,void *priv_data ch_unuse
 
 	key->rdata.rdata_dump = _rdata_key_dump;
 	key->rdata.rdata_write = _rdata_key_write;
+	key->rdata.rdata_store = _rdata_key_store;
 
 	ch_dns_sec_key_init(&key->skey);
 

@@ -182,9 +182,17 @@ _three_way_handshake_process(ch_tcp_session_request_handler_t *req_handler,
 
             /*init session request*/
             sreq->req_sn_init = sent_seq+1;
-            sreq->req_ip = src_ip;
+            if(tcp_pkt->is_ipv6){
+                sreq->is_ipv6 = 1;
+                memcpy(sreq->src_addr,tcp_pkt->src_addr,16);
+                memcpy(sreq->dst_addr,tcp_pkt->dst_addr,16);
+            }else{
+                sreq->is_ipv6 = 0;
+                sreq->req_ip = src_ip;
+                sreq->res_ip = dst_ip;
+            }
+
             sreq->req_port = src_port;
-            sreq->res_ip = dst_ip;
             sreq->res_port = dst_port;
             sreq->three_way_state = THREE_WAY_SYN;
             /*drop this packet!*/

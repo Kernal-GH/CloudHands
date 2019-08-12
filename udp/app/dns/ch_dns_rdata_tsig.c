@@ -55,6 +55,20 @@ static ssize_t  _rdata_tsig_write(ch_dns_rdata_t *rdata,ch_data_output_t *dout,v
 	return len;
 }
 
+static void _rdata_tsig_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore){
+
+      ch_dns_rdata_tsig_t *tsig = (ch_dns_rdata_tsig_t*)rdata;  
+      ch_msgpack_store_map_start(dstore,"tsig",7);
+      ch_dns_name_store(&tsig->alg,dstore);
+      ch_msgpack_store_write_uint64(dstore,"timeSigned",tsig->timeSigned);
+      ch_msgpack_store_write_uint16(dstore,"fudge",tsig->fudge);
+      ch_msgpack_store_write_str_wlen(dstore,"signature",(const char*)tsig->signature,tsig->sig_len);
+      ch_msgpack_store_write_uint16(dstore,"origID",tsig->orig_id);
+      ch_msgpack_store_write_uint16(dstore,"error",tsig->error);
+      ch_msgpack_store_write_str_wlen(dstore,"other",(const char*)tsig->other,tsig->other_len);
+
+}
+
 static ch_dns_rdata_t * _rdata_tsig_create(ch_pool_t *mp,void *priv_data ch_unused){
 
 
@@ -62,6 +76,7 @@ static ch_dns_rdata_t * _rdata_tsig_create(ch_pool_t *mp,void *priv_data ch_unus
 
 	tsig->rdata.rdata_dump = _rdata_tsig_dump;
 	tsig->rdata.rdata_write = _rdata_tsig_write;
+	tsig->rdata.rdata_store = _rdata_tsig_store;
 
 	CH_DNS_NAME_INIT(&tsig->alg);
 	tsig->timeSigned = 0;

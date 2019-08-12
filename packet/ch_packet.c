@@ -12,11 +12,13 @@
 #include "ch_log.h"
 #include "ch_list.h"
 #include "ch_packet_ipv4.h"
+#include "ch_packet_ipv4.h"
 #include "ch_packet_tcp.h"
 #include "ch_packet_udp.h"
 #include "ch_packet_ether.h"
 #include "ch_packet_arp.h"
 #include "ch_packet_icmp.h"
+#include "ch_packet_ipv6.h"
 
 static struct list_head packet_parsers[L_MAX];
 
@@ -31,6 +33,9 @@ void ch_packet_init(void){
 
 	/*init ipv4 packet parser*/
 	ch_packet_ipv4_init();
+	
+    /*init ipv6 packet parser*/
+	ch_packet_ipv6_init();
 
 	/*init tcp packet parser*/
 	ch_packet_tcp_init();
@@ -85,6 +90,7 @@ static inline void _packet_init(ch_packet_t *pkt,struct rte_mbuf *mbuf){
 	pkt->parse_off = 0;
 	pkt->hash = 0;
 	pkt->pkt_type = PKT_TYPE_OTHER;
+    pkt->is_ipv6 = 0;
 }
 
 int ch_packet_parse(ch_packet_t *pkt,struct rte_mbuf *mbuf){

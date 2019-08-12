@@ -13,6 +13,7 @@ CFLAGS +=  -fPIC
 ch_packet_SOURCES = ch_packet.c \
 					  ch_packet_ether.c \
 					  ch_packet_ipv4.c \
+					  ch_packet_ipv6.c \
 					  ch_packet_tcp.c \
 					  ch_packet_udp.c \
 					  ch_packet_arp.c \

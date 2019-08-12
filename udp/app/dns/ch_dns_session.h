@@ -19,6 +19,7 @@ typedef struct ch_dns_session_t ch_dns_session_t;
 #include "ch_data_output.h"
 #include "ch_udp_app_pool.h"
 #include "ch_dns_rdata_ipv4.h"
+#include "ch_msgpack_store.h"
 
 struct ch_dns_session_t {
 
@@ -72,6 +73,32 @@ static inline ssize_t ch_dns_session_write(ch_dns_session_t *ds,ch_data_output_t
 	}
 
 	return len;
+}
+
+static inline int ch_dns_session_store(ch_dns_session_t *ds,ch_msgpack_store_t *dstore){
+
+	if(ds->dns_req == NULL &&ds->dns_res == NULL)
+		return -1;
+
+    int n = 3;
+    if((ds->dns_req!=NULL)&&(ds->dns_res!=NULL))
+        n = 4;
+
+    ch_msgpack_store_map_start(dstore,"dns",n);
+    ch_msgpack_store_write_uint8(dstore,"hasReq",ds->dns_req?1:0);
+    ch_msgpack_store_write_uint8(dstore,"hasRes",ds->dns_res?1:0);
+	
+    if(ds->dns_req){
+	
+		ch_dns_request_store(dstore,ds->dns_req);
+	}
+	if(ds->dns_res){
+	
+		ch_dns_response_store(dstore,ds->dns_res);
+
+	}
+
+    return 0;
 }
 
 static inline const char *ch_dns_session_domain_get(ch_dns_session_t *ds){

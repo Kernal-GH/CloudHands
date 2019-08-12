@@ -16,6 +16,7 @@ typedef struct ch_dns_sec_key_t ch_dns_sec_key_t;
 #include "ch_dns_data_input.h"
 #include "ch_data_output.h"
 #include "ch_mpool.h"
+#include "ch_msgpack_store.h"
 
 struct ch_dns_sec_key_t {
 
@@ -38,6 +39,8 @@ extern void ch_dns_sec_key_dump(ch_dns_sec_key_t *skey,FILE *fp);
 
 
 extern ssize_t ch_dns_sec_key_write(ch_dns_sec_key_t *skey,ch_data_output_t *dout);
+
+extern void ch_dns_sec_key_store(ch_dns_sec_key_t *skey,ch_msgpack_store_t *dstore);
 
 
 #define CH_DNS_SEC_KEY_WRITE(dout,skey,len,rc) do {   \

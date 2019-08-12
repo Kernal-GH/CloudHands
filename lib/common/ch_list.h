@@ -416,6 +416,17 @@ static inline void list_splice_tail_init(struct list_head *list,
 #define list_for_each(pos, head) \
 	for (pos = (head)->next; pos != (head); pos = pos->next)
 
+static inline size_t list_count(struct list_head *head){
+
+    size_t c = 0;
+    struct list_head *pos;
+
+    for(pos = (head)->next; pos != (head); pos = pos->next)
+        c++;
+
+    return c;
+}
+
 /**
  * list_for_each_prev	-	iterate over a list backwards
  * @pos:	the &struct list_head to use as a loop cursor.

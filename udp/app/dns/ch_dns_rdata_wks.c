@@ -41,6 +41,17 @@ static ssize_t  _rdata_wks_write(ch_dns_rdata_t *rdata,ch_data_output_t *dout,vo
 	return len;
 }
 
+static void _rdata_wks_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore){
+
+    ch_dns_rdata_wks_t *wks = (ch_dns_rdata_wks_t*)rdata;  
+
+    ch_msgpack_store_map_start(dstore,"wks",3);
+    ch_msgpack_store_write_uint32(dstore,"address",wks->address);
+    ch_msgpack_store_write_uint8(dstore,"protocol",wks->protocol);
+    ch_msgpack_store_write_str_wlen(dstore,"bitmap",(const char*)wks->bitmap,wks->map_len);
+
+}
+
 static ch_dns_rdata_t * _rdata_wks_create(ch_pool_t *mp,void *priv_data ch_unused){
 
 
@@ -48,6 +59,7 @@ static ch_dns_rdata_t * _rdata_wks_create(ch_pool_t *mp,void *priv_data ch_unuse
 	
 	wks->rdata.rdata_dump = _rdata_wks_dump;
 	wks->rdata.rdata_write = _rdata_wks_write;
+	wks->rdata.rdata_store = _rdata_wks_store;
 
 	wks->address = 0;
 	wks->protocol = 0;

@@ -24,6 +24,14 @@ static void _rdata_ipv4_dump(ch_dns_rdata_t *rdata,FILE *fp,void *priv_data ch_u
 
 }
 
+static void _rdata_ipv4_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore) {
+
+	ch_dns_rdata_ipv4_t *ipv4 = (ch_dns_rdata_ipv4_t*)rdata;
+    ch_msgpack_store_map_start(dstore,"ipv4",1);
+    ch_msgpack_store_write_uint32(dstore,"addr",ipv4->address);
+
+}
+
 static ssize_t  _rdata_ipv4_write(ch_dns_rdata_t *rdata,ch_data_output_t *dout,void *priv_data ch_unused){
 
 	ch_dns_rdata_ipv4_t *ipv4 = (ch_dns_rdata_ipv4_t*)rdata;
@@ -39,6 +47,7 @@ static ch_dns_rdata_t * _rdata_ipv4_create(ch_pool_t *mp,void *priv_data ch_unus
 	rdata->address = 0;
 	rdata->rdata.rdata_dump = _rdata_ipv4_dump;
 	rdata->rdata.rdata_write = _rdata_ipv4_write;
+    rdata->rdata.rdata_store = _rdata_ipv4_store;
 
 	return (ch_dns_rdata_t*)rdata;
 

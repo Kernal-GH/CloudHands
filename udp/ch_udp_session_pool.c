@@ -12,10 +12,28 @@
 #include "ch_udp_session.h"
 #include "ch_jhash.h"
 #include "ch_log.h"
+ 
+static inline uint32_t
+ ipv6_hash(uint8_t *src_addr,uint8_t *dst_addr)
+ {
+     uint32_t *word_src_addr = (uint32_t *)&(src_addr[0]);
+     uint32_t *word_dst_addr = (uint32_t *)&(dst_addr[0]);
+ 
+     return (word_src_addr[0] ^ word_dst_addr[0]) ^
+             (word_src_addr[1] ^ word_dst_addr[1]) ^
+             (word_src_addr[2] ^ word_dst_addr[2]) ^
+             (word_src_addr[3] ^ word_dst_addr[3]);
+ }
 
 static size_t _udp_session_entry_hash(void *key,void *priv_data ch_unused){
 
 	ch_packet_udp_t *udp_pkt = (ch_packet_udp_t*)key;
+    
+    if(udp_pkt->is_ipv6){
+
+        uint32_t addr_hash = ipv6_hash(udp_pkt->src_addr,udp_pkt->dst_addr);
+        return ch_jhash_3words_sort(addr_hash,(uint32_t)(udp_pkt->src_port),(uint32_t)(udp_pkt->dst_port),0);
+    }
 
     return (size_t)ch_jhash_4words_sort(udp_pkt->src_ip,udp_pkt->dst_ip,
             (uint32_t)(udp_pkt->src_port),(uint32_t)(udp_pkt->dst_port),0);
@@ -43,7 +61,7 @@ static int _udp_session_entry_equal(ch_ptable_entry_t *entry,void *key,void *pri
 
     ch_udp_session_t *udp_session = (ch_udp_session_t*)entry;
 
-    return _is_request(udp_session,udp_pkt)||_is_response(udp_session,udp_pkt);
+    return is_udp_request(udp_session,udp_pkt)||is_udp_response(udp_session,udp_pkt);
 }
 
 ch_udp_session_pool_t *ch_udp_session_pool_create(ch_udp_work_t *udp_work,

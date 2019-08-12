@@ -53,6 +53,14 @@ static ssize_t _opt_entry_write(ch_dns_rdata_opt_entry_t *entry,ch_data_output_t
 	return len;
 }
 
+static void _opt_entry_store(ch_dns_rdata_opt_entry_t *entry,ch_msgpack_store_t *dstore){
+
+    ch_msgpack_store_map_start(dstore,NULL,2);
+    ch_msgpack_store_write_uint16(dstore,"code",entry->code);
+    ch_msgpack_store_write_str_wlen(dstore,"data",(const char*)entry->data,entry->dlen);
+
+}
+
 #define ENTRY_WRITE(entry,dout,len,rc) do {     \
 	if(-1 == (rc=_opt_entry_write(entry,dout))) \
 		return -1;                              \
@@ -76,6 +84,21 @@ static ssize_t  _rdata_opt_write(ch_dns_rdata_t *rdata,ch_data_output_t *dout,vo
 	return len;
 }
 
+static void _rdata_opt_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore){
+
+     ch_dns_rdata_opt_t *opt = (ch_dns_rdata_opt_t*)rdata; 
+     ch_msgpack_store_map_start(dstore,"opt",1);
+     ch_msgpack_store_array_start(dstore,"entries",opt->entries_n);
+
+     ch_dns_rdata_opt_entry_t *entry; 
+
+     list_for_each_entry(entry,&opt->entries,node){
+
+         _opt_entry_store(entry,dstore);
+     }
+
+}
+
 static ch_dns_rdata_t * _rdata_opt_create(ch_pool_t *mp,void *priv_data ch_unused){
 
 
@@ -83,6 +106,7 @@ static ch_dns_rdata_t * _rdata_opt_create(ch_pool_t *mp,void *priv_data ch_unuse
 
 	opt->rdata.rdata_dump = _rdata_opt_dump;
 	opt->rdata.rdata_write = _rdata_opt_write;
+	opt->rdata.rdata_store = _rdata_opt_store;
 
 	opt->entries_n = 0;
 	INIT_LIST_HEAD(&opt->entries);

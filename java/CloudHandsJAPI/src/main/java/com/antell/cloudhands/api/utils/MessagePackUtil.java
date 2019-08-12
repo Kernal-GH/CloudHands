@@ -36,6 +36,17 @@ public class MessagePackUtil {
         return unpacker.unpackLong();
     }
 
+    public static byte[] parseBin(MessageUnpacker unpacker) throws IOException {
+
+        unpacker.unpackString();
+        int len = unpacker.unpackBinaryHeader();
+        byte[] data = new byte[len];
+
+        unpacker.readPayload(data);
+
+        return data;
+    }
+
     public static int parseMapHeader(MessageUnpacker unpacker,boolean hasName) throws IOException {
 
         if(hasName)

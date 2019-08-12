@@ -1,5 +1,8 @@
 package com.antell.cloudhands.api.utils;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
 /**
  * Created by dell on 2017/4/17.
  */
@@ -79,6 +82,27 @@ public class IPUtils {
 
     public static final boolean isInnerIP(String ip){
         return isInnerIPLE(ipv4LongLE(ip));
+    }
+
+    public static final String ipv6Str(byte[] address){
+
+        InetAddress addr;
+        try {
+            addr = InetAddress.getByAddress(null, address);
+        } catch (UnknownHostException e) {
+            return "0:0:0:0:0:ffff:";
+        }
+        if (addr.getAddress().length == 4) {
+            // Deal with Java's broken handling of mapped IPv4 addresses.
+            StringBuilder sb = new StringBuilder("0:0:0:0:0:ffff:");
+            int high = ((address[12] & 0xFF) << 8) + (address[13] & 0xFF);
+            int low = ((address[14] & 0xFF) << 8) + (address[15] & 0xFF);
+            sb.append(Integer.toHexString(high));
+            sb.append(':');
+            sb.append(Integer.toHexString(low));
+            return sb.toString();
+        }
+        return addr.getHostAddress();
     }
 
     public static void main(String[] args){

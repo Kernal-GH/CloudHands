@@ -36,6 +36,16 @@ static ssize_t  _rdata_rt_write(ch_dns_rdata_t *rdata,ch_data_output_t *dout,voi
 	return len;
 }
 
+static void _rdata_rt_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore){
+
+     ch_dns_rdata_rt_t *rt = (ch_dns_rdata_rt_t*)rdata; 
+     ch_dns_name_t *name = &rt->midhost;
+
+     ch_msgpack_store_map_start(dstore,"rt",2);
+     ch_msgpack_store_write_uint16(dstore,"preference",rt->preference);
+     ch_dns_name_store(name,dstore);
+}
+
 static ch_dns_rdata_t * _rdata_rt_create(ch_pool_t *mp,void *priv_data ch_unused){
 
 
@@ -47,7 +57,8 @@ static ch_dns_rdata_t * _rdata_rt_create(ch_pool_t *mp,void *priv_data ch_unused
 
 	rt->rdata.rdata_dump = _rdata_rt_dump;
 	rt->rdata.rdata_write = _rdata_rt_write;
-	
+	rt->rdata.rdata_store = _rdata_rt_store;
+    
 	rt->preference = 0;
 	CH_DNS_NAME_INIT(name);
 

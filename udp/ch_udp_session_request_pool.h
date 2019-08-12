@@ -25,9 +25,12 @@ struct ch_udp_session_request_t {
 	ch_plist_entry_t entry;
 
 	ch_udp_app_session_t *app_session;
-	
+
+    uint8_t is_ipv6;
 	uint32_t src_ip;
 	uint32_t dst_ip;
+    uint8_t src_addr[16];
+    uint8_t dst_addr[16];
 	uint16_t src_port;
 	uint16_t dst_port;
 
@@ -59,8 +62,14 @@ ch_udp_session_request_pool_entry_create(ch_udp_session_request_pool_t *req_pool
 	{
 
 		req_session->app_session = app_session;
-		req_session->src_ip = udp_pkt->src_ip;
+		req_session->is_ipv6 = udp_pkt->is_ipv6;
+        if(req_session->is_ipv6){
+            memcpy(req_session->src_addr,udp_pkt->src_addr,16);
+            memcpy(req_session->dst_addr,udp_pkt->dst_addr,16);
+        }
+        req_session->src_ip = udp_pkt->src_ip;
 		req_session->dst_ip = udp_pkt->dst_ip;
+
 		req_session->src_port = udp_pkt->src_port;
 		req_session->dst_port = udp_pkt->dst_port;
 	}

@@ -19,25 +19,47 @@ static void _udp_session_out(ch_udp_session_handler_t *udp_handler,
 	uint8_t is_timeout ch_unused,
 	uint16_t timeout_tv ch_unused){
 
+	
+    ch_packet_record_t pkt_rcd;
 	size_t dlen = 0;
 	void *data;
 
 	ch_udp_session_task_t *udp_session_task = udp_handler->session_task;
-	ch_data_output_t *dout = &udp_session_task->dout;
-	CH_DOUT_RESET(dout);
+    ch_udp_context_t *ucontext = udp_session_task->udp_work->udp_context;
 
-	ch_packet_record_t pkt_rcd;
+    if(ucontext->use_msgpack){
 
+        ch_msgpack_store_t *dstore = udp_session_task->dstore;
+        ch_msgpack_store_reset(dstore);
+        
+        if(ch_udp_app_session_store(udp_session,udp_session->app_session,dstore)<0)
+        {
+        
+            ch_log(CH_LOG_ERR,"Write UDP APP msgpack Data Failed!");
+            return;
+        }
 
-	if(-1 == ch_udp_app_session_write(udp_session,udp_session->app_session,dout))
-	{
-	
-		ch_log(CH_LOG_ERR,"Write UDP APP Data Failed!");
-		return;
-	}
-	
-	dlen = CH_DOUT_CONTENT_SIZE(dout);
-	data = CH_DOUT_CONTENT(dout);
+        data = dstore->pk_buf.data;
+        dlen = dstore->pk_buf.size;
+
+    }else{
+        
+        ch_data_output_t *dout = &udp_session_task->dout;
+        CH_DOUT_RESET(dout);
+        
+        if(ch_udp_app_session_write(udp_session,udp_session->app_session,dout)<0)
+        {
+        
+            ch_log(CH_LOG_ERR,"Write UDP APP Data Failed!");
+            return;
+        }
+        
+        dlen = CH_DOUT_CONTENT_SIZE(dout);
+        data = CH_DOUT_CONTENT(dout);
+    }
+
+    if(data==NULL||dlen==0)
+        return;
 
 	pkt_rcd.type = udp_session->app_session->app->type;
 	pkt_rcd.meta_data_size = 0;
@@ -47,7 +69,6 @@ static void _udp_session_out(ch_udp_session_handler_t *udp_handler,
 		&pkt_rcd,
 		data,
 		dlen);
-
 }
 
 static void _udp_session_timeout_cb(ch_ptable_entry_t *entry,uint64_t tv,void *priv_data){

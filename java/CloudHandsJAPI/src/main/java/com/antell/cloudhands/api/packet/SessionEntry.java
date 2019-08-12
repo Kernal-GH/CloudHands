@@ -10,6 +10,7 @@ import com.antell.cloudhands.api.utils.IPUtils;
 import com.antell.cloudhands.api.utils.TextUtils;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 
+import java.io.DataInput;
 import java.io.IOException;
 
 /**
@@ -25,6 +26,7 @@ public abstract class SessionEntry implements MsgPackDataInput,BinDataInput, ESI
 
     private String portScan;
     private String sdp;
+    private boolean isIPV6;
 
     private final SessionEndPoint req;
     private final SessionEndPoint res;
@@ -35,13 +37,39 @@ public abstract class SessionEntry implements MsgPackDataInput,BinDataInput, ESI
         this.res = new SessionEndPoint();
     }
 
+    protected byte[] readBytes(DataInput in) throws IOException {
+
+        long dataSize = in.readLong();
+
+        byte[] data = new byte[(int) dataSize];
+
+        in.readFully(data, 0, (int) dataSize);
+        return data;
+    }
+
+    protected String getsrcIPStr(){
+
+         if(isIPV6)
+             return IPUtils.ipv6Str(getReqAddr());
+
+         return IPUtils.ipv4Str(getReqIP());
+    }
+    protected String getdstIPStr(){
+
+        if(isIPV6)
+            return IPUtils.ipv6Str(getResAddr());
+
+        return IPUtils.ipv4Str(getResIP());
+    }
+
     @Override
     public XContentBuilder dataToJson(XContentBuilder cb) throws IOException {
 
         cb.field("sessionID",getSessionID());
         cb.field("protocol", protocol);
-        cb.field("srcIP", IPUtils.ipv4Str(getReqIP()));
-        cb.field("dstIP",IPUtils.ipv4Str(getResIP()));
+        cb.field("isIPV6",isIPV6?1:0);
+        cb.field("srcIP", getsrcIPStr());
+        cb.field("dstIP",getdstIPStr());
         cb.field("srcPort",getReqPort());
         cb.field("dstPort",getResPort());
         cb.field("reqStartTime", getReqStartTime());
@@ -108,6 +136,24 @@ public abstract class SessionEntry implements MsgPackDataInput,BinDataInput, ESI
 
     public void setTimeout(boolean timeout) {
         isTimeout = timeout;
+    }
+
+    public void setReqAddr(byte[] addr){
+
+        req.setAddr(addr);
+    }
+    public byte[] getReqAddr(){
+
+        return req.getAddr();
+    }
+
+    public void setResAddr(byte[] addr){
+
+        res.setAddr(addr);
+    }
+    public byte[] getResAddr(){
+
+        return res.getAddr();
     }
 
     public void setReqIP(long ip){
@@ -308,4 +354,11 @@ public abstract class SessionEntry implements MsgPackDataInput,BinDataInput, ESI
         this.sdp = sb.toString();
     }
 
+    public boolean isIPV6() {
+        return isIPV6;
+    }
+
+    public void setIPV6(boolean IPV6) {
+        isIPV6 = IPV6;
+    }
 }

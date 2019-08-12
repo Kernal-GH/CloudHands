@@ -21,10 +21,15 @@ int ch_tcp_session_init(ch_tcp_session_t *tcp_session,ch_tcp_session_request_t *
         void *sentry,
         ch_memory_t *mm){
 
-    ch_tcp_session_endpoint_init(&tcp_session->endpoint_req,sreq->req_ip,sreq->req_port,sreq->req_sn_init,mm);
+    if(sreq->is_ipv6){
 
-    ch_tcp_session_endpoint_init(&tcp_session->endpoint_res,sreq->res_ip,sreq->res_port,sreq->res_sn_init,mm);
-   
+        ch_tcp_session_endpoint_init_ipv6(&tcp_session->endpoint_req,sreq->src_addr,sreq->req_port,sreq->req_sn_init,mm);
+        ch_tcp_session_endpoint_init_ipv6(&tcp_session->endpoint_res,sreq->dst_addr,sreq->res_port,sreq->res_sn_init,mm);
+    }else{
+        ch_tcp_session_endpoint_init(&tcp_session->endpoint_req,sreq->req_ip,sreq->req_port,sreq->req_sn_init,mm);
+        ch_tcp_session_endpoint_init(&tcp_session->endpoint_res,sreq->res_ip,sreq->res_port,sreq->res_sn_init,mm);
+    }
+
     tcp_session->state = SESSION_STATE_INIT; 
 
     tcp_session->need_end = 0;
@@ -44,9 +49,24 @@ void ch_tcp_session_fin(ch_tcp_session_t *tcp_session){
     ch_tcp_session_endpoint_fin(&tcp_session->endpoint_res);
 }
 
-static inline int _endpoint_equal(ch_tcp_session_endpoint_t *ep,uint32_t ip,uint16_t port){
+static inline int _endpoint_is_request(ch_tcp_session_endpoint_t *req,ch_tcp_session_endpoint_t *res,ch_packet_tcp_t *tcp_pkt){
 
-    return (ep->ip == ip)&&(ep->port == port);
+    if(tcp_pkt->is_ipv6){
+        return (req->is_ipv6)&&(memcmp(req->addr,tcp_pkt->src_addr,16)==0)&&(req->port==tcp_pkt->src_port)&&(res->is_ipv6)&&(memcmp(res->addr,tcp_pkt->dst_addr,16)==0)&&(res->port==tcp_pkt->dst_port);
+    }else{
+        return (req->ip==tcp_pkt->src_ip)&&(req->port==tcp_pkt->src_port)&&(res->ip == tcp_pkt->dst_ip)&&(res->port == tcp_pkt->dst_port);
+    }
+
+}
+
+static inline int _endpoint_is_response(ch_tcp_session_endpoint_t *req,ch_tcp_session_endpoint_t *res,ch_packet_tcp_t *tcp_pkt){
+
+    if(tcp_pkt->is_ipv6){
+        return (req->is_ipv6)&&(memcmp(req->addr,tcp_pkt->dst_addr,16)==0)&&(req->port==tcp_pkt->dst_port)&&(res->is_ipv6)&&(memcmp(res->addr,tcp_pkt->src_addr,16)==0)&&(res->port==tcp_pkt->src_port);
+    }else{
+        return (req->ip==tcp_pkt->dst_ip)&&(req->port==tcp_pkt->dst_port)&&(res->ip == tcp_pkt->src_ip)&&(res->port == tcp_pkt->src_port);
+    }
+
 }
 
 ch_tcp_session_endpoint_t * ch_tcp_session_endpoint_get(ch_tcp_session_t *tcp_session,ch_packet_tcp_t *tcp_pkt){
@@ -54,12 +74,12 @@ ch_tcp_session_endpoint_t * ch_tcp_session_endpoint_get(ch_tcp_session_t *tcp_se
     ch_tcp_session_endpoint_t *req = &tcp_session->endpoint_req;
     ch_tcp_session_endpoint_t *res = &tcp_session->endpoint_res;
 
-    if(_endpoint_equal(req,tcp_pkt->src_ip,tcp_pkt->src_port)&&_endpoint_equal(res,tcp_pkt->dst_ip,tcp_pkt->dst_port)){
+    if(_endpoint_is_request(req,res,tcp_pkt)){
         /*request packet!*/
         return req;
     }
 
-    if(_endpoint_equal(req,tcp_pkt->dst_ip,tcp_pkt->dst_port)&&_endpoint_equal(res,tcp_pkt->src_ip,tcp_pkt->src_port)){
+    if(_endpoint_is_response(req,res,tcp_pkt)){
         /*response packet!*/
         return res;
     }

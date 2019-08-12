@@ -16,6 +16,7 @@ typedef struct ch_dns_name_t ch_dns_name_t;
 #include "ch_dns_data_input.h"
 #include "ch_mpool.h"
 #include "ch_data_output.h"
+#include "ch_msgpack_store.h"
 
 /*%
  * Max size of a  domain name
@@ -47,6 +48,22 @@ static inline void ch_dns_name_clone(ch_pool_t *mp,ch_dns_name_t *dst,ch_dns_nam
 	dst->length = src->length;
 	dst->labels = src->labels;
 	dst->ndata = (unsigned char*)ch_pstrndup(mp,(const char*)src->ndata,src->length);
+}
+
+static inline void ch_dns_name_store(ch_dns_name_t *name,ch_msgpack_store_t *dstore){
+
+    ch_msgpack_store_map_start(dstore,"name",2);
+    ch_msgpack_store_write_uint16(dstore,"labels",name->labels);
+    ch_msgpack_store_write_str_wlen(dstore,"name",(const char*)name->ndata,name->length);
+
+}
+
+static inline void ch_dns_name_store_wkey(ch_dns_name_t *name,ch_msgpack_store_t *dstore,const char *k){
+
+    ch_msgpack_store_map_start(dstore,k,2);
+    ch_msgpack_store_write_uint16(dstore,"labels",name->labels);
+    ch_msgpack_store_write_str_wlen(dstore,"name",(const char*)name->ndata,name->length);
+
 }
 
 static inline ssize_t ch_dns_name_write(ch_data_output_t *dout,ch_dns_name_t *name){

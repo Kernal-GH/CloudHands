@@ -52,6 +52,7 @@ struct ch_packet_t {
 	uint16_t parse_off;
 
 	uint32_t hash;
+    uint8_t  is_ipv6;
 };
 
 

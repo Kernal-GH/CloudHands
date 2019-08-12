@@ -37,6 +37,7 @@ static void do_udp_context_init(ch_udp_context_t *udp_context){
 	udp_context->udp_session_request_pool_type = FROM_OBJ_POOL;
     udp_context->udp_session_request_limits = 10000000; 
     udp_context->udp_session_request_timeout = 3*60;
+    udp_context->use_msgpack = 1;
 }
 
 static const char *cmd_udp_log(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1,const char *p2){
@@ -209,6 +210,17 @@ static const char *cmd_udp_session_tbl_size(cmd_parms *cmd ch_unused, void *_dcf
         return "invalid udp session table size config value";
     }
 
+    return NULL;
+}
+
+static const char *cmd_udp_use_msgpack(cmd_parms *cmd ch_unused, void *_dcfg, const char *p1){
+
+    char *endptr;
+
+    ch_udp_context_t *context = (ch_udp_context_t*)_dcfg;
+
+    context->use_msgpack = (int)strtoul(p1,&endptr,10);
+    
     return NULL;
 }
 
@@ -428,6 +440,14 @@ static const command_rec udp_context_directives[] = {
             0,
             "set udp session request limits config item"
             ),
+    
+    CH_INIT_TAKE1(
+            "CHUDPUseMsgpack",
+            cmd_udp_use_msgpack,
+            NULL,
+            0,
+            "set udp session write by msgpack?"
+            ),
 
 };
 
@@ -452,6 +472,8 @@ static inline void dump_udp_context(ch_udp_context_t *udp_context){
     fprintf(stdout,"udp session request timeout:%lu\n",(unsigned long)udp_context->udp_session_request_timeout);
     
 	fprintf(stdout,"udp session request limits:%lu\n",(unsigned long)udp_context->udp_session_request_limits);
+	
+    fprintf(stdout,"udp session use msgpack:%s\n",udp_context->use_msgpack?"yes":"no");
 }
 
 ch_udp_context_t * ch_udp_context_create(ch_pool_t *mp,const char *cfname){

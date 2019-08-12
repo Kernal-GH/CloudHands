@@ -52,6 +52,21 @@ static ssize_t  _rdata_nsec3_write(ch_dns_rdata_t *rdata,ch_data_output_t *dout,
 	return len;
 }
 
+static void _rdata_nsec3_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore){
+
+    ch_dns_rdata_nsec3_t *nsec3 = (ch_dns_rdata_nsec3_t*)rdata;
+
+    ch_msgpack_store_map_start(dstore,"nsec3",6);
+    ch_msgpack_store_write_uint8(dstore,"alg",nsec3->hash_alg);
+    ch_msgpack_store_write_uint8(dstore,"flags",nsec3->flags);
+    ch_msgpack_store_write_uint16(dstore,"iterations",nsec3->iterations);
+
+    ch_msgpack_store_write_str_wlen(dstore,"salt",(const char*)nsec3->salt,nsec3->salt_len);
+    ch_msgpack_store_write_str_wlen(dstore,"next",(const char*)nsec3->next,nsec3->hash_len);
+    ch_msgpack_store_write_str_wlen(dstore,"tbtm",(const char*)nsec3->typebitmap,nsec3->typebitmap_len);
+
+}
+
 static ch_dns_rdata_t * _rdata_nsec3_create(ch_pool_t *mp,void *priv_data ch_unused){
 
 
@@ -59,6 +74,7 @@ static ch_dns_rdata_t * _rdata_nsec3_create(ch_pool_t *mp,void *priv_data ch_unu
 
 	nsec3->rdata.rdata_dump = _rdata_nsec3_dump;
 	nsec3->rdata.rdata_write = _rdata_nsec3_write;
+	nsec3->rdata.rdata_store = _rdata_nsec3_store;
 
 	nsec3->hash_alg = 0;
 	nsec3->flags = 0;

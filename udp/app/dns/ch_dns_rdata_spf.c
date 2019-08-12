@@ -35,6 +35,15 @@ static ssize_t  _rdata_spf_write(ch_dns_rdata_t *rdata,ch_data_output_t *dout,vo
 	return len;
 }
 
+static void _rdata_spf_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore){
+
+    ch_dns_rdata_spf_t *spf = (ch_dns_rdata_spf_t*)rdata;
+
+    ch_msgpack_store_map_start(dstore,"spf",1);
+
+    ch_dns_txt_base_store(&spf->txt_base,dstore);
+
+}
 
 static ch_dns_rdata_t * _rdata_spf_create(ch_pool_t *mp,void *priv_data ch_unused){
 
@@ -44,6 +53,7 @@ static ch_dns_rdata_t * _rdata_spf_create(ch_pool_t *mp,void *priv_data ch_unuse
 
 	spf->rdata.rdata_dump = _rdata_spf_dump;
 	spf->rdata.rdata_write = _rdata_spf_write;
+	spf->rdata.rdata_store = _rdata_spf_store;
 
 	ch_dns_txt_base_init(mp,&spf->txt_base);
 

@@ -29,6 +29,13 @@ static ssize_t  _rdata_nsap_ptr_write(ch_dns_rdata_t *rdata,ch_data_output_t *do
 
 }
 
+static void _rdata_nsap_ptr_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore){
+
+    ch_dns_rdata_nsap_ptr_t *nsap_ptr = (ch_dns_rdata_nsap_ptr_t*)rdata; 
+    ch_msgpack_store_map_start(dstore,"nsapptr",1);
+    ch_dns_name_store(&nsap_ptr->name,dstore);
+}
+
 static ch_dns_rdata_t * _rdata_nsap_ptr_create(ch_pool_t *mp,void *priv_data ch_unused){
 
 
@@ -38,6 +45,7 @@ static ch_dns_rdata_t * _rdata_nsap_ptr_create(ch_pool_t *mp,void *priv_data ch_
 
 	nsap_ptr->rdata.rdata_dump = _rdata_nsap_ptr_dump;
 	nsap_ptr->rdata.rdata_write = _rdata_nsap_ptr_write;
+	nsap_ptr->rdata.rdata_store = _rdata_nsap_ptr_store;
 
 	CH_DNS_NAME_INIT(name);
 

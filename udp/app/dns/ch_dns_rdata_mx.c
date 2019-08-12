@@ -34,6 +34,16 @@ static ssize_t  _rdata_mx_write(ch_dns_rdata_t *rdata,ch_data_output_t *dout,voi
 	return len;
 }
 
+static void _rdata_mx_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore){
+
+    ch_dns_rdata_mx_t *mx = (ch_dns_rdata_mx_t*)rdata; 
+    ch_dns_name_t *name = &mx->mail_exchange; 
+
+    ch_msgpack_store_map_start(dstore,"mx",2);
+    ch_msgpack_store_write_uint16(dstore,"preference",mx->preference);
+    ch_dns_name_store(name,dstore);
+}
+
 static ch_dns_rdata_t * _rdata_mx_create(ch_pool_t *mp,void *priv_data ch_unused){
 
 
@@ -45,6 +55,7 @@ static ch_dns_rdata_t * _rdata_mx_create(ch_pool_t *mp,void *priv_data ch_unused
 
 	mx->rdata.rdata_dump = _rdata_mx_dump;
 	mx->rdata.rdata_write = _rdata_mx_write;
+	mx->rdata.rdata_store = _rdata_mx_store;
 	
 	mx->preference = 0;
 	CH_DNS_NAME_INIT(name);

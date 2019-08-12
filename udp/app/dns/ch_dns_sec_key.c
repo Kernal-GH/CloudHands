@@ -49,6 +49,16 @@ void ch_dns_sec_key_dump(ch_dns_sec_key_t *skey,FILE *fp){
 
 }
 
+void ch_dns_sec_key_store(ch_dns_sec_key_t *skey,ch_msgpack_store_t *dstore) {
+
+    ch_msgpack_store_map_start(dstore,"skey",4);
+    ch_msgpack_store_write_uint16(dstore,"flags",skey->flags);
+    ch_msgpack_store_write_uint8(dstore,"proto",skey->proto);
+    ch_msgpack_store_write_uint8(dstore,"alg",skey->alg);
+    ch_msgpack_store_write_str_wlen(dstore,"pubKey",(const char*)skey->public_key,skey->public_key_len);
+
+}
+
 ssize_t ch_dns_sec_key_write(ch_dns_sec_key_t *skey,ch_data_output_t *dout){
 
 	ssize_t rc,len = 0;

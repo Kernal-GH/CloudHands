@@ -38,6 +38,16 @@ static ssize_t  _rdata_uri_write(ch_dns_rdata_t *rdata,ch_data_output_t *dout,vo
 
 }
 
+static void _rdata_uri_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore){
+
+    ch_dns_rdata_uri_t *uri = (ch_dns_rdata_uri_t*)rdata;    
+    ch_msgpack_store_map_start(dstore,"uri",3);
+    ch_msgpack_store_write_uint16(dstore,"priority",uri->priority);
+    ch_msgpack_store_write_uint16(dstore,"weight",uri->weight);
+    ch_msgpack_store_write_str_wlen(dstore,"target",(const char*)uri->target,uri->target_len);
+
+}
+
 static ch_dns_rdata_t * _rdata_uri_create(ch_pool_t *mp,void *priv_data ch_unused){
 
 
@@ -45,6 +55,7 @@ static ch_dns_rdata_t * _rdata_uri_create(ch_pool_t *mp,void *priv_data ch_unuse
 
 	uri->rdata.rdata_dump = _rdata_uri_dump;
 	uri->rdata.rdata_write = _rdata_uri_write;
+	uri->rdata.rdata_store = _rdata_uri_store;
 	
 	uri->priority = 0;
 	uri->weight = 0;

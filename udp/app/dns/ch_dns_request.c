@@ -111,6 +111,14 @@ const char *ch_dns_request_name_get(ch_dns_requst_t *dns_req){
 
 }
 
+void ch_dns_question_store(ch_dns_question_t *dnsq,ch_msgpack_store_t *dstore){
+
+    ch_msgpack_store_map_start(dstore,"question",3);
+    ch_dns_name_store(&dnsq->qname,dstore);
+    ch_msgpack_store_write_uint16(dstore,"qtype",dnsq->qtype);
+    ch_msgpack_store_write_uint16(dstore,"qclass",dnsq->qclass);
+}
+
 ssize_t ch_dns_question_write(ch_dns_question_t *dnsq,ch_data_output_t *dout){
 
 	ssize_t rc,len = 0;
@@ -120,6 +128,19 @@ ssize_t ch_dns_question_write(ch_dns_question_t *dnsq,ch_data_output_t *dout){
 	CH_DOUT_UINT16_WRITE(dout,dnsq->qclass,len,rc);
 
 	return len;
+}
+
+static inline uint16_t _dns_questions_count(ch_dns_requst_t *dnsr){
+
+	ch_dns_question_t *dnsq;
+    uint16_t c = 0;
+	
+    list_for_each_entry(dnsq,&dnsr->questions,node){
+
+        c++;
+	}
+
+    return c;
 }
 
 ssize_t ch_dns_request_write(ch_dns_requst_t *dnsr,ch_data_output_t *dout){
@@ -140,3 +161,17 @@ ssize_t ch_dns_request_write(ch_dns_requst_t *dnsr,ch_data_output_t *dout){
 	return len;
 }
 
+void  ch_dns_requst_store(ch_msgpack_store_t *dstore,ch_dns_requst_t *dnsr) {
+
+    ch_msgpack_store_map_start(dstore,"req",2);
+
+    ch_dns_header_store(&dnsr->hdr,dstore);
+    ch_msgpack_store_array_start(dstore,"questions",_dns_questions_count(dnsr));
+
+	ch_dns_question_t *dnsq;
+	
+    list_for_each_entry(dnsq,&dnsr->questions,node){
+        
+        ch_dns_question_store(dnsq,dstore);
+	}
+}
