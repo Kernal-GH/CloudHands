@@ -1,7 +1,9 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
+import com.antell.cloudhands.api.utils.MessagePackUtil;
 import com.antell.cloudhands.api.utils.Text;
 import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.msgpack.core.MessageUnpacker;
 
 import java.io.DataInput;
 import java.io.IOException;
@@ -29,6 +31,15 @@ public class ISDNRecord extends Record {
         address = Text.readString(in,2);
 
         subAddress = Text.readString(in,2);
+
+    }
+
+    @Override
+    public void read(MessageUnpacker unpacker) throws IOException {
+
+        MessagePackUtil.parseMapHeader(unpacker,true);
+        address = MessagePackUtil.parseText(unpacker);
+        subAddress = MessagePackUtil.parseText(unpacker);
 
     }
 

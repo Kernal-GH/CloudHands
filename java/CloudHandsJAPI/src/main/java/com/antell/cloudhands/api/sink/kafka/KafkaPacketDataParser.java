@@ -46,7 +46,7 @@ public class KafkaPacketDataParser {
                 break;
 
             case PacketRecord.TFTP:
-                entry = new TFTPSession(packetRecord.getDataInput());
+                entry = new TFTPSession(packetRecord.getMessageUnpacker());
                 break;
             case PacketRecord.HTTP:
             case PacketRecord.SECRESHTTP:
@@ -67,11 +67,11 @@ public class KafkaPacketDataParser {
                 break;
 
             case PacketRecord.TCPSMON:
-                entry = new SMonSession(packetRecord.getMessageUnpacker());
+                entry = new SMonSession(packetRecord.getMessageUnpacker(),true);
                 break;
 
             case PacketRecord.UDPSMON:
-                entry = new SMonSession(packetRecord.getDataInput());
+                entry = new SMonSession(packetRecord.getMessageUnpacker(),false);
                 break;
 
             default:
@@ -137,11 +137,11 @@ public class KafkaPacketDataParser {
                 break;
 
             case PacketRecord.TCPSMON:
-                entry = new SMonSession(MessagePack.newDefaultUnpacker(data,10,len));
+                entry = new SMonSession(MessagePack.newDefaultUnpacker(data,10,len),true);
                 break;
 
             case PacketRecord.UDPSMON:
-                entry = new SMonSession(input);
+                entry = new SMonSession(MessagePack.newDefaultUnpacker(data,10,len),false);
                 break;
 
             default:
@@ -151,5 +151,5 @@ public class KafkaPacketDataParser {
 
         return entry;
     }
-
+    
 }

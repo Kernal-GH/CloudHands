@@ -1,7 +1,9 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
+import com.antell.cloudhands.api.utils.MessagePackUtil;
 import com.antell.cloudhands.api.utils.Text;
 import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.msgpack.core.MessageUnpacker;
 
 import java.io.DataInput;
 import java.io.IOException;
@@ -836,6 +838,30 @@ public class WKSRecord extends Record {
 
         protocol = in.readUnsignedByte();
         byte[] array = Text.readBytes(in,2);
+
+        List list = new ArrayList();
+        for (int i = 0; i < array.length; i++) {
+            for (int j = 0; j < 8; j++) {
+                int octet = array[i] & 0xFF;
+                if ((octet & (1 << (7 - j))) != 0) {
+                    list.add(new Integer(i * 8 + j));
+                }
+            }
+        }
+        services = new int[list.size()];
+        for (int i = 0; i < list.size(); i++) {
+            services[i] = ((Integer) list.get(i)).intValue();
+        }
+    }
+
+    @Override
+    public void read(MessageUnpacker unpacker) throws IOException {
+
+        MessagePackUtil.parseMapHeader(unpacker,true);
+        address = MessagePackUtil.parseBin(unpacker);
+        protocol = MessagePackUtil.parseInt(unpacker);
+
+        byte[] array = MessagePackUtil.parseBin(unpacker);
 
         List list = new ArrayList();
         for (int i = 0; i < array.length; i++) {

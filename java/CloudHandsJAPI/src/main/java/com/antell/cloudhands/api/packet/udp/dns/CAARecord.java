@@ -1,7 +1,9 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
+import com.antell.cloudhands.api.utils.MessagePackUtil;
 import com.antell.cloudhands.api.utils.Text;
 import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.msgpack.core.MessageUnpacker;
 
 import java.io.DataInput;
 import java.io.IOException;
@@ -36,6 +38,15 @@ public class CAARecord extends Record {
         flags = in.readUnsignedByte();
         tag = Text.readString(in,2);
         value = Text.readString(in,2);
+    }
+
+    @Override
+    public void read(MessageUnpacker unpacker) throws IOException {
+
+        MessagePackUtil.parseMapHeader(unpacker,true);
+        flags = MessagePackUtil.parseInt(unpacker);
+        tag = MessagePackUtil.parseText(unpacker);
+        value = MessagePackUtil.parseText(unpacker);
     }
 
     @Override

@@ -1,6 +1,8 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
+import com.antell.cloudhands.api.utils.MessagePackUtil;
 import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.msgpack.core.MessageUnpacker;
 
 import java.io.DataInput;
 import java.io.IOException;
@@ -30,6 +32,14 @@ public class RPRecord extends Record {
     public void read(DataInput in) throws IOException {
         mailbox = new Name(in);
         textDomain = new Name(in);
+    }
+
+    @Override
+    public void read(MessageUnpacker unpacker) throws IOException {
+
+        MessagePackUtil.parseMapHeader(unpacker,true);
+        mailbox = new Name(unpacker);
+        textDomain = new Name(unpacker);
     }
 
     /**

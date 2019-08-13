@@ -1,6 +1,8 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
+import com.antell.cloudhands.api.utils.MessagePackUtil;
 import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.msgpack.core.MessageUnpacker;
 
 import java.io.DataInput;
 import java.io.IOException;
@@ -28,6 +30,16 @@ public class PXRecord extends Record {
         preference = in.readUnsignedShort();
         map822 = new Name(in);
         mapX400 = new Name(in);
+    }
+
+    @Override
+    public void read(MessageUnpacker unpacker) throws IOException {
+
+        MessagePackUtil.parseMapHeader(unpacker,true);
+        preference = MessagePackUtil.parseInt(unpacker);
+        map822 = new Name(unpacker);
+        mapX400 = new Name(unpacker);
+
     }
 
     /**

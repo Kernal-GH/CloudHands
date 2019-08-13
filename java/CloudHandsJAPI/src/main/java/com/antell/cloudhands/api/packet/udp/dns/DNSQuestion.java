@@ -3,8 +3,12 @@ package com.antell.cloudhands.api.packet.udp.dns;
 
 import com.antell.cloudhands.api.BinDataInput;
 import com.antell.cloudhands.api.DataDump;
+import com.antell.cloudhands.api.MsgPackDataInput;
 import com.antell.cloudhands.api.sink.es.ESIndexable;
+import com.antell.cloudhands.api.utils.MessagePackUtil;
+import com.google.common.base.Preconditions;
 import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.msgpack.core.MessageUnpacker;
 
 import java.io.DataInput;
 import java.io.IOException;
@@ -12,7 +16,7 @@ import java.io.IOException;
 /**
  * Created by dell on 2018/6/15.
  */
-public class DNSQuestion implements BinDataInput, ESIndexable,DataDump{
+public class DNSQuestion implements BinDataInput,MsgPackDataInput, ESIndexable,DataDump{
 
     private Name name;
     private int type;
@@ -24,6 +28,17 @@ public class DNSQuestion implements BinDataInput, ESIndexable,DataDump{
         name = new Name(in);
         type = in.readUnsignedShort();
         dclass = in.readUnsignedShort();
+    }
+
+    @Override
+    public void parse(MessageUnpacker unpacker) throws IOException {
+
+        int n = MessagePackUtil.parseMapHeader(unpacker,true);
+        Preconditions.checkArgument(n==3,"Invalid msgpack packet of udp session question entry:"+n);
+
+        name = new Name(unpacker);
+        type = MessagePackUtil.parseShort(unpacker);
+        dclass = MessagePackUtil.parseShort(unpacker);
     }
 
     @Override
@@ -74,6 +89,7 @@ public class DNSQuestion implements BinDataInput, ESIndexable,DataDump{
     public Name getName() {
         return name;
     }
+
 
 
 }

@@ -1,6 +1,9 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
+import com.antell.cloudhands.api.utils.MessagePackUtil;
+import com.antell.cloudhands.api.utils.Text;
 import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.msgpack.core.MessageUnpacker;
 
 import java.io.DataInput;
 import java.io.IOException;
@@ -31,7 +34,14 @@ public class NSECRecord extends Record {
     @Override
     public void read(DataInput in) throws IOException {
         next = new Name(in);
-        types = new TypeBitmap(in);
+        types = new TypeBitmap( Text.readBytes(in,2));
+    }
+
+    @Override
+    public void read(MessageUnpacker unpacker) throws IOException {
+        MessagePackUtil.parseMapHeader(unpacker,true);
+        next = new Name(unpacker);
+        types = new TypeBitmap(MessagePackUtil.parseBin(unpacker));
     }
 
     /**

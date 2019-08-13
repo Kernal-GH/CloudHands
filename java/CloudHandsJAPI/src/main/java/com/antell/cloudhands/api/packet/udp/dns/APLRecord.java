@@ -1,8 +1,10 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
 import com.antell.cloudhands.api.utils.Base16;
+import com.antell.cloudhands.api.utils.MessagePackUtil;
 import com.antell.cloudhands.api.utils.Text;
 import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.msgpack.core.MessageUnpacker;
 
 import java.io.DataInput;
 import java.io.IOException;
@@ -121,6 +123,40 @@ public class APLRecord extends Record {
             boolean negative = in.readUnsignedByte()==1;
 
             byte[] data = Text.readBytes(in,2);
+
+            Element element;
+            if (!validatePrefixLength(family, prefix)) {
+                throw new ParseException("invalid prefix length");
+            }
+
+            if (family == Address.IPv4 || family == Address.IPv6) {
+                data = parseAddress(data,
+                        Address.addressLength(family));
+                InetAddress addr = InetAddress.getByAddress(data);
+                element = new Element(negative, addr, prefix);
+            } else {
+                element = new Element(family, negative, data, prefix);
+            }
+            elements.add(element);
+
+        }
+    }
+
+    @Override
+    public void read(MessageUnpacker unpacker) throws IOException {
+
+        MessagePackUtil.parseMapHeader(unpacker,true);
+        int n = MessagePackUtil.parseArrayHeader(unpacker,true);
+
+        for(int i = 0;i<n;i++) {
+
+            MessagePackUtil.parseMapHeader(unpacker,false);
+
+            int family = MessagePackUtil.parseInt(unpacker);
+            int prefix = MessagePackUtil.parseByte(unpacker);
+            boolean negative = MessagePackUtil.parseByte(unpacker)==1;
+
+            byte[] data = MessagePackUtil.parseBin(unpacker);
 
             Element element;
             if (!validatePrefixLength(family, prefix)) {

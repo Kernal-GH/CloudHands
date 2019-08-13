@@ -1,6 +1,8 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
+import com.antell.cloudhands.api.utils.MessagePackUtil;
 import com.antell.cloudhands.api.utils.Text;
+import org.msgpack.core.MessageUnpacker;
 
 import java.io.DataInput;
 import java.io.IOException;
@@ -148,6 +150,40 @@ public abstract class EDNSOption {
 			option = new GenericEDNSOption(code);
 			break;
 	}
+
+		option.setData(data);
+		option.optionRead(din);
+		din.restoreActive(save);
+		return option;
+	}
+
+	public static EDNSOption build(MessageUnpacker unpacker) throws IOException {
+		int code, length;
+
+		MessagePackUtil.parseMapHeader(unpacker,false);
+		code =MessagePackUtil.parseInt(unpacker) ;
+
+		byte[] data = MessagePackUtil.parseBin(unpacker);
+		length = data.length;
+
+		DNSDataInput din = new BasicDNSDataInput(data);
+
+		if (din.remaining() < length)
+			throw new ParseException("truncated option");
+		int save = din.saveActive();
+		din.setActive(length);
+		EDNSOption option;
+		switch (code) {
+			case Code.NSID:
+				option = new NSIDOption();
+				break;
+			case Code.CLIENT_SUBNET:
+				option = new ClientSubnetOption();
+				break;
+			default:
+				option = new GenericEDNSOption(code);
+				break;
+		}
 
 		option.setData(data);
 		option.optionRead(din);

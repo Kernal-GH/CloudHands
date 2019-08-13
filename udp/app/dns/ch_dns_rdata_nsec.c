@@ -47,7 +47,7 @@ static void _rdata_nsec_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore){
      ch_msgpack_store_map_start(dstore,"nsec",2);
      
      ch_dns_name_store(name,dstore);
-     ch_msgpack_store_write_str_wlen(dstore,"tbtm",(const char*)nsec->typebitmap,nsec->typebitmap_len);
+     ch_msgpack_store_write_bin_kv(dstore,"tbtm",(void*)nsec->typebitmap,nsec->typebitmap_len);
      
 }
 

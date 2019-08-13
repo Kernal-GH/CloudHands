@@ -1,6 +1,7 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
 import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.msgpack.core.MessageUnpacker;
 
 import java.io.DataInput;
 import java.io.IOException;
@@ -38,6 +39,11 @@ public class A6Record extends Record {
         }
         if (prefixBits > 0)
             prefix = new Name(in);
+    }
+
+    @Override
+    public void read(MessageUnpacker unpacker) throws IOException {
+
     }
 
     /**

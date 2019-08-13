@@ -62,10 +62,10 @@ static void _rdata_tsig_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore){
       ch_dns_name_store(&tsig->alg,dstore);
       ch_msgpack_store_write_uint64(dstore,"timeSigned",tsig->timeSigned);
       ch_msgpack_store_write_uint16(dstore,"fudge",tsig->fudge);
-      ch_msgpack_store_write_str_wlen(dstore,"signature",(const char*)tsig->signature,tsig->sig_len);
+      ch_msgpack_store_write_bin_kv(dstore,"signature",(void*)tsig->signature,tsig->sig_len);
       ch_msgpack_store_write_uint16(dstore,"origID",tsig->orig_id);
       ch_msgpack_store_write_uint16(dstore,"error",tsig->error);
-      ch_msgpack_store_write_str_wlen(dstore,"other",(const char*)tsig->other,tsig->other_len);
+      ch_msgpack_store_write_bin_kv(dstore,"other",(void*)tsig->other,tsig->other_len);
 
 }
 

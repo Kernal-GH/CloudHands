@@ -41,7 +41,7 @@ static void _rdata_openpgpkey_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *ds
 
     ch_dns_rdata_openpgpkey_t *openpgpkey = (ch_dns_rdata_openpgpkey_t*)rdata;
     ch_msgpack_store_map_start(dstore,"openpgpkey",1);
-    ch_msgpack_store_write_str_wlen(dstore,"key",(const char*) openpgpkey->key,openpgpkey->key_len);
+    ch_msgpack_store_write_bin_kv(dstore,"key",(void*) openpgpkey->key,openpgpkey->key_len);
 
 }
 

@@ -51,7 +51,7 @@ static void _rdata_cert_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore){
     ch_msgpack_store_write_uint16(dstore,"type",cert->cert_type);
     ch_msgpack_store_write_uint16(dstore,"tag",cert->key_tag);
     ch_msgpack_store_write_uint8(dstore,"alg",cert->alg);
-    ch_msgpack_store_write_kv(dstore,"value",(const char*)cert->cert);
+    ch_msgpack_store_write_bin_kv(dstore,"value",(void*)cert->cert,cert->cert_len);
 }
 
 static ch_dns_rdata_t * _rdata_cert_create(ch_pool_t *mp,void *priv_data ch_unused){

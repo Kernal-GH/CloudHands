@@ -61,8 +61,8 @@ static void _rdata_tkey_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore){
     ch_msgpack_store_write_uint32(dstore,"timeExpire",tkey->time_expire);
     ch_msgpack_store_write_uint16(dstore,"mode",tkey->mode);
     ch_msgpack_store_write_uint16(dstore,"error",tkey->error);
-    ch_msgpack_store_write_str_wlen(dstore,"key",(const char*)tkey->key,tkey->key_len);
-    ch_msgpack_store_write_str_wlen(dstore,"other",(const char*)tkey->other,tkey->other_len);
+    ch_msgpack_store_write_bin_kv(dstore,"key",(void*)tkey->key,tkey->key_len);
+    ch_msgpack_store_write_bin_kv(dstore,"other",(void*)tkey->other,tkey->other_len);
 
 }
 

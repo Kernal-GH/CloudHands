@@ -2,9 +2,13 @@ package com.antell.cloudhands.api.packet.udp.dns;
 
 import com.antell.cloudhands.api.BinDataInput;
 import com.antell.cloudhands.api.DataDump;
+import com.antell.cloudhands.api.MsgPackDataInput;
 import com.antell.cloudhands.api.sink.es.ESIndexable;
+import com.antell.cloudhands.api.utils.MessagePackUtil;
 import com.antell.cloudhands.api.utils.TextUtils;
+import com.google.common.base.Preconditions;
 import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.msgpack.core.MessageUnpacker;
 
 import java.io.DataInput;
 import java.io.IOException;
@@ -14,7 +18,7 @@ import java.util.List;
 /**
  * Created by dell on 2018/6/15.
  */
-public class DNSRequst implements BinDataInput, ESIndexable,DataDump{
+public class DNSRequst implements BinDataInput,MsgPackDataInput,ESIndexable,DataDump{
 
     private Header header;
     private List<DNSQuestion> questions;
@@ -35,6 +39,25 @@ public class DNSRequst implements BinDataInput, ESIndexable,DataDump{
             addQuestion(question);
 
         }
+    }
+
+    @Override
+    public void parse(MessageUnpacker unpacker) throws IOException {
+
+        int n = MessagePackUtil.parseMapHeader(unpacker,true);
+        Preconditions.checkArgument(n==2,"Invalid msgpack packet of udp session request entry:"+n);
+        header = new Header(unpacker);
+        questions = new ArrayList<>();
+
+        n = MessagePackUtil.parseArrayHeader(unpacker,true);
+
+        for(int i=0;i<n;i++){
+
+            DNSQuestion question = new DNSQuestion();
+            question.parse(unpacker);
+            addQuestion(question);
+        }
+
     }
 
     @Override

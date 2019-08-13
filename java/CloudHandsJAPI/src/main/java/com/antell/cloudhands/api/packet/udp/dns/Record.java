@@ -1,7 +1,10 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
 import com.antell.cloudhands.api.utils.Base16;
+import com.antell.cloudhands.api.utils.MessagePackUtil;
+import com.google.common.base.Preconditions;
 import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.msgpack.core.MessageUnpacker;
 
 import java.io.DataInput;
 import java.io.IOException;
@@ -65,6 +68,7 @@ public abstract class Record {
      * Converts the type-specific RR to wire format - must be overriden
      */
     public abstract void read(DataInput in) throws IOException;
+    public abstract void read(MessageUnpacker unpacker) throws IOException;
 
     private static Record newRecord(Name name, int type, int dclass, long ttl, DataInput in)
             throws IOException {
@@ -77,6 +81,17 @@ public abstract class Record {
 
             rec.read(in);
         }
+
+        return rec;
+    }
+
+    private static Record newRecord(Name name, int type, int dclass, long ttl, MessageUnpacker unpacker)
+            throws IOException {
+
+        Record rec;
+        rec = getEmptyRecord(name, type, dclass, ttl, true);
+
+        rec.read(unpacker);
 
         return rec;
     }
@@ -137,6 +152,28 @@ public abstract class Record {
         return rec;
     }
 
+    public static Record build(MessageUnpacker unpacker) throws IOException {
+
+        int type, dclass;
+        long ttl;
+        int length;
+        Name name;
+        Record rec;
+        boolean hasData;
+
+        int n = MessagePackUtil.parseMapHeader(unpacker,true);
+        Preconditions.checkArgument(n==6,"Invalid msgpack packet of dns record entry:"+n);
+        name = new Name(unpacker);
+        type = MessagePackUtil.parseInt(unpacker);
+        dclass = MessagePackUtil.parseInt(unpacker);
+        ttl = MessagePackUtil.parseLong(unpacker);
+        hasData = MessagePackUtil.parseByte(unpacker)==1;
+        if (!hasData)
+            return newRecord(name, type, dclass, ttl);
+        rec = newRecord(name, type, dclass, ttl,unpacker);
+
+        return rec;
+    }
 
     /**
      * Converts the type-specific RR to text format - must be overriden

@@ -37,7 +37,7 @@ static void _rdata_ipv6_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore) 
 
     ch_dns_rdata_ipv6_t *ipv6 = (ch_dns_rdata_ipv6_t*)rdata; 
     ch_msgpack_store_map_start(dstore,"ipv6",1);
-    ch_msgpack_store_write_str_wlen(dstore,"addr",(const char*)ipv6->address,16);
+    ch_msgpack_store_write_bin_kv(dstore,"addr",(void*)ipv6->address,16);
 }
 
 static ch_dns_rdata_t * _rdata_ipv6_create(ch_pool_t *mp,void *priv_data ch_unused){

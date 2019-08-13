@@ -1,6 +1,8 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
+import com.antell.cloudhands.api.utils.MessagePackUtil;
 import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.msgpack.core.MessageUnpacker;
 
 import java.io.DataInput;
 import java.io.IOException;
@@ -48,6 +50,23 @@ public class LOCRecord extends Record {
         latitude = in.readInt();
         longitude = in.readInt();
         altitude = in.readInt();
+    }
+
+    @Override
+    public void read(MessageUnpacker unpacker) throws IOException {
+
+        MessagePackUtil.parseMapHeader(unpacker,true);
+        int version = MessagePackUtil.parseInt(unpacker);
+        if (version != 0)
+            throw new ParseException("Invalid LOC version");
+
+        size = MessagePackUtil.parseInt(unpacker);
+        hPrecision = parseLOCformat(MessagePackUtil.parseInt(unpacker));
+        vPrecision = parseLOCformat(MessagePackUtil.parseInt(unpacker));
+        latitude = MessagePackUtil.parseLong(unpacker);
+        longitude = MessagePackUtil.parseLong(unpacker);
+        altitude = MessagePackUtil.parseLong(unpacker);
+
     }
 
     private double

@@ -1,6 +1,8 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
+import com.antell.cloudhands.api.utils.MessagePackUtil;
 import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.msgpack.core.MessageUnpacker;
 
 import java.io.DataInput;
 import java.io.IOException;
@@ -37,6 +39,19 @@ public class SOARecord extends Record {
         retry = in.readInt();
         expire = in.readInt();
         minimum = in.readInt();
+    }
+
+    @Override
+    public void read(MessageUnpacker unpacker) throws IOException {
+
+        MessagePackUtil.parseMapHeader(unpacker,true);
+        host = new Name(unpacker);
+        admin = new Name(unpacker);
+        serial = MessagePackUtil.parseLong(unpacker);
+        refresh = MessagePackUtil.parseLong(unpacker);
+        retry = MessagePackUtil.parseLong(unpacker);
+        expire = MessagePackUtil.parseLong(unpacker);
+        minimum = MessagePackUtil.parseLong(unpacker);
     }
 
     /**

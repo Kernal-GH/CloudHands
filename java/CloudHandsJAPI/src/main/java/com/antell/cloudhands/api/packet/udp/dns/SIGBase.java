@@ -1,8 +1,10 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
 import com.antell.cloudhands.api.utils.Base64;
+import com.antell.cloudhands.api.utils.MessagePackUtil;
 import com.antell.cloudhands.api.utils.Text;
 import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.msgpack.core.MessageUnpacker;
 
 import java.io.DataInput;
 import java.io.IOException;
@@ -39,6 +41,21 @@ public abstract class SIGBase extends Record {
         footprint = in.readUnsignedShort();
         signer = new Name(in);
         signature = Text.readBytes(in,2);
+    }
+
+    @Override
+    public void read(MessageUnpacker unpacker) throws IOException {
+
+        MessagePackUtil.parseMapHeader(unpacker,true);
+        covered = MessagePackUtil.parseInt(unpacker);
+        alg = MessagePackUtil.parseInt(unpacker);
+        labels = MessagePackUtil.parseInt(unpacker);
+        origttl = MessagePackUtil.parseLong(unpacker);
+        expire = new Date(1000 * MessagePackUtil.parseLong(unpacker));
+        timeSigned = new Date(1000 * MessagePackUtil.parseLong(unpacker));
+        footprint = MessagePackUtil.parseInt(unpacker);
+        signer = new Name(unpacker);
+        signature = MessagePackUtil.parseBin(unpacker);
     }
 
     /**

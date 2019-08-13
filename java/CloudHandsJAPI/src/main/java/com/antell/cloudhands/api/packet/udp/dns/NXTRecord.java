@@ -1,6 +1,9 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
+import com.antell.cloudhands.api.utils.MessagePackUtil;
+import com.google.common.io.ByteStreams;
 import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.msgpack.core.MessageUnpacker;
 
 import java.io.DataInput;
 import java.io.IOException;
@@ -32,6 +35,22 @@ public class NXTRecord extends Record {
         next = new Name(in);
         bitmap = new BitSet();
 
+        int bitmapLength = in.readUnsignedShort();
+        for (int i = 0; i < bitmapLength; i++) {
+            int t = in.readUnsignedByte();
+            for (int j = 0; j < 8; j++)
+                if ((t & (1 << (7 - j))) != 0)
+                    bitmap.set(i * 8 + j);
+        }
+    }
+
+    @Override
+    public void read(MessageUnpacker unpacker) throws IOException {
+
+        MessagePackUtil.parseMapHeader(unpacker,true);
+        next = new Name(unpacker);
+        bitmap = new BitSet();
+        DataInput in = ByteStreams.newDataInput(MessagePackUtil.parseBin(unpacker));
         int bitmapLength = in.readUnsignedShort();
         for (int i = 0; i < bitmapLength; i++) {
             int t = in.readUnsignedByte();

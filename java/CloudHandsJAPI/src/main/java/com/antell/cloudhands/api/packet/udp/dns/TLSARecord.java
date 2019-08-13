@@ -1,8 +1,10 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
 import com.antell.cloudhands.api.utils.Base16;
+import com.antell.cloudhands.api.utils.MessagePackUtil;
 import com.antell.cloudhands.api.utils.Text;
 import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.msgpack.core.MessageUnpacker;
 
 import java.io.DataInput;
 import java.io.IOException;
@@ -79,6 +81,16 @@ public class TLSARecord extends Record {
         selector = in.readUnsignedByte();
         matchingType = in.readUnsignedByte();
         certificateAssociationData = Text.readBytes(in,2);
+    }
+
+    @Override
+    public void read(MessageUnpacker unpacker) throws IOException {
+
+        MessagePackUtil.parseMapHeader(unpacker,true);
+        certificateUsage = MessagePackUtil.parseInt(unpacker);
+        selector = MessagePackUtil.parseInt(unpacker);
+        matchingType = MessagePackUtil.parseInt(unpacker);
+        certificateAssociationData = MessagePackUtil.parseBin(unpacker);
     }
 
     /**

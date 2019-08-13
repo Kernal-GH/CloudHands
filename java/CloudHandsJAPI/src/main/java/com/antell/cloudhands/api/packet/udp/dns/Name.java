@@ -1,7 +1,10 @@
 
 package com.antell.cloudhands.api.packet.udp.dns;
 
+import com.antell.cloudhands.api.utils.MessagePackUtil;
 import com.antell.cloudhands.api.utils.Text;
+import com.google.common.base.Preconditions;
+import org.msgpack.core.MessageUnpacker;
 
 import java.io.DataInput;
 import java.io.IOException;
@@ -31,6 +34,15 @@ public class Name implements Comparable {
 
     }
 
+    public Name(MessageUnpacker unpacker) throws IOException {
+
+        int n = MessagePackUtil.parseMapHeader(unpacker,true);
+        Preconditions.checkArgument(n==2,"Invalid msgpack packet of udp session name entry:"+n);
+
+        labels = MessagePackUtil.parseInt(unpacker);
+        name = MessagePackUtil.parseText(unpacker);
+        length = name.length();
+    }
     /**
      * Is this name a wildcard?
      */

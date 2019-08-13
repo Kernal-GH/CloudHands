@@ -1,6 +1,8 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
+import com.antell.cloudhands.api.utils.MessagePackUtil;
 import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.msgpack.core.MessageUnpacker;
 
 import java.io.DataInput;
 import java.io.IOException;
@@ -14,12 +16,12 @@ import java.net.UnknownHostException;
 public class ARecord extends Record {
 
 
-    private int addr;
+    private long addr;
 
     public ARecord() {
     }
 
-    private static final byte[] toArray(int addr) {
+    private static final byte[] toArray(long addr) {
         byte[] bytes = new byte[4];
         bytes[0] = (byte) ((addr >>> 24) & 0xFF);
         bytes[1] = (byte) ((addr >>> 16) & 0xFF);
@@ -38,6 +40,13 @@ public class ARecord extends Record {
     public void read(DataInput in) throws IOException {
 
         addr = in.readInt();
+    }
+
+    @Override
+    public void read(MessageUnpacker unpacker) throws IOException {
+
+        MessagePackUtil.parseMapHeader(unpacker,true);
+        addr = MessagePackUtil.parseLong(unpacker);
     }
 
 

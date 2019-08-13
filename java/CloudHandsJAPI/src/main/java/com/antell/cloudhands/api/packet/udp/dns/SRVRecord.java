@@ -1,6 +1,8 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
+import com.antell.cloudhands.api.utils.MessagePackUtil;
 import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.msgpack.core.MessageUnpacker;
 
 import java.io.DataInput;
 import java.io.IOException;
@@ -34,6 +36,15 @@ public class SRVRecord extends Record {
         weight = in.readUnsignedShort();
         port = in.readUnsignedShort();
         target = new Name(in);
+    }
+
+    @Override
+    public void read(MessageUnpacker unpacker) throws IOException {
+
+        priority = MessagePackUtil.parseInt(unpacker);
+        weight = MessagePackUtil.parseInt(unpacker);
+        port = MessagePackUtil.parseInt(unpacker);
+        target = new Name(unpacker);
     }
 
 

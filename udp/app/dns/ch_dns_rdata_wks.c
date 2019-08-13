@@ -41,14 +41,28 @@ static ssize_t  _rdata_wks_write(ch_dns_rdata_t *rdata,ch_data_output_t *dout,vo
 	return len;
 }
 
+#define _VALUE_WRITE(buf,value,byte_num) 		\
+	do{												\
+		size_t bytes,i;								\
+		bytes = (byte_num)*8;						\
+		for(i=1;i<=(byte_num);i++)					\
+		{											\
+			buf[i-1]=((value)>>(bytes-i*8))&0xff;	\
+		}											\
+	}while(0)
+
 static void _rdata_wks_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore){
 
     ch_dns_rdata_wks_t *wks = (ch_dns_rdata_wks_t*)rdata;  
 
     ch_msgpack_store_map_start(dstore,"wks",3);
-    ch_msgpack_store_write_uint32(dstore,"address",wks->address);
+    
+    uint8_t barr[4]={0};
+    _VALUE_WRITE(barr,wks->address,4);
+    
+    ch_msgpack_store_write_bin_kv(dstore,"addr",(void*)barr,4);
     ch_msgpack_store_write_uint8(dstore,"protocol",wks->protocol);
-    ch_msgpack_store_write_str_wlen(dstore,"bitmap",(const char*)wks->bitmap,wks->map_len);
+    ch_msgpack_store_write_bin_kv(dstore,"bitmap",(void*)wks->bitmap,wks->map_len);
 
 }
 

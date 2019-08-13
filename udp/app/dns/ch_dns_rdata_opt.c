@@ -57,7 +57,7 @@ static void _opt_entry_store(ch_dns_rdata_opt_entry_t *entry,ch_msgpack_store_t 
 
     ch_msgpack_store_map_start(dstore,NULL,2);
     ch_msgpack_store_write_uint16(dstore,"code",entry->code);
-    ch_msgpack_store_write_str_wlen(dstore,"data",(const char*)entry->data,entry->dlen);
+    ch_msgpack_store_write_bin_kv(dstore,"data",(void*)entry->data,entry->dlen);
 
 }
 

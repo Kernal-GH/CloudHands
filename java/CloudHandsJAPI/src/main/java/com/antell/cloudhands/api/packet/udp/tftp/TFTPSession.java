@@ -6,7 +6,9 @@ import com.antell.cloudhands.api.packet.udp.UDPSessionEntry;
 import com.antell.cloudhands.api.source.AbstractSourceEntry;
 import com.antell.cloudhands.api.source.SourceEntry;
 import com.antell.cloudhands.api.utils.*;
+import com.google.common.base.Preconditions;
 import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.msgpack.core.MessageUnpacker;
 
 import java.io.DataInput;
 import java.io.IOException;
@@ -54,6 +56,42 @@ public class TFTPSession extends AbstractSourceEntry {
 
     }
 
+    public TFTPSession(MessageUnpacker unpacker) throws IOException {
+
+        sessionEntry = new UDPSessionEntry();
+        int n = MessagePackUtil.parseMapHeader(unpacker,false);
+        Preconditions.checkArgument(n==2,"Invalid msgpack packet of tftp session entry:"+n);
+
+        sessionEntry.parse(unpacker);
+
+        n = MessagePackUtil.parseMapHeader(unpacker,true);
+        Preconditions.checkArgument(n==6,"Invalid msgpack packet of tftp session:"+n);
+
+        sessionEntry.setProtocol("TFTP");
+        long reqIP = sessionEntry.getReqIP();
+        sessionEntry.setReqIP(sessionEntry.getResIP());
+        sessionEntry.setResIP(reqIP);
+
+        int reqPort = sessionEntry.getReqPort();
+        sessionEntry.setReqPort(sessionEntry.getResPort());
+        sessionEntry.setResPort(reqPort);
+
+        long reqBytes = sessionEntry.getReqBytes();
+        sessionEntry.setReqBytes(sessionEntry.getResBytes());
+        sessionEntry.setResBytes(reqBytes);
+
+        long reqPackets = sessionEntry.getReqPackets();
+        sessionEntry.setReqPackets(sessionEntry.getResPackets());
+        sessionEntry.setResPackets(reqPackets);
+
+        setIsRead(MessagePackUtil.parseInt(unpacker));
+        setIsError(MessagePackUtil.parseInt(unpacker));
+        setFname(MessagePackUtil.parseText(unpacker));
+        setMode(MessagePackUtil.parseText(unpacker));
+        setErrmsg(MessagePackUtil.parseText(unpacker));
+        setFpath(MessagePackUtil.parseText(unpacker));
+
+    }
     @Override
     public String dataToString() {
         StringBuffer sb = new StringBuffer();

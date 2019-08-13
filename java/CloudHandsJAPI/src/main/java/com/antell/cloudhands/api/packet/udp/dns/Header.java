@@ -1,6 +1,9 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
+import com.antell.cloudhands.api.utils.MessagePackUtil;
+import com.google.common.base.Preconditions;
 import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.msgpack.core.MessageUnpacker;
 
 import java.io.DataInput;
 import java.io.IOException;
@@ -27,6 +30,19 @@ public class Header {
         for (int i = 0; i < counts.length; i++)
             counts[i] = in.readUnsignedShort();
 
+
+    }
+
+    public Header(MessageUnpacker unpacker) throws IOException {
+
+        int n = MessagePackUtil.parseMapHeader(unpacker,true);
+        Preconditions.checkArgument(n==6,"Invalid msgpack packet of udp session header entry:"+n);
+
+        id = MessagePackUtil.parseShort(unpacker);
+        flags = MessagePackUtil.parseShort(unpacker);
+        counts = new int[4];
+        for (int i = 0; i < counts.length; i++)
+            counts[i] = MessagePackUtil.parseShort(unpacker);
 
     }
 

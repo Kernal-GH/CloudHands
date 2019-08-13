@@ -65,11 +65,11 @@ public class PacketSourceEntryParser implements SourceEntryParser {
                 break;
 
             case PacketRecord.DNS:
-                entry = new DNSSession(packetRecord.getDataInput());
+                entry = new DNSSession(packetRecord.getMessageUnpacker());
                 break;
 
             case PacketRecord.TFTP:
-                return tftpSessionParser.parse(packetRecord.getDataInput());
+                return tftpSessionParser.parse(packetRecord.getMessageUnpacker());
 
             case PacketRecord.HTTP:
             case PacketRecord.SECRESHTTP:
@@ -91,11 +91,11 @@ public class PacketSourceEntryParser implements SourceEntryParser {
                 break;
 
             case PacketRecord.TCPSMON:
-                entry = new SMonSession(packetRecord.getMessageUnpacker());
+                entry = new SMonSession(packetRecord.getMessageUnpacker(),true);
                 break;
 
             case PacketRecord.UDPSMON:
-                entry = new SMonSession(packetRecord.getDataInput());
+                entry = new SMonSession(packetRecord.getMessageUnpacker(),false);
                 break;
 
             case PacketRecord.SSH:

@@ -40,7 +40,7 @@ static void _rdata_null_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore){
      ch_dns_rdata_null_t *null = (ch_dns_rdata_null_t*)rdata;
 
      ch_msgpack_store_map_start(dstore,"null",1);
-     ch_msgpack_store_write_str_wlen(dstore,"data",(const char*)null->data,null->dlen);
+     ch_msgpack_store_write_bin_kv(dstore,"data",(void*)null->data,null->dlen);
 
 }
 

@@ -41,7 +41,7 @@ static void _rdata_nsap_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore){
     ch_dns_rdata_nsap_t *nsap = (ch_dns_rdata_nsap_t*)rdata;
 
     ch_msgpack_store_map_start(dstore,"nsap",1);
-    ch_msgpack_store_write_str_wlen(dstore,"addr",(const char*)nsap->addr,nsap->addr_len);
+    ch_msgpack_store_write_bin_kv(dstore,"addr",(void*)nsap->addr,nsap->addr_len);
 }
 
 static ch_dns_rdata_t * _rdata_nsap_create(ch_pool_t *mp,void *priv_data ch_unused){

@@ -2,8 +2,10 @@ package com.antell.cloudhands.api.packet.udp.dns;
 
 import com.antell.cloudhands.api.utils.Base16;
 import com.antell.cloudhands.api.utils.Base32;
+import com.antell.cloudhands.api.utils.MessagePackUtil;
 import com.antell.cloudhands.api.utils.Text;
 import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.msgpack.core.MessageUnpacker;
 
 import java.io.DataInput;
 import java.io.IOException;
@@ -76,7 +78,19 @@ public class NSEC3Record extends Record {
         salt = Text.readBytes(in,2);
         next = Text.readBytes(in,2);
 
-        types = new TypeBitmap(in);
+        types = new TypeBitmap( Text.readBytes(in,2));
+    }
+
+    @Override
+    public void read(MessageUnpacker unpacker) throws IOException {
+
+        MessagePackUtil.parseMapHeader(unpacker,true);
+        hashAlg = MessagePackUtil.parseInt(unpacker);
+        flags = MessagePackUtil.parseInt(unpacker);
+        iterations = MessagePackUtil.parseInt(unpacker);
+        salt = MessagePackUtil.parseBin(unpacker);
+        next = MessagePackUtil.parseBin(unpacker);
+        types = new TypeBitmap(MessagePackUtil.parseBin(unpacker));
     }
 
     /**

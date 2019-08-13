@@ -2,8 +2,12 @@ package com.antell.cloudhands.api.packet.udp.dns;
 
 import com.antell.cloudhands.api.BinDataInput;
 import com.antell.cloudhands.api.DataDump;
+import com.antell.cloudhands.api.MsgPackDataInput;
 import com.antell.cloudhands.api.sink.es.ESIndexable;
+import com.antell.cloudhands.api.utils.MessagePackUtil;
+import com.google.common.base.Preconditions;
 import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.msgpack.core.MessageUnpacker;
 
 import java.io.DataInput;
 import java.io.IOException;
@@ -13,7 +17,7 @@ import java.util.List;
 /**
  * Created by dell on 2018/6/15.
  */
-public class DNSResponse implements BinDataInput, ESIndexable,DataDump{
+public class DNSResponse implements BinDataInput,MsgPackDataInput, ESIndexable,DataDump{
 
 
     private Header header;
@@ -29,6 +33,17 @@ public class DNSResponse implements BinDataInput, ESIndexable,DataDump{
             records.add(record);
         }
     }
+    private void buildRecord(List records,MessageUnpacker unpacker) throws IOException {
+
+        MessagePackUtil.parseMapHeader(unpacker,true);
+        int count = MessagePackUtil.parseArrayHeader(unpacker,true);
+
+        for(int i = 0;i<count;i++){
+
+            Record record = Record.build(unpacker);
+            records.add(record);
+        }
+    }
 
     private void buildQuestion(List records,DataInput in,int count) throws IOException {
 
@@ -36,6 +51,16 @@ public class DNSResponse implements BinDataInput, ESIndexable,DataDump{
 
             DNSQuestion question = new DNSQuestion();
             question.read(in);
+            records.add(question);
+        }
+    }
+
+    private void buildQuestion(List records,MessageUnpacker unpacker,int count) throws IOException {
+
+        for(int i = 0;i<count;i++){
+
+            DNSQuestion question = new DNSQuestion();
+            question.parse(unpacker);
             records.add(question);
         }
     }
@@ -60,6 +85,21 @@ public class DNSResponse implements BinDataInput, ESIndexable,DataDump{
         } catch (ParseException e) {
                 throw e;
         }
+    }
+
+    @Override
+    public void parse(MessageUnpacker unpacker) throws IOException {
+
+        int n = MessagePackUtil.parseMapHeader(unpacker,true);
+        Preconditions.checkArgument(n==5,"Invalid msgpack packet of udp session response entry:"+n);
+        header = new Header(unpacker);
+        sections = new List[4];
+
+        buildQuestion(sections[Section.QUESTION],unpacker,MessagePackUtil.parseArrayHeader(unpacker,true));
+        buildRecord(sections[Section.ANSWER],unpacker);
+        buildRecord(sections[Section.AUTHORITY],unpacker);
+        buildRecord(sections[Section.ADDITIONAL],unpacker);
+
     }
 
     private XContentBuilder recordsToJson(XContentBuilder cb,int i) throws IOException {
@@ -228,5 +268,6 @@ public class DNSResponse implements BinDataInput, ESIndexable,DataDump{
 
         return sb.toString();
     }
+
 
 }

@@ -1,7 +1,9 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
+import com.antell.cloudhands.api.utils.MessagePackUtil;
 import com.antell.cloudhands.api.utils.Text;
 import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.msgpack.core.MessageUnpacker;
 
 import java.io.DataInput;
 import java.io.IOException;
@@ -34,6 +36,16 @@ public abstract class TXTBase extends Record {
 
     }
 
+    @Override
+    public void read(MessageUnpacker unpacker) throws IOException {
+
+        int n = MessagePackUtil.parseArrayHeader(unpacker,true);
+        strings = new ArrayList<>();
+        for(int i= 0;i<n;i++){
+            strings.add(MessagePackUtil.parseText2(unpacker));
+        }
+
+    }
     /**
      * converts to a String
      */

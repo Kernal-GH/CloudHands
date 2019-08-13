@@ -5,8 +5,11 @@ import com.antell.cloudhands.api.packet.udp.UDPSessionEntry;
 import com.antell.cloudhands.api.source.AbstractSourceEntry;
 import com.antell.cloudhands.api.utils.Constants;
 import com.antell.cloudhands.api.utils.IPUtils;
+import com.antell.cloudhands.api.utils.MessagePackUtil;
 import com.antell.cloudhands.api.utils.TextUtils;
+import com.google.common.base.Preconditions;
 import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.msgpack.core.MessageUnpacker;
 
 import java.io.DataInput;
 import java.io.IOException;
@@ -45,6 +48,35 @@ public class DNSSession  extends AbstractSourceEntry {
             dnsResponse.read(in);
         }
 
+    }
+
+    public DNSSession(MessageUnpacker unpacker) throws IOException {
+
+        sessionEntry = new UDPSessionEntry();
+        dnsRequst = null;
+        dnsResponse = null;
+
+        int n = MessagePackUtil.parseMapHeader(unpacker,false);
+        Preconditions.checkArgument(n==2,"Invalid msgpack packet of dns session entry:"+n);
+
+        sessionEntry.parse(unpacker);
+
+        n = MessagePackUtil.parseMapHeader(unpacker,true);
+        Preconditions.checkArgument(n==3||n==4,"Invalid msgpack packet of dns session entry:"+n);
+        boolean hasReq = MessagePackUtil.parseByte(unpacker)==1;
+        boolean hasRes = MessagePackUtil.parseByte(unpacker)==1;
+
+        if(hasReq){
+
+            dnsRequst = new DNSRequst();
+            dnsRequst.parse(unpacker);
+        }
+
+        if(hasRes){
+
+            dnsResponse = new DNSResponse();
+            dnsResponse.parse(unpacker);
+        }
     }
 
     @Override

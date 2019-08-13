@@ -25,10 +25,15 @@ public class SMonSession extends AbstractSourceEntry {
     private String reqBodyPath;
     private String resBodyPath;
 
-    public SMonSession(MessageUnpacker unpacker) throws IOException {
+    public SMonSession(MessageUnpacker unpacker,boolean isTCP) throws IOException {
 
-        this.sessionEntry = new TCPSessionEntry();
-        this.proto = "tcp";
+        if(isTCP) {
+            this.sessionEntry = new TCPSessionEntry();
+            this.proto = "tcp";
+        }else{
+            this.sessionEntry = new UDPSessionEntry();
+            proto = "udp";
+        }
 
         parse(unpacker);
     }

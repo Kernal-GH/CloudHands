@@ -58,7 +58,7 @@ static inline void ch_msgpack_store_write_str_wlen(ch_msgpack_store_t *dstore,co
 
 	ch_msgpack_store_write_str(dstore,k);
     msgpack_pack_str(&dstore->pk,len);
-    msgpack_pack_str_body(&dstore->pk,str,len);
+    msgpack_pack_str_body(&dstore->pk,str==NULL||len==0?"":str,len);
 }
 
 static inline void ch_msgpack_store_write_bin(ch_msgpack_store_t *dstore,void *data,size_t dlen){

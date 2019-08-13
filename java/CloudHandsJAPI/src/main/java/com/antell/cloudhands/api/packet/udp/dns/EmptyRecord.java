@@ -2,6 +2,7 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
 import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.msgpack.core.MessageUnpacker;
 
 import java.io.DataInput;
 import java.io.IOException;
@@ -24,6 +25,11 @@ class EmptyRecord extends Record {
 
     @Override
     public void read(DataInput in) throws IOException {
+    }
+
+    @Override
+    public void read(MessageUnpacker unpacker) throws IOException {
+
     }
 
 

@@ -1,5 +1,6 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
+
 /**
  * AFS Data Base Record - maps a domain name to the name of an AFS cell
  * database server.
@@ -14,8 +15,6 @@ public class AFSDBRecord extends U16NameBase {
     public Record getObject() {
         return new AFSDBRecord();
     }
-
-
 
     /**
      * Gets the subtype indicating the service provided by the host.

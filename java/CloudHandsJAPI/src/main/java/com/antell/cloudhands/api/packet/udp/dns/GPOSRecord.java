@@ -1,7 +1,9 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
+import com.antell.cloudhands.api.utils.MessagePackUtil;
 import com.antell.cloudhands.api.utils.Text;
 import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.msgpack.core.MessageUnpacker;
 
 import java.io.DataInput;
 import java.io.IOException;
@@ -48,6 +50,16 @@ public class GPOSRecord extends Record {
             throw new ParseException(e.getMessage());
         }
     }
+
+    @Override
+    public void read(MessageUnpacker unpacker) throws IOException {
+
+        MessagePackUtil.parseMapHeader(unpacker,true);
+        longitude = MessagePackUtil.parseText(unpacker);
+        latitude = MessagePackUtil.parseText(unpacker);
+        altitude = MessagePackUtil.parseText(unpacker);
+    }
+
     /**
      * Convert to a String
      */

@@ -1,6 +1,8 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
+import com.antell.cloudhands.api.utils.MessagePackUtil;
 import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.msgpack.core.MessageUnpacker;
 
 import java.io.DataInput;
 import java.io.IOException;
@@ -41,6 +43,17 @@ public class OPTRecord extends Record {
 
         for(int i = 0;i<n;i++){
             EDNSOption option = EDNSOption.build(in);
+            options.add(option);
+        }
+    }
+
+    @Override
+    public void read(MessageUnpacker unpacker) throws IOException {
+
+        MessagePackUtil.parseMapHeader(unpacker,true);
+        int n = MessagePackUtil.parseArrayHeader(unpacker,true);
+        for(int i = 0;i<n;i++){
+            EDNSOption option = EDNSOption.build(unpacker);
             options.add(option);
         }
     }

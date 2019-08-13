@@ -25,11 +25,8 @@ public final class TypeBitmap  {
         }
     }
 
-    public TypeBitmap(DataInput in) throws IOException {
+    public TypeBitmap(byte[] data) throws ParseException {
         this();
-
-        byte[] data = Text.readBytes(in,2);
-
         DNSDataInput din = new BasicDNSDataInput(data);
 
         int lastbase = -1;
@@ -55,7 +52,9 @@ public final class TypeBitmap  {
                 }
             }
         }
+
     }
+
 
     public int[] toArray() {
         int[] array = new int[types.size()];

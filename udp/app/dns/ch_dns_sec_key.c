@@ -55,7 +55,7 @@ void ch_dns_sec_key_store(ch_dns_sec_key_t *skey,ch_msgpack_store_t *dstore) {
     ch_msgpack_store_write_uint16(dstore,"flags",skey->flags);
     ch_msgpack_store_write_uint8(dstore,"proto",skey->proto);
     ch_msgpack_store_write_uint8(dstore,"alg",skey->alg);
-    ch_msgpack_store_write_str_wlen(dstore,"pubKey",(const char*)skey->public_key,skey->public_key_len);
+    ch_msgpack_store_write_bin_kv(dstore,"pubKey",(void*)skey->public_key,skey->public_key_len);
 
 }
 

@@ -108,6 +108,17 @@ static ssize_t  _rdata_ipseckey_write(ch_dns_rdata_t *rdata,ch_data_output_t *do
 	return len;
 }
 
+#define _VALUE_WRITE(buf,value,byte_num) 		\
+	do{												\
+		size_t bytes,i;								\
+		bytes = (byte_num)*8;						\
+		for(i=1;i<=(byte_num);i++)					\
+		{											\
+			buf[i-1]=((value)>>(bytes-i*8))&0xff;	\
+		}											\
+	}while(0)
+
+
 static void  _rdata_ipseckey_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore){
 
 	ch_dns_rdata_ipseckey_t *ipseckey = (ch_dns_rdata_ipseckey_t*)rdata;
@@ -123,13 +134,15 @@ static void  _rdata_ipseckey_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dst
 	
 	case 1:
 		v =  ntohl(ipseckey->in_addr.s_addr);
-        ch_msgpack_store_write_uint32(dstore,"adr4",v);
+        uint8_t barr[4]={0};
+        _VALUE_WRITE(barr,v,4);
 
+        ch_msgpack_store_write_bin_kv(dstore,"addr4",(void*)barr,4);
 		break;
 
 	case 2:
 		
-        ch_msgpack_store_write_str_wlen(dstore,"addr6",(const char*)ipseckey->in6_addr.s6_addr,16);
+        ch_msgpack_store_write_bin_kv(dstore,"addr6",(void*)ipseckey->in6_addr.s6_addr,16);
 
 		break;
 
@@ -142,7 +155,7 @@ static void  _rdata_ipseckey_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dst
         break;
 	}
 
-    ch_msgpack_store_write_str_wlen(dstore,"key",(const char*)ipseckey->key,ipseckey->key_len);
+    ch_msgpack_store_write_bin_kv(dstore,"key",(void*)ipseckey->key,ipseckey->key_len);
 }
 
 static ch_dns_rdata_t * _rdata_ipseckey_create(ch_pool_t *mp,void *priv_data ch_unused){

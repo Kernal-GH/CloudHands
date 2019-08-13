@@ -49,7 +49,7 @@ static void _rdata_sshfp_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore)
      ch_msgpack_store_map_start(dstore,"sshfp",3);
      ch_msgpack_store_write_uint8(dstore,"alg",sshfp->alg);
      ch_msgpack_store_write_uint8(dstore,"digestType",sshfp->digest_type);
-     ch_msgpack_store_write_str_wlen(dstore,"fingerprint",fingerprint,sshfp->fp_len);
+     ch_msgpack_store_write_bin_kv(dstore,"fingerprint",(void*)fingerprint,sshfp->fp_len);
 
 }
 

@@ -50,7 +50,7 @@ static void _rdata_tlsa_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore){
     ch_msgpack_store_write_uint8(dstore,"certUsage",tlsa->cert_usage);
     ch_msgpack_store_write_uint8(dstore,"selector",tlsa->selector);
     ch_msgpack_store_write_uint8(dstore,"matchingType",tlsa->matching_type);
-    ch_msgpack_store_write_str_wlen(dstore,"data",(const char*)tlsa->cert_data,tlsa->cert_dlen);
+    ch_msgpack_store_write_bin_kv(dstore,"data",(void*)tlsa->cert_data,tlsa->cert_dlen);
 
 }
 

@@ -15,6 +15,10 @@ public class MessagePackUtil {
         return unpacker.unpackString();
     }
 
+    public static String parseText2(MessageUnpacker unpacker) throws IOException {
+        return unpacker.unpackString();
+    }
+
     public static int parseByte(MessageUnpacker unpacker) throws IOException {
         unpacker.unpackString();
         return unpacker.unpackByte();

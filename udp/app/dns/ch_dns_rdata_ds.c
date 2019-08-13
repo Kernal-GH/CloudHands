@@ -49,7 +49,7 @@ static void _rdata_ds_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore){
     ch_msgpack_store_write_uint16(dstore,"footprint",ds->footprint);
     ch_msgpack_store_write_uint8(dstore,"alg",ds->alg);
     ch_msgpack_store_write_uint8(dstore,"digestid",ds->digestid);
-    ch_msgpack_store_write_str_wlen(dstore,"digest",(const char*)ds->digest,ds->digest_len);
+    ch_msgpack_store_write_bin_kv(dstore,"digest",(void*)ds->digest,ds->digest_len);
 
 }
 

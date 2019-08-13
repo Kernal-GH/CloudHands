@@ -1,8 +1,10 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
 import com.antell.cloudhands.api.utils.Base64;
+import com.antell.cloudhands.api.utils.MessagePackUtil;
 import com.antell.cloudhands.api.utils.Text;
 import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.msgpack.core.MessageUnpacker;
 
 import java.io.DataInput;
 import java.io.IOException;
@@ -67,6 +69,20 @@ public class TKEYRecord extends Record {
         key = Text.readBytes(in,2);
         other = Text.readBytes(in,2);
 
+    }
+
+    @Override
+    public void read(MessageUnpacker unpacker) throws IOException {
+
+        MessagePackUtil.parseMapHeader(unpacker,true);
+        alg = new Name(unpacker);
+        timeInception = new Date(1000 * MessagePackUtil.parseLong(unpacker));
+        timeExpire = new Date(1000 * MessagePackUtil.parseLong(unpacker));
+        mode = MessagePackUtil.parseInt(unpacker);
+        error = MessagePackUtil.parseInt(unpacker);
+
+        key = MessagePackUtil.parseBin(unpacker);
+        other = MessagePackUtil.parseBin(unpacker);
     }
 
     protected String modeString() {

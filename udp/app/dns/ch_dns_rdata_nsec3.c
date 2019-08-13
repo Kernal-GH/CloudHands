@@ -61,9 +61,9 @@ static void _rdata_nsec3_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore)
     ch_msgpack_store_write_uint8(dstore,"flags",nsec3->flags);
     ch_msgpack_store_write_uint16(dstore,"iterations",nsec3->iterations);
 
-    ch_msgpack_store_write_str_wlen(dstore,"salt",(const char*)nsec3->salt,nsec3->salt_len);
-    ch_msgpack_store_write_str_wlen(dstore,"next",(const char*)nsec3->next,nsec3->hash_len);
-    ch_msgpack_store_write_str_wlen(dstore,"tbtm",(const char*)nsec3->typebitmap,nsec3->typebitmap_len);
+    ch_msgpack_store_write_bin_kv(dstore,"salt",(void*)nsec3->salt,nsec3->salt_len);
+    ch_msgpack_store_write_bin_kv(dstore,"next",(void*)nsec3->next,nsec3->hash_len);
+    ch_msgpack_store_write_bin_kv(dstore,"tbtm",(void*)nsec3->typebitmap,nsec3->typebitmap_len);
 
 }
 

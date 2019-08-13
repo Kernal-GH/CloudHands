@@ -3,8 +3,10 @@ package com.antell.cloudhands.api.packet.udp.dns;
 
 import com.antell.cloudhands.api.utils.Base64;
 import com.antell.cloudhands.api.utils.DNSSEC;
+import com.antell.cloudhands.api.utils.MessagePackUtil;
 import com.antell.cloudhands.api.utils.Text;
 import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.msgpack.core.MessageUnpacker;
 
 import java.io.DataInput;
 import java.io.IOException;
@@ -32,6 +34,18 @@ public abstract class KEYBase extends Record {
         key = Text.readBytes(in,2);
     }
 
+    @Override
+    public void read(MessageUnpacker unpacker) throws IOException {
+
+        MessagePackUtil.parseMapHeader(unpacker,true);
+        MessagePackUtil.parseMapHeader(unpacker,true);
+
+        flags = MessagePackUtil.parseInt(unpacker);
+        proto = MessagePackUtil.parseInt(unpacker);
+        alg = MessagePackUtil.parseInt(unpacker);
+
+        key = MessagePackUtil.parseBin(unpacker);
+    }
     /**
      * Converts the DNSKEY/KEY Record to a String
      */

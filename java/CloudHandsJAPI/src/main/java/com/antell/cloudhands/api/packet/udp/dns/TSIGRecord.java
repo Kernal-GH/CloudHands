@@ -2,8 +2,10 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
 import com.antell.cloudhands.api.utils.Base64;
+import com.antell.cloudhands.api.utils.MessagePackUtil;
 import com.antell.cloudhands.api.utils.Text;
 import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.msgpack.core.MessageUnpacker;
 
 import java.io.DataInput;
 import java.io.IOException;
@@ -48,6 +50,19 @@ public class TSIGRecord extends Record {
         error = in.readUnsignedShort();
 
         other = Text.readBytes(in,2);
+    }
+
+    @Override
+    public void read(MessageUnpacker unpacker) throws IOException {
+
+        MessagePackUtil.parseMapHeader(unpacker,true);
+        alg = new Name(unpacker);
+        timeSigned = new Date(MessagePackUtil.parseLong(unpacker) * 1000);
+        fudge = MessagePackUtil.parseInt(unpacker);
+        signature = MessagePackUtil.parseBin(unpacker);
+        originalID = MessagePackUtil.parseInt(unpacker);
+        error = MessagePackUtil.parseInt(unpacker);
+        other = MessagePackUtil.parseBin(unpacker);
     }
 
 

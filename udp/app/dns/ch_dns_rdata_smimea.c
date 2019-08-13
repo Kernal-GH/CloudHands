@@ -51,7 +51,7 @@ static void _rdata_smimea_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore
     ch_msgpack_store_write_uint8(dstore,"selector",smimea->selector);
     ch_msgpack_store_write_uint8(dstore,"matchingType",smimea->matching_type);
 
-    ch_msgpack_store_write_str_wlen(dstore,"data",(const char*)smimea->cert_data,smimea->cert_dlen);
+    ch_msgpack_store_write_bin_kv(dstore,"data",(void*)smimea->cert_data,smimea->cert_dlen);
 
 }
 

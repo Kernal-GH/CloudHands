@@ -56,7 +56,7 @@ static void _rdata_nsec3param_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *ds
      ch_msgpack_store_write_uint8(dstore,"alg",nsec3param->hash_alg);
      ch_msgpack_store_write_uint8(dstore,"flags",nsec3param->flags);
      ch_msgpack_store_write_uint16(dstore,"iterations",nsec3param->iterations);
-     ch_msgpack_store_write_str_wlen(dstore,"salt",(const char*)nsec3param->salt,nsec3param->salt_len);
+     ch_msgpack_store_write_bin_kv(dstore,"salt",(void*)nsec3param->salt,nsec3param->salt_len);
 
 }
 

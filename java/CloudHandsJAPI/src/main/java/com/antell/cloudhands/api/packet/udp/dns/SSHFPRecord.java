@@ -1,8 +1,10 @@
 package com.antell.cloudhands.api.packet.udp.dns;
 
 import com.antell.cloudhands.api.utils.Base16;
+import com.antell.cloudhands.api.utils.MessagePackUtil;
 import com.antell.cloudhands.api.utils.Text;
 import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.msgpack.core.MessageUnpacker;
 
 import java.io.DataInput;
 import java.io.IOException;
@@ -46,6 +48,15 @@ public class SSHFPRecord extends Record {
         alg = in.readUnsignedByte();
         digestType = in.readUnsignedByte();
         fingerprint = Text.readBytes(in,2);
+    }
+
+    @Override
+    public void read(MessageUnpacker unpacker) throws IOException {
+
+        MessagePackUtil.parseMapHeader(unpacker,true);
+        alg = MessagePackUtil.parseInt(unpacker);
+        digestType = MessagePackUtil.parseInt(unpacker);
+        fingerprint = MessagePackUtil.parseBin(unpacker);
     }
 
 

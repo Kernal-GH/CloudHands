@@ -109,7 +109,7 @@ void ch_dns_sec_sig_store(ch_dns_sec_sig_t *ssig,ch_msgpack_store_t *dstore){
     ch_msgpack_store_write_uint16(dstore,"footprint",ssig->footprint);
 
     ch_dns_name_store(&ssig->signer,dstore);
-    ch_msgpack_store_write_str_wlen(dstore,"signature",signature,sign_len);
+    ch_msgpack_store_write_bin_kv(dstore,"signature",(void*)signature,sign_len);
 
 }
 

@@ -56,7 +56,7 @@ static void _rdata_dhcid_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore)
 
      ch_dns_rdata_dhcid_t *dhcid = (ch_dns_rdata_dhcid_t*)rdata; 
      ch_msgpack_store_map_start(dstore,"dhcid",1);
-     ch_msgpack_store_write_str_wlen(dstore,"data",(const char*)dhcid->data,dhcid->dlen);
+     ch_msgpack_store_write_bin_kv(dstore,"data",(void*)dhcid->data,dhcid->dlen);
 
 }
 

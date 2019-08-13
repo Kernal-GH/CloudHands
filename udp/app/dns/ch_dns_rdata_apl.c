@@ -62,7 +62,7 @@ static void _apl_entry_store(ch_dns_rdata_apl_entry_t *entry,ch_msgpack_store_t 
     ch_msgpack_store_write_uint16(dstore,"family",entry->family);
     ch_msgpack_store_write_uint8(dstore,"prefix",entry->prefix);
     ch_msgpack_store_write_uint8(dstore,"neg",entry->neg);
-    ch_msgpack_store_write_str_wlen(dstore,"data",(const char*)entry->data,entry->dlen);
+    ch_msgpack_store_write_bin_kv(dstore,"data",(void*)entry->data,entry->dlen);
 
 }
 
@@ -93,7 +93,8 @@ static void _rdata_apl_store(ch_dns_rdata_t *rdata,ch_msgpack_store_t *dstore){
 
 	ch_dns_rdata_apl_t *apl = (ch_dns_rdata_apl_t*)rdata;
     ch_dns_rdata_apl_entry_t *entry;  
-    
+
+    ch_msgpack_store_map_start(dstore,"apl",1);
     ch_msgpack_store_array_start(dstore,"entries",apl->entries_n);
 
     list_for_each_entry(entry,&apl->entries,node){
