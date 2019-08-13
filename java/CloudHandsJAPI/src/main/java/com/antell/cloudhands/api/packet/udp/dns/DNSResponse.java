@@ -95,6 +95,11 @@ public class DNSResponse implements BinDataInput,MsgPackDataInput, ESIndexable,D
         header = new Header(unpacker);
         sections = new List[4];
 
+        sections[0] = new ArrayList();
+        sections[1] = new ArrayList();
+        sections[2] = new ArrayList();
+        sections[3] = new ArrayList();
+        
         buildQuestion(sections[Section.QUESTION],unpacker,MessagePackUtil.parseArrayHeader(unpacker,true));
         buildRecord(sections[Section.ANSWER],unpacker);
         buildRecord(sections[Section.AUTHORITY],unpacker);

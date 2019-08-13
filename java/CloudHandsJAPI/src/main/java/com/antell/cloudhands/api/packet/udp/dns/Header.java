@@ -38,11 +38,11 @@ public class Header {
         int n = MessagePackUtil.parseMapHeader(unpacker,true);
         Preconditions.checkArgument(n==6,"Invalid msgpack packet of udp session header entry:"+n);
 
-        id = MessagePackUtil.parseShort(unpacker);
-        flags = MessagePackUtil.parseShort(unpacker);
+        id = MessagePackUtil.parseInt(unpacker);
+        flags = MessagePackUtil.parseInt(unpacker);
         counts = new int[4];
         for (int i = 0; i < counts.length; i++)
-            counts[i] = MessagePackUtil.parseShort(unpacker);
+            counts[i] = MessagePackUtil.parseInt(unpacker);
 
     }
 

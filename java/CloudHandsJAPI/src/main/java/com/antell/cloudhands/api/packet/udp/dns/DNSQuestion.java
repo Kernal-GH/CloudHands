@@ -37,8 +37,8 @@ public class DNSQuestion implements BinDataInput,MsgPackDataInput, ESIndexable,D
         Preconditions.checkArgument(n==3,"Invalid msgpack packet of udp session question entry:"+n);
 
         name = new Name(unpacker);
-        type = MessagePackUtil.parseShort(unpacker);
-        dclass = MessagePackUtil.parseShort(unpacker);
+        type = MessagePackUtil.parseInt(unpacker);
+        dclass = MessagePackUtil.parseInt(unpacker);
     }
 
     @Override

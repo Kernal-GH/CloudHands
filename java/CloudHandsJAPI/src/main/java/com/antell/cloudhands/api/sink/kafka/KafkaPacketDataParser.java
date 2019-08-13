@@ -151,5 +151,5 @@ public class KafkaPacketDataParser {
 
         return entry;
     }
-    
+
 }
