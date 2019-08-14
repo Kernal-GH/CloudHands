@@ -39,6 +39,7 @@ public abstract class TXTBase extends Record {
     @Override
     public void read(MessageUnpacker unpacker) throws IOException {
 
+        MessagePackUtil.parseMapHeader(unpacker,true);
         int n = MessagePackUtil.parseArrayHeader(unpacker,true);
         strings = new ArrayList<>();
         for(int i= 0;i<n;i++){
